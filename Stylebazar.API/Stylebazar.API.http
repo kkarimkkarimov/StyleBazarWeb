@@ -1,0 +1,6 @@
+@Stylebazar.API_HostAddress = http://localhost:5202
+
+GET {{Stylebazar.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

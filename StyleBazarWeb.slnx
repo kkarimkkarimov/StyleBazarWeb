@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/core/">
+    <Project Path="Core.Application/Core.Application.csproj" Id="34190d32-875b-4b98-b61e-15a4e7b34eeb" />
+    <Project Path="Core.Persistence/Core.Persistence.csproj" Id="ac24c9e6-83f0-45d3-85a3-a1df4c3643ed" />
+  </Folder>
+  <Folder Name="/src/project/" />
+  <Folder Name="/src/project/stylebazar/">
+    <Project Path="Stylebazar.API/Stylebazar.API.csproj" Id="9a31ad49-af9b-4c24-85a6-bf094d02df0a" />
+    <Project Path="Stylebazar.BLL/Stylebazar.BLL.csproj" Id="00b3af33-1fc0-4f09-b285-f26c0c83c612" />
+    <Project Path="Stylebazar.DAL/Stylebazar.DAL.csproj" Id="4dca62f2-f589-42d8-8e2b-6c6629b2b111" />
+    <Project Path="Stylebazar.MVC/Stylebazar.MVC.csproj" Id="cfbdba1c-7838-484a-9e6f-17c22cbf851f" />
+  </Folder>
+</Solution>
