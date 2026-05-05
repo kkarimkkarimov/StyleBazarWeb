@@ -1,7 +1,11 @@
+using Stylebazar.DAL.DependencyResolver;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddPersistenceServices(builder.Configuration);
 
 var app = builder.Build();
 
