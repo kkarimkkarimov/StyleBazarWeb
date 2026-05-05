@@ -1,3 +1,4 @@
+using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddIdentityServices();
 
 var app = builder.Build();
 
@@ -20,6 +22,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
