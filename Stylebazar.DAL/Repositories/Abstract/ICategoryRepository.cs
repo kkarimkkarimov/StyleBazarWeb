@@ -3,6 +3,6 @@ using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.DAL.Repositories.Abstract;
 
-public interface ICategoryRepository : IAsyncRepository<Category, int>
+public interface ICategoryRepository : IAsyncRepository<Category, int> 
 {
 }
