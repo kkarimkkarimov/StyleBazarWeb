@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Stylebazar.BLL.DTOs.Authentication;
 
-namespace Stylebazar.BLL.Services.Authentication
+namespace Stylebazar.BLL.Services.Authentication;
+
+public interface IAuthService
 {
-    internal interface IAuthService
-    {
-    }
+    Task<IdentityResult> RegisterAsync(RegisterDto dto);
+    Task<SignInResult> LoginAsync(LoginDto dto);
+    Task LogoutAsync();
 }

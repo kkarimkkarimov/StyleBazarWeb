@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Stylebazar.BLL.DTOs.Authentication;
 
-namespace Stylebazar.BLL.DTOs.Authentication
+public class LoginDto
 {
-    internal class LoginDto
-    {
-    }
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public bool RememberMe { get; set; }
 }

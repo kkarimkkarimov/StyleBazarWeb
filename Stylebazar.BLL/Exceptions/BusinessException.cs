@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Stylebazar.BLL.Exceptions;
 
-namespace Stylebazar.BLL.Exceptions
+public class BusinessException : Exception
 {
-    internal class BusinessException
-    {
-    }
+    public BusinessException(string message) : base(message) { }
 }

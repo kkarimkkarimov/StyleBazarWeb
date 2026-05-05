@@ -12,6 +12,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddIdentityServices();
+builder.Services.AddBusinessServices();
 
 var app = builder.Build();
 

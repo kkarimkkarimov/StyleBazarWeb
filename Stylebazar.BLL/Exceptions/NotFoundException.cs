@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Stylebazar.BLL.Exceptions;
 
-namespace Stylebazar.BLL.Exceptions
+public class NotFoundException : Exception
 {
-    internal class NotFoundException
-    {
-    }
+    public NotFoundException(string entityName, object key)
+        : base($"{entityName} with key '{key}' was not found.") { }
+
+    public NotFoundException(string message) : base(message) { }
 }

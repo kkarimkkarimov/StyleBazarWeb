@@ -1,5 +1,9 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Stylebazar.BLL.Mappings;
+using Stylebazar.BLL.Services.Authentication;
+using Stylebazar.BLL.Validators;
 using Stylebazar.DAL.Contexts;
 using Stylebazar.DAL.Entities;
 
@@ -24,6 +28,16 @@ public static class ServiceRegistration
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        return services;
+    }
+
+    public static IServiceCollection AddBusinessServices(this IServiceCollection services)
+    {
+        services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
+        services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
+
+        services.AddScoped<IAuthService, AuthManager>();
 
         return services;
     }

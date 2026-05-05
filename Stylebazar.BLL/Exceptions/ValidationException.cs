@@ -1,10 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using FluentValidation.Results;
 
-namespace Stylebazar.BLL.Exceptions
+namespace Stylebazar.BLL.Exceptions;
+
+public class ValidationException : Exception
 {
-    internal class ValidationException
+    public IDictionary<string, string[]> Errors { get; }
+
+    public ValidationException()
+        : base("One or more validation failures occurred.")
     {
+        Errors = new Dictionary<string, string[]>();
+    }
+
+    public ValidationException(IEnumerable<ValidationFailure> failures)
+        : this()
+    {
+        Errors = failures
+            .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
+            .ToDictionary(g => g.Key, g => g.ToArray());
     }
 }
