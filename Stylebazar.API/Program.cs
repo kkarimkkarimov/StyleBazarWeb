@@ -1,3 +1,4 @@
+using Stylebazar.API.Middlewares;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
 using Stylebazar.DAL.Seeders;
@@ -19,6 +20,8 @@ var app = builder.Build();
 await RoleSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
