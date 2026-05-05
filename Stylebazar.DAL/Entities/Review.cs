@@ -7,7 +7,7 @@ public class Review : Entity<int>
     public required string UserId { get; set; }
     public int ProductId { get; set; }
     public int Rating { get; set; }
-    public required string Comment { get; set; }
+    public string? Comment { get; set; }
 
     public virtual AppUser User { get; set; } = null!;
     public virtual Product Product { get; set; } = null!;
