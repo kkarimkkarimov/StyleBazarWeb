@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Core.Persistence.Paging;
 
-namespace Core.Persistence.Paging
+public class PageRequest
 {
-    internal class PageRequest
-    {
-    }
+    public int PageIndex { get; set; }
+    public int PageSize { get; set; }
 }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Core.Application.Repositories;
 
-namespace Core.Application.Repositories
+public interface IRepository
 {
-    internal interface IRepository
-    {
-    }
 }
