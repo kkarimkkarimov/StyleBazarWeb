@@ -1,5 +1,6 @@
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
+using Stylebazar.DAL.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 var app = builder.Build();
+
+await RoleSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
