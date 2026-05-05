@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Core.Persistence.Repositories;
 
-namespace Stylebazar.DAL.Entities
+namespace Stylebazar.DAL.Entities;
+
+public class ProductSize : Entity<int>
 {
-    internal class ProductSize
-    {
-    }
+    public int ProductId { get; set; }
+    public required string Size { get; set; }
+    public int StockQuantity { get; set; }
+
+    public virtual Product Product { get; set; } = null!;
 }

@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Core.Persistence.Repositories;
 
-namespace Stylebazar.DAL.Entities
+namespace Stylebazar.DAL.Entities;
+
+public class ProductImage : Entity<int>
 {
-    internal class ProductImage
-    {
-    }
+    public int ProductId { get; set; }
+    public required string ImageUrl { get; set; }
+    public bool IsMain { get; set; }
+    public int DisplayOrder { get; set; }
+
+    public virtual Product Product { get; set; } = null!;
 }
