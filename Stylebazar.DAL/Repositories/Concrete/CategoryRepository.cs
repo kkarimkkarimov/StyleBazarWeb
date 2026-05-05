@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Core.Persistence.Repositories;
+using Stylebazar.DAL.Contexts;
+using Stylebazar.DAL.Entities;
+using Stylebazar.DAL.Repositories.Abstract;
 
-namespace Stylebazar.DAL.Repositories.Concrete
+namespace Stylebazar.DAL.Repositories.Concrete;
+
+public class CategoryRepository : EfRepositoryBase<Category, int, ApplicationDbContext>, ICategoryRepository
 {
-    internal class CategoryRepository
+    public CategoryRepository(ApplicationDbContext context) : base(context)
     {
     }
 }

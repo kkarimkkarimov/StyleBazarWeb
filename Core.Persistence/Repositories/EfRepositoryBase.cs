@@ -28,8 +28,8 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
             queryable = queryable.AsNoTracking();
         if (include != null)
             queryable = include(queryable);
-        if (!withDeleted)
-            queryable = queryable.Where(e => e.DeletedDate == null);
+        if (withDeleted)
+            queryable = queryable.IgnoreQueryFilters();
 
         return await queryable.FirstOrDefaultAsync(predicate, cancellationToken);
     }
@@ -49,8 +49,8 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
             queryable = queryable.AsNoTracking();
         if (include != null)
             queryable = include(queryable);
-        if (!withDeleted)
-            queryable = queryable.Where(e => e.DeletedDate == null);
+        if (withDeleted)
+            queryable = queryable.IgnoreQueryFilters();
         if (predicate != null)
             queryable = queryable.Where(predicate);
 
@@ -77,8 +77,8 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
         IQueryable<TEntity> queryable = Context.Set<TEntity>();
         if (!enableTracking)
             queryable = queryable.AsNoTracking();
-        if (!withDeleted)
-            queryable = queryable.Where(e => e.DeletedDate == null);
+        if (withDeleted)
+            queryable = queryable.IgnoreQueryFilters();
         if (predicate != null)
             queryable = queryable.Where(predicate);
 
@@ -87,7 +87,6 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
 
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        entity.CreatedDate = DateTime.UtcNow;
         await Context.Set<TEntity>().AddAsync(entity, cancellationToken);
         await Context.SaveChangesAsync(cancellationToken);
         return entity;
@@ -97,10 +96,6 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
         ICollection<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
-        DateTime now = DateTime.UtcNow;
-        foreach (TEntity entity in entities)
-            entity.CreatedDate = now;
-
         await Context.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
         await Context.SaveChangesAsync(cancellationToken);
         return entities;
@@ -108,7 +103,6 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext> : IAsyncRepository<T
 
     public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        entity.UpdatedDate = DateTime.UtcNow;
         Context.Set<TEntity>().Update(entity);
         await Context.SaveChangesAsync(cancellationToken);
         return entity;
