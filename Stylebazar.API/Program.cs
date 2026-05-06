@@ -49,6 +49,7 @@ builder.Services
 var app = builder.Build();
 
 await RoleSeeder.SeedAsync(app.Services);
+await AdminSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionMiddleware>();

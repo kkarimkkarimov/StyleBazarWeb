@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Stylebazar.BLL.Mappings;
+using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Authentication;
+using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
 using Stylebazar.DAL.Contexts;
@@ -43,6 +45,10 @@ public static class ServiceRegistration
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthManager>();
+
+        // Domain services
+        services.AddScoped<CategoryBusinessRules>();
+        services.AddScoped<ICategoryService, CategoryManager>();
 
         return services;
     }

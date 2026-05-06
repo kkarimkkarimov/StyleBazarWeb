@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Stylebazar.BLL.DTOs.Categories;
 
-namespace Stylebazar.BLL.DTOs.Categories
+public class CreateCategoryDto
 {
-    internal class CreateCategoryDto
-    {
-    }
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional. If empty, slug is generated from Name.
+    /// </summary>
+    public string? Slug { get; set; }
+
+    public int? ParentCategoryId { get; set; }
 }
