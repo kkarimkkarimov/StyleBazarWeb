@@ -14,7 +14,12 @@ public static class PersistenceServiceRegistration
         IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sql => sql.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(3),
+                    errorNumbersToAdd: null)));
 
         services.AddScoped<IStoreRepository, StoreRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
