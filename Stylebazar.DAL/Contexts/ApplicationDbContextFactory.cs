@@ -6,7 +6,7 @@ namespace Stylebazar.DAL.Contexts;
 public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
     private const string DesignTimeConnectionString =
-        "Server=(localdb)\\MSSQLLocalDB;Database=StyleBazarDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True";
+        "Server=localhost;Database=StyleBazarDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False";
 
     public ApplicationDbContext CreateDbContext(string[] args)
     {
