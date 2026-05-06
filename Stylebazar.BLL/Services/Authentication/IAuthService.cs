@@ -6,6 +6,6 @@ namespace Stylebazar.BLL.Services.Authentication;
 public interface IAuthService
 {
     Task<IdentityResult> RegisterAsync(RegisterDto dto);
-    Task<SignInResult> LoginAsync(LoginDto dto);
+    Task<LoginResultDto> LoginAsync(LoginDto dto);
     Task LogoutAsync();
 }

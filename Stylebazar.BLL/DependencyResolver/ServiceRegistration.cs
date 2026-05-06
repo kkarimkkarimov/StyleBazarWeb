@@ -1,8 +1,10 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Services.Authentication;
+using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
 using Stylebazar.DAL.Contexts;
 using Stylebazar.DAL.Entities;
@@ -32,11 +34,14 @@ public static class ServiceRegistration
         return services;
     }
 
-    public static IServiceCollection AddBusinessServices(this IServiceCollection services)
+    public static IServiceCollection AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
         services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
 
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
+        services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthManager>();
 
         return services;

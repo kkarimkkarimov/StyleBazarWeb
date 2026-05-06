@@ -9,7 +9,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddIdentityServices();
-builder.Services.AddBusinessServices();
+builder.Services.AddBusinessServices(builder.Configuration);
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

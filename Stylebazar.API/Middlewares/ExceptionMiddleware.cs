@@ -35,6 +35,10 @@ public class ExceptionMiddleware
                 (int)HttpStatusCode.BadRequest,
                 (object)new { message = ve.Message, errors = ve.Errors }),
 
+            UnauthorizedException ue => (
+                (int)HttpStatusCode.Unauthorized,
+                (object)new { message = ue.Message }),
+
             NotFoundException nfe => (
                 (int)HttpStatusCode.NotFound,
                 (object)new { message = nfe.Message }),

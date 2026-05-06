@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
 using Stylebazar.BLL.DTOs.Authentication;
+using Stylebazar.BLL.Exceptions;
 using Stylebazar.DAL.Entities;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
@@ -12,6 +13,7 @@ public class AuthManager : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
     private readonly IValidator<RegisterDto> _registerValidator;
     private readonly IValidator<LoginDto> _loginValidator;
@@ -19,12 +21,14 @@ public class AuthManager : IAuthService
     public AuthManager(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
+        ITokenService tokenService,
         IMapper mapper,
         IValidator<RegisterDto> registerValidator,
         IValidator<LoginDto> loginValidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _tokenService = tokenService;
         _mapper = mapper;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
@@ -52,7 +56,7 @@ public class AuthManager : IAuthService
         return IdentityResult.Success;
     }
 
-    public async Task<SignInResult> LoginAsync(LoginDto dto)
+    public async Task<LoginResultDto> LoginAsync(LoginDto dto)
     {
         ValidationResult validation = await _loginValidator.ValidateAsync(dto);
         if (!validation.IsValid)
@@ -60,10 +64,23 @@ public class AuthManager : IAuthService
 
         AppUser? user = await _userManager.FindByEmailAsync(dto.Email);
         if (user is null)
-            return SignInResult.Failed;
+            throw new UnauthorizedException("Invalid credentials.");
 
-        return await _signInManager.PasswordSignInAsync(
-            user, dto.Password, dto.RememberMe, lockoutOnFailure: false);
+        bool passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
+        if (!passwordValid)
+            throw new UnauthorizedException("Invalid credentials.");
+
+        IList<string> roles = await _userManager.GetRolesAsync(user);
+        (string token, DateTime expiresAt) = _tokenService.CreateToken(user, roles);
+
+        return new LoginResultDto
+        {
+            Token = token,
+            ExpiresAt = expiresAt,
+            Email = user.Email ?? string.Empty,
+            FullName = user.FullName,
+            Roles = roles.ToList()
+        };
     }
 
     public Task LogoutAsync() => _signInManager.SignOutAsync();
