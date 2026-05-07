@@ -18,6 +18,18 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
 
+// Resolve file-storage RootPath against the web project's wwwroot.
+string mvcUploadsRoot = Path.Combine(
+    builder.Environment.WebRootPath ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot"),
+    "uploads");
+Directory.CreateDirectory(mvcUploadsRoot);
+
+builder.Services.PostConfigure<Stylebazar.BLL.Settings.FileStorageSettings>(opts =>
+{
+    opts.RootPath = mvcUploadsRoot;
+    opts.BaseUrl = "/uploads";
+});
+
 var app = builder.Build();
 
 await RoleSeeder.SeedAsync(app.Services);

@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# StyleBazar — user-uploaded files (kept on disk, not in repo)
+Stylebazar.API/wwwroot/uploads/
+Stylebazar.MVC/wwwroot/uploads/

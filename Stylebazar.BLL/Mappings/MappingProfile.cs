@@ -1,6 +1,7 @@
 using AutoMapper;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.DTOs.Categories;
+using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.DAL.Entities;
 
@@ -34,5 +35,27 @@ public class MappingProfile : Profile
         CreateMap<Store, StoreDetailDto>()
             .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count))
             .ForMember(d => d.OwnerFullName, opt => opt.MapFrom(s => s.Owner != null ? s.Owner.FullName : string.Empty));
+
+        // Products
+        CreateMap<ProductImage, ProductImageDto>();
+        CreateMap<ProductSize, ProductSizeDto>();
+        CreateMap<CreateProductSizeDto, ProductSize>();
+
+        CreateMap<Product, ProductListDto>()
+            .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Store != null ? s.Store.Name : string.Empty))
+            .ForMember(d => d.CategoryName, opt => opt.MapFrom(s => s.Category != null ? s.Category.Name : string.Empty))
+            .ForMember(d => d.MainImageUrl, opt => opt.MapFrom(s =>
+                s.Images.Where(i => i.IsMain).Select(i => i.ImageUrl).FirstOrDefault()
+                ?? s.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).FirstOrDefault()));
+
+        CreateMap<Product, ProductDetailDto>()
+            .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Store != null ? s.Store.Name : string.Empty))
+            .ForMember(d => d.StoreSlug, opt => opt.MapFrom(s => s.Store != null ? s.Store.Slug : string.Empty))
+            .ForMember(d => d.CategoryName, opt => opt.MapFrom(s => s.Category != null ? s.Category.Name : string.Empty))
+            .ForMember(d => d.CategorySlug, opt => opt.MapFrom(s => s.Category != null ? s.Category.Slug : string.Empty))
+            .ForMember(d => d.Images, opt => opt.MapFrom(s => s.Images.OrderBy(i => i.DisplayOrder)))
+            .ForMember(d => d.Sizes, opt => opt.MapFrom(s => s.Sizes))
+            .ForMember(d => d.ReviewCount, opt => opt.MapFrom(s => s.Reviews.Count))
+            .ForMember(d => d.AverageRating, opt => opt.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0d));
     }
 }

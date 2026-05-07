@@ -1,10 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Stylebazar.BLL.DTOs.Products;
 
-namespace Stylebazar.BLL.DTOs.Products
+public class UpdateProductDto
 {
-    internal class UpdateProductDto
-    {
-    }
+    public string Name { get; set; } = string.Empty;
+    public string? Slug { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
+    public int StockQuantity { get; set; }
+    public string? Brand { get; set; }
+    public int CategoryId { get; set; }
+    public bool IsActive { get; set; } = true;
 }

@@ -1,7 +1,9 @@
 using Core.Persistence.Paging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.DTOs.Stores;
+using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Stores;
 
 namespace Stylebazar.API.Controllers;
@@ -12,10 +14,12 @@ namespace Stylebazar.API.Controllers;
 public class StoresController : ControllerBase
 {
     private readonly IStoreService _service;
+    private readonly IProductService _products;
 
-    public StoresController(IStoreService service)
+    public StoresController(IStoreService service, IProductService products)
     {
         _service = service;
+        _products = products;
     }
 
     /// <summary>Public list of stores with filters and pagination. Anonymous callers see only active stores by default.</summary>
@@ -127,5 +131,15 @@ public class StoresController : ControllerBase
     {
         StoreDetailDto result = await _service.ToggleActiveAsync(id, ct);
         return Ok(result);
+    }
+
+    /// <summary>List products belonging to a store.</summary>
+    [HttpGet("{id:int}/products")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<ProductListDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<ProductListDto>>> GetStoreProducts(int id, CancellationToken ct)
+    {
+        List<ProductListDto> products = await _products.GetByStoreAsync(id, ct);
+        return Ok(products);
     }
 }

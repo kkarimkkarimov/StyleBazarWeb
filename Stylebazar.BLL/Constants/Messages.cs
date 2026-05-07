@@ -21,5 +21,16 @@ public static class Messages
         public const string OwnerMustBeSeller = "Only sellers can own a store.";
         public const string NotOwner = "You are not the owner of this store.";
         public const string HasProducts = "Store has products. Remove or reassign them first.";
+        public const string Inactive = "This store is inactive and cannot accept new products.";
+    }
+
+    public static class Product
+    {
+        public const string NotFound = "Product was not found.";
+        public const string ImageNotFound = "Product image was not found.";
+        public const string SizeNotFound = "Product size was not found.";
+        public const string SlugAlreadyExists = "A product with this slug already exists.";
+        public const string DiscountTooHigh = "Discount price must be less than price.";
+        public const string NotStoreOwner = "You can only manage products in stores you own.";
     }
 }

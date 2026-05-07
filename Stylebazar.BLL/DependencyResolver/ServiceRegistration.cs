@@ -7,6 +7,8 @@ using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.CurrentUser;
+using Stylebazar.BLL.Services.FileStorage;
+using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
@@ -44,6 +46,10 @@ public static class ServiceRegistration
         services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
+
+        // File storage (local disk impl; swap to CloudinaryFileStorageService later)
+        services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
         // Auth
         services.AddScoped<ITokenService, TokenService>();
@@ -59,6 +65,9 @@ public static class ServiceRegistration
 
         services.AddScoped<StoreBusinessRules>();
         services.AddScoped<IStoreService, StoreManager>();
+
+        services.AddScoped<ProductBusinessRules>();
+        services.AddScoped<IProductService, ProductManager>();
 
         return services;
     }

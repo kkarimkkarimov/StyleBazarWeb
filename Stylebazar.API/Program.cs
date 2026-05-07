@@ -46,6 +46,18 @@ builder.Services
         };
     });
 
+// Resolve file-storage RootPath against the web project's wwwroot.
+string uploadsRoot = Path.Combine(
+    builder.Environment.WebRootPath ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot"),
+    "uploads");
+Directory.CreateDirectory(uploadsRoot);
+
+builder.Services.PostConfigure<Stylebazar.BLL.Settings.FileStorageSettings>(opts =>
+{
+    opts.RootPath = uploadsRoot;
+    opts.BaseUrl = "/uploads";
+});
+
 var app = builder.Build();
 
 await RoleSeeder.SeedAsync(app.Services);
@@ -66,6 +78,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Serve uploaded files (wwwroot/uploads → /uploads/...)
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
