@@ -12,4 +12,14 @@ public static class Messages
         public const string HasChildren = "Category has child categories. Move or delete them first.";
         public const string HasProducts = "Category has products. Reassign or delete them first.";
     }
+
+    public static class Store
+    {
+        public const string NotFound = "Store was not found.";
+        public const string SlugAlreadyExists = "A store with this slug already exists.";
+        public const string OwnerNotAuthenticated = "You must be signed in to perform this action.";
+        public const string OwnerMustBeSeller = "Only sellers can own a store.";
+        public const string NotOwner = "You are not the owner of this store.";
+        public const string HasProducts = "Store has products. Remove or reassign them first.";
+    }
 }

@@ -6,6 +6,8 @@ using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
+using Stylebazar.BLL.Services.CurrentUser;
+using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
 using Stylebazar.DAL.Contexts;
@@ -43,12 +45,20 @@ public static class ServiceRegistration
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
+        // Auth
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthManager>();
+
+        // Current user (needs IHttpContextAccessor — register in API/MVC startup)
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // Domain services
         services.AddScoped<CategoryBusinessRules>();
         services.AddScoped<ICategoryService, CategoryManager>();
+
+        services.AddScoped<StoreBusinessRules>();
+        services.AddScoped<IStoreService, StoreManager>();
 
         return services;
     }

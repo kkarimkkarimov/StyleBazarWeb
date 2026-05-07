@@ -1,6 +1,7 @@
 using AutoMapper;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.DTOs.Categories;
+using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.BLL.Mappings;
@@ -25,5 +26,13 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDetailDto>()
             .ForMember(d => d.ParentCategoryName, opt => opt.MapFrom(s => s.ParentCategory != null ? s.ParentCategory.Name : null))
             .ForMember(d => d.ChildCategories, opt => opt.MapFrom(s => s.ChildCategories));
+
+        // Stores
+        CreateMap<Store, StoreListDto>()
+            .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count));
+
+        CreateMap<Store, StoreDetailDto>()
+            .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count))
+            .ForMember(d => d.OwnerFullName, opt => opt.MapFrom(s => s.Owner != null ? s.Owner.FullName : string.Empty));
     }
 }
