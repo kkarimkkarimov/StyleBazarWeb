@@ -2,7 +2,9 @@ using AutoMapper;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.DTOs.Categories;
 using Stylebazar.BLL.DTOs.Products;
+using Stylebazar.BLL.DTOs.Reviews;
 using Stylebazar.BLL.DTOs.Stores;
+using Stylebazar.BLL.DTOs.Wishlist;
 using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.BLL.Mappings;
@@ -57,5 +59,26 @@ public class MappingProfile : Profile
             .ForMember(d => d.Sizes, opt => opt.MapFrom(s => s.Sizes))
             .ForMember(d => d.ReviewCount, opt => opt.MapFrom(s => s.Reviews.Count))
             .ForMember(d => d.AverageRating, opt => opt.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0d));
+
+        // Wishlist
+        CreateMap<Stylebazar.DAL.Entities.Wishlist, WishlistItemDto>()
+            .ForMember(d => d.ProductName, opt => opt.MapFrom(s => s.Product != null ? s.Product.Name : string.Empty))
+            .ForMember(d => d.ProductSlug, opt => opt.MapFrom(s => s.Product != null ? s.Product.Slug : string.Empty))
+            .ForMember(d => d.Price, opt => opt.MapFrom(s => s.Product != null ? s.Product.Price : 0m))
+            .ForMember(d => d.DiscountPrice, opt => opt.MapFrom(s => s.Product != null ? s.Product.DiscountPrice : null))
+            .ForMember(d => d.MainImageUrl, opt => opt.MapFrom(s =>
+                s.Product != null
+                    ? (s.Product.Images.Where(i => i.IsMain).Select(i => i.ImageUrl).FirstOrDefault()
+                       ?? s.Product.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).FirstOrDefault())
+                    : null))
+            .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Product != null && s.Product.Store != null ? s.Product.Store.Name : string.Empty))
+            .ForMember(d => d.AddedAt, opt => opt.MapFrom(s => s.CreatedDate));
+
+        // Reviews
+        CreateMap<ReviewImage, ReviewImageDto>();
+        CreateMap<Review, ReviewDto>()
+            .ForMember(d => d.UserFullName, opt => opt.MapFrom(s => s.User != null ? s.User.FullName : string.Empty))
+            .ForMember(d => d.UserProfileImageUrl, opt => opt.MapFrom(s => s.User != null ? s.User.ProfileImageUrl : null))
+            .ForMember(d => d.Images, opt => opt.MapFrom(s => s.Images));
     }
 }

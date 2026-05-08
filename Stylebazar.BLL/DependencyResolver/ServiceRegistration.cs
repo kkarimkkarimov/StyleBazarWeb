@@ -9,7 +9,9 @@ using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.BLL.Services.Products;
+using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
+using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
 using Stylebazar.DAL.Contexts;
@@ -68,6 +70,11 @@ public static class ServiceRegistration
 
         services.AddScoped<ProductBusinessRules>();
         services.AddScoped<IProductService, ProductManager>();
+
+        services.AddScoped<IWishlistService, WishlistManager>();
+
+        services.AddScoped<ReviewBusinessRules>();
+        services.AddScoped<IReviewService, ReviewManager>();
 
         return services;
     }

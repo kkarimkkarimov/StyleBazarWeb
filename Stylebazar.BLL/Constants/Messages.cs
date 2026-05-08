@@ -33,4 +33,20 @@ public static class Messages
         public const string DiscountTooHigh = "Discount price must be less than price.";
         public const string NotStoreOwner = "You can only manage products in stores you own.";
     }
+
+    public static class Wishlist
+    {
+        public const string NotAuthenticated = "You must be signed in to manage your wishlist.";
+        public const string ProductAlreadyInList = "This product is already in your wishlist.";
+        public const string ItemNotFound = "This product is not in your wishlist.";
+    }
+
+    public static class Review
+    {
+        public const string NotFound = "Review was not found.";
+        public const string ImageNotFound = "Review image was not found.";
+        public const string NotAuthenticated = "You must be signed in to review products.";
+        public const string AlreadyReviewed = "You have already reviewed this product.";
+        public const string NotOwner = "You can only modify your own reviews.";
+    }
 }
