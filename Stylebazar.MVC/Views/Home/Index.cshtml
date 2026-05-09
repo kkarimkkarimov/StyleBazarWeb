@@ -3,117 +3,129 @@
     ViewData["Title"] = "Ana səhifə";
 }
 
-@* ===== Hero ===== *@
+@* ============== HERO ============== *@
 <section class="sb-hero">
-    <div class="row align-items-center">
-        <div class="col-lg-7">
-            <h1 class="mb-3">Stilini tap, satıcısını seç.</h1>
-            <p class="lead mb-4">
-                StyleBazar — yerli satıcılardan brend geyimləri tapdığın və sevimlilərini bir yerdə saxladığın platformadır.
-            </p>
-            <div class="d-flex gap-2 flex-wrap">
-                <a class="btn btn-light btn-lg fw-700" asp-controller="Shop" asp-action="Index">
-                    <i class="bi bi-bag-heart me-1"></i> Mağazaya bax
-                </a>
-                <a class="btn btn-accent btn-lg fw-700" asp-controller="Account" asp-action="Register">
-                    Satıcı kimi qoşul
-                </a>
-            </div>
+    <div class="sb-hero__inner">
+        <span class="sb-eyebrow">Yeni nəsil moda platforması</span>
+        <h1>Stilini tap, <em>satıcısını seç.</em></h1>
+        <p class="sb-hero__lead">
+            Yerli mağazalardan brend geyimləri kəşf et, sevimlilərini saxla,
+            real rəylərlə əmin ol. Hər satıcı moderasiyadan keçir.
+        </p>
+        <div class="sb-hero__cta">
+            <a class="sb-btn sb-btn--primary sb-btn--lg" asp-controller="Shop" asp-action="Index">
+                Mağazaya bax
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a class="sb-btn sb-btn--ghost sb-btn--lg" asp-controller="Account" asp-action="Register">
+                Satıcı kimi qoşul
+            </a>
         </div>
     </div>
 </section>
 
-@* ===== Categories ===== *@
+@* ============== CATEGORIES ============== *@
 @if (Model.Categories.Any())
 {
     <section class="sb-section">
         <div class="sb-section-head">
-            <h2><i class="bi bi-grid me-2"></i>Kateqoriyalar</h2>
-            <a asp-controller="Shop" asp-action="Index">Hamısı <i class="bi bi-arrow-right"></i></a>
+            <div>
+                <span class="sb-eyebrow">Kateqoriyalar</span>
+                <h2>Sevdiyini tap</h2>
+            </div>
+            <a class="sb-section-head__link" asp-controller="Shop" asp-action="Index">Hamısı →</a>
         </div>
-        <div class="row g-3">
+        <div class="sb-cat-strip">
             @foreach (var cat in Model.Categories)
             {
-                <div class="col-6 col-md-3 col-lg-3">
-                    <a class="sb-category-tile" asp-controller="Shop" asp-action="Index" asp-route-categoryId="@cat.Id">
-                        <i class="bi bi-tag fs-3 d-block mb-2 text-muted-2"></i>
-                        @cat.Name
-                    </a>
-                </div>
+                <a class="sb-cat-pill" asp-controller="Shop" asp-action="Index" asp-route-categoryId="@cat.Id">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.59 13.41L13.42 20.58a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    @cat.Name
+                </a>
             }
         </div>
     </section>
 }
 
-@* ===== Featured ===== *@
+@* ============== FEATURED ============== *@
 @if (Model.FeaturedProducts.Any())
 {
     <section class="sb-section">
         <div class="sb-section-head">
-            <h2><i class="bi bi-stars me-2 text-warning"></i>Önə çıxanlar</h2>
-            <a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Hamısı <i class="bi bi-arrow-right"></i></a>
+            <div>
+                <span class="sb-eyebrow">Editorial</span>
+                <h2>Önə çıxanlar</h2>
+            </div>
+            <a class="sb-section-head__link" asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Hamısı →</a>
         </div>
-        <div class="row g-3">
+        <div class="sb-product-grid">
             @foreach (var p in Model.FeaturedProducts)
             {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <partial name="_ProductCard" model="p" />
-                </div>
+                <partial name="_ProductCard" model="p" />
             }
         </div>
     </section>
 }
 
-@* ===== Latest ===== *@
+@* ============== LATEST ============== *@
 <section class="sb-section">
     <div class="sb-section-head">
-        <h2><i class="bi bi-lightning-charge me-2"></i>Yeni gələnlər</h2>
-        <a asp-controller="Shop" asp-action="Index" asp-route-sortBy="newest">Hamısı <i class="bi bi-arrow-right"></i></a>
+        <div>
+            <span class="sb-eyebrow">Mağaza</span>
+            <h2>Yeni gələnlər</h2>
+        </div>
+        <a class="sb-section-head__link" asp-controller="Shop" asp-action="Index" asp-route-sortBy="newest">Hamısı →</a>
     </div>
     @if (Model.LatestProducts.Any())
     {
-        <div class="row g-3">
+        <div class="sb-product-grid">
             @foreach (var p in Model.LatestProducts)
             {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <partial name="_ProductCard" model="p" />
-                </div>
+                <partial name="_ProductCard" model="p" />
             }
         </div>
     }
     else
     {
         <div class="sb-empty">
-            <i class="bi bi-bag fs-1 d-block mb-2"></i>
-            <p class="mb-3">Hələlik heç bir məhsul yoxdur.</p>
-            <a class="btn btn-primary" asp-controller="Account" asp-action="Register">İlk satıcı ol</a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            <h3>Hələlik məhsul yoxdur</h3>
+            <p>İlk satıcı sən ol və mağazanı bu gün başlat.</p>
+            <a class="sb-btn sb-btn--primary" asp-controller="Account" asp-action="Register">Qeydiyyatdan keç</a>
         </div>
     }
 </section>
 
-@* ===== Why StyleBazar ===== *@
+@* ============== TRUST ============== *@
 <section class="sb-section">
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="sb-card p-4 h-100 text-center">
-                <i class="bi bi-shield-check fs-1 text-primary mb-2"></i>
-                <h5 class="fw-700">Etibarlı mağazalar</h5>
-                <p class="text-muted-2 mb-0">Hər mağaza moderasiyadan keçir, alıcılar rahatlıqla seçir.</p>
-            </div>
+    <div class="sb-trust">
+        <div class="sb-trust__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <h3>Etibarlı mağazalar</h3>
+            <p>Hər satıcı moderasiyadan keçir. Profil, ünvan və əlaqə məlumatları yoxlanılmışdır.</p>
         </div>
-        <div class="col-md-4">
-            <div class="sb-card p-4 h-100 text-center">
-                <i class="bi bi-truck fs-1 text-primary mb-2"></i>
-                <h5 class="fw-700">Sürətli çatdırılma</h5>
-                <p class="text-muted-2 mb-0">Yerli satıcılar — yerli logistika ilə daha sürətli sifariş.</p>
-            </div>
+        <div class="sb-trust__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <h3>Yerli logistika</h3>
+            <p>Yerli satıcılarla yerli çatdırılma — sürətli sifariş, az risk, az xərc.</p>
         </div>
-        <div class="col-md-4">
-            <div class="sb-card p-4 h-100 text-center">
-                <i class="bi bi-stars fs-1 text-primary mb-2"></i>
-                <h5 class="fw-700">Real rəylər</h5>
-                <p class="text-muted-2 mb-0">Şəkilli rəylər və reytinq sistemi alıcıların rəyini gerçəkdə görmək.</p>
-            </div>
+        <div class="sb-trust__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <h3>Real rəylər</h3>
+            <p>Şəkilli rəylər və 1–5 reytinq sistemi. Hər alıcı yalnız aldığı məhsula rəy verə bilir.</p>
         </div>
+    </div>
+</section>
+
+@* ============== NEWSLETTER ============== *@
+<section class="sb-section">
+    <div class="sb-newsletter">
+        <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">Newsletter</span>
+        <h2>Yeni gələnlərdən ilk sən xəbər tut</h2>
+        <p>Endirimlər, xüsusi kolleksiyalar və satıcı hekayələri — ayda 1-2 dəfə, spam yoxdur.</p>
+        <form>
+            <input type="email" placeholder="E-mail ünvanın" aria-label="E-mail" />
+            <button type="submit" class="sb-btn sb-btn--accent">Abunə ol</button>
+        </form>
     </div>
 </section>

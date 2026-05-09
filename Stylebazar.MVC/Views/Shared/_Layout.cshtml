@@ -5,142 +5,227 @@
 <html lang="az">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#FFFFFF" />
     <title>@(ViewData["Title"]) — StyleBazar</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+    @* ============== HEADER ============== *@
     <header class="sb-header">
-        <nav class="navbar navbar-expand-lg py-2">
-            <div class="container">
-                <a class="navbar-brand sb-brand" asp-controller="Home" asp-action="Index">
-                    Style<span class="sb-brand-accent">Bazar</span>
+        <div class="sb-container sb-header__bar">
+            <a class="sb-brand" asp-controller="Home" asp-action="Index">
+                StyleBazar<span class="sb-brand__dot">.</span>
+            </a>
+
+            <ul class="sb-nav">
+                <li><a asp-controller="Shop" asp-action="Index">Mağaza</a></li>
+                <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni</a></li>
+                <li><a asp-controller="Store" asp-action="Index">Satıcılar</a></li>
+            </ul>
+
+            <div class="sb-header__spacer"></div>
+
+            <div class="sb-header__actions">
+                <a class="sb-icon-btn" asp-controller="Shop" asp-action="Index" aria-label="Axtarış">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sbNav" aria-controls="sbNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <a class="sb-icon-btn" asp-controller="Account" asp-action="Wishlist" aria-label="Wishlist">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                    </a>
 
-                <div class="collapse navbar-collapse" id="sbNav">
-                    <form class="d-flex sb-search mx-lg-3 my-2 my-lg-0" asp-controller="Shop" asp-action="Index" method="get" role="search">
-                        <input class="form-control" type="search" name="search" placeholder="Məhsul, mağaza, brend axtar..." aria-label="Search" value="@Context.Request.Query["search"]" />
-                    </form>
-
-                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-                        <li class="nav-item">
-                            <a class="nav-link sb-nav-link" asp-controller="Shop" asp-action="Index">Mağaza</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link sb-nav-link" asp-controller="Store" asp-action="Index">Satıcılar</a>
-                        </li>
-
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a class="sb-icon-btn" asp-controller="Account" asp-action="Wishlist" title="Wishlist">
-                                    <i class="bi bi-heart"></i>
-                                </a>
-                            </li>
+                    <div class="sb-user-wrap">
+                        <button class="sb-user" type="button" id="sbUserToggle" aria-haspopup="true" aria-expanded="false">
+                            <span class="sb-user__avatar">@(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")</span>
+                            <span>@(User.Identity?.Name?.Split('@')[0] ?? "Hesab")</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="sb-dropdown" id="sbUserMenu" role="menu">
+                            <a class="sb-dropdown__item" asp-controller="Account" asp-action="Profile">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                Profil
+                            </a>
+                            <a class="sb-dropdown__item" asp-controller="Account" asp-action="Wishlist">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                                Wishlist
+                            </a>
                             @if (User.IsInRole("Seller"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link sb-nav-link" asp-area="Seller" asp-controller="Store" asp-action="Index">
-                                        <i class="bi bi-shop"></i> Satıcı paneli
-                                    </a>
-                                </li>
+                                <a class="sb-dropdown__item" asp-area="Seller" asp-controller="Store" asp-action="Index">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
+                                    Satıcı paneli
+                                </a>
                             }
                             @if (User.IsInRole("Admin"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link sb-nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                        <i class="bi bi-shield-check"></i> Admin
-                                    </a>
-                                </li>
-                            }
-                            <li class="nav-item dropdown">
-                                <a class="nav-link sb-nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-circle"></i>
-                                    @(User.Identity?.Name ?? "Hesab")
+                                <a class="sb-dropdown__item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    Admin
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2"></i>Profil</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Wishlist"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="bi bi-box-arrow-right me-2"></i>Çıxış
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="btn btn-outline-primary btn-sm me-2" asp-controller="Account" asp-action="Login">Giriş</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Qeydiyyat</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+                            }
+                            <div class="sb-dropdown__sep"></div>
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <button type="submit" class="sb-dropdown__item sb-dropdown__item--danger">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                    Çıxış
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="sb-auth-actions">
+                        <a class="sb-btn sb-btn--ghost sb-btn--sm" asp-controller="Account" asp-action="Login">Giriş</a>
+                        <a class="sb-btn sb-btn--primary sb-btn--sm" asp-controller="Account" asp-action="Register">Qeydiyyat</a>
+                    </div>
+                }
+
+                <button class="sb-icon-btn sb-burger" type="button" id="sbBurger" aria-label="Menyu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
             </div>
-        </nav>
+        </div>
     </header>
 
-    <main role="main" class="container py-4">
-        @if (TempData["Success"] is string s) { <div class="sb-alert success">@s</div> }
-        @if (TempData["Error"] is string e)   { <div class="sb-alert error">@e</div>   }
+    @* ============== MOBILE MENU ============== *@
+    <div class="sb-mobile-menu" id="sbMobileMenu" aria-hidden="true">
+        <div class="sb-mobile-menu__head">
+            <a class="sb-brand" asp-controller="Home" asp-action="Index">
+                StyleBazar<span class="sb-brand__dot">.</span>
+            </a>
+            <button class="sb-icon-btn" type="button" id="sbMenuClose" aria-label="Bağla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <ul class="sb-mobile-menu__list">
+            <li><a asp-controller="Shop" asp-action="Index">Mağaza <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Store" asp-action="Index">Satıcılar <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <li><a asp-controller="Account" asp-action="Profile">Profil <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                <li><a asp-controller="Account" asp-action="Wishlist">Wishlist <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            }
+        </ul>
+        @if (!SignInManager.IsSignedIn(User))
+        {
+            <div class="sb-mobile-menu__cta">
+                <a class="sb-btn sb-btn--primary sb-btn--block" asp-controller="Account" asp-action="Register">Qeydiyyatdan keç</a>
+                <a class="sb-btn sb-btn--ghost sb-btn--block" asp-controller="Account" asp-action="Login">Giriş et</a>
+            </div>
+        }
+        else
+        {
+            <form asp-controller="Account" asp-action="Logout" method="post" class="sb-mobile-menu__cta">
+                <button type="submit" class="sb-btn sb-btn--ghost sb-btn--block">Çıxış</button>
+            </form>
+        }
+    </div>
+
+    @* ============== MARQUEE STRIP ============== *@
+    <div class="sb-marquee">
+        <div class="sb-marquee__track">
+            <span>Yeni satıcılar üçün ilk ay komissiyasız</span>
+            <span>Bütün məhsullar yerli mağazalardan</span>
+            <span>Şəkilli rəylər ilə inamla seç</span>
+            <span>Wishlist ilə sevimlilərini saxla</span>
+            <span>Yeni satıcılar üçün ilk ay komissiyasız</span>
+            <span>Bütün məhsullar yerli mağazalardan</span>
+        </div>
+    </div>
+
+    @* ============== MAIN ============== *@
+    <main class="sb-container">
+        @if (TempData["Success"] is string s) { <div class="sb-alert sb-alert--success">@s</div> }
+        @if (TempData["Error"] is string e)   { <div class="sb-alert sb-alert--error">@e</div>   }
 
         @RenderBody()
     </main>
 
+    @* ============== FOOTER ============== *@
     <footer class="sb-footer">
-        <div class="container">
-            <div class="row gy-3">
-                <div class="col-md-4">
-                    <h6 class="sb-brand">Style<span class="sb-brand-accent">Bazar</span></h6>
-                    <p class="mb-0">Onlayn mağaza platforması — alıcı və satıcılar üçün.</p>
+        <div class="sb-container">
+            <div class="sb-footer__cols">
+                <div>
+                    <a class="sb-brand" asp-controller="Home" asp-action="Index">
+                        StyleBazar<span class="sb-brand__dot">.</span>
+                    </a>
+                    <p class="sb-muted" style="margin-top: 12px; max-width: 320px;">
+                        Yerli satıcılardan brend geyimləri tapdığın və sevimlilərini bir yerdə saxladığın platforma.
+                    </p>
                 </div>
-                <div class="col-md-2">
-                    <h6>Naviqasiya</h6>
-                    <ul class="list-unstyled">
-                        <li><a asp-controller="Home" asp-action="Index">Ana səhifə</a></li>
-                        <li><a asp-controller="Shop" asp-action="Index">Mağaza</a></li>
+                <div>
+                    <h4>Mağaza</h4>
+                    <ul>
+                        <li><a asp-controller="Shop" asp-action="Index">Bütün məhsullar</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər</a></li>
                         <li><a asp-controller="Store" asp-action="Index">Satıcılar</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
-                    <h6>Hesab</h6>
-                    <ul class="list-unstyled">
+                <div>
+                    <h4>Hesab</h4>
+                    <ul>
                         <li><a asp-controller="Account" asp-action="Login">Giriş</a></li>
                         <li><a asp-controller="Account" asp-action="Register">Qeydiyyat</a></li>
                         <li><a asp-controller="Account" asp-action="Profile">Profil</a></li>
+                        <li><a asp-controller="Account" asp-action="Wishlist">Wishlist</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
-                    <h6>Əlaqə</h6>
-                    <p class="mb-1">support@@stylebazar.az</p>
-                    <p class="mb-0">Bakı, Azərbaycan</p>
+                <div>
+                    <h4>Əlaqə</h4>
+                    <ul>
+                        <li>support@@stylebazar.az</li>
+                        <li>Bakı, Azərbaycan</li>
+                        <li><a asp-controller="Home" asp-action="Privacy">Gizlilik</a></li>
+                    </ul>
                 </div>
             </div>
-            <hr>
-            <div class="d-flex justify-content-between flex-wrap small">
+            <div class="sb-footer__bottom">
                 <span>&copy; @DateTime.Now.Year StyleBazar. Bütün hüquqlar qorunur.</span>
-                <span><a asp-controller="Home" asp-action="Privacy">Gizlilik</a></span>
+                <span>Made with ♡ in Baku</span>
             </div>
         </div>
     </footer>
+
+    @* ============== MOBILE BOTTOM TAB BAR ============== *@
+    <nav class="sb-bottombar" aria-label="Əsas naviqasiya">
+        <a asp-controller="Home" asp-action="Index">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21V12h6v9"/></svg>
+            <span>Ana</span>
+        </a>
+        <a asp-controller="Shop" asp-action="Index">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Mağaza</span>
+        </a>
+        <a asp-controller="Account" asp-action="Wishlist">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <span>Wishlist</span>
+        </a>
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <a asp-controller="Account" asp-action="Profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Hesab</span>
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <span>Giriş</span>
+            </a>
+        }
+    </nav>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

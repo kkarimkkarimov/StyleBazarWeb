@@ -3,19 +3,20 @@
     ViewData["Title"] = "Xəta";
 }
 
-<div class="sb-card p-4 p-md-5 text-center">
-    <i class="bi bi-exclamation-triangle fs-1 text-danger mb-3"></i>
-    <h1 class="fw-700">Bir səhv baş verdi</h1>
-    <p class="text-muted-2">
-        Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyib təkrar cəhd edə bilərsən.
+<section class="sb-section" style="max-width: 540px; margin: 80px auto; text-align: center;">
+    <div style="font-family: var(--sb-font-display); font-size: 5rem; line-height: 1; color: var(--sb-accent); margin-bottom: 8px;">5×0</div>
+    <h1>Bir səhv baş verdi</h1>
+    <p class="sb-muted" style="font-size: 1.05rem;">
+        Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyə və ya ana səhifəyə qayıda bilərsən.
     </p>
     @if (Model.ShowRequestId)
     {
-        <p class="small text-muted-2">
+        <p style="font-size: .8rem; color: var(--sb-muted); margin-top: 24px;">
             Request ID: <code>@Model.RequestId</code>
         </p>
     }
-    <a class="btn btn-primary mt-2" asp-controller="Home" asp-action="Index">
-        <i class="bi bi-house me-1"></i> Ana səhifəyə qayıt
-    </a>
-</div>
+    <div style="margin-top: 32px; display: flex; gap: 12px; justify-content: center;">
+        <a class="sb-btn sb-btn--primary" asp-controller="Home" asp-action="Index">Ana səhifə</a>
+        <a class="sb-btn sb-btn--ghost" asp-controller="Shop" asp-action="Index">Mağazaya bax</a>
+    </div>
+</section>
