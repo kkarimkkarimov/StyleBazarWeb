@@ -1,8 +1,119 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model HomeIndexViewModel
+@{
+    ViewData["Title"] = "Ana səhifə";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@* ===== Hero ===== *@
+<section class="sb-hero">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <h1 class="mb-3">Stilini tap, satıcısını seç.</h1>
+            <p class="lead mb-4">
+                StyleBazar — yerli satıcılardan brend geyimləri tapdığın və sevimlilərini bir yerdə saxladığın platformadır.
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-light btn-lg fw-700" asp-controller="Shop" asp-action="Index">
+                    <i class="bi bi-bag-heart me-1"></i> Mağazaya bax
+                </a>
+                <a class="btn btn-accent btn-lg fw-700" asp-controller="Account" asp-action="Register">
+                    Satıcı kimi qoşul
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* ===== Categories ===== *@
+@if (Model.Categories.Any())
+{
+    <section class="sb-section">
+        <div class="sb-section-head">
+            <h2><i class="bi bi-grid me-2"></i>Kateqoriyalar</h2>
+            <a asp-controller="Shop" asp-action="Index">Hamısı <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-3">
+            @foreach (var cat in Model.Categories)
+            {
+                <div class="col-6 col-md-3 col-lg-3">
+                    <a class="sb-category-tile" asp-controller="Shop" asp-action="Index" asp-route-categoryId="@cat.Id">
+                        <i class="bi bi-tag fs-3 d-block mb-2 text-muted-2"></i>
+                        @cat.Name
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@* ===== Featured ===== *@
+@if (Model.FeaturedProducts.Any())
+{
+    <section class="sb-section">
+        <div class="sb-section-head">
+            <h2><i class="bi bi-stars me-2 text-warning"></i>Önə çıxanlar</h2>
+            <a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Hamısı <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-3">
+            @foreach (var p in Model.FeaturedProducts)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <partial name="_ProductCard" model="p" />
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@* ===== Latest ===== *@
+<section class="sb-section">
+    <div class="sb-section-head">
+        <h2><i class="bi bi-lightning-charge me-2"></i>Yeni gələnlər</h2>
+        <a asp-controller="Shop" asp-action="Index" asp-route-sortBy="newest">Hamısı <i class="bi bi-arrow-right"></i></a>
+    </div>
+    @if (Model.LatestProducts.Any())
+    {
+        <div class="row g-3">
+            @foreach (var p in Model.LatestProducts)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <partial name="_ProductCard" model="p" />
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="sb-empty">
+            <i class="bi bi-bag fs-1 d-block mb-2"></i>
+            <p class="mb-3">Hələlik heç bir məhsul yoxdur.</p>
+            <a class="btn btn-primary" asp-controller="Account" asp-action="Register">İlk satıcı ol</a>
+        </div>
+    }
+</section>
+
+@* ===== Why StyleBazar ===== *@
+<section class="sb-section">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="sb-card p-4 h-100 text-center">
+                <i class="bi bi-shield-check fs-1 text-primary mb-2"></i>
+                <h5 class="fw-700">Etibarlı mağazalar</h5>
+                <p class="text-muted-2 mb-0">Hər mağaza moderasiyadan keçir, alıcılar rahatlıqla seçir.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="sb-card p-4 h-100 text-center">
+                <i class="bi bi-truck fs-1 text-primary mb-2"></i>
+                <h5 class="fw-700">Sürətli çatdırılma</h5>
+                <p class="text-muted-2 mb-0">Yerli satıcılar — yerli logistika ilə daha sürətli sifariş.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="sb-card p-4 h-100 text-center">
+                <i class="bi bi-stars fs-1 text-primary mb-2"></i>
+                <h5 class="fw-700">Real rəylər</h5>
+                <p class="text-muted-2 mb-0">Şəkilli rəylər və reytinq sistemi alıcıların rəyini gerçəkdə görmək.</p>
+            </div>
+        </div>
+    </div>
+</section>

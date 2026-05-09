@@ -1,47 +1,147 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+@using Microsoft.AspNetCore.Identity
+@using Stylebazar.DAL.Entities
+@inject SignInManager<AppUser> SignInManager
+<!DOCTYPE html>
+<html lang="az">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Stylebazar.MVC</title>
-    <script type="importmap"></script>
+    <title>@(ViewData["Title"]) — StyleBazar</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Stylebazar.MVC.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Stylebazar.MVC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+    <header class="sb-header">
+        <nav class="navbar navbar-expand-lg py-2">
+            <div class="container">
+                <a class="navbar-brand sb-brand" asp-controller="Home" asp-action="Index">
+                    Style<span class="sb-brand-accent">Bazar</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sbNav" aria-controls="sbNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="sbNav">
+                    <form class="d-flex sb-search mx-lg-3 my-2 my-lg-0" asp-controller="Shop" asp-action="Index" method="get" role="search">
+                        <input class="form-control" type="search" name="search" placeholder="Məhsul, mağaza, brend axtar..." aria-label="Search" value="@Context.Request.Query["search"]" />
+                    </form>
+
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link sb-nav-link" asp-controller="Shop" asp-action="Index">Mağaza</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link sb-nav-link" asp-controller="Store" asp-action="Index">Satıcılar</a>
                         </li>
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="sb-icon-btn" asp-controller="Account" asp-action="Wishlist" title="Wishlist">
+                                    <i class="bi bi-heart"></i>
+                                </a>
+                            </li>
+                            @if (User.IsInRole("Seller"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link sb-nav-link" asp-area="Seller" asp-controller="Store" asp-action="Index">
+                                        <i class="bi bi-shop"></i> Satıcı paneli
+                                    </a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link sb-nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                        <i class="bi bi-shield-check"></i> Admin
+                                    </a>
+                                </li>
+                            }
+                            <li class="nav-item dropdown">
+                                <a class="nav-link sb-nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i>
+                                    @(User.Identity?.Name ?? "Hesab")
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2"></i>Profil</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Wishlist"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i>Çıxış
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-primary btn-sm me-2" asp-controller="Account" asp-action="Login">Giriş</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Qeydiyyat</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+    <main role="main" class="container py-4">
+        @if (TempData["Success"] is string s) { <div class="sb-alert success">@s</div> }
+        @if (TempData["Error"] is string e)   { <div class="sb-alert error">@e</div>   }
+
+        @RenderBody()
+    </main>
+
+    <footer class="sb-footer">
         <div class="container">
-            &copy; 2026 - Stylebazar.MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row gy-3">
+                <div class="col-md-4">
+                    <h6 class="sb-brand">Style<span class="sb-brand-accent">Bazar</span></h6>
+                    <p class="mb-0">Onlayn mağaza platforması — alıcı və satıcılar üçün.</p>
+                </div>
+                <div class="col-md-2">
+                    <h6>Naviqasiya</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Home" asp-action="Index">Ana səhifə</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index">Mağaza</a></li>
+                        <li><a asp-controller="Store" asp-action="Index">Satıcılar</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Hesab</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Account" asp-action="Login">Giriş</a></li>
+                        <li><a asp-controller="Account" asp-action="Register">Qeydiyyat</a></li>
+                        <li><a asp-controller="Account" asp-action="Profile">Profil</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Əlaqə</h6>
+                    <p class="mb-1">support@@stylebazar.az</p>
+                    <p class="mb-0">Bakı, Azərbaycan</p>
+                </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between flex-wrap small">
+                <span>&copy; @DateTime.Now.Year StyleBazar. Bütün hüquqlar qorunur.</span>
+                <span><a asp-controller="Home" asp-action="Privacy">Gizlilik</a></span>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

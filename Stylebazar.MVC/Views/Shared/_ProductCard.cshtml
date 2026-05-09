@@ -1,0 +1,35 @@
+@model Stylebazar.BLL.DTOs.Products.ProductListDto
+
+<div class="sb-card sb-product-card h-100">
+    <a class="sb-product-link" asp-controller="Shop" asp-action="Detail" asp-route-id="@Model.Id">
+        <div class="sb-product-thumb">
+            @if (!string.IsNullOrEmpty(Model.MainImageUrl))
+            {
+                <img src="@Model.MainImageUrl" alt="@Model.Name" loading="lazy" />
+            }
+            else
+            {
+                <div class="sb-product-thumb-fallback"><i class="bi bi-image"></i></div>
+            }
+            @if (Model.IsFeatured)
+            {
+                <span class="sb-featured-badge">Featured</span>
+            }
+        </div>
+        <div class="sb-product-body">
+            <div class="sb-product-name">@Model.Name</div>
+            <div class="sb-product-store">@Model.StoreName · @Model.CategoryName</div>
+            <div class="mt-auto">
+                @if (Model.DiscountPrice.HasValue)
+                {
+                    <span class="sb-price sb-price-discount">@Model.DiscountPrice.Value.ToString("N2") ₼</span>
+                    <span class="sb-price-old">@Model.Price.ToString("N2") ₼</span>
+                }
+                else
+                {
+                    <span class="sb-price">@Model.Price.ToString("N2") ₼</span>
+                }
+            </div>
+        </div>
+    </a>
+</div>
