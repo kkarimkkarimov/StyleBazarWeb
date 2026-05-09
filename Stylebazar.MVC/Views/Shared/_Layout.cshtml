@@ -17,32 +17,167 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+    @* ============== TOP UTILITY BAR (desktop only) ============== *@
+    <div class="sb-utility">
+        <div class="sb-container sb-utility__bar">
+            <a asp-controller="Account" asp-action="Register">Satıcı kimi qoşul</a>
+            <span class="sb-utility__divider"></span>
+            <a asp-controller="Support" asp-action="Index">Dəstək</a>
+            <span class="sb-utility__divider"></span>
+            <div class="sb-lang">
+                <button class="sb-lang__toggle" type="button" id="sbLangToggle" aria-haspopup="true" aria-expanded="false">
+                    <span class="sb-lang__flag sb-lang__flag--az" aria-hidden="true"></span>
+                    <span>AZ</span>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="sb-lang__menu" id="sbLangMenu" role="menu">
+                    <button type="button" class="is-active" data-lang="az"><span class="sb-lang__flag sb-lang__flag--az"></span>Azərbaycan</button>
+                    <button type="button" data-lang="en"><span class="sb-lang__flag sb-lang__flag--en"></span>English</button>
+                    <button type="button" data-lang="ru"><span class="sb-lang__flag sb-lang__flag--ru"></span>Русский</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* ============== HEADER ============== *@
-    <header class="sb-header">
+    <header class="sb-header" id="sbHeader">
         <div class="sb-container sb-header__bar">
             <a class="sb-brand" asp-controller="Home" asp-action="Index">
                 StyleBazar<span class="sb-brand__dot">.</span>
             </a>
 
             <ul class="sb-nav">
-                <li><a asp-controller="Shop" asp-action="Index">Mağaza</a></li>
-                <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni</a></li>
-                <li><a asp-controller="Store" asp-action="Index">Satıcılar</a></li>
+                <li class="sb-nav__item">
+                    <a class="sb-nav__link" asp-controller="Shop" asp-action="Index">Mağaza</a>
+                </li>
+                <li class="sb-nav__item">
+                    <a class="sb-nav__link" asp-controller="Store" asp-action="Index">Satıcılar</a>
+                </li>
+                <li class="sb-nav__item" data-mega="categories">
+                    <button class="sb-nav__link" type="button" aria-haspopup="true" aria-expanded="false">
+                        Kateqoriyalar
+                        <svg class="sb-nav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sb-mega" role="menu" aria-label="Kateqoriyalar">
+                        <div class="sb-mega__grid">
+                            <div class="sb-mega__col">
+                                <h5>İnsanlar</h5>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="qadin">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="6" r="3"/><path d="M9 9l-2 12h10l-2-12"/><path d="M9 15h6"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Qadın</span><span class="sb-mega__cell-sub">Yeni mövsüm geyimləri</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="kisi">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="6" r="3"/><path d="M5 21l3-12h8l3 12"/><path d="M9 13h6"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Kişi</span><span class="sb-mega__cell-sub">Klassik və idman</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="usaq">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="7" r="2.5"/><path d="M8 21l1-9h6l1 9"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Uşaq</span><span class="sb-mega__cell-sub">0–12 yaş</span></span>
+                                </a>
+                            </div>
+                            <div class="sb-mega__col">
+                                <h5>Geyim</h5>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="ust-geyim">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 6l4-3 3 2 3-2 4 3-3 4v9H8v-9z"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Üst geyim</span><span class="sb-mega__cell-sub">Köynək, jaket, palto</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="alt-geyim">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 4h10l-1 8h-3l-1 8h-2l-1-8H8z"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Alt geyim</span><span class="sb-mega__cell-sub">Şalvar, ətək</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="ayaqqabi">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 17l6-9 4 2 4-3 6 4v6H2z"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Ayaqqabı</span><span class="sb-mega__cell-sub">Hər mövsüm</span></span>
+                                </a>
+                            </div>
+                            <div class="sb-mega__col">
+                                <h5>Aksesuar</h5>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="canta">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V5a3 3 0 016 0v3"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Çanta</span><span class="sb-mega__cell-sub">Hər stilə uyğun</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="bijuteriya">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3l-4 6 10 12L22 9l-4-6z"/><path d="M6 3h12"/><path d="M2 9h20"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Bijuteriya</span><span class="sb-mega__cell-sub">Üzük, qolbaq, sancaq</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Shop" asp-action="Index" asp-route-search="kosmetika">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 2h6v6l-2 2v12H11V10L9 8z"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Kosmetika</span><span class="sb-mega__cell-sub">Üz, dodaq, ətir</span></span>
+                                </a>
+                            </div>
+                            <a class="sb-mega__featured" asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">
+                                <h6>Yeni kolleksiya</h6>
+                                <p>Bu mövsümün ən populyar parçaları, yerli satıcılardan.</p>
+                                <span class="sb-mega__featured-cta">Kəşf et →</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li class="sb-nav__item" data-mega="blog">
+                    <button class="sb-nav__link" type="button" aria-haspopup="true" aria-expanded="false">
+                        Blog
+                        <svg class="sb-nav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sb-mega sb-mega--blog" role="menu" aria-label="Blog">
+                        <div class="sb-mega__grid">
+                            <div class="sb-mega__col">
+                                <h5>Yeni</h5>
+                                <a class="sb-mega__cell" asp-controller="Blog" asp-action="Index">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Hamısı</span><span class="sb-mega__cell-sub">Bütün yazılar</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Blog" asp-action="Index" asp-route-cat="moda">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Moda</span><span class="sb-mega__cell-sub">Trend və üslublar</span></span>
+                                </a>
+                            </div>
+                            <div class="sb-mega__col">
+                                <h5>Bələdçi</h5>
+                                <a class="sb-mega__cell" asp-controller="Blog" asp-action="Index" asp-route-cat="rehberler">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Geyim rəhbərləri</span><span class="sb-mega__cell-sub">Necə kombin etmək</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Blog" asp-action="Index" asp-route-cat="meslehetler">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Alış məsləhətləri</span><span class="sb-mega__cell-sub">Daha yaxşı seç</span></span>
+                                </a>
+                            </div>
+                            <div class="sb-mega__col">
+                                <h5>Biznes</h5>
+                                <a class="sb-mega__cell" asp-controller="Blog" asp-action="Index" asp-route-cat="eticaret">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">E-Ticarət</span><span class="sb-mega__cell-sub">Satıcı uğur hekayələri</span></span>
+                                </a>
+                                <a class="sb-mega__cell" asp-controller="Blog" asp-action="Index" asp-route-cat="brendler">
+                                    <span class="sb-mega__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3.27 6.96L12 12.01l8.73-5.05"/><path d="M12 22V12"/></svg></span>
+                                    <span><span class="sb-mega__cell-title">Brand hekayələri</span><span class="sb-mega__cell-sub">Yerli markalar</span></span>
+                                </a>
+                            </div>
+                            <a class="sb-mega__featured" asp-controller="Blog" asp-action="Index">
+                                <h6>Editor's Pick</h6>
+                                <p>Bu həftənin ən çox oxunan moda yazısı.</p>
+                                <span class="sb-mega__featured-cta">Oxu →</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li class="sb-nav__item">
+                    <a class="sb-nav__link" asp-controller="About" asp-action="Index">Haqqımızda</a>
+                </li>
             </ul>
 
             <div class="sb-header__spacer"></div>
 
             <div class="sb-header__actions">
-                <a class="sb-icon-btn" asp-controller="Shop" asp-action="Index" aria-label="Axtarış">
+                <button class="sb-icon-btn" type="button" id="sbSearchOpen" aria-label="Axtarış">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </a>
+                </button>
 
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <a class="sb-icon-btn" asp-controller="Account" asp-action="Wishlist" aria-label="Wishlist">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                     </a>
-
                     <div class="sb-user-wrap">
                         <button class="sb-user" type="button" id="sbUserToggle" aria-haspopup="true" aria-expanded="false">
                             <span class="sb-user__avatar">@(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")</span>
@@ -97,6 +232,45 @@
         </div>
     </header>
 
+    @* ============== MEGA-MENU BACKDROP ============== *@
+    <div class="sb-mega-backdrop" id="sbMegaBackdrop" aria-hidden="true"></div>
+
+    @* ============== SEARCH OVERLAY ============== *@
+    <div class="sb-search-overlay" id="sbSearchOverlay" aria-hidden="true">
+        <div class="sb-container">
+            <div class="sb-search-overlay__head">
+                <form class="sb-search-overlay__form" asp-controller="Shop" asp-action="Index" method="get" role="search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input class="sb-search-overlay__input" type="search" name="search" placeholder="Nə axtarırsan?" id="sbSearchInput" autocomplete="off" />
+                </form>
+                <button class="sb-icon-btn" type="button" id="sbSearchClose" aria-label="Bağla">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="sb-search-overlay__suggestions">
+                <div>
+                    <div class="sb-search-overlay__suggestion-label">Populyar axtarışlar</div>
+                    <div class="sb-search-overlay__chips">
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="köynək">Köynək</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="ayaqqabı">Ayaqqabı</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="çanta">Çanta</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="palto">Palto</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="şalvar">Şalvar</a>
+                    </div>
+                </div>
+                <div style="margin-top: 24px;">
+                    <div class="sb-search-overlay__suggestion-label">Tez keçidlər</div>
+                    <div class="sb-search-overlay__chips">
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-sortBy="price-asc">Ucuzdan bahaya</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Store" asp-action="Index">Bütün satıcılar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* ============== MOBILE MENU ============== *@
     <div class="sb-mobile-menu" id="sbMobileMenu" aria-hidden="true">
         <div class="sb-mobile-menu__head">
@@ -109,8 +283,28 @@
         </div>
         <ul class="sb-mobile-menu__list">
             <li><a asp-controller="Shop" asp-action="Index">Mağaza <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
-            <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             <li><a asp-controller="Store" asp-action="Index">Satıcılar <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li>
+                <div class="sb-mobile-acc">
+                    <button class="sb-mobile-acc__trigger" type="button">
+                        Kateqoriyalar
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sb-mobile-acc__panel">
+                        <div class="sb-mobile-acc__panel-inner">
+                            <a class="sb-mobile-acc__link" asp-controller="Shop" asp-action="Index" asp-route-search="qadın"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="6" r="3"/><path d="M9 9l-2 12h10l-2-12"/></svg>Qadın</a>
+                            <a class="sb-mobile-acc__link" asp-controller="Shop" asp-action="Index" asp-route-search="kişi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="6" r="3"/><path d="M5 21l3-12h8l3 12"/></svg>Kişi</a>
+                            <a class="sb-mobile-acc__link" asp-controller="Shop" asp-action="Index" asp-route-search="uşaq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="7" r="2.5"/><path d="M8 21l1-9h6l1 9"/></svg>Uşaq</a>
+                            <a class="sb-mobile-acc__link" asp-controller="Shop" asp-action="Index" asp-route-search="ayaqqabı"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 17l6-9 4 2 4-3 6 4v6H2z"/></svg>Ayaqqabı</a>
+                            <a class="sb-mobile-acc__link" asp-controller="Shop" asp-action="Index" asp-route-search="çanta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V5a3 3 0 016 0v3"/></svg>Çanta</a>
+                            <a class="sb-mobile-acc__link" asp-controller="Shop" asp-action="Index" asp-route-search="bijuteriya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3l-4 6 10 12L22 9l-4-6z"/></svg>Bijuteriya</a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li><a asp-controller="Blog" asp-action="Index">Blog <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="About" asp-action="Index">Haqqımızda <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Support" asp-action="Index">Dəstək <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             @if (SignInManager.IsSignedIn(User))
             {
                 <li><a asp-controller="Account" asp-action="Profile">Profil <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
@@ -170,15 +364,16 @@
                         <li><a asp-controller="Shop" asp-action="Index">Bütün məhsullar</a></li>
                         <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər</a></li>
                         <li><a asp-controller="Store" asp-action="Index">Satıcılar</a></li>
+                        <li><a asp-controller="Blog" asp-action="Index">Blog</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4>Hesab</h4>
+                    <h4>Şirkət</h4>
                     <ul>
-                        <li><a asp-controller="Account" asp-action="Login">Giriş</a></li>
-                        <li><a asp-controller="Account" asp-action="Register">Qeydiyyat</a></li>
-                        <li><a asp-controller="Account" asp-action="Profile">Profil</a></li>
-                        <li><a asp-controller="Account" asp-action="Wishlist">Wishlist</a></li>
+                        <li><a asp-controller="About" asp-action="Index">Haqqımızda</a></li>
+                        <li><a asp-controller="Support" asp-action="Index">Dəstək</a></li>
+                        <li><a asp-controller="Account" asp-action="Register">Satıcı ol</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">Gizlilik</a></li>
                     </ul>
                 </div>
                 <div>
@@ -186,7 +381,6 @@
                     <ul>
                         <li>support@@stylebazar.az</li>
                         <li>Bakı, Azərbaycan</li>
-                        <li><a asp-controller="Home" asp-action="Privacy">Gizlilik</a></li>
                     </ul>
                 </div>
             </div>
