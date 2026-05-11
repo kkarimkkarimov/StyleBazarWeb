@@ -24,6 +24,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<ReviewImage> ReviewImages => Set<ReviewImage>();
+    public DbSet<Story> Stories => Set<Story>();
+    public DbSet<HeroBanner> HeroBanners => Set<HeroBanner>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
 
     public override int SaveChanges()
     {

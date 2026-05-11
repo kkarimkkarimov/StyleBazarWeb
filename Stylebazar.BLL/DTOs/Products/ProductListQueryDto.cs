@@ -1,3 +1,5 @@
+using Stylebazar.DAL.Entities.Enums;
+
 namespace Stylebazar.BLL.DTOs.Products;
 
 public class ProductListQueryDto
@@ -20,6 +22,7 @@ public class ProductListQueryDto
     public decimal? MaxPrice { get; set; }
     public bool? IsFeatured { get; set; }
     public bool? IsActive { get; set; }
+    public ProductCondition? Condition { get; set; }
 
     /// <summary>
     /// price-asc, price-desc, newest (default), name-asc, name-desc

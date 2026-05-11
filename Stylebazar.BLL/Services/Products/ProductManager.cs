@@ -69,7 +69,8 @@ public class ProductManager : IProductService
                     (query.IsFeatured.Value
                         ? p.IsFeatured && (p.FeaturedUntil == null || p.FeaturedUntil > DateTime.UtcNow)
                         : !p.IsFeatured)) &&
-                (!query.IsActive.HasValue || p.IsActive == query.IsActive.Value),
+                (!query.IsActive.HasValue || p.IsActive == query.IsActive.Value) &&
+                (!query.Condition.HasValue || p.Condition == query.Condition.Value),
             orderBy: BuildOrder(query.SortBy),
             include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images),
             index: query.Page - 1,
@@ -157,6 +158,7 @@ public class ProductManager : IProductService
             DiscountPrice = dto.DiscountPrice,
             StockQuantity = dto.StockQuantity,
             Brand = dto.Brand?.Trim(),
+            Condition = dto.Condition,
             StoreId = dto.StoreId,
             CategoryId = dto.CategoryId,
             IsActive = true,
@@ -199,6 +201,7 @@ public class ProductManager : IProductService
         tracked.DiscountPrice = dto.DiscountPrice;
         tracked.StockQuantity = dto.StockQuantity;
         tracked.Brand = dto.Brand?.Trim();
+        tracked.Condition = dto.Condition;
         tracked.CategoryId = dto.CategoryId;
         tracked.IsActive = dto.IsActive;
 

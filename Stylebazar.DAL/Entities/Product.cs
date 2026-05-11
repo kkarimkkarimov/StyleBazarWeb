@@ -1,4 +1,5 @@
 using Core.Persistence.Repositories;
+using Stylebazar.DAL.Entities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +15,7 @@ namespace Stylebazar.DAL.Entities
         public decimal? DiscountPrice { get; set; }
         public int StockQuantity { get; set; }
         public string? Brand { get; set; }
+        public ProductCondition Condition { get; set; } = ProductCondition.New;
         public int StoreId { get; set; }
         public int CategoryId { get; set; }
         public bool IsFeatured { get; set; }

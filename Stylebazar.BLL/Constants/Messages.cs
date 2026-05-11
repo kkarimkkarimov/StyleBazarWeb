@@ -49,4 +49,28 @@ public static class Messages
         public const string AlreadyReviewed = "You have already reviewed this product.";
         public const string NotOwner = "You can only modify your own reviews.";
     }
+
+    public static class Story
+    {
+        public const string NotFound = "Story was not found.";
+        public const string NotAuthenticated = "You must be signed in to publish a story.";
+        public const string NotStoreOwner = "You can only publish stories for stores you own.";
+        public const string TooManyActive = "This store already has the maximum number of active stories.";
+    }
+
+    public static class HeroBanner
+    {
+        public const string NotFound = "Hero banner was not found.";
+    }
+
+    public static class Contact
+    {
+        public const string NotFound = "Contact message was not found.";
+    }
+
+    public static class Newsletter
+    {
+        public const string NotFound = "Subscriber was not found.";
+        public const string AlreadySubscribed = "This email is already subscribed.";
+    }
 }

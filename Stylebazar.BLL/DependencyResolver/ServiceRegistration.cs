@@ -6,11 +6,15 @@ using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
+using Stylebazar.BLL.Services.Contact;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.BLL.Services.FileStorage;
+using Stylebazar.BLL.Services.HeroBanners;
+using Stylebazar.BLL.Services.Newsletter;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
+using Stylebazar.BLL.Services.Stories;
 using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
@@ -75,6 +79,13 @@ public static class ServiceRegistration
 
         services.AddScoped<ReviewBusinessRules>();
         services.AddScoped<IReviewService, ReviewManager>();
+
+        services.AddScoped<StoryBusinessRules>();
+        services.AddScoped<IStoryService, StoryManager>();
+
+        services.AddScoped<IHeroBannerService, HeroBannerManager>();
+        services.AddScoped<IContactMessageService, ContactMessageManager>();
+        services.AddScoped<INewsletterService, NewsletterManager>();
 
         return services;
     }

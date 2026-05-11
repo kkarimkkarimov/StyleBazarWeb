@@ -1,9 +1,13 @@
 using AutoMapper;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.DTOs.Categories;
+using Stylebazar.BLL.DTOs.Contact;
+using Stylebazar.BLL.DTOs.HeroBanners;
+using Stylebazar.BLL.DTOs.Newsletter;
 using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.DTOs.Reviews;
 using Stylebazar.BLL.DTOs.Stores;
+using Stylebazar.BLL.DTOs.Stories;
 using Stylebazar.BLL.DTOs.Wishlist;
 using Stylebazar.DAL.Entities;
 
@@ -80,5 +84,20 @@ public class MappingProfile : Profile
             .ForMember(d => d.UserFullName, opt => opt.MapFrom(s => s.User != null ? s.User.FullName : string.Empty))
             .ForMember(d => d.UserProfileImageUrl, opt => opt.MapFrom(s => s.User != null ? s.User.ProfileImageUrl : null))
             .ForMember(d => d.Images, opt => opt.MapFrom(s => s.Images));
+
+        // Stories
+        CreateMap<Story, StoryDto>();
+
+        // Hero banners
+        CreateMap<HeroBanner, HeroBannerDto>();
+        CreateMap<CreateHeroBannerDto, HeroBanner>()
+            .ForMember(d => d.Id, opt => opt.Ignore())
+            .ForMember(d => d.IsActive, opt => opt.MapFrom(_ => true));
+
+        // Contact
+        CreateMap<ContactMessage, ContactMessageDto>();
+
+        // Newsletter
+        CreateMap<NewsletterSubscriber, NewsletterSubscriberDto>();
     }
 }

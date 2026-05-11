@@ -1,3 +1,5 @@
+using Stylebazar.DAL.Entities.Enums;
+
 namespace Stylebazar.BLL.DTOs.Products;
 
 public class CreateProductDto
@@ -9,6 +11,7 @@ public class CreateProductDto
     public decimal? DiscountPrice { get; set; }
     public int StockQuantity { get; set; }
     public string? Brand { get; set; }
+    public ProductCondition Condition { get; set; } = ProductCondition.New;
     public int StoreId { get; set; }
     public int CategoryId { get; set; }
     public List<CreateProductSizeDto> Sizes { get; set; } = new();
