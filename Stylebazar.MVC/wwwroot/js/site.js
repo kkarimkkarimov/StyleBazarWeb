@@ -15,6 +15,7 @@
         setupLanguageDropdown();
         setupBottomBarActiveState();
         setupWishlistHearts();
+        setupAuthForms();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -227,6 +228,104 @@
                 e.preventDefault();
                 e.stopPropagation();
                 btn.classList.toggle('is-saved');
+            });
+        });
+    }
+
+    /* ----------- Auth forms: password toggle, strength meter, role cards, submit loading ----------- */
+    function setupAuthForms() {
+        // Password show/hide
+        document.querySelectorAll('[data-pwd-toggle]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var wrap = btn.closest('.sb-field__input-wrap');
+                if (!wrap) return;
+                var input = wrap.querySelector('input[data-pwd]');
+                if (!input) return;
+                var isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                var eye = btn.querySelector('[data-eye]');
+                var eyeOff = btn.querySelector('[data-eye-off]');
+                if (eye && eyeOff) {
+                    eye.style.display = isHidden ? 'none' : '';
+                    eyeOff.style.display = isHidden ? '' : 'none';
+                }
+                btn.setAttribute('aria-label', isHidden ? 'Parolu gizlət' : 'Parolu göstər');
+            });
+        });
+
+        // Password strength meter
+        document.querySelectorAll('[data-pwd-meter]').forEach(function (input) {
+            var field = input.closest('.sb-field');
+            if (!field) return;
+            var bars = field.querySelectorAll('[data-meter] .sb-pwd-meter__bar');
+            var label = field.querySelector('[data-meter-label]');
+            if (!bars.length) return;
+
+            function score(v) {
+                if (!v) return 0;
+                var s = 0;
+                if (v.length >= 6) s++;
+                if (v.length >= 10 && /[a-z]/.test(v) && /[0-9]/.test(v)) s++;
+                if (v.length >= 12 && /[A-Z]/.test(v) && /[^a-zA-Z0-9]/.test(v)) s++;
+                if (v.length < 6) s = 0;
+                return s; // 0..3
+            }
+
+            function render() {
+                var s = score(input.value);
+                var classes = ['is-weak', 'is-medium', 'is-strong'];
+                bars.forEach(function (b, i) {
+                    b.classList.remove('is-weak', 'is-medium', 'is-strong');
+                    if (i < s) {
+                        b.classList.add(s === 1 ? 'is-weak' : s === 2 ? 'is-medium' : 'is-strong');
+                    }
+                });
+                if (label) {
+                    label.classList.remove('is-weak', 'is-medium', 'is-strong');
+                    if (!input.value) {
+                        label.textContent = 'Parol gücü';
+                    } else if (s === 0) {
+                        label.textContent = 'Çox zəif — minimum 6 simvol';
+                        label.classList.add('is-weak');
+                    } else if (s === 1) {
+                        label.textContent = 'Zəif';
+                        label.classList.add('is-weak');
+                    } else if (s === 2) {
+                        label.textContent = 'Orta';
+                        label.classList.add('is-medium');
+                    } else {
+                        label.textContent = 'Güclü';
+                        label.classList.add('is-strong');
+                    }
+                }
+            }
+
+            input.addEventListener('input', render);
+            render();
+        });
+
+        // Role card click — toggle hidden radio + visual state
+        document.querySelectorAll('[data-role-group]').forEach(function (group) {
+            var cards = group.querySelectorAll('[data-role-card]');
+            cards.forEach(function (card) {
+                card.addEventListener('click', function (e) {
+                    // Let the native label/radio behaviour happen; we just paint
+                    setTimeout(function () {
+                        cards.forEach(function (c) {
+                            var radio = c.querySelector('input[type="radio"]');
+                            if (radio && radio.checked) c.classList.add('is-active');
+                            else c.classList.remove('is-active');
+                        });
+                    }, 0);
+                });
+            });
+        });
+
+        // Submit loading
+        document.querySelectorAll('[data-auth-form]').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                var btn = form.querySelector('[data-submit]');
+                if (btn) btn.classList.add('is-loading');
             });
         });
     }

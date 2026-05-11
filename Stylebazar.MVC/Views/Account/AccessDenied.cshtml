@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Giriş qadağandır";
+}
+
+<section class="sb-section" style="max-width: 540px; margin: 80px auto; text-align: center;">
+    <div style="font-family: var(--sb-font-display); font-size: 5rem; line-height: 1; color: var(--sb-accent); margin-bottom: 8px;">4·0·3</div>
+    <h1>Giriş qadağandır</h1>
+    <p class="sb-muted" style="font-size: 1.05rem;">
+        Bu səhifəyə girişin yoxdur. Əgər səhv güman edirsənsə, başqa hesabla daxil ol.
+    </p>
+    <div style="margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a class="sb-btn sb-btn--primary" asp-controller="Home" asp-action="Index">Ana səhifə</a>
+        <a class="sb-btn sb-btn--ghost" asp-controller="Account" asp-action="Login">Yenidən daxil ol</a>
+    </div>
+</section>

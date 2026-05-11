@@ -1,0 +1,107 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Giriş";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="sb-auth">
+    <div class="sb-auth__form-wrap">
+        <form class="sb-auth__form" asp-action="Login" asp-route-returnUrl="@returnUrl" method="post" novalidate data-auth-form>
+            @Html.AntiForgeryToken()
+
+            <h1>Yenidən <em>xoş gəldin.</em></h1>
+            <p class="sb-auth__form-sub">Hesabına daxil ol, sevimlilərini və alış-verişini davam et.</p>
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+            {
+                <div class="sb-form-summary">
+                    @foreach (var err in ViewData.ModelState[""]!.Errors) { @err.ErrorMessage <br /> }
+                </div>
+            }
+
+            <div class="sb-field">
+                <label class="sb-field__label" asp-for="Email">Email</label>
+                <div class="sb-field__input-wrap">
+                    <input class="sb-field__input @(ViewData.ModelState["Email"]?.Errors.Count > 0 ? "is-error" : "")"
+                           asp-for="Email"
+                           type="email"
+                           placeholder="sen@example.com"
+                           autocomplete="email"
+                           autofocus />
+                </div>
+                <span class="sb-field__error" asp-validation-for="Email"></span>
+            </div>
+
+            <div class="sb-field">
+                <label class="sb-field__label" asp-for="Password">Parol</label>
+                <div class="sb-field__input-wrap">
+                    <input class="sb-field__input sb-field__input--has-icon @(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "is-error" : "")"
+                           asp-for="Password"
+                           type="password"
+                           placeholder="••••••••"
+                           autocomplete="current-password"
+                           data-pwd />
+                    <button type="button" class="sb-field__icon-btn" data-pwd-toggle aria-label="Parolu göstər">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" data-eye>
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" data-eye-off style="display:none">
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+                <span class="sb-field__error" asp-validation-for="Password"></span>
+            </div>
+
+            <div class="sb-row-between">
+                <label class="sb-check">
+                    <input asp-for="RememberMe" type="checkbox" />
+                    <span class="sb-check__box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </span>
+                    <span>Məni xatırla</span>
+                </label>
+                <a href="#" tabindex="-1">Parolu unutmusan?</a>
+            </div>
+
+            <button type="submit" class="sb-btn sb-btn--primary sb-btn--block sb-btn--lg" data-submit>
+                Daxil ol
+            </button>
+
+            <div class="sb-auth__alt">
+                Hesabın yoxdur? <a asp-action="Register">Qeydiyyatdan keç</a>
+            </div>
+        </form>
+    </div>
+
+    <aside class="sb-auth__panel">
+        <div class="sb-auth__panel-top">
+            <span class="sb-auth__panel-eyebrow">StyleBazar</span>
+            <h2 class="sb-auth__panel-quote">
+                "Stil sənin <em style="color: var(--sb-accent);">imzandır.</em> Onu Bakının ən yaxşı mağazalarından tap."
+            </h2>
+            <p class="sb-auth__panel-attr">— StyleBazar redaksiyası</p>
+        </div>
+        <div class="sb-auth__panel-bottom">
+            <div>
+                <div class="sb-auth__stat-num">100+</div>
+                <div class="sb-auth__stat-label">Yerli satıcı</div>
+            </div>
+            <div>
+                <div class="sb-auth__stat-num">5K+</div>
+                <div class="sb-auth__stat-label">Məhsul</div>
+            </div>
+            <div>
+                <div class="sb-auth__stat-num">98%</div>
+                <div class="sb-auth__stat-label">Məmnun alıcı</div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Profil";
+}
+
+<section class="sb-page-hero">
+    <span class="sb-eyebrow">Mənim hesabım</span>
+    <h1>Salam, <em style="font-style: italic; color: var(--sb-accent);">@(User.Identity?.Name?.Split('@')[0])</em></h1>
+    <p>Profil redaktə UI yaxınlarda. İndilik buradan əsas hissələrə keç.</p>
+</section>
+
+<section class="sb-section">
+    <div class="sb-trust">
+        <a class="sb-trust__item" asp-controller="Account" asp-action="Wishlist" style="text-decoration: none; cursor: pointer;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <h3>Wishlist</h3>
+            <p>Sevimlilərinə bax və idarə et.</p>
+        </a>
+        <a class="sb-trust__item" asp-controller="Shop" asp-action="Index" style="text-decoration: none; cursor: pointer;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <h3>Mağaza</h3>
+            <p>Yeni məhsulları kəşf et.</p>
+        </a>
+        @if (User.IsInRole("Seller"))
+        {
+            <a class="sb-trust__item" asp-area="Seller" asp-controller="Store" asp-action="Index" style="text-decoration: none; cursor: pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
+                <h3>Mağazam</h3>
+                <p>Mağaza və məhsullarını idarə et.</p>
+            </a>
+        }
+        else
+        {
+            <a class="sb-trust__item" asp-controller="Support" asp-action="Index" style="text-decoration: none; cursor: pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <h3>Dəstək</h3>
+                <p>Tez-tez verilən suallar və əlaqə.</p>
+            </a>
+        }
+    </div>
+</section>
