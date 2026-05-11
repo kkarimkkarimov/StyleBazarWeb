@@ -3,31 +3,123 @@
     ViewData["Title"] = "Ana səhifə";
 }
 
-@* ============== HERO ============== *@
-<section class="sb-hero">
-    <div class="sb-hero__inner">
-        <span class="sb-eyebrow">Yeni nəsil moda platforması</span>
-        <h1>Stilini tap, <em>satıcısını seç.</em></h1>
-        <p class="sb-hero__lead">
-            Yerli mağazalardan brend geyimləri kəşf et, sevimlilərini saxla,
-            real rəylərlə əmin ol. Hər satıcı moderasiyadan keçir.
-        </p>
-        <div class="sb-hero__cta">
-            <a class="sb-btn sb-btn--primary sb-btn--lg" asp-controller="Shop" asp-action="Index">
-                Mağazaya bax
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </a>
-            <a class="sb-btn sb-btn--ghost sb-btn--lg" asp-controller="Account" asp-action="Register">
-                Satıcı kimi qoşul
-            </a>
+@* ============== HERO CAROUSEL (DB-driven, fallback to default if empty) ============== *@
+<section class="sb-hero-carousel" id="sbHeroCarousel" data-autoplay="6000" aria-label="Editorial banners">
+    @if (Model.Banners.Any())
+    {
+        var i = 0;
+        foreach (var b in Model.Banners)
+        {
+            var bg = !string.IsNullOrEmpty(b.ImageUrl)
+                ? $"background-image:url('{b.ImageUrl}');"
+                : "";
+            var slideClass = string.IsNullOrEmpty(b.ImageUrl) ? "sb-hero-slide sb-hero-slide--no-image" : "sb-hero-slide";
+            var active = i == 0 ? "is-active" : "";
+            <article class="@slideClass @active" data-slide-index="@i" style="@bg">
+                <div class="sb-hero-slide__inner">
+                    @if (!string.IsNullOrEmpty(b.Eyebrow))
+                    {
+                        <span class="sb-hero-slide__eyebrow">@b.Eyebrow</span>
+                    }
+                    <h1 class="sb-hero-slide__title">@b.Title</h1>
+                    @if (!string.IsNullOrEmpty(b.Subtitle))
+                    {
+                        <p class="sb-hero-slide__sub">@b.Subtitle</p>
+                    }
+                    @if (!string.IsNullOrEmpty(b.CtaText) && !string.IsNullOrEmpty(b.CtaUrl))
+                    {
+                        <a class="sb-btn sb-btn--primary sb-btn--lg" href="@b.CtaUrl">
+                            @b.CtaText
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    }
+                </div>
+            </article>
+            i++;
+        }
+    }
+    else
+    {
+        @* Default slide when admin hasn't added any banners *@
+        <article class="sb-hero-slide sb-hero-slide--no-image is-active" data-slide-index="0">
+            <div class="sb-hero-slide__inner">
+                <span class="sb-hero-slide__eyebrow">Yeni nəsil moda platforması</span>
+                <h1 class="sb-hero-slide__title">Stilini tap, <em style="font-style: italic; color: var(--sb-accent);">satıcısını seç.</em></h1>
+                <p class="sb-hero-slide__sub">Yerli mağazalardan brend geyimləri kəşf et, sevimlilərini saxla, real rəylərlə əmin ol.</p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a class="sb-btn sb-btn--primary sb-btn--lg" asp-controller="Shop" asp-action="Index">
+                        Mağazaya bax
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                    <a class="sb-btn sb-btn--ghost sb-btn--lg" asp-controller="Account" asp-action="Register">
+                        Satıcı kimi qoşul
+                    </a>
+                </div>
+            </div>
+        </article>
+    }
+
+    @if (Model.Banners.Count > 1)
+    {
+        <div class="sb-hero-controls">
+            <button class="sb-hero-arrow sb-hero-arrow--prev" type="button" aria-label="Əvvəlki" data-hero-prev>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="sb-hero-arrow sb-hero-arrow--next" type="button" aria-label="Növbəti" data-hero-next>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="sb-hero-dots" data-hero-dots>
+                @for (var i = 0; i < Model.Banners.Count; i++)
+                {
+                    <button type="button" class="@(i == 0 ? "is-active" : "")" data-hero-dot="@i" aria-label="Banner @(i+1)"></button>
+                }
+            </div>
         </div>
-    </div>
+    }
 </section>
+
+@* ============== STORIES RAIL ============== *@
+@if (Model.Stories.Any())
+{
+    <section class="sb-section sb-reveal">
+        <div class="sb-section-head">
+            <div>
+                <span class="sb-eyebrow">Hekayələr</span>
+                <h2>Satıcılardan canlı</h2>
+            </div>
+        </div>
+        <div class="sb-stories-rail" id="sbStoriesRail">
+            @{
+                var storiesJson = System.Text.Json.JsonSerializer.Serialize(Model.Stories);
+            }
+            @foreach (var ss in Model.Stories)
+            {
+                var initial = !string.IsNullOrEmpty(ss.StoreName) ? ss.StoreName.Substring(0, 1).ToUpper() : "?";
+                <button type="button" class="sb-story-item" data-story-store-id="@ss.StoreId" aria-label="@ss.StoreName hekayələrini aç">
+                    <span class="sb-story-item__ring">
+                        <span class="sb-story-item__avatar">
+                            @if (!string.IsNullOrEmpty(ss.StoreProfileImageUrl))
+                            {
+                                <img src="@ss.StoreProfileImageUrl" alt="@ss.StoreName" loading="lazy" />
+                            }
+                            else
+                            {
+                                @initial
+                            }
+                        </span>
+                    </span>
+                    <span class="sb-story-item__name">@ss.StoreName</span>
+                </button>
+            }
+        </div>
+        <script id="sbStoriesData" type="application/json">@Html.Raw(storiesJson)</script>
+    </section>
+}
 
 @* ============== CATEGORIES ============== *@
 @if (Model.Categories.Any())
 {
-    <section class="sb-section">
+    <section class="sb-section sb-reveal">
         <div class="sb-section-head">
             <div>
                 <span class="sb-eyebrow">Kateqoriyalar</span>
@@ -47,10 +139,10 @@
     </section>
 }
 
-@* ============== FEATURED ============== *@
+@* ============== FEATURED CAROUSEL ============== *@
 @if (Model.FeaturedProducts.Any())
 {
-    <section class="sb-section">
+    <section class="sb-section sb-reveal">
         <div class="sb-section-head">
             <div>
                 <span class="sb-eyebrow">Editorial</span>
@@ -58,17 +150,25 @@
             </div>
             <a class="sb-section-head__link" asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Hamısı →</a>
         </div>
-        <div class="sb-product-grid">
-            @foreach (var p in Model.FeaturedProducts)
-            {
-                <partial name="_ProductCard" model="p" />
-            }
+        <div class="sb-product-rail-wrap">
+            <button class="sb-product-rail-arrow sb-product-rail-arrow--prev" type="button" aria-label="Əvvəlki" data-rail-prev="featured">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="sb-product-rail" id="sbFeaturedRail" data-rail="featured">
+                @foreach (var p in Model.FeaturedProducts)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+            </div>
+            <button class="sb-product-rail-arrow sb-product-rail-arrow--next" type="button" aria-label="Növbəti" data-rail-next="featured">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
     </section>
 }
 
 @* ============== LATEST ============== *@
-<section class="sb-section">
+<section class="sb-section sb-reveal">
     <div class="sb-section-head">
         <div>
             <span class="sb-eyebrow">Mağaza</span>
@@ -97,7 +197,7 @@
 </section>
 
 @* ============== TRUST ============== *@
-<section class="sb-section">
+<section class="sb-section sb-reveal">
     <div class="sb-trust">
         <div class="sb-trust__item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -117,15 +217,36 @@
     </div>
 </section>
 
-@* ============== NEWSLETTER ============== *@
-<section class="sb-section">
+@* ============== NEWSLETTER (real backend submission) ============== *@
+<section class="sb-section sb-reveal">
     <div class="sb-newsletter">
         <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">Newsletter</span>
         <h2>Yeni gələnlərdən ilk sən xəbər tut</h2>
         <p>Endirimlər, xüsusi kolleksiyalar və satıcı hekayələri — ayda 1-2 dəfə, spam yoxdur.</p>
-        <form>
-            <input type="email" placeholder="E-mail ünvanın" aria-label="E-mail" />
+        <form id="sbNewsletterForm" novalidate>
+            <input type="email" name="email" placeholder="E-mail ünvanın" aria-label="E-mail" required />
             <button type="submit" class="sb-btn sb-btn--accent">Abunə ol</button>
         </form>
+        <div class="sb-newsletter__result" id="sbNewsletterResult" aria-live="polite"></div>
     </div>
 </section>
+
+@* ============== STORY VIEWER (built into page, hidden by default) ============== *@
+<div class="sb-story-viewer" id="sbStoryViewer" aria-hidden="true" role="dialog">
+    <div class="sb-story-viewer__frame">
+        <div class="sb-story-viewer__progress" id="sbStoryProgress"></div>
+        <div class="sb-story-viewer__header">
+            <span class="sb-story-viewer__avatar" id="sbStoryAvatar"></span>
+            <span class="sb-story-viewer__store-name" id="sbStoryStoreName"></span>
+            <button class="sb-story-viewer__close" type="button" id="sbStoryClose" aria-label="Bağla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="sb-story-viewer__media">
+            <img id="sbStoryImage" alt="" />
+        </div>
+        <div class="sb-story-viewer__caption" id="sbStoryCaption"></div>
+        <div class="sb-story-viewer__tap sb-story-viewer__tap--prev" id="sbStoryTapPrev"></div>
+        <div class="sb-story-viewer__tap sb-story-viewer__tap--next" id="sbStoryTapNext"></div>
+    </div>
+</div>

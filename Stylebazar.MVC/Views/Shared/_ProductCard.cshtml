@@ -1,3 +1,4 @@
+@using Stylebazar.DAL.Entities.Enums
 @model Stylebazar.BLL.DTOs.Products.ProductListDto
 
 <article class="sb-product">
@@ -13,15 +14,32 @@
             </div>
         }
 
-        @if (Model.IsFeatured)
-        {
-            <span class="sb-product__badge sb-product__badge--accent">Featured</span>
-        }
-        else if (Model.DiscountPrice.HasValue)
-        {
-            var pct = (int)Math.Round(((double)(Model.Price - Model.DiscountPrice.Value) / (double)Model.Price) * 100);
-            <span class="sb-product__badge">-@pct%</span>
-        }
+        @* Top-left badge stack: Featured / Discount + Condition *@
+        <div class="sb-product__badges">
+            @if (Model.IsFeatured)
+            {
+                <span class="sb-product__badge sb-product__badge--accent">Featured</span>
+            }
+            else if (Model.DiscountPrice.HasValue)
+            {
+                var pct = (int)Math.Round(((double)(Model.Price - Model.DiscountPrice.Value) / (double)Model.Price) * 100);
+                <span class="sb-product__badge sb-product__badge--dark">-@pct%</span>
+            }
+
+            @if (Model.Condition == ProductCondition.SecondHand)
+            {
+                <span class="sb-product__badge sb-product__badge--soft">İkinci əl</span>
+            }
+            else if (Model.Condition == ProductCondition.Vintage)
+            {
+                <span class="sb-product__badge sb-product__badge--soft">Vintage</span>
+            }
+
+            @if (Model.StockQuantity <= 0)
+            {
+                <span class="sb-product__badge sb-product__badge--muted">Tükəndi</span>
+            }
+        </div>
     </a>
 
     <button type="button" class="sb-product__wish" aria-label="Wishlist-ə əlavə et" data-product-id="@Model.Id">

@@ -16,6 +16,11 @@
         setupBottomBarActiveState();
         setupWishlistHearts();
         setupAuthForms();
+        setupHeroCarousel();
+        setupProductRails();
+        setupStoryViewer();
+        setupNewsletterForm();
+        setupRevealOnScroll();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -230,6 +235,256 @@
                 btn.classList.toggle('is-saved');
             });
         });
+    }
+
+    /* ----------- Hero carousel ----------- */
+    function setupHeroCarousel() {
+        var root = document.getElementById('sbHeroCarousel');
+        if (!root) return;
+        var slides = root.querySelectorAll('.sb-hero-slide');
+        if (slides.length < 2) return;
+        var dots = root.querySelectorAll('[data-hero-dot]');
+        var prevBtn = root.querySelector('[data-hero-prev]');
+        var nextBtn = root.querySelector('[data-hero-next]');
+        var autoplayMs = parseInt(root.getAttribute('data-autoplay') || '6000', 10);
+        var current = 0;
+        var timer = null;
+
+        function show(i) {
+            slides.forEach(function (s) { s.classList.remove('is-active'); });
+            dots.forEach(function (d) { d.classList.remove('is-active'); });
+            slides[i].classList.add('is-active');
+            if (dots[i]) dots[i].classList.add('is-active');
+            current = i;
+        }
+        function next() { show((current + 1) % slides.length); }
+        function prev() { show((current - 1 + slides.length) % slides.length); }
+        function start() { stop(); timer = setInterval(next, autoplayMs); }
+        function stop() { if (timer) clearInterval(timer); timer = null; }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { prev(); start(); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { next(); start(); });
+        dots.forEach(function (d, i) {
+            d.addEventListener('click', function () { show(i); start(); });
+        });
+
+        root.addEventListener('mouseenter', stop);
+        root.addEventListener('mouseleave', start);
+
+        start();
+    }
+
+    /* ----------- Product rails (arrow scroll) ----------- */
+    function setupProductRails() {
+        document.querySelectorAll('[data-rail]').forEach(function (rail) {
+            var key = rail.getAttribute('data-rail');
+            var prev = document.querySelector('[data-rail-prev="' + key + '"]');
+            var next = document.querySelector('[data-rail-next="' + key + '"]');
+            function step() {
+                var first = rail.firstElementChild;
+                if (!first) return rail.clientWidth * 0.8;
+                return first.getBoundingClientRect().width + 24;
+            }
+            if (prev) prev.addEventListener('click', function () {
+                rail.scrollBy({ left: -step() * 2, behavior: 'smooth' });
+            });
+            if (next) next.addEventListener('click', function () {
+                rail.scrollBy({ left: step() * 2, behavior: 'smooth' });
+            });
+        });
+    }
+
+    /* ----------- Story viewer ----------- */
+    function setupStoryViewer() {
+        var rail = document.getElementById('sbStoriesRail');
+        var viewer = document.getElementById('sbStoryViewer');
+        var dataEl = document.getElementById('sbStoriesData');
+        if (!rail || !viewer || !dataEl) return;
+
+        var data;
+        try { data = JSON.parse(dataEl.textContent || '[]'); }
+        catch (e) { return; }
+        if (!Array.isArray(data) || !data.length) return;
+
+        var progressEl = document.getElementById('sbStoryProgress');
+        var imgEl      = document.getElementById('sbStoryImage');
+        var captionEl  = document.getElementById('sbStoryCaption');
+        var avatarEl   = document.getElementById('sbStoryAvatar');
+        var nameEl     = document.getElementById('sbStoryStoreName');
+        var closeBtn   = document.getElementById('sbStoryClose');
+        var tapPrev    = document.getElementById('sbStoryTapPrev');
+        var tapNext    = document.getElementById('sbStoryTapNext');
+
+        var storeIdx = 0;
+        var storyIdx = 0;
+        var timer = null;
+        var startTs = 0;
+        var elapsed = 0;
+        var paused = false;
+        var DURATION_MS = 5000;
+        var rafId = null;
+
+        function renderHeader() {
+            var store = data[storeIdx];
+            nameEl.textContent = store.storeName || '';
+            avatarEl.innerHTML = '';
+            if (store.storeProfileImageUrl) {
+                var img = document.createElement('img');
+                img.src = store.storeProfileImageUrl;
+                img.alt = store.storeName || '';
+                avatarEl.appendChild(img);
+            } else {
+                avatarEl.textContent = (store.storeName || '?').substring(0, 1).toUpperCase();
+            }
+        }
+        function renderProgressBars() {
+            var store = data[storeIdx];
+            progressEl.innerHTML = '';
+            for (var i = 0; i < store.stories.length; i++) {
+                var bar = document.createElement('span');
+                bar.className = 'sb-story-viewer__progress-bar';
+                if (i < storyIdx) bar.classList.add('is-done');
+                var fill = document.createElement('i');
+                bar.appendChild(fill);
+                progressEl.appendChild(bar);
+            }
+        }
+        function setFill(percent) {
+            var bars = progressEl.querySelectorAll('.sb-story-viewer__progress-bar');
+            if (!bars[storyIdx]) return;
+            var fill = bars[storyIdx].querySelector('i');
+            if (fill) fill.style.right = (100 - percent) + '%';
+        }
+        function play() {
+            var s = data[storeIdx].stories[storyIdx];
+            imgEl.src = s.imageUrl;
+            captionEl.textContent = s.caption || '';
+            renderProgressBars();
+            elapsed = 0;
+            startTs = performance.now();
+            paused = false;
+            // Fire-and-forget view tracking
+            fetch('/Stories/View/' + s.id, { method: 'POST' }).catch(function () {});
+            cancelAnimationFrame(rafId);
+            tick();
+        }
+        function tick() {
+            if (paused) { return; }
+            var now = performance.now();
+            elapsed = now - startTs;
+            var pct = Math.min(100, (elapsed / DURATION_MS) * 100);
+            setFill(pct);
+            if (elapsed >= DURATION_MS) { advance(1); return; }
+            rafId = requestAnimationFrame(tick);
+        }
+        function advance(delta) {
+            cancelAnimationFrame(rafId);
+            var stories = data[storeIdx].stories;
+            var ni = storyIdx + delta;
+            if (ni >= stories.length) {
+                // Next store
+                if (storeIdx + 1 >= data.length) { close(); return; }
+                storeIdx += 1;
+                storyIdx = 0;
+                renderHeader();
+            } else if (ni < 0) {
+                if (storeIdx === 0) { storyIdx = 0; } // clamp
+                else { storeIdx -= 1; storyIdx = data[storeIdx].stories.length - 1; renderHeader(); }
+            } else {
+                storyIdx = ni;
+            }
+            play();
+        }
+        function open(initialStoreIdx) {
+            storeIdx = Math.max(0, Math.min(initialStoreIdx || 0, data.length - 1));
+            storyIdx = 0;
+            viewer.classList.add('is-open');
+            viewer.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sb-locked');
+            renderHeader();
+            play();
+        }
+        function close() {
+            cancelAnimationFrame(rafId);
+            viewer.classList.remove('is-open');
+            viewer.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('sb-locked');
+            // Mark this rail item as viewed
+            var item = rail.querySelector('[data-story-store-id="' + data[storeIdx].storeId + '"] .sb-story-item__ring');
+            if (item) item.classList.add('is-viewed');
+        }
+
+        rail.querySelectorAll('[data-story-store-id]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var sid = parseInt(btn.getAttribute('data-story-store-id'), 10);
+                var idx = data.findIndex(function (x) { return x.storeId === sid; });
+                open(idx);
+            });
+        });
+
+        closeBtn.addEventListener('click', close);
+        tapNext.addEventListener('click', function () { advance(1); });
+        tapPrev.addEventListener('click', function () { advance(-1); });
+        document.addEventListener('keydown', function (e) {
+            if (!viewer.classList.contains('is-open')) return;
+            if (e.key === 'Escape') close();
+            else if (e.key === 'ArrowRight') advance(1);
+            else if (e.key === 'ArrowLeft') advance(-1);
+        });
+    }
+
+    /* ----------- Newsletter AJAX form ----------- */
+    function setupNewsletterForm() {
+        var form = document.getElementById('sbNewsletterForm');
+        var result = document.getElementById('sbNewsletterResult');
+        if (!form || !result) return;
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var emailInput = form.querySelector('input[name="email"]');
+            if (!emailInput || !emailInput.value) return;
+            var submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.classList.add('is-loading');
+            result.className = 'sb-newsletter__result';
+            result.textContent = '';
+
+            fetch('/Home/Subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value })
+            }).then(function (r) {
+                if (submitBtn) submitBtn.classList.remove('is-loading');
+                if (r.ok) {
+                    result.classList.add('is-success');
+                    result.textContent = 'Təşəkkürlər! Abunəliyin təsdiqləndi.';
+                    emailInput.value = '';
+                } else {
+                    result.classList.add('is-error');
+                    result.textContent = 'Email düzgün formatda deyil. Yenidən cəhd et.';
+                }
+            }).catch(function () {
+                if (submitBtn) submitBtn.classList.remove('is-loading');
+                result.classList.add('is-error');
+                result.textContent = 'Şəbəkə xətası. Sonra cəhd et.';
+            });
+        });
+    }
+
+    /* ----------- Reveal on scroll ----------- */
+    function setupRevealOnScroll() {
+        var els = document.querySelectorAll('.sb-reveal');
+        if (!els.length || typeof IntersectionObserver === 'undefined') {
+            els.forEach(function (el) { el.classList.add('is-visible'); });
+            return;
+        }
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        els.forEach(function (el) { obs.observe(el); });
     }
 
     /* ----------- Auth forms: password toggle, strength meter, role cards, submit loading ----------- */
