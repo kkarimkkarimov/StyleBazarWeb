@@ -21,6 +21,8 @@
         setupStoryViewer();
         setupNewsletterForm();
         setupRevealOnScroll();
+        setupShopFilter();
+        setupShopSort();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -466,6 +468,49 @@
                 result.classList.add('is-error');
                 result.textContent = 'Şəbəkə xətası. Sonra cəhd et.';
             });
+        });
+    }
+
+    /* ----------- Shop filter (mobile drawer) ----------- */
+    function setupShopFilter() {
+        var filter = document.getElementById('sbShopFilter');
+        var openBtn = document.getElementById('sbFilterOpen');
+        var closeBtn = document.getElementById('sbFilterClose');
+        var backdrop = document.getElementById('sbFilterBackdrop');
+        if (!filter || !openBtn) return;
+
+        function open() {
+            filter.classList.add('is-open');
+            if (backdrop) backdrop.classList.add('is-open');
+            document.body.classList.add('sb-locked');
+        }
+        function close() {
+            filter.classList.remove('is-open');
+            if (backdrop) backdrop.classList.remove('is-open');
+            document.body.classList.remove('sb-locked');
+        }
+
+        openBtn.addEventListener('click', open);
+        if (closeBtn) closeBtn.addEventListener('click', close);
+        if (backdrop) backdrop.addEventListener('click', close);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && filter.classList.contains('is-open')) close();
+        });
+    }
+
+    /* ----------- Shop sort (auto-submit form on change) ----------- */
+    function setupShopSort() {
+        var sel = document.getElementById('sbShopSort');
+        var form = document.getElementById('sbShopFilterForm');
+        if (!sel || !form) return;
+        sel.addEventListener('change', function () {
+            // Find the hidden sortBy input inside the filter form and submit.
+            var hidden = form.querySelector('input[name="sortBy"]');
+            if (hidden) hidden.value = sel.value;
+            // Drop pagination when sort changes
+            var pageHidden = form.querySelector('input[name="page"]');
+            if (pageHidden) pageHidden.remove();
+            form.submit();
         });
     }
 
