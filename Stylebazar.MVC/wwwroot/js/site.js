@@ -23,6 +23,10 @@
         setupRevealOnScroll();
         setupShopFilter();
         setupShopSort();
+        setupProductGallery();
+        setupSizePicker();
+        setupQuantityStepper();
+        setupLightbox();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -627,6 +631,202 @@
                 var btn = form.querySelector('[data-submit]');
                 if (btn) btn.classList.add('is-loading');
             });
+        });
+    }
+
+    /* ----------- Product gallery — thumb click swaps main image ----------- */
+    function setupProductGallery() {
+        var gallery = document.querySelector('[data-gallery]');
+        if (!gallery) return;
+        var mainImg = gallery.querySelector('[data-main-img]');
+        var thumbs = gallery.querySelectorAll('[data-thumb-index]');
+        if (!mainImg || !thumbs.length) return;
+
+        thumbs.forEach(function (thumb) {
+            thumb.addEventListener('click', function () {
+                var url = thumb.getAttribute('data-thumb-url');
+                if (!url || mainImg.src === url) return;
+
+                thumbs.forEach(function (t) { t.classList.remove('is-active'); });
+                thumb.classList.add('is-active');
+
+                mainImg.classList.add('is-fading');
+                var pre = new Image();
+                pre.onload = function () {
+                    mainImg.src = url;
+                    requestAnimationFrame(function () {
+                        mainImg.classList.remove('is-fading');
+                    });
+                };
+                pre.src = url;
+            });
+        });
+    }
+
+    /* ----------- Size picker — single-select chip group ----------- */
+    function setupSizePicker() {
+        var picker = document.querySelector('[data-size-picker]');
+        if (!picker) return;
+        var label = document.getElementById('sbSizeLabel');
+        var qtyWrap = document.querySelector('[data-qty]');
+
+        picker.querySelectorAll('.sb-size-chip').forEach(function (chip) {
+            if (chip.disabled) return;
+            chip.addEventListener('click', function () {
+                picker.querySelectorAll('.sb-size-chip').forEach(function (c) {
+                    c.classList.remove('is-active');
+                });
+                chip.classList.add('is-active');
+
+                var size = chip.getAttribute('data-size-value');
+                var stock = parseInt(chip.getAttribute('data-size-stock') || '0', 10);
+                if (label) {
+                    label.textContent = size + ' — ' + stock + ' ədəd stokda';
+                    label.style.color = 'var(--sb-ink)';
+                }
+                // If size has its own stock, clamp qty max to that stock
+                if (qtyWrap && stock > 0) {
+                    qtyWrap.setAttribute('data-max', String(stock));
+                    var input = qtyWrap.querySelector('[data-qty-input]');
+                    if (input) {
+                        input.max = String(stock);
+                        if (parseInt(input.value, 10) > stock) input.value = String(stock);
+                    }
+                }
+            });
+        });
+    }
+
+    /* ----------- Quantity stepper — clamp [1, max] ----------- */
+    function setupQuantityStepper() {
+        document.querySelectorAll('[data-qty]').forEach(function (wrap) {
+            var input = wrap.querySelector('[data-qty-input]');
+            var dec = wrap.querySelector('[data-qty-dec]');
+            var inc = wrap.querySelector('[data-qty-inc]');
+            if (!input || !dec || !inc) return;
+
+            function getMax() { return parseInt(wrap.getAttribute('data-max') || input.max || '99', 10); }
+            function clamp(v) {
+                var max = getMax();
+                if (isNaN(v) || v < 1) v = 1;
+                if (v > max) v = max;
+                return v;
+            }
+            function paint() {
+                var v = clamp(parseInt(input.value, 10));
+                input.value = String(v);
+                dec.disabled = v <= 1;
+                inc.disabled = v >= getMax() || getMax() <= 0;
+            }
+
+            dec.addEventListener('click', function () {
+                input.value = String(clamp(parseInt(input.value, 10) - 1));
+                paint();
+            });
+            inc.addEventListener('click', function () {
+                input.value = String(clamp(parseInt(input.value, 10) + 1));
+                paint();
+            });
+            input.addEventListener('input', paint);
+            input.addEventListener('blur', paint);
+            paint();
+        });
+    }
+
+    /* ----------- Lightbox — full-screen gallery viewer ----------- */
+    function setupLightbox() {
+        var lightbox = document.getElementById('sbLightbox');
+        if (!lightbox) return;
+        var dataEl = document.getElementById('sbLightboxData');
+        var images = [];
+        if (dataEl) {
+            try { images = JSON.parse(dataEl.textContent || '[]'); }
+            catch (e) { images = []; }
+        }
+        if (!images.length) return;
+
+        var img = document.getElementById('sbLightboxImg');
+        var counter = document.getElementById('sbLightboxCounter');
+        var btnClose = lightbox.querySelector('[data-lightbox-close]');
+        var btnPrev = lightbox.querySelector('[data-lightbox-prev]');
+        var btnNext = lightbox.querySelector('[data-lightbox-next]');
+        var idx = 0;
+
+        function show(i, animate) {
+            idx = (i + images.length) % images.length;
+            if (animate && img) {
+                img.classList.add('is-fading');
+                setTimeout(function () {
+                    img.src = images[idx].url;
+                    img.alt = images[idx].alt || '';
+                    requestAnimationFrame(function () { img.classList.remove('is-fading'); });
+                }, 120);
+            } else if (img) {
+                img.src = images[idx].url;
+                img.alt = images[idx].alt || '';
+            }
+            if (counter) counter.textContent = (idx + 1) + ' / ' + images.length;
+            // Hide nav buttons when only one image
+            if (images.length <= 1) {
+                if (btnPrev) btnPrev.style.display = 'none';
+                if (btnNext) btnNext.style.display = 'none';
+                if (counter) counter.style.display = 'none';
+            }
+        }
+        function open(startIdx) {
+            show(typeof startIdx === 'number' ? startIdx : 0, false);
+            lightbox.classList.add('is-open');
+            lightbox.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+        function close() {
+            lightbox.classList.remove('is-open');
+            lightbox.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        function next() { show(idx + 1, true); }
+        function prev() { show(idx - 1, true); }
+
+        // Open from main image click
+        var main = document.querySelector('[data-gallery-main]');
+        if (main) {
+            main.addEventListener('click', function () { open(0); });
+            main.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(0); }
+            });
+        }
+        // Open from any thumb (matching its index)
+        document.querySelectorAll('[data-thumb-index]').forEach(function (thumb) {
+            thumb.addEventListener('dblclick', function () {
+                var i = parseInt(thumb.getAttribute('data-thumb-index') || '0', 10);
+                open(i);
+            });
+        });
+        // Open from review image
+        document.querySelectorAll('[data-review-image]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                var url = b.getAttribute('data-review-image');
+                if (!url) return;
+                // Use the review image as a single-entry override
+                images = [{ url: url, alt: 'Rəy şəkli' }];
+                idx = 0;
+                open(0);
+            });
+        });
+
+        if (btnClose) btnClose.addEventListener('click', close);
+        if (btnPrev) btnPrev.addEventListener('click', prev);
+        if (btnNext) btnNext.addEventListener('click', next);
+
+        lightbox.addEventListener('click', function (e) {
+            if (e.target === lightbox) close();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (!lightbox.classList.contains('is-open')) return;
+            if (e.key === 'Escape') close();
+            else if (e.key === 'ArrowRight') next();
+            else if (e.key === 'ArrowLeft') prev();
         });
     }
 })();
