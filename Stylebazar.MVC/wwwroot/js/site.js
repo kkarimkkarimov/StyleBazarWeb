@@ -27,6 +27,8 @@
         setupSizePicker();
         setupQuantityStepper();
         setupLightbox();
+        setupReviewForm();
+        setupMyReviewActions();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -234,13 +236,159 @@
 
     /* ----------- Wishlist hearts ----------- */
     function setupWishlistHearts() {
-        document.querySelectorAll('.sb-product__wish').forEach(function (btn) {
+        // Hearts come in two flavours: product card overlay (sb-product__wish)
+        // and the big detail-page button (sb-btn-wish-lg). Both opt-in via
+        // [data-wish-toggle] so seller/admin UIs can re-use the same icon
+        // without firing the wishlist endpoint.
+        var buttons = document.querySelectorAll('[data-wish-toggle]');
+        if (!buttons.length) return;
+
+        buttons.forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                btn.classList.toggle('is-saved');
+
+                var productId = btn.getAttribute('data-product-id');
+                if (!productId) return;
+                if (btn.dataset.busy === '1') return;
+
+                // Anonymous user → bounce to login with returnUrl, never call the
+                // endpoint (fetch follows the auth redirect silently otherwise).
+                if (document.body.getAttribute('data-auth') !== 'true') {
+                    var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                    window.location.href = '/Account/Login?returnUrl=' + returnUrl;
+                    return;
+                }
+
+                btn.dataset.busy = '1';
+
+                var formData = new FormData();
+                formData.append('productId', productId);
+                var token = getAntiForgeryToken();
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                fetch('/Wishlist/Toggle', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(function (res) {
+                    if (res.status === 401) {
+                        // Anonymous → kick to login with returnUrl back to this page.
+                        var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                        window.location.href = '/Account/Login?returnUrl=' + returnUrl;
+                        return null;
+                    }
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (!data) return;
+                    var nowActive = !!data.isInWishlist;
+                    btn.classList.toggle('is-active', nowActive);
+                    btn.classList.toggle('is-saved', nowActive);
+                    btn.setAttribute('aria-pressed', nowActive ? 'true' : 'false');
+                    btn.classList.remove('is-pulsing');
+                    void btn.offsetWidth; // restart animation
+                    btn.classList.add('is-pulsing');
+
+                    updateWishlistCount(data.count);
+
+                    showToast(nowActive ? 'Wishlist-ə əlavə olundu' : 'Wishlist-dən silindi', 'success');
+                })
+                .catch(function () {
+                    showToast('Xəta baş verdi. Yenidən cəhd edin.', 'error');
+                })
+                .finally(function () {
+                    btn.dataset.busy = '';
+                });
             });
         });
+
+        // Dedicated "remove" buttons on the wishlist page — animate the card
+        // out, then call /Wishlist/Remove so we never accidentally re-add.
+        document.querySelectorAll('[data-wishlist-remove]').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var productId = btn.getAttribute('data-product-id');
+                if (!productId) return;
+                if (btn.dataset.busy === '1') return;
+                btn.dataset.busy = '1';
+
+                var card = btn.closest('[data-wishlist-card]');
+                if (card) card.classList.add('is-removing');
+
+                var formData = new FormData();
+                formData.append('productId', productId);
+                var token = getAntiForgeryToken();
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                fetch('/Wishlist/Remove', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (data) {
+                    if (card) {
+                        setTimeout(function () {
+                            card.remove();
+                            // If grid is now empty, force a reload so the empty
+                            // state renders cleanly.
+                            var grid = document.querySelector('.sb-wishlist-grid');
+                            if (grid && !grid.querySelector('.sb-wishlist-card')) {
+                                window.location.reload();
+                            }
+                        }, 320);
+                    }
+                    if (data) updateWishlistCount(data.count);
+                })
+                .catch(function () {
+                    if (card) card.classList.remove('is-removing');
+                    showToast('Xəta baş verdi.', 'error');
+                })
+                .finally(function () { btn.dataset.busy = ''; });
+            });
+        });
+    }
+
+    /* ----------- Helpers shared by wishlist + review ----------- */
+    function getAntiForgeryToken() {
+        var input = document.querySelector('input[name="__RequestVerificationToken"]');
+        return input ? input.value : null;
+    }
+
+    function updateWishlistCount(count) {
+        var el = document.querySelector('[data-wishlist-count]');
+        if (!el) return;
+        el.textContent = String(count);
+        el.classList.toggle('is-visible', count > 0);
+        el.classList.remove('is-bumping');
+        void el.offsetWidth;
+        el.classList.add('is-bumping');
+    }
+
+    var toastEl = null, toastTimer = null;
+    function showToast(message, kind) {
+        if (!toastEl) {
+            toastEl = document.createElement('div');
+            toastEl.className = 'sb-toast';
+            toastEl.setAttribute('role', 'status');
+            toastEl.setAttribute('aria-live', 'polite');
+            document.body.appendChild(toastEl);
+        }
+        toastEl.textContent = message;
+        toastEl.classList.remove('is-error', 'is-success', 'is-visible');
+        if (kind === 'error') toastEl.classList.add('is-error');
+        else if (kind === 'success') toastEl.classList.add('is-success');
+        void toastEl.offsetWidth;
+        toastEl.classList.add('is-visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            toastEl.classList.remove('is-visible');
+        }, 2400);
     }
 
     /* ----------- Hero carousel ----------- */
@@ -828,5 +976,260 @@
             else if (e.key === 'ArrowRight') next();
             else if (e.key === 'ArrowLeft') prev();
         });
+    }
+
+    /* ----------- Review form — rating picker + image upload + AJAX submit ----------- */
+    function setupReviewForm() {
+        var form = document.querySelector('[data-review-form]');
+        if (!form) return;
+        var productId = form.getAttribute('data-product-id');
+        var body = form.querySelector('[data-review-form-body]');
+        var toggle = form.querySelector('[data-review-form-toggle]');
+        var cancel = form.querySelector('[data-review-form-cancel]');
+        var submit = form.querySelector('[data-review-submit]');
+        var ratingInput = form.querySelector('[data-rating-value-input]');
+        var ratingHint = form.querySelector('[data-rating-hint]');
+        var stars = form.querySelectorAll('[data-rating-value]');
+        var textarea = form.querySelector('[data-review-textarea]');
+        var counter = form.querySelector('[data-review-counter]');
+        var fileInput = form.querySelector('[data-review-image-input]');
+        var previews = form.querySelector('[data-review-previews]');
+        var errorBox = form.querySelector('[data-review-error]');
+
+        var pendingFiles = []; // staged images attached after the review is created
+        var MAX_FILES = 3;
+        var MAX_BYTES = 10 * 1024 * 1024;
+
+        function open() {
+            form.classList.add('is-open');
+            if (toggle) toggle.setAttribute('aria-expanded', 'true');
+            if (textarea) setTimeout(function () { textarea.focus(); }, 100);
+        }
+        function close() {
+            form.classList.remove('is-open');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+        if (toggle) toggle.addEventListener('click', open);
+        if (cancel) cancel.addEventListener('click', function () {
+            close();
+            resetForm();
+        });
+
+        // Rating stars — hover preview + click set
+        stars.forEach(function (star, idx) {
+            star.addEventListener('mouseenter', function () { paintStars(idx + 1, true); });
+            star.addEventListener('focus', function () { paintStars(idx + 1, true); });
+            star.addEventListener('click', function () {
+                var v = idx + 1;
+                ratingInput.value = String(v);
+                ratingHint.textContent = v + ' / 5';
+                ratingHint.classList.add('is-set');
+                paintStars(v, false);
+                stars.forEach(function (s, i) { s.setAttribute('aria-checked', i < v ? 'true' : 'false'); });
+            });
+        });
+        var ratingWrap = form.querySelector('[data-rating-input]');
+        if (ratingWrap) {
+            ratingWrap.addEventListener('mouseleave', function () {
+                var v = parseInt(ratingInput.value, 10) || 0;
+                paintStars(v, false);
+            });
+        }
+        function paintStars(count, isPreview) {
+            stars.forEach(function (s, i) {
+                s.classList.remove('is-active', 'is-preview');
+                if (i < count) s.classList.add(isPreview ? 'is-preview' : 'is-active');
+            });
+        }
+
+        // Textarea char counter
+        if (textarea && counter) {
+            var paintCounter = function () {
+                var len = textarea.value.length;
+                counter.textContent = len + ' / 1000';
+                counter.classList.toggle('is-warning', len > 900);
+            };
+            textarea.addEventListener('input', paintCounter);
+            paintCounter();
+        }
+
+        // Image staging (we upload after the POST succeeds and we have a review id)
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                var files = Array.from(fileInput.files || []);
+                files.forEach(function (f) {
+                    if (pendingFiles.length >= MAX_FILES) return;
+                    if (!/^image\//.test(f.type)) return;
+                    if (f.size > MAX_BYTES) {
+                        showToast('Şəkil 10 MB-dan böyük ola bilməz.', 'error');
+                        return;
+                    }
+                    pendingFiles.push(f);
+                });
+                fileInput.value = '';
+                renderPreviews();
+            });
+        }
+        function renderPreviews() {
+            if (!previews) return;
+            previews.innerHTML = '';
+            pendingFiles.forEach(function (file, i) {
+                var url = URL.createObjectURL(file);
+                var wrap = document.createElement('div');
+                wrap.className = 'sb-review-form__preview';
+                wrap.innerHTML =
+                    '<img src="' + url + '" alt="" />' +
+                    '<button type="button" class="sb-review-form__preview-remove" aria-label="Sil">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>';
+                wrap.querySelector('button').addEventListener('click', function () {
+                    URL.revokeObjectURL(url);
+                    pendingFiles.splice(i, 1);
+                    renderPreviews();
+                });
+                previews.appendChild(wrap);
+            });
+        }
+
+        // Submit
+        if (body) {
+            body.addEventListener('submit', function (e) {
+                e.preventDefault();
+                hideError();
+
+                var rating = parseInt(ratingInput.value, 10) || 0;
+                if (rating < 1 || rating > 5) {
+                    showError('Zəhmət olmasa ulduz seçin.');
+                    return;
+                }
+
+                if (submit) submit.classList.add('is-loading');
+
+                var formData = new FormData();
+                formData.append('productId', productId);
+                formData.append('rating', String(rating));
+                formData.append('comment', textarea ? textarea.value : '');
+                var token = getAntiForgeryToken();
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                fetch('/Review/Create', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(function (res) {
+                    return res.json().then(function (json) { return { ok: res.ok, status: res.status, json: json }; });
+                })
+                .then(function (r) {
+                    if (!r.ok) {
+                        var msg = r.json && (r.json.error || (r.json.errors && firstError(r.json.errors))) || 'Rəy göndərilə bilmədi.';
+                        showError(msg);
+                        return;
+                    }
+                    var reviewId = r.json.review && r.json.review.id;
+                    // Upload images sequentially, then reload to show the final state.
+                    return uploadImagesSequentially(reviewId).then(function () {
+                        showToast('Rəyiniz əlavə olundu', 'success');
+                        setTimeout(function () { window.location.reload(); }, 400);
+                    });
+                })
+                .catch(function () { showError('Xəta baş verdi. Yenidən cəhd edin.'); })
+                .finally(function () {
+                    if (submit) submit.classList.remove('is-loading');
+                });
+            });
+        }
+
+        function uploadImagesSequentially(reviewId) {
+            if (!reviewId || !pendingFiles.length) return Promise.resolve();
+            return pendingFiles.reduce(function (chain, file) {
+                return chain.then(function () {
+                    var fd = new FormData();
+                    fd.append('reviewId', String(reviewId));
+                    fd.append('file', file);
+                    var token = getAntiForgeryToken();
+                    if (token) fd.append('__RequestVerificationToken', token);
+                    return fetch('/Review/UploadImage', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: fd
+                    });
+                });
+            }, Promise.resolve());
+        }
+
+        function showError(msg) {
+            if (!errorBox) return;
+            errorBox.textContent = msg;
+            errorBox.hidden = false;
+        }
+        function hideError() {
+            if (!errorBox) return;
+            errorBox.hidden = true;
+            errorBox.textContent = '';
+        }
+        function firstError(errors) {
+            if (!errors) return null;
+            if (Array.isArray(errors) && errors.length) return errors[0].errorMessage || errors[0];
+            // ValidationException maps to a dict { field: [messages] }
+            var keys = Object.keys(errors);
+            if (!keys.length) return null;
+            var v = errors[keys[0]];
+            return Array.isArray(v) ? v[0] : v;
+        }
+        function resetForm() {
+            ratingInput.value = '0';
+            ratingHint.textContent = 'Ulduz seç';
+            ratingHint.classList.remove('is-set');
+            paintStars(0, false);
+            if (textarea) textarea.value = '';
+            if (counter) counter.textContent = '0 / 1000';
+            pendingFiles = [];
+            renderPreviews();
+            hideError();
+        }
+    }
+
+    /* ----------- "My review" inline delete (edit is a TODO once UI is ready) ----------- */
+    function setupMyReviewActions() {
+        var card = document.querySelector('[data-my-review]');
+        if (!card) return;
+        var reviewId = card.getAttribute('data-review-id');
+        var del = card.querySelector('[data-my-review-delete]');
+        if (del) {
+            del.addEventListener('click', function () {
+                if (!confirm('Bu rəyi silmək istədiyinizdən əminsiniz?')) return;
+                var formData = new FormData();
+                formData.append('id', reviewId);
+                var token = getAntiForgeryToken();
+                if (token) formData.append('__RequestVerificationToken', token);
+                fetch('/Review/Delete', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(function (res) {
+                    if (res.ok) {
+                        showToast('Rəy silindi', 'success');
+                        setTimeout(function () { window.location.reload(); }, 400);
+                    } else {
+                        showToast('Silinə bilmədi.', 'error');
+                    }
+                })
+                .catch(function () { showToast('Xəta baş verdi.', 'error'); });
+            });
+        }
+        // Edit — open the inline form pre-filled. For now we just scroll user
+        // to the form section (where it would re-render). Full inline edit
+        // can land in a follow-up; we already support Update on the API.
+        var edit = card.querySelector('[data-my-review-edit]');
+        if (edit) {
+            edit.addEventListener('click', function () {
+                showToast('Redaktə yaxında qoşulacaq — hələlik silib yenidən yaza bilərsiniz.', 'success');
+            });
+        }
     }
 })();

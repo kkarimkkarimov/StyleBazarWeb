@@ -17,4 +17,7 @@ public class ShopIndexViewModel
 
     /// <summary>Distinct brand names found in current product population.</summary>
     public List<string> Brands { get; set; } = new();
+
+    /// <summary>Product IDs the current user has wishlisted. Empty for anon.</summary>
+    public HashSet<int> WishlistProductIds { get; set; } = new();
 }

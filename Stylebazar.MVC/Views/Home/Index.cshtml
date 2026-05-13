@@ -1,6 +1,8 @@
 @model HomeIndexViewModel
 @{
     ViewData["Title"] = "Ana səhifə";
+    // Published for _ProductCard so each card can paint its initial heart state.
+    ViewData["WishlistIds"] = Model.WishlistProductIds;
 }
 
 @* ============== HERO CAROUSEL (DB-driven, fallback to default if empty) ============== *@

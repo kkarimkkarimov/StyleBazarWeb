@@ -169,6 +169,21 @@ public class ReviewManager : IReviewService
         return _mapper.Map<ReviewImageDto>(created);
     }
 
+    public async Task<ReviewDto?> GetMineForProductAsync(int productId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(_currentUser.UserId))
+            return null;
+
+        string userId = _currentUser.UserId;
+        Review? mine = await _reviews.GetAsync(
+            r => r.UserId == userId && r.ProductId == productId,
+            include: q => q.Include(r => r.User).Include(r => r.Images),
+            enableTracking: false,
+            cancellationToken: ct);
+
+        return mine is null ? null : _mapper.Map<ReviewDto>(mine);
+    }
+
     public async Task DeleteImageAsync(int reviewId, int imageId, CancellationToken ct = default)
     {
         Review existing = await _rules.ReviewMustExistAsync(reviewId, ct);

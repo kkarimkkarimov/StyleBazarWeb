@@ -14,4 +14,12 @@ public interface IReviewService
 
     Task<ReviewImageDto> AddImageAsync(int reviewId, IFormFile file, CancellationToken ct = default);
     Task DeleteImageAsync(int reviewId, int imageId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns the current user's review for the given product (or null when the
+    /// user is anonymous or has not reviewed it yet). Used by the product
+    /// detail page to render the "Sənin rəyin" card with edit/delete actions
+    /// and to hide the "Rəy yaz" CTA when a review already exists.
+    /// </summary>
+    Task<ReviewDto?> GetMineForProductAsync(int productId, CancellationToken ct = default);
 }

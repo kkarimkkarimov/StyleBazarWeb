@@ -2,7 +2,10 @@
 @model ShopDetailViewModel
 @{
     ViewData["Title"] = Model.Product.Name;
+    // Published so the related-rail _ProductCard partials paint correct hearts.
+    ViewData["WishlistIds"] = Model.WishlistProductIds;
     var p = Model.Product;
+    bool isAuth = User.Identity?.IsAuthenticated == true;
     var mainImg = p.Images.OrderByDescending(i => i.IsMain).ThenBy(i => i.DisplayOrder).FirstOrDefault();
     var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < p.Price;
     var savePct = hasDiscount ? (int)Math.Round(((double)(p.Price - p.DiscountPrice!.Value) / (double)p.Price) * 100) : 0;
@@ -218,7 +221,12 @@
                     <span>Səbətə əlavə et</span>
                 }
             </button>
-            <button type="button" class="sb-btn-wish-lg" data-product-id="@p.Id" aria-label="Wishlist-ə əlavə et">
+            <button type="button"
+                    class="sb-btn-wish-lg @(Model.IsInWishlist ? "is-active" : "")"
+                    data-product-id="@p.Id"
+                    data-wish-toggle
+                    aria-pressed="@(Model.IsInWishlist ? "true" : "false")"
+                    aria-label="Wishlist-ə əlavə et">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
             </button>
         </div>
@@ -261,8 +269,117 @@
 
 @* ============== REVIEWS ============== *@
 <section class="sb-reviews" id="sbReviews">
+
+    @* ========== REVIEW AUTHORING ZONE (top of reviews block) ========== *@
+    @if (Model.MyReview is not null)
+    {
+        var mr = Model.MyReview;
+        <div class="sb-my-review" data-my-review data-review-id="@mr.Id">
+            <header class="sb-my-review__head">
+                <span class="sb-my-review__pill">Sənin rəyin</span>
+                <div class="sb-my-review__head-right">
+                    <button type="button" class="sb-my-review__action" data-my-review-edit aria-label="Rəyi redaktə et">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <span>Redaktə et</span>
+                    </button>
+                    <button type="button" class="sb-my-review__action sb-my-review__action--danger" data-my-review-delete aria-label="Rəyi sil">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        <span>Sil</span>
+                    </button>
+                </div>
+            </header>
+            <div class="sb-my-review__stars" aria-label="Sənin reytinqin: @mr.Rating / 5">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <svg class="@(i <= mr.Rating ? "" : "is-empty")" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(mr.Comment))
+            {
+                <p class="sb-my-review__comment">@mr.Comment</p>
+            }
+            <span class="sb-my-review__date">@mr.CreatedDate.ToString("dd MMM yyyy")</span>
+        </div>
+    }
+    else if (isAuth)
+    {
+        @* Inline review form — collapsible to keep the section calm by default *@
+        <div class="sb-review-form" data-review-form data-product-id="@p.Id">
+            <button type="button" class="sb-review-form__toggle" data-review-form-toggle aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>Rəy yaz</span>
+            </button>
+            <form class="sb-review-form__body" data-review-form-body novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@p.Id" />
+
+                <div class="sb-review-form__row">
+                    <label class="sb-review-form__label">Reytinqin</label>
+                    <div class="sb-rating-input" data-rating-input role="radiogroup" aria-label="Ulduzla qiymətləndir">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            <button type="button"
+                                    class="sb-rating-input__star"
+                                    data-rating-value="@i"
+                                    role="radio"
+                                    aria-checked="false"
+                                    aria-label="@i ulduz">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            </button>
+                        }
+                        <input type="hidden" name="rating" value="0" data-rating-value-input required />
+                        <span class="sb-rating-input__hint" data-rating-hint>Ulduz seç</span>
+                    </div>
+                </div>
+
+                <div class="sb-review-form__row">
+                    <label class="sb-review-form__label" for="sbReviewComment">Şərh <span class="sb-muted">(istəyə bağlı)</span></label>
+                    <textarea id="sbReviewComment"
+                              class="sb-review-form__textarea"
+                              name="comment"
+                              rows="4"
+                              maxlength="1000"
+                              placeholder="Məhsul haqqında düşüncələrini bizimlə bölüş..."
+                              data-review-textarea></textarea>
+                    <span class="sb-review-form__counter" data-review-counter>0 / 1000</span>
+                </div>
+
+                <div class="sb-review-form__row sb-review-form__row--inline">
+                    <label class="sb-btn-upload" data-review-image-label>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>Şəkil əlavə et</span>
+                        <input type="file" accept="image/*" multiple hidden data-review-image-input />
+                    </label>
+                    <span class="sb-review-form__hint">Maks 3 şəkil, hər biri 10 MB-a qədər</span>
+                </div>
+                <div class="sb-review-form__previews" data-review-previews></div>
+
+                <div class="sb-review-form__error" data-review-error hidden></div>
+
+                <div class="sb-review-form__actions">
+                    <button type="button" class="sb-btn-ghost" data-review-form-cancel>Ləğv et</button>
+                    <button type="submit" class="sb-btn-primary" data-review-submit>
+                        <span>Rəyi göndər</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="sb-review-cta">
+            <div>
+                <strong>Bu məhsulu sınamısan?</strong>
+                <p>Rəy yazmaq üçün hesabına daxil ol.</p>
+            </div>
+            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Detail", "Shop", new { id = p.Id })#sbReviews" class="sb-btn-primary">
+                Daxil ol
+            </a>
+        </div>
+    }
+
     <div class="sb-reviews__header">
-        <h2>Rəylər</h2>
+        <h2>@(Model.MyReview is not null ? "Digər rəylər" : "Rəylər")</h2>
         @if (Model.Reviews.Items.Any())
         {
             <div class="sb-reviews__summary">
@@ -334,7 +451,7 @@
             </p>
         }
     }
-    else
+    else if (Model.MyReview is null)
     {
         <div class="sb-reviews__empty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>

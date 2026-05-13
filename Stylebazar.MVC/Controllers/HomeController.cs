@@ -9,6 +9,7 @@ using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Stories;
+using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.MVC.Models;
 using Stylebazar.MVC.ViewModels;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
@@ -22,19 +23,22 @@ public class HomeController : Controller
     private readonly IHeroBannerService _banners;
     private readonly IStoryService _stories;
     private readonly INewsletterService _newsletter;
+    private readonly IWishlistService _wishlist;
 
     public HomeController(
         IProductService products,
         ICategoryService categories,
         IHeroBannerService banners,
         IStoryService stories,
-        INewsletterService newsletter)
+        INewsletterService newsletter,
+        IWishlistService wishlist)
     {
         _products = products;
         _categories = categories;
         _banners = banners;
         _stories = stories;
         _newsletter = newsletter;
+        _wishlist = wishlist;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -49,13 +53,18 @@ public class HomeController : Controller
             new ProductListQueryDto { Page = 1, PageSize = 8, IsActive = true },
             ct);
 
+        // Wishlist IDs — empty set for anon. Used to paint heart icons on
+        // every product card without one round-trip per card.
+        HashSet<int> wishlistIds = await _wishlist.GetMyProductIdsAsync(ct);
+
         var vm = new HomeIndexViewModel
         {
             Banners = banners,
             Stories = stories,
             Categories = tree.Take(8).ToList(),
             FeaturedProducts = featured,
-            LatestProducts = latest.Items.ToList()
+            LatestProducts = latest.Items.ToList(),
+            WishlistProductIds = wishlistIds
         };
 
         return View(vm);

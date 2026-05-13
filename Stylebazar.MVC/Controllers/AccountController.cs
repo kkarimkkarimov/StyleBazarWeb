@@ -149,7 +149,9 @@ public class AccountController : Controller
     [Authorize]
     public IActionResult Profile() => View();
 
+    // Wishlist moved to its own controller (Phase 4).
+    // Keep a permanent redirect so any stale /Account/Wishlist bookmark
+    // or external link still works.
     [HttpGet]
-    [Authorize]
-    public IActionResult Wishlist() => View();
+    public IActionResult Wishlist() => RedirectToActionPermanent("Index", "Wishlist");
 }

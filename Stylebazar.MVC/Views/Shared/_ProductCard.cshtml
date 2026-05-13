@@ -1,5 +1,11 @@
 @using Stylebazar.DAL.Entities.Enums
 @model Stylebazar.BLL.DTOs.Products.ProductListDto
+@{
+    // Wishlist state is published page-side via ViewData["WishlistIds"] (HashSet<int>).
+    // Anonymous / non-wishlist => default false (heart starts empty).
+    var wishlistIds = ViewData["WishlistIds"] as HashSet<int>;
+    bool isInWishlist = wishlistIds is not null && wishlistIds.Contains(Model.Id);
+}
 
 <article class="sb-product">
     <a class="sb-product__media" asp-controller="Shop" asp-action="Detail" asp-route-id="@Model.Id" aria-label="@Model.Name">
@@ -42,7 +48,12 @@
         </div>
     </a>
 
-    <button type="button" class="sb-product__wish" aria-label="Wishlist-ə əlavə et" data-product-id="@Model.Id">
+    <button type="button"
+            class="sb-product__wish @(isInWishlist ? "is-active" : "")"
+            aria-label="Wishlist-ə əlavə et"
+            aria-pressed="@(isInWishlist ? "true" : "false")"
+            data-product-id="@Model.Id"
+            data-wish-toggle>
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 

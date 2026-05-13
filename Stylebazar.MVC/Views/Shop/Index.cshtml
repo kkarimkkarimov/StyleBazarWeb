@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Mağaza";
     var q = Model.Query;
+    // Published for _ProductCard so each card can paint its initial heart state.
+    ViewData["WishlistIds"] = Model.WishlistProductIds;
 }
 
 @functions {

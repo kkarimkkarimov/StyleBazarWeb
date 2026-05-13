@@ -85,6 +85,39 @@ public class WishlistManager : IWishlistService
         return _mapper.Map<WishlistItemDto>(full ?? created);
     }
 
+    public async Task<HashSet<int>> GetMyProductIdsAsync(CancellationToken ct = default)
+    {
+        // Anonymous callers — no wishlist, no exception. Lets call sites
+        // always pass us the user context without guarding.
+        if (string.IsNullOrEmpty(_currentUser.UserId))
+            return new HashSet<int>();
+
+        string userId = _currentUser.UserId;
+        Paginate<DAL.Entities.Wishlist> page = await _repo.GetListAsync(
+            predicate: w => w.UserId == userId,
+            index: 0,
+            size: int.MaxValue,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        return page.Items.Select(w => w.ProductId).ToHashSet();
+    }
+
+    public async Task<int> GetMyCountAsync(CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(_currentUser.UserId))
+            return 0;
+        string userId = _currentUser.UserId;
+        // size: 1 → server runs COUNT(*) + TOP 1, we only read .Count.
+        Paginate<DAL.Entities.Wishlist> page = await _repo.GetListAsync(
+            predicate: w => w.UserId == userId,
+            index: 0,
+            size: 1,
+            enableTracking: false,
+            cancellationToken: ct);
+        return page.Count;
+    }
+
     public async Task RemoveAsync(int productId, CancellationToken ct = default)
     {
         string userId = RequireUserId();
