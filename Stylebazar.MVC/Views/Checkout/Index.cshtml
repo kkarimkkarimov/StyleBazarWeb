@@ -1,0 +1,163 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Sifariş";
+    var cart = Model.Cart;
+}
+
+<header class="sb-shop__header">
+    <span class="sb-eyebrow">Sifariş</span>
+    <h1>Sifarişi tamamla</h1>
+    <p>Çatdırılma ünvanı və ödəniş üsulunu seç — biz qalanını yerinə yetirək.</p>
+</header>
+
+<div class="sb-checkout">
+
+    @* ============== LEFT — 3 steps ============== *@
+    <section class="sb-checkout-main">
+
+        @* ---- Step 1: Address ---- *@
+        <article class="sb-checkout-step is-open" data-step="1">
+            <header class="sb-checkout-step__head">
+                <span class="sb-checkout-step__num">1</span>
+                <h2>Çatdırılma ünvanı</h2>
+            </header>
+            <div class="sb-checkout-step__body">
+                @if (!Model.Addresses.Any())
+                {
+                    <div class="sb-cart-alert">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>Heç bir ünvan saxlamamısan. <a asp-controller="Address" asp-action="Addresses">Ünvan əlavə et →</a></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="sb-address-picker" data-address-picker>
+                        @foreach (var a in Model.Addresses)
+                        {
+                            <label class="sb-address-pick @(a.Id == Model.DefaultAddressId ? "is-selected" : "")">
+                                <input type="radio" name="addressId" value="@a.Id" @(a.Id == Model.DefaultAddressId ? "checked" : "") />
+                                <div class="sb-address-pick__body">
+                                    <div class="sb-address-pick__head">
+                                        <strong>@(string.IsNullOrEmpty(a.Label) ? a.City : a.Label)</strong>
+                                        @if (a.IsDefault)
+                                        {
+                                            <span class="sb-pill sb-pill--accent">Default</span>
+                                        }
+                                    </div>
+                                    <p>@a.FullName · @a.Phone</p>
+                                    <p>@a.AddressLine, @a.City</p>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                    <a class="sb-checkout-step__inline-cta" asp-controller="Address" asp-action="Addresses">+ Başqa ünvan əlavə et</a>
+                }
+            </div>
+        </article>
+
+        @* ---- Step 2: Payment ---- *@
+        <article class="sb-checkout-step" data-step="2">
+            <header class="sb-checkout-step__head">
+                <span class="sb-checkout-step__num">2</span>
+                <h2>Ödəniş üsulu</h2>
+            </header>
+            <div class="sb-checkout-step__body">
+                <div class="sb-payment-picker">
+                    <label class="sb-payment-pick is-selected">
+                        <input type="radio" name="paymentMethod" value="CashOnDelivery" checked />
+                        <div class="sb-payment-pick__body">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+                            <div>
+                                <strong>Çatdırılma zamanı nağd</strong>
+                                <span>Kuryer gələndə kartla və ya nağd ödə.</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="sb-payment-pick is-disabled">
+                        <input type="radio" name="paymentMethod" value="Card" disabled />
+                        <div class="sb-payment-pick__body">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            <div>
+                                <strong>Bank kartı</strong>
+                                <span>Tezliklə əlavə olunacaq.</span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="sb-form-field" style="margin-top: 18px;">
+                    <label for="sbCheckoutNote">Sifariş üçün qeyd (istəyə bağlı)</label>
+                    <textarea id="sbCheckoutNote" name="customerNote" rows="2" maxlength="500" placeholder="Məsələn: 18:00-dan sonra zəng vurun"></textarea>
+                </div>
+            </div>
+        </article>
+
+        @* ---- Step 3: Review ---- *@
+        <article class="sb-checkout-step" data-step="3">
+            <header class="sb-checkout-step__head">
+                <span class="sb-checkout-step__num">3</span>
+                <h2>Yoxla və təsdiqlə</h2>
+            </header>
+            <div class="sb-checkout-step__body">
+                <ul class="sb-checkout-lines">
+                    @foreach (var line in cart.Items)
+                    {
+                        <li>
+                            <div class="sb-checkout-line__media">
+                                @if (!string.IsNullOrEmpty(line.MainImageUrl))
+                                {
+                                    <img src="@line.MainImageUrl" alt="@line.ProductName" loading="lazy" />
+                                }
+                            </div>
+                            <div class="sb-checkout-line__body">
+                                <strong>@line.ProductName</strong>
+                                <span>@(string.IsNullOrEmpty(line.SizeLabel) ? "" : line.SizeLabel + " · ")@line.Quantity ədəd · @line.UnitPriceCurrent.ToString("N2") ₼</span>
+                            </div>
+                            <span class="sb-checkout-line__total">@line.LineTotal.ToString("N2") ₼</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </article>
+    </section>
+
+    @* ============== RIGHT — sticky summary + place button ============== *@
+    <aside class="sb-checkout-summary">
+        <div class="sb-checkout-summary__sticky">
+            <h3>Sifariş xülasəsi</h3>
+            <dl class="sb-cart-summary__lines">
+                <div>
+                    <dt>Məhsullar (@cart.TotalItemCount)</dt>
+                    <dd>@cart.Subtotal.ToString("N2") ₼</dd>
+                </div>
+                <div>
+                    <dt>Çatdırılma</dt>
+                    <dd>@Model.ShippingFee.ToString("N2") ₼</dd>
+                </div>
+            </dl>
+            <div class="sb-cart-summary__total">
+                <span>Cəm</span>
+                <strong>@Model.Total.ToString("N2") ₼</strong>
+            </div>
+
+            @if (cart.HasIssues)
+            {
+                <div class="sb-cart-alert" style="margin: 14px 0 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+                    <span>Səbətdə problemli sətirlər var. Sifariş vermədən öncə düzəlt.</span>
+                </div>
+            }
+
+            <button type="button" class="sb-btn-primary sb-btn-primary--full sb-btn-primary--lg" data-checkout-place @(Model.Addresses.Any() && !cart.HasIssues ? "" : "disabled")>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Sifarişi təsdiqlə · @Model.Total.ToString("N2") ₼</span>
+            </button>
+
+            <div class="sb-checkout-summary__error" data-checkout-error hidden></div>
+
+            <p class="sb-cart-summary__note">Təsdiqləyəndə sifariş yerləşdirilir, səbət boşaldılır.</p>
+        </div>
+    </aside>
+</div>
+
+@Html.AntiForgeryToken()

@@ -1,0 +1,133 @@
+@model AddressesIndexViewModel
+@{
+    ViewData["Title"] = "Ünvanlarım";
+}
+
+<header class="sb-shop__header">
+    <span class="sb-eyebrow">Hesabım</span>
+    <h1>Ünvanlarım</h1>
+    <p>Çatdırılma üçün saxladığın ünvanlar — sifariş zamanı bunlardan birini seçəcəksən.</p>
+</header>
+
+<section class="sb-account-section" data-addresses-section>
+    <div class="sb-account-section__head">
+        <h2>Saxlanılmış ünvanlar (<span data-address-count>@Model.Items.Count</span>)</h2>
+        <button type="button" class="sb-btn-primary" data-address-add>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Yeni ünvan</span>
+        </button>
+    </div>
+
+    @if (!Model.HasItems)
+    {
+        <div class="sb-wishlist-empty" data-address-empty>
+            <div class="sb-wishlist-empty__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <h2>Ünvan əlavə etməmisən</h2>
+            <p>Sifariş vermək üçün ən azı bir ünvan əlavə etməlisən.</p>
+            <button type="button" class="sb-btn-primary" data-address-add>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Yeni ünvan əlavə et
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="sb-address-grid" data-address-grid>
+            @foreach (var a in Model.Items)
+            {
+                <article class="sb-address-card @(a.IsDefault ? "is-default" : "")" data-address-card data-id="@a.Id">
+                    @if (a.IsDefault)
+                    {
+                        <span class="sb-address-card__pill">Default</span>
+                    }
+                    <h3>@(string.IsNullOrEmpty(a.Label) ? a.City : a.Label)</h3>
+                    <p class="sb-address-card__name">@a.FullName</p>
+                    <p class="sb-address-card__line">@a.AddressLine, @a.City@(string.IsNullOrEmpty(a.PostalCode) ? "" : $" — {a.PostalCode}")</p>
+                    <p class="sb-address-card__phone">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        @a.Phone
+                    </p>
+                    @if (!string.IsNullOrWhiteSpace(a.Notes))
+                    {
+                        <p class="sb-address-card__notes">@a.Notes</p>
+                    }
+
+                    <div class="sb-address-card__actions">
+                        @if (!a.IsDefault)
+                        {
+                            <button type="button" class="sb-btn-ghost sb-btn-ghost--sm" data-address-default>Default et</button>
+                        }
+                        <button type="button" class="sb-btn-ghost sb-btn-ghost--sm" data-address-edit>Redaktə</button>
+                        <button type="button" class="sb-btn-ghost sb-btn-ghost--sm sb-btn-ghost--danger" data-address-delete>Sil</button>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+@* ============== ADDRESS MODAL (create + edit) ============== *@
+<div class="sb-modal" id="sbAddressModal" aria-hidden="true" role="dialog">
+    <div class="sb-modal__backdrop" data-modal-close></div>
+    <div class="sb-modal__panel">
+        <header class="sb-modal__head">
+            <h3 data-address-modal-title>Yeni ünvan</h3>
+            <button type="button" class="sb-icon-btn" data-modal-close aria-label="Bağla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </header>
+        <form class="sb-modal__body" data-address-form novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="0" data-address-id />
+
+            <div class="sb-form-row">
+                <div class="sb-form-field">
+                    <label>Ad-soyad *</label>
+                    <input type="text" name="FullName" required maxlength="150" />
+                </div>
+                <div class="sb-form-field">
+                    <label>Telefon *</label>
+                    <input type="tel" name="Phone" required placeholder="+994 50 000 00 00" />
+                </div>
+            </div>
+            <div class="sb-form-row">
+                <div class="sb-form-field">
+                    <label>Şəhər *</label>
+                    <input type="text" name="City" required maxlength="80" />
+                </div>
+                <div class="sb-form-field">
+                    <label>Posta indeksi</label>
+                    <input type="text" name="PostalCode" maxlength="20" />
+                </div>
+            </div>
+            <div class="sb-form-field">
+                <label>Ünvan *</label>
+                <textarea name="AddressLine" required rows="2" maxlength="500" placeholder="Küçə, ev, mənzil"></textarea>
+            </div>
+            <div class="sb-form-row">
+                <div class="sb-form-field">
+                    <label>Yarlıq (məs. "Ev", "İş")</label>
+                    <input type="text" name="Label" maxlength="40" />
+                </div>
+                <div class="sb-form-field">
+                    <label>Qeyd</label>
+                    <input type="text" name="Notes" maxlength="500" placeholder="Domofon kodu, vaxt..." />
+                </div>
+            </div>
+            <label class="sb-checkbox">
+                <input type="checkbox" name="IsDefault" value="true" />
+                <span>Default ünvan kimi qeyd et</span>
+            </label>
+
+            <div class="sb-modal__error" data-form-error hidden></div>
+            <div class="sb-modal__actions">
+                <button type="button" class="sb-btn-ghost" data-modal-close>Ləğv</button>
+                <button type="submit" class="sb-btn-primary" data-address-submit>
+                    <span>Yadda saxla</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

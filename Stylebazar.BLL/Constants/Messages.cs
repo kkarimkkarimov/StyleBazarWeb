@@ -86,4 +86,27 @@ public static class Messages
         public const string ItemNotFound = "Səbətdə belə məhsul yoxdur.";
         public const string NotOwner = "Bu səbət sizə aid deyil.";
     }
+
+    public static class Address
+    {
+        public const string NotFound = "Ünvan tapılmadı.";
+        public const string NotAuthenticated = "Bu əməliyyat üçün hesabınıza daxil olun.";
+        public const string NotOwner = "Bu ünvan sizə aid deyil.";
+        public const string QuotaExceeded = "Maksimum {0} ünvan saxlaya bilərsiniz.";
+    }
+
+    public static class Order
+    {
+        public const string NotFound = "Sifariş tapılmadı.";
+        public const string NotAuthenticated = "Bu əməliyyat üçün hesabınıza daxil olun.";
+        public const string NotOwner = "Bu sifariş sizə aid deyil.";
+        public const string CartEmpty = "Səbət boşdur — sifariş vermək üçün məhsul əlavə edin.";
+        public const string AddressNotFound = "Çatdırılma ünvanı tapılmadı.";
+        public const string AddressNotYours = "Seçilən ünvan sizə aid deyil.";
+        public const string LineOutOfStock = "\"{0}\" üçün stokda yalnız {1} ədəd var.";
+        public const string LineInactive = "\"{0}\" artıq satışda deyil.";
+        public const string InvalidStatusTransition = "{0} → {1} keçidi mümkün deyil.";
+        public const string NotAuthorisedToUpdate = "Sifariş statusunu yeniləməyə icazəniz yoxdur.";
+        public const string CannotCancelAtThisStage = "Bu mərhələdə sifarişi ləğv etmək mümkün deyil.";
+    }
 }

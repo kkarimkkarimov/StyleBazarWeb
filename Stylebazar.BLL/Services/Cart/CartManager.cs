@@ -65,7 +65,6 @@ public class CartManager : ICartService
               && i.ProductSizeId == (size != null ? size.Id : (int?)null),
             cancellationToken: ct);
 
-        int unitPrice = 0;
         decimal effectivePrice = product.DiscountPrice ?? product.Price;
 
         if (existing is not null)

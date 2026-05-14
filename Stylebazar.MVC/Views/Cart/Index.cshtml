@@ -133,11 +133,10 @@ else
                     <span>Cəm</span>
                     <strong data-summary-total>@cart.Subtotal.ToString("N2") ₼</strong>
                 </div>
-                <button type="button" class="sb-btn-primary sb-btn-primary--full" disabled title="Phase 5b — Checkout">
+                <a class="sb-btn-primary sb-btn-primary--full" asp-controller="Checkout" asp-action="Index">
                     <span>Sifarişə keç</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </button>
-                <p class="sb-cart-summary__note">Checkout flow Phase 5b-də əlavə olunacaq.</p>
+                </a>
 
                 <ul class="sb-cart-summary__perks">
                     <li>

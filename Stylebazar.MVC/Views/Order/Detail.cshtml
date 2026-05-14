@@ -1,0 +1,183 @@
+@using Stylebazar.DAL.Entities.Enums
+@model OrderDetailViewModel
+@{
+    ViewData["Title"] = "Sifariş " + Model.Order.OrderNumber;
+    var o = Model.Order;
+}
+
+@functions {
+    string StatusLabel(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "Yeni",
+        OrderStatus.Confirmed => "Təsdiqləndi",
+        OrderStatus.Processing => "Hazırlanır",
+        OrderStatus.Shipped => "Yolda",
+        OrderStatus.Delivered => "Çatdırıldı",
+        OrderStatus.Cancelled => "Ləğv olundu",
+        OrderStatus.Returned => "Geri qaytarıldı",
+        _ => s.ToString()
+    };
+    bool IsActive(OrderStatus a, OrderStatus current) => (int)current >= (int)a && current != OrderStatus.Cancelled && current != OrderStatus.Returned;
+    bool CanCancel(OrderStatus s) =>
+        s == OrderStatus.Pending || s == OrderStatus.Confirmed || s == OrderStatus.Processing;
+}
+
+<nav class="sb-breadcrumb" aria-label="Breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Ana səhifə</a>
+    <span class="sb-breadcrumb__sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <a asp-controller="Order" asp-action="History">Sifarişlərim</a>
+    <span class="sb-breadcrumb__sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <span class="sb-breadcrumb__current">@o.OrderNumber</span>
+</nav>
+
+<section class="sb-order-detail">
+    <header class="sb-order-detail__head">
+        <div>
+            <span class="sb-eyebrow">Sifariş</span>
+            <h1>@o.OrderNumber</h1>
+            <p class="sb-order-detail__date">@o.CreatedDate.ToString("dd MMMM yyyy, HH:mm")</p>
+        </div>
+        <span class="sb-order-status sb-order-status--lg
+            @(o.Status switch {
+                OrderStatus.Pending => "is-pending",
+                OrderStatus.Confirmed or OrderStatus.Processing => "is-progress",
+                OrderStatus.Shipped => "is-shipped",
+                OrderStatus.Delivered => "is-success",
+                OrderStatus.Cancelled or OrderStatus.Returned => "is-cancelled",
+                _ => ""
+            })">@StatusLabel(o.Status)</span>
+    </header>
+
+    @* ============== STATUS TIMELINE ============== *@
+    @if (o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Returned)
+    {
+        <ol class="sb-order-timeline">
+            <li class="@(IsActive(OrderStatus.Pending, o.Status) ? "is-done" : "")">
+                <span class="sb-order-timeline__dot"></span>
+                <strong>Yeni</strong>
+                <span>Sifariş qəbul edildi</span>
+            </li>
+            <li class="@(IsActive(OrderStatus.Confirmed, o.Status) ? "is-done" : "")">
+                <span class="sb-order-timeline__dot"></span>
+                <strong>Təsdiqləndi</strong>
+                <span>Satıcı qəbul etdi</span>
+            </li>
+            <li class="@(IsActive(OrderStatus.Processing, o.Status) ? "is-done" : "")">
+                <span class="sb-order-timeline__dot"></span>
+                <strong>Hazırlanır</strong>
+                <span>Paketlənir</span>
+            </li>
+            <li class="@(IsActive(OrderStatus.Shipped, o.Status) ? "is-done" : "")">
+                <span class="sb-order-timeline__dot"></span>
+                <strong>Yolda</strong>
+                <span>Kuryerdə</span>
+            </li>
+            <li class="@(IsActive(OrderStatus.Delivered, o.Status) ? "is-done" : "")">
+                <span class="sb-order-timeline__dot"></span>
+                <strong>Çatdırıldı</strong>
+                <span>Sənə təhvil verildi</span>
+            </li>
+        </ol>
+    }
+    else if (o.Status == OrderStatus.Cancelled)
+    {
+        <div class="sb-cart-alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <span>Sifariş ləğv olundu @(o.StatusChangedDate?.ToString("dd MMM yyyy, HH:mm") ?? "")</span>
+        </div>
+    }
+
+    <div class="sb-order-detail__grid">
+
+        @* Left — items *@
+        <section class="sb-order-detail__items">
+            <h2>Məhsullar (@o.TotalItemCount)</h2>
+            <div class="sb-order-items">
+                @foreach (var i in o.Items)
+                {
+                    <article class="sb-order-item">
+                        <div class="sb-order-item__media">
+                            @if (!string.IsNullOrEmpty(i.ProductImageUrl))
+                            {
+                                <img src="@i.ProductImageUrl" alt="@i.ProductName" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="sb-product__media-fallback">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                </div>
+                            }
+                        </div>
+                        <div class="sb-order-item__body">
+                            @if (i.ProductId.HasValue)
+                            {
+                                <h3><a asp-controller="Shop" asp-action="Detail" asp-route-id="@i.ProductId">@i.ProductName</a></h3>
+                            }
+                            else
+                            {
+                                <h3>@i.ProductName</h3>
+                            }
+                            <p>@i.StoreName</p>
+                            <p class="sb-order-item__meta">
+                                @(string.IsNullOrEmpty(i.SizeLabel) ? "" : "Ölçü: " + i.SizeLabel + " · ")@i.Quantity ədəd · @i.UnitPrice.ToString("N2") ₼
+                            </p>
+                        </div>
+                        <strong class="sb-order-item__total">@i.LineTotal.ToString("N2") ₼</strong>
+                    </article>
+                }
+            </div>
+        </section>
+
+        @* Right — summary + shipping + payment *@
+        <aside class="sb-order-detail__aside">
+            <div class="sb-order-block">
+                <h3>Cəm</h3>
+                <dl>
+                    <div><dt>Məhsullar</dt><dd>@o.Subtotal.ToString("N2") ₼</dd></div>
+                    <div><dt>Çatdırılma</dt><dd>@o.ShippingFee.ToString("N2") ₼</dd></div>
+                </dl>
+                <div class="sb-order-block__total">
+                    <span>Yekun</span>
+                    <strong>@o.Total.ToString("N2") ₼</strong>
+                </div>
+            </div>
+
+            <div class="sb-order-block">
+                <h3>Çatdırılma</h3>
+                <p><strong>@o.ShipFullName</strong></p>
+                <p>@o.ShipPhone</p>
+                <p>@o.ShipAddressLine, @o.ShipCity@(string.IsNullOrEmpty(o.ShipPostalCode) ? "" : $" — {o.ShipPostalCode}")</p>
+                @if (!string.IsNullOrWhiteSpace(o.ShipNotes))
+                {
+                    <p class="sb-text-muted">@o.ShipNotes</p>
+                }
+            </div>
+
+            <div class="sb-order-block">
+                <h3>Ödəniş</h3>
+                <p>@(o.PaymentMethod == PaymentMethod.CashOnDelivery ? "Çatdırılma zamanı nağd" : o.PaymentMethod.ToString())</p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(o.CustomerNote))
+            {
+                <div class="sb-order-block">
+                    <h3>Qeyd</h3>
+                    <p>@o.CustomerNote</p>
+                </div>
+            }
+
+            @if (CanCancel(o.Status))
+            {
+                <button type="button" class="sb-btn-ghost sb-btn-ghost--danger sb-btn-primary--full" data-order-cancel data-order-id="@o.Id">
+                    Sifarişi ləğv et
+                </button>
+            }
+        </aside>
+    </div>
+</section>
+
+@Html.AntiForgeryToken()

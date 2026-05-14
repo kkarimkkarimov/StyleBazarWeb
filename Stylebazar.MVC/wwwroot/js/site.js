@@ -32,6 +32,9 @@
         setupCartDrawer();
         setupAddToCart();
         setupCartPageActions();
+        setupAddressBook();
+        setupCheckout();
+        setupOrderCancel();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -1523,6 +1526,239 @@
         if (!keys.length) return null;
         var v = errors[keys[0]];
         return Array.isArray(v) ? v[0] : v;
+    }
+
+    /* ----------- Address book (modal-based CRUD) ----------- */
+    function setupAddressBook() {
+        var section = document.querySelector('[data-addresses-section]');
+        if (!section) return;
+        var modal = document.getElementById('sbAddressModal');
+        if (!modal) return;
+        var form = modal.querySelector('[data-address-form]');
+        var titleEl = modal.querySelector('[data-address-modal-title]');
+        var idInput = modal.querySelector('[data-address-id]');
+        var errorBox = modal.querySelector('[data-form-error]');
+        var submitBtn = modal.querySelector('[data-address-submit]');
+
+        function openModal(addressDto) {
+            form.reset();
+            errorBox.hidden = true; errorBox.textContent = '';
+            if (addressDto) {
+                titleEl.textContent = 'Ünvanı redaktə et';
+                idInput.value = addressDto.id;
+                form.querySelector('[name="FullName"]').value = addressDto.fullName || '';
+                form.querySelector('[name="Phone"]').value = addressDto.phone || '';
+                form.querySelector('[name="City"]').value = addressDto.city || '';
+                form.querySelector('[name="PostalCode"]').value = addressDto.postalCode || '';
+                form.querySelector('[name="AddressLine"]').value = addressDto.addressLine || '';
+                form.querySelector('[name="Label"]').value = addressDto.label || '';
+                form.querySelector('[name="Notes"]').value = addressDto.notes || '';
+                form.querySelector('[name="IsDefault"]').checked = !!addressDto.isDefault;
+            } else {
+                titleEl.textContent = 'Yeni ünvan';
+                idInput.value = '0';
+            }
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function () { form.querySelector('[name="FullName"]').focus(); }, 80);
+        }
+        function closeModal() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        modal.querySelectorAll('[data-modal-close]').forEach(function (b) {
+            b.addEventListener('click', closeModal);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+        });
+
+        // Open "new"
+        section.querySelectorAll('[data-address-add]').forEach(function (b) {
+            b.addEventListener('click', function () { openModal(null); });
+        });
+
+        // Wire per-card edit / delete / set-default
+        section.querySelectorAll('[data-address-card]').forEach(function (card) {
+            var id = parseInt(card.getAttribute('data-id'), 10);
+
+            var editBtn = card.querySelector('[data-address-edit]');
+            if (editBtn) editBtn.addEventListener('click', function () {
+                // Re-read fields from the card DOM (lighter than another fetch)
+                openModal({
+                    id: id,
+                    fullName: card.querySelector('.sb-address-card__name')?.textContent.trim(),
+                    phone: card.querySelector('.sb-address-card__phone')?.textContent.trim(),
+                    city: '', // user can re-fill; we don't expose them all in the card
+                    addressLine: card.querySelector('.sb-address-card__line')?.textContent.split(',')[0].trim(),
+                    isDefault: card.classList.contains('is-default')
+                });
+            });
+
+            var delBtn = card.querySelector('[data-address-delete]');
+            if (delBtn) delBtn.addEventListener('click', function () {
+                if (!confirm('Bu ünvanı silmək istədiyinə əminsən?')) return;
+                postForm('/Account/DeleteAddress', { id: id }).then(function (data) {
+                    if (data && data.ok) {
+                        card.style.transition = 'opacity .25s ease, transform .25s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(.96)';
+                        setTimeout(function () { window.location.reload(); }, 280);
+                    } else {
+                        showToast('Silinə bilmədi.', 'error');
+                    }
+                });
+            });
+
+            var defBtn = card.querySelector('[data-address-default]');
+            if (defBtn) defBtn.addEventListener('click', function () {
+                postForm('/Account/SetDefaultAddress', { id: id }).then(function (data) {
+                    if (data && data.ok) {
+                        showToast('Default ünvan dəyişdi', 'success');
+                        setTimeout(function () { window.location.reload(); }, 350);
+                    }
+                });
+            });
+        });
+
+        // Form submit
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            errorBox.hidden = true; errorBox.textContent = '';
+            submitBtn.classList.add('is-loading');
+
+            var fd = new FormData(form);
+            var id = parseInt(idInput.value, 10);
+            var url = id > 0 ? '/Account/UpdateAddress' : '/Account/CreateAddress';
+
+            fetch(url, {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            })
+            .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, json: j }; }); })
+            .then(function (r) {
+                if (!r.ok) {
+                    var msg = (r.json && (r.json.error || firstValidationError(r.json.errors))) || 'Yadda saxlanılmadı.';
+                    errorBox.textContent = msg; errorBox.hidden = false;
+                    return;
+                }
+                showToast(id > 0 ? 'Ünvan yeniləndi' : 'Ünvan əlavə olundu', 'success');
+                setTimeout(function () { window.location.reload(); }, 350);
+            })
+            .catch(function () { errorBox.textContent = 'Xəta baş verdi.'; errorBox.hidden = false; })
+            .finally(function () { submitBtn.classList.remove('is-loading'); });
+        });
+    }
+
+    /* ----------- Checkout — collapsible steps + place button ----------- */
+    function setupCheckout() {
+        var picker = document.querySelector('[data-address-picker]');
+        if (picker) {
+            picker.querySelectorAll('.sb-address-pick').forEach(function (lbl) {
+                lbl.addEventListener('click', function () {
+                    picker.querySelectorAll('.sb-address-pick').forEach(function (l) { l.classList.remove('is-selected'); });
+                    lbl.classList.add('is-selected');
+                });
+            });
+        }
+        var payPicker = document.querySelector('.sb-payment-picker');
+        if (payPicker) {
+            payPicker.querySelectorAll('.sb-payment-pick').forEach(function (lbl) {
+                if (lbl.classList.contains('is-disabled')) return;
+                lbl.addEventListener('click', function () {
+                    payPicker.querySelectorAll('.sb-payment-pick').forEach(function (l) { l.classList.remove('is-selected'); });
+                    lbl.classList.add('is-selected');
+                });
+            });
+        }
+
+        var placeBtn = document.querySelector('[data-checkout-place]');
+        if (!placeBtn) return;
+        var errorBox = document.querySelector('[data-checkout-error]');
+
+        placeBtn.addEventListener('click', function () {
+            if (placeBtn.disabled || placeBtn.dataset.busy === '1') return;
+
+            var addressInput = document.querySelector('input[name="addressId"]:checked');
+            if (!addressInput) {
+                showError('Çatdırılma ünvanı seçin.');
+                return;
+            }
+            var paymentInput = document.querySelector('input[name="paymentMethod"]:checked');
+            var note = document.getElementById('sbCheckoutNote');
+
+            placeBtn.dataset.busy = '1';
+            placeBtn.classList.add('is-loading');
+            if (errorBox) { errorBox.hidden = true; errorBox.textContent = ''; }
+
+            var fd = new FormData();
+            fd.append('addressId', addressInput.value);
+            fd.append('paymentMethod', paymentInput ? paymentInput.value : 'CashOnDelivery');
+            if (note) fd.append('customerNote', note.value || '');
+            var token = getAntiForgeryToken();
+            if (token) fd.append('__RequestVerificationToken', token);
+
+            fetch('/Checkout/Place', {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            })
+            .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, json: j }; }); })
+            .then(function (r) {
+                if (!r.ok) {
+                    var msg = (r.json && (r.json.error || firstValidationError(r.json.errors))) || 'Sifariş verilə bilmədi.';
+                    showError(msg);
+                    return;
+                }
+                window.location.href = '/Order/Success?id=' + r.json.orderId;
+            })
+            .catch(function () { showError('Şəbəkə xətası. Yenidən cəhd edin.'); })
+            .finally(function () {
+                placeBtn.dataset.busy = '';
+                placeBtn.classList.remove('is-loading');
+            });
+        });
+
+        function showError(msg) {
+            if (!errorBox) { showToast(msg, 'error'); return; }
+            errorBox.textContent = msg;
+            errorBox.hidden = false;
+        }
+    }
+
+    function setupOrderCancel() {
+        document.querySelectorAll('[data-order-cancel]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (!confirm('Sifarişi ləğv etmək istədiyinizə əminsiniz?')) return;
+                var id = btn.getAttribute('data-order-id');
+                postForm('/Order/Cancel', { id: id }).then(function (data) {
+                    if (data && data.ok) {
+                        showToast('Sifariş ləğv olundu', 'success');
+                        setTimeout(function () { window.location.reload(); }, 500);
+                    } else {
+                        showToast((data && data.error) || 'Ləğv olunmadı.', 'error');
+                    }
+                });
+            });
+        });
+    }
+
+    /* Generic anti-forgery-aware POST helper */
+    function postForm(url, fields) {
+        var fd = new FormData();
+        Object.keys(fields).forEach(function (k) { fd.append(k, String(fields[k])); });
+        var token = getAntiForgeryToken();
+        if (token) fd.append('__RequestVerificationToken', token);
+        return fetch(url, {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        }).then(function (res) { return res.json().catch(function () { return null; }); })
+          .catch(function () { return null; });
     }
 
     /* ----------- "My review" inline delete (edit is a TODO once UI is ready) ----------- */
