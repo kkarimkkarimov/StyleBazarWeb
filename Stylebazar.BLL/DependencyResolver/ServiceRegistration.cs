@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Authentication;
+using Stylebazar.BLL.Services.Cart;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Contact;
 using Stylebazar.BLL.Services.CurrentUser;
@@ -86,6 +87,9 @@ public static class ServiceRegistration
         services.AddScoped<IHeroBannerService, HeroBannerManager>();
         services.AddScoped<IContactMessageService, ContactMessageManager>();
         services.AddScoped<INewsletterService, NewsletterManager>();
+
+        services.AddScoped<CartBusinessRules>();
+        services.AddScoped<ICartService, CartManager>();
 
         return services;
     }

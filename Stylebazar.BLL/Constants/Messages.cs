@@ -73,4 +73,17 @@ public static class Messages
         public const string NotFound = "Subscriber was not found.";
         public const string AlreadySubscribed = "This email is already subscribed.";
     }
+
+    public static class Cart
+    {
+        public const string NotAuthenticated = "Səbətə əlavə etmək üçün hesabınıza daxil olun.";
+        public const string ProductNotFound = "Məhsul tapılmadı.";
+        public const string ProductInactive = "Bu məhsul artıq satışda deyil.";
+        public const string SizeNotFound = "Seçilən ölçü tapılmadı.";
+        public const string SizeRequired = "Bu məhsul üçün ölçü seçilməlidir.";
+        public const string SizeBelongsToOtherProduct = "Seçilən ölçü bu məhsula aid deyil.";
+        public const string InsufficientStock = "Stokda kifayət qədər ədəd yoxdur.";
+        public const string ItemNotFound = "Səbətdə belə məhsul yoxdur.";
+        public const string NotOwner = "Bu səbət sizə aid deyil.";
+    }
 }
