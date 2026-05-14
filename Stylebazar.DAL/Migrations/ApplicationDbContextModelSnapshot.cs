@@ -455,6 +455,10 @@ namespace Stylebazar.DAL.Migrations
                     b.Property<int>("Condition")
                         .HasColumnType("int");
 
+                    b.Property<string>("CountryOfOrigin")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -473,20 +477,47 @@ namespace Stylebazar.DAL.Migrations
                     b.Property<DateTime?>("FeaturedUntil")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Fit")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<bool>("HasDelivery")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsFeatured")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Material")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Neckline")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Pattern")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Season")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("SleeveLength")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -498,6 +529,10 @@ namespace Stylebazar.DAL.Migrations
 
                     b.Property<int>("StoreId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Style")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
@@ -513,6 +548,46 @@ namespace Stylebazar.DAL.Migrations
                     b.HasIndex("StoreId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.ProductColor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Hex")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductColors");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.ProductImage", b =>
@@ -698,6 +773,10 @@ namespace Stylebazar.DAL.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("InstagramHandle")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -720,8 +799,16 @@ namespace Stylebazar.DAL.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<string>("TelegramHandle")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("WhatsAppNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
 
@@ -898,6 +985,17 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("Store");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.ProductColor", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
+                        .WithMany("Colors")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.ProductImage", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
@@ -1009,6 +1107,8 @@ namespace Stylebazar.DAL.Migrations
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>
                 {
+                    b.Navigation("Colors");
+
                     b.Navigation("Images");
 
                     b.Navigation("Reviews");

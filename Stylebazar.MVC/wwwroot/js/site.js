@@ -29,6 +29,11 @@
         setupLightbox();
         setupReviewForm();
         setupMyReviewActions();
+        setupPdpDescription();
+        setupColorPicker();
+        setupContactCtas();
+        setupShareRow();
+        setupPdpTabs();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -1230,6 +1235,181 @@
             edit.addEventListener('click', function () {
                 showToast('Redaktə yaxında qoşulacaq — hələlik silib yenidən yaza bilərsiniz.', 'success');
             });
+        }
+    }
+
+    /* ----------- PDP: description "daha çox" toggle ----------- */
+    function setupPdpDescription() {
+        var wrap = document.querySelector('[data-desc]');
+        if (!wrap) return;
+        var btn = wrap.querySelector('[data-desc-more]');
+        var text = wrap.querySelector('.sb-pdp__desc-text');
+        if (!btn || !text) return;
+        // Only show "daha çox" if the text actually overflows
+        if (text.scrollHeight <= text.clientHeight + 2) {
+            btn.style.display = 'none';
+            return;
+        }
+        btn.addEventListener('click', function () {
+            var open = wrap.classList.toggle('is-expanded');
+            btn.textContent = open ? 'daha az' : 'daha çox';
+        });
+    }
+
+    /* ----------- PDP: color swatch picker ----------- */
+    function setupColorPicker() {
+        var picker = document.querySelector('[data-color-picker]');
+        if (!picker) return;
+        var label = document.querySelector('[data-color-label]');
+        picker.querySelectorAll('.sb-color-swatch').forEach(function (sw) {
+            sw.addEventListener('click', function () {
+                picker.querySelectorAll('.sb-color-swatch').forEach(function (s) { s.classList.remove('is-active'); });
+                sw.classList.add('is-active');
+                if (label) label.textContent = sw.getAttribute('data-color-name') || '—';
+            });
+        });
+    }
+
+    /* ----------- PDP: contact CTA dispatcher (WhatsApp / Instagram / Telegram / Phone) ----------- */
+    function setupContactCtas() {
+        var root = document.querySelector('.sb-pdp');
+        if (!root) return;
+        var phone     = root.getAttribute('data-phone')     || '';
+        var whatsapp  = root.getAttribute('data-whatsapp')  || '';
+        var instagram = root.getAttribute('data-instagram') || '';
+        var telegram  = root.getAttribute('data-telegram')  || '';
+        var productName = root.getAttribute('data-product-name') || '';
+        var productUrl  = root.getAttribute('data-product-url')  || '';
+        var storeName   = root.getAttribute('data-store-name')   || '';
+
+        // Strip any non-digit from whatsapp / phone (wa.me wants digits only).
+        function clean(num) { return (num || '').replace(/[^\d]/g, ''); }
+
+        function selectedSize() {
+            var s = document.querySelector('.sb-size-chip.is-active');
+            return s ? s.getAttribute('data-size-value') : null;
+        }
+        function selectedColor() {
+            var c = document.querySelector('.sb-color-swatch.is-active');
+            return c ? c.getAttribute('data-color-name') : null;
+        }
+        function buildMessage() {
+            var size = selectedSize();
+            var color = selectedColor();
+            var lines = ['Salam! "' + productName + '" məhsulu ilə maraqlanıram.'];
+            if (color) lines.push('Rəng: ' + color);
+            if (size) lines.push('Ölçü: ' + size);
+            if (productUrl) lines.push('Link: ' + productUrl);
+            return lines.join('\n');
+        }
+        function open(channel) {
+            var msg = buildMessage();
+            var url = null;
+            switch (channel) {
+                case 'whatsapp':
+                    if (!whatsapp) return;
+                    url = 'https://wa.me/' + clean(whatsapp) + '?text=' + encodeURIComponent(msg);
+                    break;
+                case 'instagram':
+                    if (!instagram) return;
+                    url = 'https://instagram.com/' + instagram.replace(/^@/, '');
+                    break;
+                case 'telegram':
+                    if (!telegram) return;
+                    url = 'https://t.me/' + telegram.replace(/^@/, '');
+                    break;
+                case 'phone':
+                    if (!phone) return;
+                    url = 'tel:' + phone;
+                    break;
+            }
+            if (url) window.open(url, '_blank', 'noopener');
+        }
+
+        var primary = root.querySelector('[data-contact-primary]');
+        if (primary) {
+            primary.addEventListener('click', function () { open(primary.getAttribute('data-channel')); });
+        }
+        root.querySelectorAll('.sb-pdp-channel').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                var ch = btn.getAttribute('data-channel');
+                // <a href="tel:...">  — let the browser handle it
+                if (ch === 'phone' && btn.tagName === 'A') return;
+                e.preventDefault();
+                open(ch);
+            });
+        });
+    }
+
+    /* ----------- PDP: social share row ----------- */
+    function setupShareRow() {
+        var root = document.querySelector('.sb-pdp');
+        if (!root) return;
+        var productName = root.getAttribute('data-product-name') || '';
+        var productUrl  = root.getAttribute('data-product-url')  || window.location.href;
+        var msg = productName + ' — ' + productUrl;
+        var enc = encodeURIComponent;
+
+        var wa = root.querySelector('[data-share-whatsapp]');
+        if (wa) wa.setAttribute('href', 'https://wa.me/?text=' + enc(msg));
+
+        var tg = root.querySelector('[data-share-telegram]');
+        if (tg) tg.setAttribute('href', 'https://t.me/share/url?url=' + enc(productUrl) + '&text=' + enc(productName));
+
+        var fb = root.querySelector('[data-share-facebook]');
+        if (fb) fb.setAttribute('href', 'https://www.facebook.com/sharer/sharer.php?u=' + enc(productUrl));
+
+        var x = root.querySelector('[data-share-x]');
+        if (x) x.setAttribute('href', 'https://twitter.com/intent/tweet?text=' + enc(productName) + '&url=' + enc(productUrl));
+
+        // Open share links in a new tab (Instagram link is just to instagram.com — no share API)
+        ['[data-share-whatsapp]','[data-share-telegram]','[data-share-facebook]','[data-share-x]'].forEach(function (sel) {
+            var el = root.querySelector(sel);
+            if (el) { el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener'); }
+        });
+
+        var copy = root.querySelector('[data-share-copy]');
+        if (copy) {
+            copy.addEventListener('click', function () {
+                if (!navigator.clipboard) {
+                    showToast('Brauzeriniz dəstəkləmir.', 'error');
+                    return;
+                }
+                navigator.clipboard.writeText(productUrl).then(function () {
+                    copy.classList.add('is-copied');
+                    showToast('Link köçürüldü', 'success');
+                    setTimeout(function () { copy.classList.remove('is-copied'); }, 1500);
+                });
+            });
+        }
+    }
+
+    /* ----------- PDP: about / Q&A / reviews tabs ----------- */
+    function setupPdpTabs() {
+        var tabs = document.querySelector('[data-tabs]');
+        if (!tabs) return;
+        var heads = tabs.querySelectorAll('[data-tab]');
+        var panels = tabs.querySelectorAll('[data-tab-panel]');
+        heads.forEach(function (h) {
+            h.addEventListener('click', function () {
+                var key = h.getAttribute('data-tab');
+                heads.forEach(function (x) {
+                    var on = x === h;
+                    x.classList.toggle('is-active', on);
+                    x.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+                panels.forEach(function (p) {
+                    p.classList.toggle('is-active', p.getAttribute('data-tab-panel') === key);
+                });
+            });
+        });
+        // If URL has #sbReviews / #sbQa, jump to that tab
+        if (window.location.hash === '#sbReviews') {
+            var rev = tabs.querySelector('[data-tab="reviews"]');
+            if (rev) rev.click();
+        } else if (window.location.hash === '#sbQa') {
+            var qa = tabs.querySelector('[data-tab="qa"]');
+            if (qa) qa.click();
         }
     }
 })();

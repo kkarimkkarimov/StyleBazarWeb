@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
+    public DbSet<ProductColor> ProductColors => Set<ProductColor>();
     public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<ReviewImage> ReviewImages => Set<ReviewImage>();

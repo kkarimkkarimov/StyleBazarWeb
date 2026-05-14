@@ -34,6 +34,10 @@ public class StoreConfiguration : IEntityTypeConfiguration<Store>
         builder.Property(s => s.Address)
             .HasMaxLength(500);
 
+        builder.Property(s => s.WhatsAppNumber).HasMaxLength(30);
+        builder.Property(s => s.InstagramHandle).HasMaxLength(60);
+        builder.Property(s => s.TelegramHandle).HasMaxLength(60);
+
         builder.Property(s => s.OwnerId)
             .IsRequired();
 

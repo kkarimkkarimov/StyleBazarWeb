@@ -46,6 +46,7 @@ public class MappingProfile : Profile
         CreateMap<ProductImage, ProductImageDto>();
         CreateMap<ProductSize, ProductSizeDto>();
         CreateMap<CreateProductSizeDto, ProductSize>();
+        CreateMap<ProductColor, ProductColorDto>();
 
         CreateMap<Product, ProductListDto>()
             .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Store != null ? s.Store.Name : string.Empty))
@@ -57,10 +58,15 @@ public class MappingProfile : Profile
         CreateMap<Product, ProductDetailDto>()
             .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Store != null ? s.Store.Name : string.Empty))
             .ForMember(d => d.StoreSlug, opt => opt.MapFrom(s => s.Store != null ? s.Store.Slug : string.Empty))
+            .ForMember(d => d.StorePhone, opt => opt.MapFrom(s => s.Store != null ? s.Store.ContactPhone : null))
+            .ForMember(d => d.StoreWhatsApp, opt => opt.MapFrom(s => s.Store != null ? s.Store.WhatsAppNumber : null))
+            .ForMember(d => d.StoreInstagram, opt => opt.MapFrom(s => s.Store != null ? s.Store.InstagramHandle : null))
+            .ForMember(d => d.StoreTelegram, opt => opt.MapFrom(s => s.Store != null ? s.Store.TelegramHandle : null))
             .ForMember(d => d.CategoryName, opt => opt.MapFrom(s => s.Category != null ? s.Category.Name : string.Empty))
             .ForMember(d => d.CategorySlug, opt => opt.MapFrom(s => s.Category != null ? s.Category.Slug : string.Empty))
             .ForMember(d => d.Images, opt => opt.MapFrom(s => s.Images.OrderBy(i => i.DisplayOrder)))
             .ForMember(d => d.Sizes, opt => opt.MapFrom(s => s.Sizes))
+            .ForMember(d => d.Colors, opt => opt.MapFrom(s => s.Colors.OrderBy(c => c.DisplayOrder)))
             .ForMember(d => d.ReviewCount, opt => opt.MapFrom(s => s.Reviews.Count))
             .ForMember(d => d.AverageRating, opt => opt.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => r.Rating) : 0d));
 

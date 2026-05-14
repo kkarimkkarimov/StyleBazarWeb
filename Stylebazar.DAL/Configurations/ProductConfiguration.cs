@@ -28,8 +28,18 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.DiscountPrice)
             .HasPrecision(18, 2);
 
-        builder.Property(p => p.Brand)
-            .HasMaxLength(100);
+        builder.Property(p => p.Brand).HasMaxLength(100);
+
+        // Free-text product features — all optional, short caps to keep
+        // the right-sidebar layout tidy.
+        builder.Property(p => p.Material).HasMaxLength(80);
+        builder.Property(p => p.Pattern).HasMaxLength(80);
+        builder.Property(p => p.Neckline).HasMaxLength(80);
+        builder.Property(p => p.SleeveLength).HasMaxLength(80);
+        builder.Property(p => p.Fit).HasMaxLength(80);
+        builder.Property(p => p.Season).HasMaxLength(80);
+        builder.Property(p => p.Style).HasMaxLength(80);
+        builder.Property(p => p.CountryOfOrigin).HasMaxLength(80);
 
         builder.HasOne(p => p.Store)
             .WithMany(s => s.Products)

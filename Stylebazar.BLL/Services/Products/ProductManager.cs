@@ -361,6 +361,7 @@ public class ProductManager : IProductService
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Sizes)
+                .Include(p => p.Colors)
                 .Include(p => p.Reviews),
             enableTracking: false,
             cancellationToken: ct);
