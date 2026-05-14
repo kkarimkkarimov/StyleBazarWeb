@@ -28,11 +28,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<HeroBanner> HeroBanners => Set<HeroBanner>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
-    public DbSet<Cart> Carts => Set<Cart>();
-    public DbSet<CartItem> CartItems => Set<CartItem>();
-    public DbSet<Address> Addresses => Set<Address>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     public override int SaveChanges()
     {

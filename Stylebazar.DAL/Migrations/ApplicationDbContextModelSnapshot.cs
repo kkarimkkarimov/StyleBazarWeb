@@ -128,69 +128,6 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AddressLine")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Label")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("PostalCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Addresses");
-                });
-
             modelBuilder.Entity("Stylebazar.DAL.Entities.AppRole", b =>
                 {
                     b.Property<string>("Id")
@@ -297,79 +234,6 @@ namespace Stylebazar.DAL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Cart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Carts");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.CartItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CartId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProductSizeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPriceSnapshot")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductSizeId");
-
-                    b.HasIndex("CartId", "ProductId", "ProductSizeId")
-                        .IsUnique()
-                        .HasFilter("[ProductSizeId] IS NOT NULL");
-
-                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Category", b =>
@@ -571,161 +435,6 @@ namespace Stylebazar.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("NewsletterSubscribers");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CustomerNote")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OrderNumber")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ShipAddressLine")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ShipCity")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<string>("ShipFullName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("ShipNotes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ShipPhone")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("ShipPostalCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<decimal>("ShippingFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("StatusChangedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedDate");
-
-                    b.HasIndex("OrderNumber")
-                        .IsUnique();
-
-                    b.HasIndex("UserId", "Status");
-
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.OrderItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("LineTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProductImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int?>("ProductSizeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SizeLabel")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<int?>("StoreId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StoreName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductSizeId");
-
-                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>
@@ -1160,54 +869,6 @@ namespace Stylebazar.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Address", b =>
-                {
-                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Cart", b =>
-                {
-                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.CartItem", b =>
-                {
-                    b.HasOne("Stylebazar.DAL.Entities.Cart", "Cart")
-                        .WithMany("Items")
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Stylebazar.DAL.Entities.ProductSize", "ProductSize")
-                        .WithMany()
-                        .HasForeignKey("ProductSizeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Cart");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ProductSize");
-                });
-
             modelBuilder.Entity("Stylebazar.DAL.Entities.Category", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Category", "ParentCategory")
@@ -1216,42 +877,6 @@ namespace Stylebazar.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentCategory");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Order", b =>
-                {
-                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.OrderItem", b =>
-                {
-                    b.HasOne("Stylebazar.DAL.Entities.Order", "Order")
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Stylebazar.DAL.Entities.ProductSize", "ProductSize")
-                        .WithMany()
-                        .HasForeignKey("ProductSizeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ProductSize");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>
@@ -1375,21 +1000,11 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("Wishlists");
                 });
 
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Cart", b =>
-                {
-                    b.Navigation("Items");
-                });
-
             modelBuilder.Entity("Stylebazar.DAL.Entities.Category", b =>
                 {
                     b.Navigation("ChildCategories");
 
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("Stylebazar.DAL.Entities.Order", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>
