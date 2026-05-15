@@ -156,21 +156,32 @@
             </form>
         </div>
 
-        @* ============== ADDRESSES (placeholder for Phase 6b) ============== *@
+        @* ============== ADDRESSES ============== *@
         <div class="sb-seller-card">
             <header class="sb-seller-card__head sb-seller-card__head--split">
                 <span class="sb-seller-card__head-left">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     <h2>Addresses</h2>
                 </span>
-                <button type="button" class="sb-btn-pill sb-btn-pill--add" disabled title="Tezliklə">
+                <button type="button" class="sb-btn-pill sb-btn-pill--add" data-addr-modal-open>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     New Address
                 </button>
             </header>
-            <div class="sb-seller-addresses-empty">
+
+            <div class="sb-addr-list" data-addr-list>
+                @if (Model.Addresses.Any())
+                {
+                    @foreach (var addr in Model.Addresses)
+                    {
+                        @await Html.PartialAsync("_AddressCard", addr)
+                    }
+                }
+            </div>
+
+            <div class="sb-seller-addresses-empty" data-addr-empty @(Model.Addresses.Any() ? "hidden" : "")>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>Address not found. Click the button above to create a new address.</span>
+                <span>Hələ ünvan əlavə etməmisiniz. Yuxarıdakı düymə ilə yeni ünvan yaradın.</span>
             </div>
         </div>
 
@@ -250,6 +261,8 @@
         </div>
     </main>
 </section>
+
+@await Html.PartialAsync("_AddressModal")
 
 <div class="sb-modal" id="sbChangePasswordModal" aria-hidden="true" role="dialog">
     <div class="sb-modal__backdrop" data-modal-close></div>

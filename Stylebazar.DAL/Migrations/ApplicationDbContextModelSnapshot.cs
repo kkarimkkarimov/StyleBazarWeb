@@ -128,6 +128,76 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Address", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AddressLine")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("District")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "CreatedDate");
+
+                    b.HasIndex("UserId", "IsDefault");
+
+                    b.ToTable("Addresses");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.AppRole", b =>
                 {
                     b.Property<string>("Id")
@@ -1003,6 +1073,17 @@ namespace Stylebazar.DAL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Address", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
+                        .WithMany("Addresses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Category", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Category", "ParentCategory")
@@ -1149,6 +1230,8 @@ namespace Stylebazar.DAL.Migrations
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.AppUser", b =>
                 {
+                    b.Navigation("Addresses");
+
                     b.Navigation("Reviews");
 
                     b.Navigation("Stores");

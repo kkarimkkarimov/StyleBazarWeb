@@ -5885,6 +5885,330 @@ body:has(.sb-seller-layout) {
 }
 
 /* -----------------------------------------------------------
+   17ab. Modal — shared (Change Password, Address, …)
+   ----------------------------------------------------------- */
+.sb-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .22s ease, visibility .22s ease;
+}
+.sb-modal.is-open { opacity: 1; visibility: visible; }
+
+.sb-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, .55);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+}
+
+.sb-modal__panel {
+    position: relative;
+    width: min(100%, 460px);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 30px 60px rgba(15, 23, 42, .28);
+    transform: translateY(12px) scale(.98);
+    transition: transform .25s cubic-bezier(.32,.72,.0,1);
+    display: flex;
+    flex-direction: column;
+}
+.sb-modal.is-open .sb-modal__panel { transform: translateY(0) scale(1); }
+.sb-modal__panel--wide { width: min(100%, 640px); }
+
+.sb-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--sb-line);
+}
+.sb-modal__head h3 {
+    margin: 0;
+    font-family: var(--sb-font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--sb-ink);
+}
+
+.sb-modal__body {
+    padding: 20px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sb-modal__error {
+    padding: 10px 14px;
+    background: rgba(220,38,38,.06);
+    color: #DC2626;
+    border-radius: 8px;
+    font-size: .85rem;
+    line-height: 1.4;
+}
+
+.sb-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+/* -----------------------------------------------------------
+   17ac. Address cards — used on /Account/Addresses + Seller Profile
+   ----------------------------------------------------------- */
+.sb-acc-section-title--split {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.sb-acc-section-title__left {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--sb-acc-cyan);
+}
+.sb-acc-section-title__left h1 {
+    margin: 0;
+    font-family: var(--sb-font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--sb-ink);
+}
+
+.sb-addr-card-wrap { padding: 18px; }
+
+.sb-addr-list {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+}
+@@media (min-width: 768px) {
+    .sb-addr-list { grid-template-columns: repeat(2, 1fr); }
+}
+
+.sb-addr-card {
+    border: 1px solid var(--sb-line);
+    border-radius: 12px;
+    padding: 16px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .25s cubic-bezier(.32,.72,.0,1);
+    animation: sbAddrIn .32s cubic-bezier(.32,.72,.0,1);
+}
+.sb-addr-card.is-default {
+    border-color: var(--sb-acc-cyan);
+    background: linear-gradient(180deg, var(--sb-acc-cyan-soft), #fff 80%);
+}
+.sb-addr-card:hover {
+    border-color: var(--sb-acc-cyan);
+    box-shadow: 0 8px 22px rgba(14, 165, 183, .08);
+}
+
+@@keyframes sbAddrIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.sb-addr-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+.sb-addr-card__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--sb-ink);
+    min-width: 0;
+}
+.sb-addr-card__title svg {
+    width: 18px; height: 18px;
+    color: var(--sb-acc-cyan);
+    flex-shrink: 0;
+}
+.sb-addr-card__title strong {
+    font-size: .95rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.sb-addr-card__badge {
+    background: var(--sb-acc-cyan);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+
+.sb-addr-card__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.sb-addr-card__btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--sb-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+}
+.sb-addr-card__btn:hover {
+    background: var(--sb-acc-cyan-soft);
+    color: var(--sb-acc-cyan);
+}
+.sb-addr-card__btn--danger:hover {
+    background: rgba(220, 38, 38, .08);
+    color: #DC2626;
+}
+.sb-addr-card__btn svg { width: 15px; height: 15px; }
+
+.sb-addr-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: .85rem;
+    line-height: 1.5;
+}
+.sb-addr-card__name {
+    margin: 0;
+    font-weight: 600;
+    color: var(--sb-ink);
+}
+.sb-addr-card__phone,
+.sb-addr-card__line,
+.sb-addr-card__notes {
+    margin: 0;
+    color: var(--sb-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+.sb-addr-card__phone svg,
+.sb-addr-card__notes svg {
+    width: 13px; height: 13px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--sb-acc-cyan);
+}
+.sb-addr-card__line { flex-wrap: wrap; }
+.sb-addr-card__postal { color: var(--sb-muted-2, var(--sb-muted)); }
+.sb-addr-card__notes {
+    color: var(--sb-ink);
+    background: var(--sb-acc-cyan-soft);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: .8rem;
+}
+
+/* Empty state on Account page */
+.sb-addr-empty {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--sb-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.sb-addr-empty svg {
+    width: 48px; height: 48px;
+    color: var(--sb-acc-cyan);
+    opacity: .55;
+}
+.sb-addr-empty h3 {
+    margin: 4px 0 0;
+    font-family: var(--sb-font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--sb-ink);
+}
+.sb-addr-empty p {
+    margin: 0;
+    font-size: .88rem;
+    max-width: 380px;
+}
+
+/* Address modal — extra fields grid */
+.sb-addr-modal__body { padding-top: 18px; }
+.sb-addr-modal__grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+}
+@@media (min-width: 560px) {
+    .sb-addr-modal__grid { grid-template-columns: 1fr 1fr; }
+}
+
+.sb-acc-field textarea {
+    resize: vertical;
+    min-height: 60px;
+    font-family: inherit;
+}
+
+/* iOS-style "Defolt" checkbox (clickable label) */
+.sb-addr-modal__default {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 2px;
+    font-size: .9rem;
+    color: var(--sb-ink);
+}
+.sb-addr-modal__default input { position: absolute; opacity: 0; pointer-events: none; }
+.sb-addr-modal__default-box {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--sb-line);
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s ease, background .15s ease;
+}
+.sb-addr-modal__default-box svg {
+    width: 14px; height: 14px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+.sb-addr-modal__default input:checked ~ .sb-addr-modal__default-box {
+    background: var(--sb-acc-cyan);
+    border-color: var(--sb-acc-cyan);
+}
+.sb-addr-modal__default input:checked ~ .sb-addr-modal__default-box svg { opacity: 1; }
+.sb-addr-modal__default input:focus-visible ~ .sb-addr-modal__default-box {
+    box-shadow: 0 0 0 3px var(--sb-acc-cyan-soft);
+}
+
+/* -----------------------------------------------------------
    18. Utilities
    ----------------------------------------------------------- */
 .sb-sr-only {

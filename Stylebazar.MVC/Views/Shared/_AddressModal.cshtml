@@ -1,0 +1,73 @@
+@*
+    Shared address create/edit modal — included once on Addresses + Seller Profile.
+    JS reads [data-addr-modal-open] (id, optional) on click, populates fields,
+    POSTs to /Address/Create or /Address/Update.
+*@
+<div class="sb-modal sb-addr-modal" id="sbAddressModal" aria-hidden="true" role="dialog" aria-labelledby="sbAddressModalTitle">
+    <div class="sb-modal__backdrop" data-modal-close></div>
+    <div class="sb-modal__panel sb-modal__panel--wide">
+        <header class="sb-modal__head">
+            <h3 id="sbAddressModalTitle" data-addr-modal-title>Yeni ünvan</h3>
+            <button type="button" class="sb-icon-btn" data-modal-close aria-label="Bağla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </header>
+        <form class="sb-modal__body sb-addr-modal__body" data-addr-form novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="" data-addr-id />
+
+            <div class="sb-addr-modal__grid">
+                <div class="sb-acc-field">
+                    <label for="sbAddrTitle">Ünvan adı *</label>
+                    <input id="sbAddrTitle" type="text" name="title" required maxlength="60" placeholder="Ev, Ofis, Anamın evi..." />
+                </div>
+                <div class="sb-acc-field">
+                    <label for="sbAddrFullName">Qəbul edən *</label>
+                    <input id="sbAddrFullName" type="text" name="fullName" required maxlength="100" placeholder="Ad Soyad" />
+                </div>
+                <div class="sb-acc-field">
+                    <label for="sbAddrPhone">Telefon *</label>
+                    <input id="sbAddrPhone" type="tel" name="phone" required maxlength="30" placeholder="+994501234567" />
+                </div>
+                <div class="sb-acc-field">
+                    <label for="sbAddrCity">Şəhər *</label>
+                    <input id="sbAddrCity" type="text" name="city" required maxlength="80" placeholder="Bakı" />
+                </div>
+                <div class="sb-acc-field">
+                    <label for="sbAddrDistrict">Rayon / region</label>
+                    <input id="sbAddrDistrict" type="text" name="district" maxlength="80" placeholder="Nəsimi r." />
+                </div>
+                <div class="sb-acc-field">
+                    <label for="sbAddrPostal">Poçt indeksi</label>
+                    <input id="sbAddrPostal" type="text" name="postalCode" maxlength="16" placeholder="AZ1010" />
+                </div>
+            </div>
+
+            <div class="sb-acc-field">
+                <label for="sbAddrLine">Ünvan *</label>
+                <textarea id="sbAddrLine" name="addressLine" required rows="2" maxlength="300" placeholder="Küçə, bina, mənzil..."></textarea>
+            </div>
+
+            <div class="sb-acc-field">
+                <label for="sbAddrNotes">Qeyd / orientir</label>
+                <textarea id="sbAddrNotes" name="notes" rows="2" maxlength="300" placeholder="Kuryer üçün əlavə təlimat..."></textarea>
+            </div>
+
+            <label class="sb-addr-modal__default">
+                <input type="checkbox" name="isDefault" value="true" data-addr-default-cb />
+                <span class="sb-addr-modal__default-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span>Defolt ünvan kimi təyin et</span>
+            </label>
+
+            <div class="sb-modal__error" data-addr-form-error hidden></div>
+            <div class="sb-modal__actions">
+                <button type="button" class="sb-btn-ghost" data-modal-close>Ləğv</button>
+                <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" data-addr-submit>
+                    <span data-addr-submit-label>Yadda saxla</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

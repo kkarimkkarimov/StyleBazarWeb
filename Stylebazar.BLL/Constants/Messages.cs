@@ -81,4 +81,12 @@ public static class Messages
         public const string WrongCurrentPassword = "Mövcud parol səhvdir.";
         public const string AvatarRequired = "Şəkil seçilməyib.";
     }
+
+    public static class Address
+    {
+        public const string NotAuthenticated = "Ünvanlarınızı idarə etmək üçün hesabınıza daxil olun.";
+        public const string NotFound = "Ünvan tapılmadı.";
+        public const string NotOwner = "Yalnız öz ünvanlarınızı dəyişə bilərsiniz.";
+        public const string MaxLimitReached = "Bir hesab üçün maksimum 10 ünvan saxlana bilər.";
+    }
 }

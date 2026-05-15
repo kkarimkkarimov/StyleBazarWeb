@@ -5,6 +5,7 @@ using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Account;
+using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.Stores;
 using Stylebazar.DAL.Entities;
@@ -22,17 +23,20 @@ namespace Stylebazar.MVC.Controllers;
 public class SellerController : Controller
 {
     private readonly IAccountService _account;
+    private readonly IAddressService _addresses;
     private readonly IStoreService _stores;
     private readonly ILoginEventService _events;
     private readonly UserManager<AppUser> _userManager;
 
     public SellerController(
         IAccountService account,
+        IAddressService addresses,
         IStoreService stores,
         ILoginEventService events,
         UserManager<AppUser> userManager)
     {
         _account = account;
+        _addresses = addresses;
         _stores = stores;
         _events = events;
         _userManager = userManager;
@@ -53,13 +57,15 @@ public class SellerController : Controller
         var vm = await BuildPanelVmAsync(ct);
         var sessions = await _events.GetMyActiveSessionsAsync(ct);
         var history = await _events.GetMyHistoryAsync(30, ct);
+        var addresses = await _addresses.GetMineAsync(ct);
 
         return View(new SellerProfilePageViewModel
         {
             Profile = vm.Profile,
             PrimaryStore = vm.PrimaryStore,
             ActiveSessions = sessions,
-            LoginHistory = history
+            LoginHistory = history,
+            Addresses = addresses
         });
     }
 

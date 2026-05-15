@@ -30,6 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
     public DbSet<LoginEvent> LoginEvents => Set<LoginEvent>();
+    public DbSet<Address> Addresses => Set<Address>();
 
     public override int SaveChanges()
     {

@@ -35,6 +35,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IContactMessageRepository, ContactMessageRepository>();
         services.AddScoped<INewsletterSubscriberRepository, NewsletterSubscriberRepository>();
         services.AddScoped<ILoginEventRepository, LoginEventRepository>();
+        services.AddScoped<IAddressRepository, AddressRepository>();
 
         return services;
     }

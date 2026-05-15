@@ -1,4 +1,5 @@
 using Stylebazar.BLL.DTOs.Account;
+using Stylebazar.BLL.DTOs.Addresses;
 using Stylebazar.BLL.DTOs.Stores;
 
 namespace Stylebazar.MVC.ViewModels;
@@ -18,4 +19,5 @@ public class SellerProfilePageViewModel : SellerPanelViewModel
 {
     public List<ActiveSessionDto> ActiveSessions { get; set; } = new();
     public List<LoginEventDto> LoginHistory { get; set; } = new();
+    public List<AddressDto> Addresses { get; set; } = new();
 }

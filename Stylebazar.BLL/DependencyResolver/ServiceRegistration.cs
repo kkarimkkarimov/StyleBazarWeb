@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Account;
+using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Contact;
@@ -91,6 +92,7 @@ public static class ServiceRegistration
 
         services.AddScoped<ILoginEventService, LoginEventManager>();
         services.AddScoped<IAccountService, AccountManager>();
+        services.AddScoped<IAddressService, AddressManager>();
 
         return services;
     }

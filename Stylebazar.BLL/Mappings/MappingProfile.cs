@@ -1,4 +1,5 @@
 using AutoMapper;
+using Stylebazar.BLL.DTOs.Addresses;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.DTOs.Categories;
 using Stylebazar.BLL.DTOs.Contact;
@@ -118,5 +119,12 @@ public class MappingProfile : Profile
 
         // Newsletter
         CreateMap<NewsletterSubscriber, NewsletterSubscriberDto>();
+
+        // Addresses
+        CreateMap<Address, AddressDto>();
+        CreateMap<CreateAddressDto, Address>()
+            .ForMember(d => d.Id, opt => opt.Ignore())
+            .ForMember(d => d.UserId, opt => opt.Ignore())
+            .ForMember(d => d.User, opt => opt.Ignore());
     }
 }

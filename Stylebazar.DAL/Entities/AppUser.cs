@@ -12,5 +12,6 @@ namespace Stylebazar.DAL.Entities
         public virtual ICollection<Store> Stores { get; set; } = new List<Store>();
         public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
     }
 }

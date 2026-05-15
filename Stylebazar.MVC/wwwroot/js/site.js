@@ -53,6 +53,7 @@
         safe('setupAccountProfileForm',  setupAccountProfileForm);
         safe('setupSellerProfile',       setupSellerProfile);
         safe('setupChangePasswordModal', setupChangePasswordModal);
+        safe('setupAddresses',           setupAddresses);
 
         // Final safety net: even if every reveal-on-scroll path failed,
         // any .sb-reveal element still hidden after 1500 ms is force-shown.
@@ -1698,5 +1699,344 @@
                 .finally(function () { if (submit) submit.classList.remove('is-loading'); });
             });
         }
+    }
+
+    /* -----------------------------------------------------------
+       Addresses (Phase 6b) — used on /Account/Addresses + Seller Profile
+       - One modal, two consumers
+       - Server-rendered initial list; we mutate DOM after successful CRUD
+       - All actions require an anti-forgery token
+       ----------------------------------------------------------- */
+    function setupAddresses() {
+        var modal   = document.getElementById('sbAddressModal');
+        var list    = document.querySelector('[data-addr-list]');
+        var emptyEl = document.querySelector('[data-addr-empty]');
+        if (!modal || !list) return;
+
+        var form          = modal.querySelector('[data-addr-form]');
+        var titleEl       = modal.querySelector('[data-addr-modal-title]');
+        var submitBtn     = modal.querySelector('[data-addr-submit]');
+        var submitLabelEl = modal.querySelector('[data-addr-submit-label]');
+        var errBox        = modal.querySelector('[data-addr-form-error]');
+        var idEl          = modal.querySelector('[data-addr-id]');
+        if (!form) return;
+
+        var editingId = null;
+
+        // ---------- modal lifecycle ----------
+        function open() {
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function () {
+                var first = form.querySelector('input[name="title"]');
+                if (first) first.focus();
+            }, 80);
+        }
+        function close() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (errBox) { errBox.hidden = true; errBox.textContent = ''; }
+        }
+        function resetForm() {
+            form.reset();
+            editingId = null;
+            if (idEl) idEl.value = '';
+            if (titleEl) titleEl.textContent = 'Yeni ünvan';
+            if (submitLabelEl) submitLabelEl.textContent = 'Yadda saxla';
+        }
+        function fillForm(addr) {
+            editingId = addr.id;
+            if (idEl) idEl.value = String(addr.id);
+            form.querySelector('input[name="title"]').value       = addr.title || '';
+            form.querySelector('input[name="fullName"]').value    = addr.fullName || '';
+            form.querySelector('input[name="phone"]').value       = addr.phone || '';
+            form.querySelector('input[name="city"]').value        = addr.city || '';
+            form.querySelector('input[name="district"]').value    = addr.district || '';
+            form.querySelector('input[name="postalCode"]').value  = addr.postalCode || '';
+            form.querySelector('textarea[name="addressLine"]').value = addr.addressLine || '';
+            form.querySelector('textarea[name="notes"]').value    = addr.notes || '';
+            var defCb = form.querySelector('[data-addr-default-cb]');
+            if (defCb) defCb.checked = !!addr.isDefault;
+
+            if (titleEl) titleEl.textContent = 'Ünvanı redaktə et';
+            if (submitLabelEl) submitLabelEl.textContent = 'Yadda saxla';
+        }
+
+        // ---------- DOM helpers ----------
+        function refreshEmptyState() {
+            var anyCard = list.querySelector('.sb-addr-card');
+            if (!emptyEl) return;
+            emptyEl.hidden = !!anyCard;
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function renderCard(addr) {
+            var defaultBadge = addr.isDefault
+                ? '<span class="sb-addr-card__badge">Defolt</span>'
+                : '';
+            var setDefaultBtn = addr.isDefault ? '' :
+                '<button type="button" class="sb-addr-card__btn" data-addr-set-default aria-label="Defolt et" title="Defolt et">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
+                '</button>';
+            var districtPart = addr.district ? ', ' + escapeHtml(addr.district) : '';
+            var postalPart = addr.postalCode
+                ? '<span class="sb-addr-card__postal" data-addr-postal>· ' + escapeHtml(addr.postalCode) + '</span>'
+                : '';
+            var notesPart = addr.notes
+                ? '<p class="sb-addr-card__notes" data-addr-notes>' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ' +
+                  escapeHtml(addr.notes) + '</p>'
+                : '';
+
+            var html =
+                '<article class="sb-addr-card ' + (addr.isDefault ? 'is-default' : '') + '" data-address-id="' + addr.id + '">' +
+                  '<header class="sb-addr-card__head">' +
+                    '<div class="sb-addr-card__title">' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+                      '<strong data-addr-title>' + escapeHtml(addr.title) + '</strong>' +
+                      defaultBadge +
+                    '</div>' +
+                    '<div class="sb-addr-card__actions">' +
+                      setDefaultBtn +
+                      '<button type="button" class="sb-addr-card__btn" data-addr-edit aria-label="Redaktə et" title="Redaktə et">' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+                      '</button>' +
+                      '<button type="button" class="sb-addr-card__btn sb-addr-card__btn--danger" data-addr-delete aria-label="Sil" title="Sil">' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>' +
+                      '</button>' +
+                    '</div>' +
+                  '</header>' +
+                  '<div class="sb-addr-card__body">' +
+                    '<p class="sb-addr-card__name" data-addr-name>' + escapeHtml(addr.fullName) + '</p>' +
+                    '<p class="sb-addr-card__phone" data-addr-phone>' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg> ' +
+                      escapeHtml(addr.phone) + '</p>' +
+                    '<p class="sb-addr-card__line" data-addr-line>' +
+                      '<span data-addr-city>' + escapeHtml(addr.city) + '</span>' + districtPart + ' · <span data-addr-text>' + escapeHtml(addr.addressLine) + '</span>' +
+                      postalPart +
+                    '</p>' +
+                    notesPart +
+                  '</div>' +
+                '</article>';
+
+            var tpl = document.createElement('template');
+            tpl.innerHTML = html.trim();
+            return tpl.content.firstChild;
+        }
+
+        function replaceAllDefaults(newDefaultId) {
+            // Strip "Defolt" badge + restore "set default" buttons on previous default cards.
+            list.querySelectorAll('.sb-addr-card.is-default').forEach(function (card) {
+                if (parseInt(card.getAttribute('data-address-id'), 10) === newDefaultId) return;
+                card.classList.remove('is-default');
+                var badge = card.querySelector('.sb-addr-card__badge');
+                if (badge) badge.remove();
+                var actions = card.querySelector('.sb-addr-card__actions');
+                if (actions && !actions.querySelector('[data-addr-set-default]')) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'sb-addr-card__btn';
+                    btn.setAttribute('data-addr-set-default', '');
+                    btn.setAttribute('aria-label', 'Defolt et');
+                    btn.setAttribute('title', 'Defolt et');
+                    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                    actions.insertBefore(btn, actions.firstChild);
+                }
+            });
+        }
+
+        // ---------- network ----------
+        function post(url, fd) {
+            var token = getAntiForgeryToken();
+            if (token && !fd.has('__RequestVerificationToken')) fd.append('__RequestVerificationToken', token);
+            return fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            }).then(function (res) { return res.json().then(function (j) { return { ok: res.ok, json: j }; }); });
+        }
+
+        // ---------- delegated clicks on the list ----------
+        list.addEventListener('click', function (e) {
+            var card = e.target.closest('[data-address-id]');
+            if (!card) return;
+            var id = parseInt(card.getAttribute('data-address-id'), 10);
+            if (!id) return;
+
+            if (e.target.closest('[data-addr-edit]')) {
+                e.preventDefault();
+                resetForm();
+                // Pull values straight off the DOM — avoid a round-trip.
+                var addr = {
+                    id: id,
+                    title:       (card.querySelector('[data-addr-title]') || {}).textContent || '',
+                    fullName:    (card.querySelector('[data-addr-name]')  || {}).textContent || '',
+                    phone:       ((card.querySelector('[data-addr-phone]') || {}).textContent || '').trim(),
+                    city:        (card.querySelector('[data-addr-city]')  || {}).textContent || '',
+                    addressLine: (card.querySelector('[data-addr-text]')  || {}).textContent || '',
+                    postalCode:  ((card.querySelector('[data-addr-postal]') || {}).textContent || '').replace(/^·\s*/, ''),
+                    notes:       ((card.querySelector('[data-addr-notes]') || {}).textContent || '').trim(),
+                    isDefault:   card.classList.contains('is-default')
+                };
+                fillForm(addr);
+                open();
+                return;
+            }
+            if (e.target.closest('[data-addr-delete]')) {
+                e.preventDefault();
+                if (!window.confirm('Bu ünvanı silmək istədiyinə əminsən?')) return;
+                var fd = new FormData();
+                fd.append('id', String(id));
+                post('/Address/Delete', fd).then(function (r) {
+                    if (!r.ok) {
+                        showToast((r.json && r.json.error) || 'Silinmədi.', 'error');
+                        return;
+                    }
+                    card.style.transition = 'opacity .25s ease, transform .25s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(-4px)';
+                    setTimeout(function () {
+                        var wasDefault = card.classList.contains('is-default');
+                        card.remove();
+                        // If we removed the default, the server promotes the next one —
+                        // re-fetch the list to reflect new default state.
+                        if (wasDefault) {
+                            refreshFromServer();
+                        } else {
+                            refreshEmptyState();
+                        }
+                    }, 230);
+                    showToast('Ünvan silindi', 'success');
+                }).catch(function () { showToast('Şəbəkə xətası.', 'error'); });
+                return;
+            }
+            if (e.target.closest('[data-addr-set-default]')) {
+                e.preventDefault();
+                var fd2 = new FormData();
+                fd2.append('id', String(id));
+                post('/Address/SetDefault', fd2).then(function (r) {
+                    if (!r.ok) {
+                        showToast((r.json && r.json.error) || 'Yenilənmədi.', 'error');
+                        return;
+                    }
+                    replaceAllDefaults(id);
+                    card.classList.add('is-default');
+                    // Drop the star button + add a badge to this card.
+                    var setBtn = card.querySelector('[data-addr-set-default]');
+                    if (setBtn) setBtn.remove();
+                    var title = card.querySelector('.sb-addr-card__title');
+                    if (title && !title.querySelector('.sb-addr-card__badge')) {
+                        var span = document.createElement('span');
+                        span.className = 'sb-addr-card__badge';
+                        span.textContent = 'Defolt';
+                        title.appendChild(span);
+                    }
+                    // Move the default card to the top of the list.
+                    list.insertBefore(card, list.firstChild);
+                    showToast('Defolt ünvan dəyişdi', 'success');
+                }).catch(function () { showToast('Şəbəkə xətası.', 'error'); });
+            }
+        });
+
+        // ---------- "Yeni ünvan" triggers ----------
+        document.querySelectorAll('[data-addr-modal-open]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                resetForm();
+                open();
+            });
+        });
+
+        // ---------- modal close ----------
+        modal.querySelectorAll('[data-modal-close]').forEach(function (btn) {
+            btn.addEventListener('click', close);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+        });
+
+        // ---------- form submit ----------
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (errBox) { errBox.hidden = true; errBox.textContent = ''; }
+            if (submitBtn) submitBtn.classList.add('is-loading');
+
+            var fd = new FormData(form);
+            // Normalise the checkbox payload to a real bool the model binder understands.
+            var defCb = form.querySelector('[data-addr-default-cb]');
+            fd.delete('isDefault');
+            fd.append('isDefault', defCb && defCb.checked ? 'true' : 'false');
+
+            var url = editingId ? '/Address/Update' : '/Address/Create';
+            if (!editingId) fd.delete('id');
+
+            post(url, fd).then(function (r) {
+                if (!r.ok) {
+                    var msg = (r.json && (r.json.error || firstValidationError(r.json.errors))) || 'Yadda saxlanılmadı.';
+                    if (errBox) { errBox.textContent = msg; errBox.hidden = false; }
+                    else showToast(msg, 'error');
+                    return;
+                }
+
+                var saved = r.json && r.json.item;
+                if (!saved) {
+                    showToast('Yadda saxlandı', 'success');
+                    close();
+                    return;
+                }
+
+                if (editingId) {
+                    // Replace existing card in place.
+                    var existing = list.querySelector('[data-address-id="' + saved.id + '"]');
+                    var fresh = renderCard(saved);
+                    if (existing) existing.replaceWith(fresh);
+                    else list.appendChild(fresh);
+                    if (saved.isDefault) {
+                        replaceAllDefaults(saved.id);
+                        list.insertBefore(fresh, list.firstChild);
+                    }
+                } else {
+                    // Prepend the new card.
+                    if (saved.isDefault) replaceAllDefaults(saved.id);
+                    var node = renderCard(saved);
+                    list.insertBefore(node, list.firstChild);
+                }
+
+                showToast(editingId ? 'Ünvan yeniləndi' : 'Yeni ünvan əlavə olundu', 'success');
+                close();
+                resetForm();
+                refreshEmptyState();
+            }).catch(function () {
+                if (errBox) { errBox.textContent = 'Şəbəkə xətası.'; errBox.hidden = false; }
+            }).finally(function () {
+                if (submitBtn) submitBtn.classList.remove('is-loading');
+            });
+        });
+
+        // ---------- after a delete-of-default, refetch authoritative state ----------
+        function refreshFromServer() {
+            fetch('/Address/Mine', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (data) {
+                if (!data || !data.ok) return;
+                list.innerHTML = '';
+                (data.items || []).forEach(function (a) { list.appendChild(renderCard(a)); });
+                refreshEmptyState();
+            }).catch(function () { /* leave UI as-is */ });
+        }
+
+        // Initial sync of empty-state flag in case it drifted server-side.
+        refreshEmptyState();
     }
 })();

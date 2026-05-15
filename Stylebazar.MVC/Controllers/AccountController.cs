@@ -5,6 +5,7 @@ using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Account;
+using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.DAL.Entities;
@@ -18,6 +19,7 @@ public class AccountController : Controller
 {
     private readonly IAuthService _authService;
     private readonly IAccountService _account;
+    private readonly IAddressService _addresses;
     private readonly ILoginEventService _events;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly UserManager<AppUser> _userManager;
@@ -25,12 +27,14 @@ public class AccountController : Controller
     public AccountController(
         IAuthService authService,
         IAccountService account,
+        IAddressService addresses,
         ILoginEventService events,
         SignInManager<AppUser> signInManager,
         UserManager<AppUser> userManager)
     {
         _authService = authService;
         _account = account;
+        _addresses = addresses;
         _events = events;
         _signInManager = signInManager;
         _userManager = userManager;
@@ -280,7 +284,13 @@ public class AccountController : Controller
     [HttpGet] [Authorize]
     public async Task<IActionResult> Addresses(CancellationToken ct)
     {
-        return View(new AccountPanelViewModel { Profile = await _account.GetMineAsync(ct) });
+        var profile = await _account.GetMineAsync(ct);
+        var list = await _addresses.GetMineAsync(ct);
+        return View(new AccountAddressesPageViewModel
+        {
+            Profile = profile,
+            Addresses = list
+        });
     }
 
     // Wishlist moved to its own controller.
