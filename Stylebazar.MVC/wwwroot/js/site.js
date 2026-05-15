@@ -34,6 +34,8 @@
         setupContactCtas();
         setupShareRow();
         setupPdpTabs();
+        setupTileRails();
+        setupShopsSearch();
     });
 
     /* ----------- Header scroll-shrink ----------- */
@@ -1382,6 +1384,62 @@
                 });
             });
         }
+    }
+
+    /* ----------- Pastel tile rails — arrow controls scroll the rail ----------- */
+    function setupTileRails() {
+        document.querySelectorAll('.sb-tile__rail-wrap').forEach(function (wrap) {
+            var rail = wrap.querySelector('[data-rail]');
+            var prev = wrap.querySelector('[data-rail-prev]');
+            var next = wrap.querySelector('[data-rail-next]');
+            if (!rail) return;
+
+            function scrollBy(dir) {
+                var step = Math.max(220, Math.round(rail.clientWidth * 0.8));
+                rail.scrollBy({ left: dir * step, behavior: 'smooth' });
+            }
+
+            if (prev) prev.addEventListener('click', function () { scrollBy(-1); });
+            if (next) next.addEventListener('click', function () { scrollBy(1); });
+
+            // Disable arrows at edges
+            function updateState() {
+                var atStart = rail.scrollLeft <= 4;
+                var atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4;
+                if (prev) prev.style.opacity = atStart ? '0.4' : '1';
+                if (prev) prev.style.pointerEvents = atStart ? 'none' : 'auto';
+                if (next) next.style.opacity = atEnd ? '0.4' : '1';
+                if (next) next.style.pointerEvents = atEnd ? 'none' : 'auto';
+            }
+            updateState();
+            rail.addEventListener('scroll', updateState, { passive: true });
+            window.addEventListener('resize', updateState, { passive: true });
+        });
+    }
+
+    /* ----------- Shops page — live filter as user types ----------- */
+    function setupShopsSearch() {
+        var input = document.querySelector('[data-shops-search]');
+        var grid = document.querySelector('[data-shop-grid]');
+        if (!input || !grid) return;
+
+        var debounce;
+        input.addEventListener('input', function () {
+            clearTimeout(debounce);
+            debounce = setTimeout(function () {
+                var q = (input.value || '').trim().toLowerCase();
+                var visible = 0;
+                grid.querySelectorAll('[data-shop-card]').forEach(function (card) {
+                    var name = (card.getAttribute('data-shop-name') || '').toLowerCase();
+                    var match = !q || name.indexOf(q) !== -1;
+                    card.classList.toggle('is-hidden', !match);
+                    if (match) visible++;
+                });
+                // We don't submit on every keystroke — but if the user presses Enter,
+                // we submit the form to re-query the backend (gets results past
+                // the first page too).
+            }, 120);
+        });
     }
 
     /* ----------- PDP: about / Q&A / reviews tabs ----------- */

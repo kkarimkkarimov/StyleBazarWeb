@@ -1,0 +1,157 @@
+@model ShopsIndexViewModel
+@{
+    ViewData["Title"] = "Mağazalar";
+}
+
+<header class="sb-shops-header">
+    <span class="sb-eyebrow">StyleBazar</span>
+    <h1>Mağazalar</h1>
+    <p>Yerli satıcıları kəşf et — kolleksiyalarına bax, birbaşa əlaqə saxla.</p>
+</header>
+
+<form class="sb-shops-search" method="get" action="@Url.Action("Index", "Store")">
+    <div class="sb-shops-search__field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" name="search" value="@Model.Search" placeholder="Mağaza axtar..." autocomplete="off" data-shops-search />
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <a class="sb-shops-search__clear" asp-controller="Store" asp-action="Index" aria-label="Təmizlə">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </a>
+        }
+    </div>
+</form>
+
+@if (!Model.Stores.Items.Any())
+{
+    <div class="sb-shops-empty">
+        <div class="sb-shops-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/><path d="M9 22V12h6v10"/></svg>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <h2>"@Model.Search" üçün nəticə yoxdur</h2>
+            <p>Başqa açar sözlər sına və ya hamısına bax.</p>
+            <a asp-controller="Store" asp-action="Index" class="sb-btn-primary">Bütün mağazalar</a>
+        }
+        else
+        {
+            <h2>Hələ mağaza yoxdur</h2>
+            <p>Tezliklə yerli satıcılar burada görünəcək.</p>
+        }
+    </div>
+}
+else
+{
+    <div class="sb-shops-meta">
+        <span><strong>@Model.Stores.Count</strong> mağaza</span>
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <span class="sb-text-muted">— "@Model.Search" üçün</span>
+        }
+    </div>
+
+    <div class="sb-shop-grid" data-shop-grid>
+        @foreach (var s in Model.Stores.Items)
+        {
+            <article class="sb-shop-card sb-reveal" data-shop-card data-shop-name="@s.Name.ToLowerInvariant()">
+                <a class="sb-shop-card__cover" asp-controller="Store" asp-action="Detail" asp-route-slug="@s.Slug" aria-label="@s.Name">
+                    @if (!string.IsNullOrEmpty(s.CoverImageUrl))
+                    {
+                        <img src="@s.CoverImageUrl" alt="@s.Name kover" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="sb-shop-card__cover-fallback" style="background: linear-gradient(135deg, var(--sb-soft), #fff)"></div>
+                    }
+                    <div class="sb-shop-card__avatar">
+                        @if (!string.IsNullOrEmpty(s.ProfileImageUrl))
+                        {
+                            <img src="@s.ProfileImageUrl" alt="@s.Name" loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="sb-shop-card__avatar-initial">@(s.Name.Length > 0 ? s.Name[0].ToString().ToUpper() : "S")</span>
+                        }
+                    </div>
+                    <span class="sb-shop-card__count">@s.ProductCount məhsul</span>
+                </a>
+
+                <div class="sb-shop-card__body">
+                    <h3 class="sb-shop-card__name">
+                        <a asp-controller="Store" asp-action="Detail" asp-route-slug="@s.Slug">@s.Name</a>
+                    </h3>
+                    @if (!string.IsNullOrWhiteSpace(s.Description))
+                    {
+                        <p class="sb-shop-card__bio">@s.Description</p>
+                    }
+                    else
+                    {
+                        <p class="sb-shop-card__bio sb-text-muted">Mağaza haqqında məlumat yoxdur.</p>
+                    }
+
+                    @if (s.ThumbnailImageUrls.Any())
+                    {
+                        <div class="sb-shop-card__thumbs">
+                            @foreach (var url in s.ThumbnailImageUrls.Take(5))
+                            {
+                                <span class="sb-shop-card__thumb">
+                                    <img src="@url" alt="" loading="lazy" />
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+
+    @if (Model.Stores.Pages > 1)
+    {
+        <nav class="sb-pagination" aria-label="Pagination">
+            @{
+                int currentPage = Model.Stores.Index + 1;
+                int totalPages = Model.Stores.Pages;
+                int start = Math.Max(1, currentPage - 2);
+                int end = Math.Min(totalPages, currentPage + 2);
+            }
+            @if (currentPage > 1)
+            {
+                <a class="sb-pagination__item" asp-controller="Store" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@Model.Search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </a>
+            }
+            else
+            {
+                <span class="sb-pagination__item is-disabled">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </span>
+            }
+
+            @for (int p = start; p <= end; p++)
+            {
+                if (p == currentPage)
+                {
+                    <span class="sb-pagination__item is-current">@p</span>
+                }
+                else
+                {
+                    <a class="sb-pagination__item" asp-controller="Store" asp-action="Index" asp-route-page="@p" asp-route-search="@Model.Search">@p</a>
+                }
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <a class="sb-pagination__item" asp-controller="Store" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@Model.Search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            }
+            else
+            {
+                <span class="sb-pagination__item is-disabled">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </span>
+            }
+        </nav>
+    }
+}

@@ -36,7 +36,18 @@ public class MappingProfile : Profile
 
         // Stores
         CreateMap<Store, StoreListDto>()
-            .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count));
+            .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count))
+            .ForMember(d => d.ThumbnailImageUrls, opt => opt.MapFrom(s =>
+                s.Products
+                    .Where(p => p.IsActive)
+                    .OrderByDescending(p => p.CreatedDate)
+                    .Take(5)
+                    .Select(p =>
+                        p.Images.Where(i => i.IsMain).Select(i => i.ImageUrl).FirstOrDefault()
+                        ?? p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).FirstOrDefault()
+                        ?? string.Empty)
+                    .Where(u => !string.IsNullOrEmpty(u))
+                    .ToList()));
 
         CreateMap<Store, StoreDetailDto>()
             .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count))

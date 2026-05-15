@@ -1,0 +1,50 @@
+@model Stylebazar.BLL.DTOs.Stores.StoreDetailDto
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<nav class="sb-breadcrumb" aria-label="Breadcrumb">
+    <a asp-controller="Home" asp-action="Index">StyleBazar</a>
+    <span class="sb-breadcrumb__sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <a asp-controller="Store" asp-action="Index">Mağazalar</a>
+    <span class="sb-breadcrumb__sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <span class="sb-breadcrumb__current">@Model.Name</span>
+</nav>
+
+<section class="sb-store-detail-placeholder">
+    <div class="sb-store-detail-placeholder__cover">
+        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+        {
+            <img src="@Model.CoverImageUrl" alt="@Model.Name kover" />
+        }
+    </div>
+    <div class="sb-store-detail-placeholder__head">
+        <div class="sb-store-detail-placeholder__avatar">
+            @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+            {
+                <img src="@Model.ProfileImageUrl" alt="@Model.Name" />
+            }
+            else
+            {
+                <span>@(Model.Name.Length > 0 ? Model.Name[0].ToString().ToUpper() : "S")</span>
+            }
+        </div>
+        <div>
+            <h1>@Model.Name</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p>@Model.Description</p>
+            }
+        </div>
+    </div>
+
+    <div class="sb-tab-empty" style="margin-top: 32px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
+        <strong>Mağaza səhifəsi tezliklə</strong>
+        <span>Bu mağazanın bütün məhsulları, hekayələri və əlaqə kanalları burada görünəcək.</span>
+    </div>
+</section>

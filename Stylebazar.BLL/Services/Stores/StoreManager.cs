@@ -48,7 +48,9 @@ public class StoreManager : IStoreService
                 (string.IsNullOrEmpty(query.OwnerId) || s.OwnerId == query.OwnerId) &&
                 (string.IsNullOrEmpty(query.Search) || s.Name.Contains(query.Search)),
             orderBy: q => q.OrderByDescending(s => s.CreatedDate),
-            include: q => q.Include(s => s.Products),
+            // Products.Images is included so the shop-card side-rail can render
+            // up to 5 thumbnails per store without an N+1 lookup.
+            include: q => q.Include(s => s.Products).ThenInclude(p => p.Images),
             index: query.Page - 1,
             size: query.PageSize,
             enableTracking: false,
