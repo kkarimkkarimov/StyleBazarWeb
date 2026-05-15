@@ -9,4 +9,11 @@ public class UpdateStoreDto
     public string? CoverImageUrl { get; set; }
     public string? ContactPhone { get; set; }
     public string? Address { get; set; }
+
+    // Contact / social channels
+    public string? WhatsAppNumber { get; set; }
+    public string? InstagramHandle { get; set; }
+    public string? TelegramHandle { get; set; }
+    public string? FacebookHandle { get; set; }
+    public string? TikTokHandle { get; set; }
 }

@@ -1,0 +1,6 @@
+@model SellerPanelViewModel
+@{
+    ViewData["StubTitle"] = "Products";
+    ViewData["StubSubtitle"] = "Məhsul siyahısı, edit/silmə, stok yenilənməsi tezliklə.";
+}
+@await Html.PartialAsync("_SellerStubPage", Model)

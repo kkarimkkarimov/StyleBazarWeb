@@ -32,6 +32,12 @@ public class Store : Entity<int>
     /// </summary>
     public string? TelegramHandle { get; set; }
 
+    /// <summary>Facebook page/profile slug ("yourpage" → facebook.com/yourpage).</summary>
+    public string? FacebookHandle { get; set; }
+
+    /// <summary>TikTok username without the @ ("useremda" → tiktok.com/@useremda).</summary>
+    public string? TikTokHandle { get; set; }
+
     public virtual AppUser Owner { get; set; } = null!;
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

@@ -1,0 +1,6 @@
+@model SellerPanelViewModel
+@{
+    ViewData["StubTitle"] = "Dashboard";
+    ViewData["StubSubtitle"] = "İcmal, stats və sürətli keçidlər tezliklə əlavə olunacaq.";
+}
+@await Html.PartialAsync("_SellerStubPage", Model)

@@ -4,10 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Rules;
+using Stylebazar.BLL.Services.Account;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Contact;
 using Stylebazar.BLL.Services.CurrentUser;
+using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
@@ -86,6 +88,9 @@ public static class ServiceRegistration
         services.AddScoped<IHeroBannerService, HeroBannerManager>();
         services.AddScoped<IContactMessageService, ContactMessageManager>();
         services.AddScoped<INewsletterService, NewsletterManager>();
+
+        services.AddScoped<ILoginEventService, LoginEventManager>();
+        services.AddScoped<IAccountService, AccountManager>();
 
         return services;
     }

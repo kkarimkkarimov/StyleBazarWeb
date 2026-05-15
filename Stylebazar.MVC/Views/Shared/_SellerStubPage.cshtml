@@ -1,0 +1,17 @@
+@model SellerPanelViewModel
+@{
+    string title = (ViewData["StubTitle"] as string) ?? "Tezliklə";
+    string subtitle = (ViewData["StubSubtitle"] as string) ?? "Bu bölmə tezliklə əlavə olunacaq.";
+    ViewData["Title"] = title;
+}
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", Model.Profile)
+    <main class="sb-seller-main">
+        <div class="sb-seller-card sb-acc-stub">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <strong>@title</strong>
+            <p>@subtitle</p>
+        </div>
+    </main>
+</section>

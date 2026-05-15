@@ -152,10 +152,17 @@ public class StoreManager : IStoreService
         tracked.CoverImageUrl = dto.CoverImageUrl?.Trim();
         tracked.ContactPhone = dto.ContactPhone?.Trim();
         tracked.Address = dto.Address?.Trim();
+        tracked.WhatsAppNumber = NullIfBlank(dto.WhatsAppNumber);
+        tracked.InstagramHandle = NullIfBlank(dto.InstagramHandle);
+        tracked.TelegramHandle = NullIfBlank(dto.TelegramHandle);
+        tracked.FacebookHandle = NullIfBlank(dto.FacebookHandle);
+        tracked.TikTokHandle = NullIfBlank(dto.TikTokHandle);
 
         await _repo.UpdateAsync(tracked, ct);
         return await GetByIdAsync(id, ct);
     }
+
+    private static string? NullIfBlank(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {

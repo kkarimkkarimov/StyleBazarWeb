@@ -1,40 +1,210 @@
+@model AccountProfilePageViewModel
 @{
     ViewData["Title"] = "Profil";
+    var p = Model.Profile;
 }
 
-<section class="sb-page-hero">
-    <span class="sb-eyebrow">Mənim hesabım</span>
-    <h1>Salam, <em style="font-style: italic; color: var(--sb-accent);">@(User.Identity?.Name?.Split('@')[0])</em></h1>
-    <p>Profil redaktə UI yaxınlarda. İndilik buradan əsas hissələrə keç.</p>
+@functions {
+    static string EventClass(Stylebazar.DAL.Entities.Enums.LoginEventType t) => t switch
+    {
+        Stylebazar.DAL.Entities.Enums.LoginEventType.SignUp => "is-success",
+        Stylebazar.DAL.Entities.Enums.LoginEventType.SignIn => "is-info",
+        Stylebazar.DAL.Entities.Enums.LoginEventType.SignOut => "is-muted",
+        Stylebazar.DAL.Entities.Enums.LoginEventType.FailedSignIn => "is-danger",
+        Stylebazar.DAL.Entities.Enums.LoginEventType.PasswordChanged => "is-warn",
+        _ => "is-muted"
+    };
+    static string TimeAgo(DateTime when)
+    {
+        var diff = DateTime.UtcNow - when.ToUniversalTime();
+        if (diff.TotalSeconds < 60) return "indi";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} dəqiqə əvvəl";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} saat əvvəl";
+        return $"{(int)diff.TotalDays} gün əvvəl";
+    }
+}
+
+<nav class="sb-breadcrumb sb-acc-breadcrumb" aria-label="Breadcrumb">
+    <a asp-controller="Home" asp-action="Index">Home</a>
+    <span class="sb-breadcrumb__sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <a asp-controller="Account" asp-action="Dashboard">Customer</a>
+    <span class="sb-breadcrumb__sep" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <span class="sb-breadcrumb__current">Profile</span>
+</nav>
+
+<section class="sb-acc-layout">
+    @await Html.PartialAsync("_AccountSidebar", p)
+
+    <main class="sb-acc-main">
+        <header class="sb-acc-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <h1>Profile Parameters</h1>
+        </header>
+
+        <div class="sb-acc-card">
+            <form data-acc-profile-form novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="sb-acc-avatar-row">
+                    <label class="sb-acc-avatar-uploader" data-avatar-uploader>
+                        <input type="file" accept="image/*" hidden data-avatar-input />
+                        <span class="sb-acc-avatar-uploader__img" data-avatar-preview>
+                            @if (!string.IsNullOrEmpty(p.ProfileImageUrl))
+                            {
+                                <img src="@p.ProfileImageUrl" alt="@p.FullName" />
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                            }
+                        </span>
+                        <span class="sb-acc-avatar-uploader__camera" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        </span>
+                    </label>
+                    <div class="sb-acc-avatar-meta">
+                        <span class="sb-acc-avatar-meta__label" data-avatar-label>No image selected</span>
+                        <button type="button" class="sb-btn-pill" data-avatar-trigger>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Upload
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="sb-acc-divider" />
+
+                <div class="sb-acc-field">
+                    <label for="sbFullName">Full Name</label>
+                    <input id="sbFullName" type="text" name="fullName" value="@p.FullName" required maxlength="100" />
+                </div>
+
+                <div class="sb-acc-field">
+                    <label for="sbEmail">Email</label>
+                    <input id="sbEmail" type="email" value="@p.Email" readonly />
+                </div>
+
+                <div class="sb-acc-field">
+                    <label for="sbPhone">Mobile</label>
+                    <input id="sbPhone" type="tel" name="phoneNumber" value="@p.PhoneNumber" placeholder="None" />
+                </div>
+
+                <div class="sb-acc-form-actions">
+                    <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" data-acc-profile-submit>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="sb-btn-ghost sb-btn-ghost--cyan" data-change-password-open>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        <span>Change Password</span>
+                    </button>
+                </div>
+
+                <div class="sb-acc-form-error" data-acc-profile-error hidden></div>
+            </form>
+        </div>
+
+        <header class="sb-acc-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <h2>Security</h2>
+        </header>
+
+        <div class="sb-acc-card sb-acc-card--security">
+            <div class="sb-acc-sec-block">
+                <h3 class="sb-acc-sec-block__title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Active Sessions
+                    <span class="sb-acc-sec-block__sub">(Maximum 3 concurrent sessions)</span>
+                </h3>
+                <div class="sb-acc-sessions">
+                    @if (Model.ActiveSessions.Any())
+                    {
+                        @foreach (var s in Model.ActiveSessions)
+                        {
+                            <div class="sb-acc-session @(s.IsCurrent ? "is-current" : "")">
+                                <div class="sb-acc-session__head">
+                                    <svg class="sb-acc-session__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                    <strong>@s.DeviceLabel</strong>
+                                    @if (s.IsCurrent)
+                                    {
+                                        <span class="sb-acc-session__current">Current</span>
+                                    }
+                                </div>
+                                <div class="sb-acc-session__meta">
+                                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg> @s.IpAddress</span>
+                                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> @TimeAgo(s.LastSeen)</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="sb-acc-sec-block__empty">Aktiv sessiya yoxdur.</p>
+                    }
+                </div>
+            </div>
+
+            <div class="sb-acc-sec-block">
+                <h3 class="sb-acc-sec-block__title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                    Login History
+                    <span class="sb-acc-sec-block__sub">(Last 30 days)</span>
+                </h3>
+                <table class="sb-acc-login-history">
+                    @if (Model.LoginHistory.Any())
+                    {
+                        @foreach (var e in Model.LoginHistory)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="sb-acc-event-badge @EventClass(e.EventType)">@e.EventLabel</span>
+                                </td>
+                                <td class="sb-acc-event-date">@e.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="sb-acc-event-ip">@(e.IpAddress ?? "—")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="3" class="sb-acc-sec-block__empty">Tarixçə boşdur.</td></tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </main>
 </section>
 
-<section class="sb-section">
-    <div class="sb-trust">
-        <a class="sb-trust__item" asp-controller="Account" asp-action="Wishlist" style="text-decoration: none; cursor: pointer;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            <h3>Wishlist</h3>
-            <p>Sevimlilərinə bax və idarə et.</p>
-        </a>
-        <a class="sb-trust__item" asp-controller="Shop" asp-action="Index" style="text-decoration: none; cursor: pointer;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <h3>Mağaza</h3>
-            <p>Yeni məhsulları kəşf et.</p>
-        </a>
-        @if (User.IsInRole("Seller"))
-        {
-            <a class="sb-trust__item" asp-area="Seller" asp-controller="Store" asp-action="Index" style="text-decoration: none; cursor: pointer;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-                <h3>Mağazam</h3>
-                <p>Mağaza və məhsullarını idarə et.</p>
-            </a>
-        }
-        else
-        {
-            <a class="sb-trust__item" asp-controller="Support" asp-action="Index" style="text-decoration: none; cursor: pointer;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <h3>Dəstək</h3>
-                <p>Tez-tez verilən suallar və əlaqə.</p>
-            </a>
-        }
+<div class="sb-modal" id="sbChangePasswordModal" aria-hidden="true" role="dialog">
+    <div class="sb-modal__backdrop" data-modal-close></div>
+    <div class="sb-modal__panel">
+        <header class="sb-modal__head">
+            <h3>Parolu dəyiş</h3>
+            <button type="button" class="sb-icon-btn" data-modal-close aria-label="Bağla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </header>
+        <form class="sb-modal__body" data-change-password-form novalidate>
+            @Html.AntiForgeryToken()
+            <div class="sb-acc-field">
+                <label>Mövcud parol</label>
+                <input type="password" name="currentPassword" required autocomplete="current-password" />
+            </div>
+            <div class="sb-acc-field">
+                <label>Yeni parol</label>
+                <input type="password" name="newPassword" required minlength="6" autocomplete="new-password" />
+            </div>
+            <div class="sb-acc-field">
+                <label>Yeni parolu təkrarla</label>
+                <input type="password" name="confirmNewPassword" required minlength="6" autocomplete="new-password" />
+            </div>
+            <div class="sb-modal__error" data-change-password-error hidden></div>
+            <div class="sb-modal__actions">
+                <button type="button" class="sb-btn-ghost" data-modal-close>Ləğv</button>
+                <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" data-change-password-submit>Yenilə</button>
+            </div>
+        </form>
     </div>
-</section>
+</div>

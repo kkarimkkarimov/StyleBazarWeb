@@ -1,0 +1,6 @@
+@model AccountPanelViewModel
+@{
+    ViewData["StubTitle"] = "Ünvanlarım";
+    ViewData["StubSubtitle"] = "Çatdırılma ünvanlarının idarə olunması Phase 6b-də əlavə olunacaq.";
+}
+@await Html.PartialAsync("_AccountStubPage", Model)

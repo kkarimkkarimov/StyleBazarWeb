@@ -393,6 +393,45 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("HeroBanners");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.LoginEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "CreatedDate");
+
+                    b.ToTable("LoginEvents");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.NewsletterSubscriber", b =>
                 {
                     b.Property<int>("Id")
@@ -773,6 +812,10 @@ namespace Stylebazar.DAL.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("FacebookHandle")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<string>("InstagramHandle")
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
@@ -800,6 +843,10 @@ namespace Stylebazar.DAL.Migrations
                         .HasColumnType("nvarchar(120)");
 
                     b.Property<string>("TelegramHandle")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("TikTokHandle")
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
@@ -964,6 +1011,17 @@ namespace Stylebazar.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentCategory");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.LoginEvent", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>

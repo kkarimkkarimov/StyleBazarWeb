@@ -29,6 +29,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<HeroBanner> HeroBanners => Set<HeroBanner>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
+    public DbSet<LoginEvent> LoginEvents => Set<LoginEvent>();
 
     public override int SaveChanges()
     {

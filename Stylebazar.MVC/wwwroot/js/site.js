@@ -49,6 +49,10 @@
         safe('setupPdpTabs',             setupPdpTabs);
         safe('setupTileRails',           setupTileRails);
         safe('setupShopsSearch',         setupShopsSearch);
+        safe('setupAvatarUploader',      setupAvatarUploader);
+        safe('setupAccountProfileForm',  setupAccountProfileForm);
+        safe('setupSellerProfile',       setupSellerProfile);
+        safe('setupChangePasswordModal', setupChangePasswordModal);
 
         // Final safety net: even if every reveal-on-scroll path failed,
         // any .sb-reveal element still hidden after 1500 ms is force-shown.
@@ -1489,6 +1493,210 @@
         } else if (window.location.hash === '#sbQa') {
             var qa = tabs.querySelector('[data-tab="qa"]');
             if (qa) qa.click();
+        }
+    }
+
+    /* ----------- Avatar uploader (clicking the circle opens the file picker) ----------- */
+    function setupAvatarUploader() {
+        document.querySelectorAll('[data-avatar-uploader]').forEach(function (wrap) {
+            var input = wrap.querySelector('[data-avatar-input]');
+            if (!input) return;
+            var preview = wrap.querySelector('[data-avatar-preview]');
+            var label = document.querySelector('[data-avatar-label]');
+            var triggerBtn = document.querySelector('[data-avatar-trigger]');
+
+            if (triggerBtn) {
+                triggerBtn.addEventListener('click', function (e) { e.preventDefault(); input.click(); });
+            }
+
+            input.addEventListener('change', function () {
+                var file = input.files && input.files[0];
+                if (!file) return;
+
+                if (label) label.textContent = file.name;
+
+                // Local preview
+                if (preview) {
+                    var url = URL.createObjectURL(file);
+                    preview.innerHTML = '<img src="' + url + '" alt="" />';
+                }
+
+                // Server upload
+                var fd = new FormData();
+                fd.append('file', file);
+                var token = getAntiForgeryToken();
+                if (token) fd.append('__RequestVerificationToken', token);
+
+                fetch('/Account/UploadAvatar', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (res) { return res.json().catch(function () { return null; }); })
+                .then(function (data) {
+                    if (data && data.ok) {
+                        showToast('Şəkil yeniləndi', 'success');
+                    } else {
+                        var msg = (data && (data.error || firstValidationError(data.errors))) || 'Şəkil yüklənmədi.';
+                        showToast(msg, 'error');
+                    }
+                })
+                .catch(function () { showToast('Şəkil yüklənmədi.', 'error'); });
+            });
+        });
+    }
+
+    /* ----------- Account Profile form (image 1) — AJAX update ----------- */
+    function setupAccountProfileForm() {
+        var form = document.querySelector('[data-acc-profile-form]');
+        if (!form) return;
+        var submit = form.querySelector('[data-acc-profile-submit]');
+        var errBox = form.querySelector('[data-acc-profile-error]');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (errBox) { errBox.hidden = true; errBox.textContent = ''; }
+            if (submit) submit.classList.add('is-loading');
+
+            var fd = new FormData(form);
+            fetch('/Account/UpdateProfile', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            })
+            .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, json: j }; }); })
+            .then(function (r) {
+                if (!r.ok) {
+                    var msg = (r.json && (r.json.error || firstValidationError(r.json.errors))) || 'Yenilənmədi.';
+                    if (errBox) { errBox.textContent = msg; errBox.hidden = false; }
+                    else showToast(msg, 'error');
+                    return;
+                }
+                showToast('Profil yeniləndi', 'success');
+            })
+            .catch(function () {
+                if (errBox) { errBox.textContent = 'Şəbəkə xətası.'; errBox.hidden = false; }
+                else showToast('Şəbəkə xətası.', 'error');
+            })
+            .finally(function () { if (submit) submit.classList.remove('is-loading'); });
+        });
+    }
+
+    /* ----------- Seller Profile (image 2) — Save All button posts both forms ----------- */
+    function setupSellerProfile() {
+        var saveBtn = document.querySelector('[data-seller-save-all]');
+        if (!saveBtn) return;
+        var profileForm = document.querySelector('[data-seller-profile-form]');
+        var socialForm = document.querySelector('[data-seller-social-form]');
+
+        saveBtn.addEventListener('click', function () {
+            if (saveBtn.dataset.busy === '1') return;
+            saveBtn.dataset.busy = '1';
+            saveBtn.classList.add('is-loading');
+
+            var calls = [];
+
+            if (profileForm) {
+                var fd1 = new FormData(profileForm);
+                calls.push(fetch('/Seller/UpdateProfile', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd1
+                }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j, label: 'profile' }; }); }));
+            }
+            if (socialForm) {
+                var storeId = socialForm.querySelector('input[name="storeId"]')?.value || '0';
+                if (storeId !== '0') {
+                    var fd2 = new FormData(socialForm);
+                    calls.push(fetch('/Seller/UpdateStoreContacts', {
+                        method: 'POST', credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: fd2
+                    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j, label: 'social' }; }); }));
+                }
+            }
+
+            Promise.all(calls).then(function (results) {
+                var fail = results.find(function (r) { return !r.ok; });
+                if (fail) {
+                    var msg = (fail.json && (fail.json.error || firstValidationError(fail.json.errors))) || 'Yenilənmədi.';
+                    showToast(msg, 'error');
+                } else {
+                    showToast('Bütün dəyişikliklər yadda saxlanıldı', 'success');
+                }
+            })
+            .catch(function () { showToast('Şəbəkə xətası.', 'error'); })
+            .finally(function () {
+                saveBtn.dataset.busy = '';
+                saveBtn.classList.remove('is-loading');
+            });
+        });
+    }
+
+    /* ----------- Change Password modal (shared between Account + Seller) ----------- */
+    function setupChangePasswordModal() {
+        var modal = document.getElementById('sbChangePasswordModal');
+        if (!modal) return;
+        var form = modal.querySelector('[data-change-password-form]');
+        var errBox = modal.querySelector('[data-change-password-error]');
+        var submit = modal.querySelector('[data-change-password-submit]');
+
+        function open() {
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function () {
+                var first = modal.querySelector('input[name="currentPassword"]');
+                if (first) first.focus();
+            }, 80);
+        }
+        function close() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (form) form.reset();
+            if (errBox) { errBox.hidden = true; errBox.textContent = ''; }
+        }
+
+        document.querySelectorAll('[data-change-password-open]').forEach(function (btn) {
+            btn.addEventListener('click', open);
+        });
+        modal.querySelectorAll('[data-modal-close]').forEach(function (btn) {
+            btn.addEventListener('click', close);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+        });
+
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (errBox) { errBox.hidden = true; errBox.textContent = ''; }
+                if (submit) submit.classList.add('is-loading');
+
+                var fd = new FormData(form);
+                fetch('/Account/ChangePassword', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, json: j }; }); })
+                .then(function (r) {
+                    if (!r.ok) {
+                        var msg = (r.json && (r.json.error || firstValidationError(r.json.errors))) || 'Parol yenilənmədi.';
+                        if (errBox) { errBox.textContent = msg; errBox.hidden = false; }
+                        return;
+                    }
+                    showToast('Parol yeniləndi', 'success');
+                    close();
+                })
+                .catch(function () {
+                    if (errBox) { errBox.textContent = 'Şəbəkə xətası.'; errBox.hidden = false; }
+                })
+                .finally(function () { if (submit) submit.classList.remove('is-loading'); });
+            });
         }
     }
 })();

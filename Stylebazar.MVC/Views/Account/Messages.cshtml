@@ -1,0 +1,6 @@
+@model AccountPanelViewModel
+@{
+    ViewData["StubTitle"] = "Messages";
+    ViewData["StubSubtitle"] = "Satıcılarla yazışma tezliklə əlavə olunacaq.";
+}
+@await Html.PartialAsync("_AccountStubPage", Model)

@@ -73,4 +73,12 @@ public static class Messages
         public const string NotFound = "Subscriber was not found.";
         public const string AlreadySubscribed = "This email is already subscribed.";
     }
+
+    public static class Account
+    {
+        public const string NotAuthenticated = "Bu əməliyyat üçün hesabınıza daxil olun.";
+        public const string NotFound = "İstifadəçi tapılmadı.";
+        public const string WrongCurrentPassword = "Mövcud parol səhvdir.";
+        public const string AvatarRequired = "Şəkil seçilməyib.";
+    }
 }

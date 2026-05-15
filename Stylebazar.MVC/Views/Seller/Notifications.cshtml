@@ -1,0 +1,6 @@
+@model SellerPanelViewModel
+@{
+    ViewData["StubTitle"] = "Notifications";
+    ViewData["StubSubtitle"] = "Yeni rəy, sual və sistem bildirişləri tezliklə.";
+}
+@await Html.PartialAsync("_SellerStubPage", Model)

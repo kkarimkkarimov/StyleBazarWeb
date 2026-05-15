@@ -1,0 +1,6 @@
+@model AccountPanelViewModel
+@{
+    ViewData["StubTitle"] = "Dashboard";
+    ViewData["StubSubtitle"] = "İcmal, sürətli keçidlər və xəbərdarlıqlar tezliklə.";
+}
+@await Html.PartialAsync("_AccountStubPage", Model)

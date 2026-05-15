@@ -13,6 +13,13 @@ public class StoreDetailDto
     public bool IsActive { get; set; }
     public int ProductCount { get; set; }
 
+    // Contact / social channels
+    public string? WhatsAppNumber { get; set; }
+    public string? InstagramHandle { get; set; }
+    public string? TelegramHandle { get; set; }
+    public string? FacebookHandle { get; set; }
+    public string? TikTokHandle { get; set; }
+
     public string OwnerId { get; set; } = string.Empty;
     public string OwnerFullName { get; set; } = string.Empty;
 
