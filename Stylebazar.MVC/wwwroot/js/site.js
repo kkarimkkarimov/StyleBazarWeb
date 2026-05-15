@@ -806,11 +806,30 @@
             });
         });
 
-        // Submit loading
+        // Submit loading — but only paint the spinner when the form is
+        // actually navigating. jQuery Unobtrusive Validation may have called
+        // preventDefault() if AcceptTerms / required fields fail — adding
+        // `is-loading` then would strand a dead button (the class applies
+        // `pointer-events: none`, so the user can't click again to retry).
         document.querySelectorAll('[data-auth-form]').forEach(function (form) {
-            form.addEventListener('submit', function () {
-                var btn = form.querySelector('[data-submit]');
-                if (btn) btn.classList.add('is-loading');
+            var btn = form.querySelector('[data-submit]');
+            if (!btn) return;
+
+            form.addEventListener('submit', function (e) {
+                // setTimeout(0) runs after all sync submit handlers, so
+                // defaultPrevented reflects the final state after validation.
+                setTimeout(function () {
+                    if (!e.defaultPrevented) btn.classList.add('is-loading');
+                }, 0);
+            });
+
+            // Belt-and-braces: if a stuck spinner ever lingers (server
+            // round-trip error, slow validator, etc.), any subsequent edit
+            // to the form releases the button so the user can retry.
+            ['input', 'change'].forEach(function (ev) {
+                form.addEventListener(ev, function () {
+                    btn.classList.remove('is-loading');
+                }, true);
             });
         });
     }
