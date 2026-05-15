@@ -25,7 +25,10 @@ public class MappingProfile : Profile
             .ForMember(d => d.NormalizedUserName, opt => opt.MapFrom(s => s.Email.ToUpperInvariant()))
             .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email))
             .ForMember(d => d.NormalizedEmail, opt => opt.MapFrom(s => s.Email.ToUpperInvariant()))
-            .ForMember(d => d.FullName, opt => opt.MapFrom(s => s.FullName));
+            .ForMember(d => d.FullName, opt => opt.MapFrom(s => s.FullName))
+            // AppUser inherits IdentityUser, not Entity<TId>, so the global audit-field
+            // hook in ApplicationDbContext doesn't fire — stamp creation time here.
+            .ForMember(d => d.CreatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
         // Categories
         CreateMap<Category, CategoryListDto>()

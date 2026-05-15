@@ -41,9 +41,17 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+
+    // HTTPS redirect only in non-dev — keeps the dev startup log clean
+    // (Kestrel logs "Failed to determine the https port for redirect" when
+    // no HTTPS listener is bound, which the default dev profile omits).
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+// Friendly 404 / 403 / 500 — re-execute through /Home/Error so the layout
+// (header, footer, brand) renders consistently around the error message.
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
+
 app.UseRouting();
 
 app.UseAuthentication();

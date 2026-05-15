@@ -16,10 +16,17 @@ public static class PersistenceServiceRegistration
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
-                sql => sql.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(3),
-                    errorNumbersToAdd: null)));
+                sql => sql
+                    .EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(3),
+                        errorNumbersToAdd: null)
+                    // Multi-collection Include queries (Product → Images + Sizes +
+                    // Colors + Reviews) cause cartesian explosion under the default
+                    // SingleQuery mode AND emit a MultipleCollectionIncludeWarning
+                    // at runtime. SplitQuery runs N small queries instead — fewer
+                    // bytes over the wire, no warning.
+                    .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
         services.AddScoped<IStoreRepository, StoreRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();

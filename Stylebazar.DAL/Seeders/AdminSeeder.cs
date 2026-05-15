@@ -37,6 +37,14 @@ public static class AdminSeeder
             // Make sure existing user has Admin role
             if (!await userManager.IsInRoleAsync(existing, UserRole.Admin.ToString()))
                 await userManager.AddToRoleAsync(existing, UserRole.Admin.ToString());
+
+            // Backfill CreatedDate for admins seeded before that field was set
+            // (pre-fix runs left it at DateTime.MinValue / 0001-01-01).
+            if (existing.CreatedDate == default)
+            {
+                existing.CreatedDate = DateTime.UtcNow;
+                await userManager.UpdateAsync(existing);
+            }
             return;
         }
 
@@ -46,7 +54,10 @@ public static class AdminSeeder
             UserName = email,
             Email = email,
             FullName = fullName,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            // AppUser is IdentityUser-based, not Entity<TId>, so the SaveChanges
+            // audit hook doesn't fire — stamp creation time explicitly.
+            CreatedDate = DateTime.UtcNow
         };
 
         IdentityResult create = await userManager.CreateAsync(admin, password);

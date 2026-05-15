@@ -1,13 +1,29 @@
 @model ErrorViewModel
 @{
-    ViewData["Title"] = "Xəta";
+    int? code = ViewData["StatusCode"] as int?;
+    string headline = code switch
+    {
+        404 => "Səhifə tapılmadı",
+        403 => "Giriş qadağandır",
+        401 => "Giriş tələb olunur",
+        _   => "Bir səhv baş verdi"
+    };
+    string badge = code?.ToString() ?? "5×0";
+    string subtitle = code switch
+    {
+        404 => "Axtardığın səhifə köçürülmüş, silinmiş və ya heç vaxt mövcud olmamış ola bilər.",
+        403 => "Bu səhifəyə icazən yoxdur. Hesabını dəyişməyə cəhd et və ya ana səhifəyə qayıt.",
+        401 => "Bu səhifəyə baxmaq üçün hesabına daxil olmalısan.",
+        _   => "Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyə və ya ana səhifəyə qayıda bilərsən."
+    };
+    ViewData["Title"] = headline;
 }
 
 <section class="sb-section" style="max-width: 540px; margin: 80px auto; text-align: center;">
-    <div style="font-family: var(--sb-font-display); font-size: 5rem; line-height: 1; color: var(--sb-accent); margin-bottom: 8px;">5×0</div>
-    <h1>Bir səhv baş verdi</h1>
+    <div style="font-family: var(--sb-font-display); font-size: 5rem; line-height: 1; color: var(--sb-accent); margin-bottom: 8px;">@badge</div>
+    <h1>@headline</h1>
     <p class="sb-muted" style="font-size: 1.05rem;">
-        Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyə və ya ana səhifəyə qayıda bilərsən.
+        @subtitle
     </p>
     @if (Model.ShowRequestId)
     {

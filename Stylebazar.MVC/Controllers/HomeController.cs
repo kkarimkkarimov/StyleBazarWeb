@@ -77,6 +77,15 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error() =>
-        View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    public IActionResult Error(int? code = null)
+    {
+        // The status-code re-execution middleware forwards the original code so
+        // the view can show a friendly headline for 404 vs 500.
+        ViewData["StatusCode"] = code;
+        Response.StatusCode = code ?? 500;
+        return View(new ErrorViewModel
+        {
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        });
+    }
 }

@@ -79,8 +79,11 @@ public class AddressManager : IAddressService
         string userId = RequireUserId();
 
         // Hard cap — keeps the UI sane and stops scripted spam.
+        // OrderBy required: EF translates size:1 into TOP/OFFSET, which SQL
+        // Server forbids without ORDER BY (warns at runtime otherwise).
         Paginate<Address> existing = await _repo.GetListAsync(
             predicate: a => a.UserId == userId,
+            orderBy: q => q.OrderBy(a => a.Id),
             index: 0, size: 1,
             enableTracking: false,
             cancellationToken: ct);
@@ -214,6 +217,7 @@ public class AddressManager : IAddressService
     {
         Paginate<Address> defaults = await _repo.GetListAsync(
             predicate: a => a.UserId == userId && a.IsDefault && (exceptId == null || a.Id != exceptId),
+            orderBy: q => q.OrderBy(a => a.Id),
             index: 0, size: int.MaxValue,
             enableTracking: true,
             cancellationToken: ct);

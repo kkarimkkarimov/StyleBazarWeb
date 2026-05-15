@@ -93,8 +93,10 @@ public class WishlistManager : IWishlistService
             return new HashSet<int>();
 
         string userId = _currentUser.UserId;
+        // OrderBy required: TOP/OFFSET FETCH NEXT in SQL Server forbids no-order paging.
         Paginate<DAL.Entities.Wishlist> page = await _repo.GetListAsync(
             predicate: w => w.UserId == userId,
+            orderBy: q => q.OrderBy(w => w.Id),
             index: 0,
             size: int.MaxValue,
             enableTracking: false,
@@ -109,8 +111,10 @@ public class WishlistManager : IWishlistService
             return 0;
         string userId = _currentUser.UserId;
         // size: 1 → server runs COUNT(*) + TOP 1, we only read .Count.
+        // Cheap stable order keeps SQL Server happy (no warning).
         Paginate<DAL.Entities.Wishlist> page = await _repo.GetListAsync(
             predicate: w => w.UserId == userId,
+            orderBy: q => q.OrderBy(w => w.Id),
             index: 0,
             size: 1,
             enableTracking: false,

@@ -240,6 +240,7 @@ public class ProductManager : IProductService
         {
             Paginate<ProductImage> mains = await _images.GetListAsync(
                 predicate: i => i.ProductId == productId && i.IsMain,
+                orderBy: q => q.OrderBy(i => i.Id),
                 index: 0,
                 size: int.MaxValue,
                 cancellationToken: ct);
@@ -284,6 +285,7 @@ public class ProductManager : IProductService
 
         Paginate<ProductImage> all = await _images.GetListAsync(
             predicate: i => i.ProductId == productId,
+            orderBy: q => q.OrderBy(i => i.DisplayOrder),
             index: 0,
             size: int.MaxValue,
             cancellationToken: ct);

@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
+      AutoMapper 14+ is Lucky Penny Software's commercial fork. It emits a
+      benign "no valid license key" runtime warning until a paid license
+      is added in production. The earlier MIT-licensed 13.x line has an
+      unfixed high-severity CVE (GHSA-rvv3-g6hj-g44x), so staying on the
+      Lucky Penny line is the safer trade-off for now.
+    -->
     <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
