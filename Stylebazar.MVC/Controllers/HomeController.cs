@@ -8,6 +8,8 @@ using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
 using Stylebazar.BLL.Services.Products;
+using Stylebazar.BLL.DTOs.Stores;
+using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Services.Stories;
 using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.MVC.Models;
@@ -24,6 +26,7 @@ public class HomeController : Controller
     private readonly IStoryService _stories;
     private readonly INewsletterService _newsletter;
     private readonly IWishlistService _wishlist;
+    private readonly IStoreService _stores;
 
     public HomeController(
         IProductService products,
@@ -31,7 +34,8 @@ public class HomeController : Controller
         IHeroBannerService banners,
         IStoryService stories,
         INewsletterService newsletter,
-        IWishlistService wishlist)
+        IWishlistService wishlist,
+        IStoreService stores)
     {
         _products = products;
         _categories = categories;
@@ -39,6 +43,7 @@ public class HomeController : Controller
         _stories = stories;
         _newsletter = newsletter;
         _wishlist = wishlist;
+        _stores = stores;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -53,6 +58,12 @@ public class HomeController : Controller
             new ProductListQueryDto { Page = 1, PageSize = 8, IsActive = true },
             ct);
 
+        // Top 6 active stores for the "Tanınan mağazalar" rail. Returns
+        // StoreListDto which already carries product-count + 5 thumbnails.
+        Paginate<StoreListDto> stores = await _stores.GetListAsync(
+            new StoreListQueryDto { Page = 1, PageSize = 6, IsActive = true },
+            ct);
+
         // Wishlist IDs — empty set for anon. Used to paint heart icons on
         // every product card without one round-trip per card.
         HashSet<int> wishlistIds = await _wishlist.GetMyProductIdsAsync(ct);
@@ -64,6 +75,9 @@ public class HomeController : Controller
             Categories = tree.Take(8).ToList(),
             FeaturedProducts = featured,
             LatestProducts = latest.Items.ToList(),
+            FeaturedStores = stores.Items.ToList(),
+            TotalProductCount = latest.Count,
+            TotalStoreCount = stores.Count,
             WishlistProductIds = wishlistIds
         };
 
