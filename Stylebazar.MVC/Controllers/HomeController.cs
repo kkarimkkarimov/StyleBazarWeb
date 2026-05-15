@@ -1,16 +1,13 @@
 using System.Diagnostics;
 using Core.Persistence.Paging;
 using Microsoft.AspNetCore.Mvc;
+using Stylebazar.BLL.DTOs.Categories;
 using Stylebazar.BLL.DTOs.Newsletter;
 using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Categories;
-using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
 using Stylebazar.BLL.Services.Products;
-using Stylebazar.BLL.DTOs.Stores;
-using Stylebazar.BLL.Services.Stores;
-using Stylebazar.BLL.Services.Stories;
 using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.MVC.Models;
 using Stylebazar.MVC.ViewModels;
@@ -18,70 +15,60 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.MVC.Controllers;
 
+/// <summary>
+/// "Ana səhifə" — the root URL "/" now serves the product catalog
+/// (the same page that used to live under "Mağaza"/"/Shop"). We re-use
+/// the existing Shop/Index view so there is a single source of truth
+/// for the catalog UI; /Shop remains as a legacy alias.
+/// </summary>
 public class HomeController : Controller
 {
     private readonly IProductService _products;
     private readonly ICategoryService _categories;
-    private readonly IHeroBannerService _banners;
-    private readonly IStoryService _stories;
     private readonly INewsletterService _newsletter;
     private readonly IWishlistService _wishlist;
-    private readonly IStoreService _stores;
 
     public HomeController(
         IProductService products,
         ICategoryService categories,
-        IHeroBannerService banners,
-        IStoryService stories,
         INewsletterService newsletter,
-        IWishlistService wishlist,
-        IStoreService stores)
+        IWishlistService wishlist)
     {
         _products = products;
         _categories = categories;
-        _banners = banners;
-        _stories = stories;
         _newsletter = newsletter;
         _wishlist = wishlist;
-        _stores = stores;
     }
 
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index([FromQuery] ProductListQueryDto query, CancellationToken ct)
     {
-        // Sequential awaits — one scoped DbContext per request, so we cannot
-        // fire these in parallel with Task.WhenAll without crashing EF Core.
-        var banners = await _banners.GetActiveAsync(ct);
-        var stories = await _stories.GetActiveFeedAsync(ct);
-        var tree = await _categories.GetTreeAsync(ct);
-        var featured = await _products.GetFeaturedAsync(8, ct);
-        Paginate<ProductListDto> latest = await _products.GetListAsync(
-            new ProductListQueryDto { Page = 1, PageSize = 8, IsActive = true },
-            ct);
+        // Mirror ShopController.Index — buyers see only active products,
+        // sellers and admins can flip the IsActive flag via query string.
+        if (!User.IsInRole("Admin") && !User.IsInRole("Seller") && !query.IsActive.HasValue)
+            query.IsActive = true;
 
-        // Top 6 active stores for the "Tanınan mağazalar" rail. Returns
-        // StoreListDto which already carries product-count + 5 thumbnails.
-        Paginate<StoreListDto> stores = await _stores.GetListAsync(
-            new StoreListQueryDto { Page = 1, PageSize = 6, IsActive = true },
-            ct);
-
-        // Wishlist IDs — empty set for anon. Used to paint heart icons on
-        // every product card without one round-trip per card.
+        Paginate<ProductListDto> products = await _products.GetListAsync(query, ct);
+        Paginate<CategoryListDto> catPage = await _categories.GetListAsync(
+            new CategoryListQueryDto { Page = 1, PageSize = 100 }, ct);
         HashSet<int> wishlistIds = await _wishlist.GetMyProductIdsAsync(ct);
 
-        var vm = new HomeIndexViewModel
+        var vm = new ShopIndexViewModel
         {
-            Banners = banners,
-            Stories = stories,
-            Categories = tree.Take(8).ToList(),
-            FeaturedProducts = featured,
-            LatestProducts = latest.Items.ToList(),
-            FeaturedStores = stores.Items.ToList(),
-            TotalProductCount = latest.Count,
-            TotalStoreCount = stores.Count,
+            Query = query,
+            Products = products,
+            Categories = catPage.Items.ToList(),
+            Brands = products.Items
+                .Where(p => !string.IsNullOrWhiteSpace(p.Brand))
+                .Select(p => p.Brand!)
+                .Distinct()
+                .OrderBy(b => b)
+                .ToList(),
             WishlistProductIds = wishlistIds
         };
 
-        return View(vm);
+        // Re-use the catalog view. "Ana səhifə" is just a renamed entry
+        // point — the page content is the catalog the user expects.
+        return View("~/Views/Shop/Index.cshtml", vm);
     }
 
     public IActionResult Privacy() => View();
