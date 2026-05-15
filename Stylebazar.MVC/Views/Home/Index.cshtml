@@ -6,7 +6,7 @@
 }
 
 @* ============== FEATURED — pastel lilac rail with arrow nav ============== *@
-<section class="sb-tile sb-tile--lilac sb-reveal">
+<section class="sb-tile sb-tile--lilac">
     <header class="sb-tile__head">
         <h2>Seçilmiş məhsullar</h2>
         <a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true" class="sb-tile__view-all">
@@ -47,7 +47,7 @@
 @* ============== STORIES — pastel blush rail ============== *@
 @if (Model.Stories.Any())
 {
-    <section class="sb-tile sb-tile--blush sb-reveal">
+    <section class="sb-tile sb-tile--blush">
         <header class="sb-tile__head">
             <h2>Hekayələr</h2>
         </header>
@@ -77,7 +77,7 @@
 }
 
 @* ============== PRODUCTS — pastel mint grid (rich cards) ============== *@
-<section class="sb-tile sb-tile--mint sb-reveal">
+<section class="sb-tile sb-tile--mint">
     <header class="sb-tile__head">
         <h2>Məhsullar</h2>
         <a asp-controller="Shop" asp-action="Index" class="sb-tile__view-all">

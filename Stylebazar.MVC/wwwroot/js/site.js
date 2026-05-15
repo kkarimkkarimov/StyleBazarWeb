@@ -5,37 +5,58 @@
 (function () {
     'use strict';
 
+    // Each setup is wrapped in a try-catch so a single page-specific
+    // setup throwing (e.g. a selector that didn't exist) never cascades
+    // and prevents later setups (notably setupRevealOnScroll) from
+    // running and leaving content invisible.
+    function safe(name, fn) {
+        try { fn(); }
+        catch (e) {
+            if (typeof console !== 'undefined' && console.error) {
+                console.error('[StyleBazar] ' + name + ' failed:', e);
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        setupScrollHeader();
-        setupMegaMenus();
-        setupSearchOverlay();
-        setupMobileMenu();
-        setupMobileAccordion();
-        setupUserDropdown();
-        setupLanguageDropdown();
-        setupBottomBarActiveState();
-        setupWishlistHearts();
-        setupAuthForms();
-        setupHeroCarousel();
-        setupProductRails();
-        setupStoryViewer();
-        setupNewsletterForm();
-        setupRevealOnScroll();
-        setupShopFilter();
-        setupShopSort();
-        setupProductGallery();
-        setupSizePicker();
-        setupQuantityStepper();
-        setupLightbox();
-        setupReviewForm();
-        setupMyReviewActions();
-        setupPdpDescription();
-        setupColorPicker();
-        setupContactCtas();
-        setupShareRow();
-        setupPdpTabs();
-        setupTileRails();
-        setupShopsSearch();
+        safe('setupScrollHeader',        setupScrollHeader);
+        safe('setupMegaMenus',           setupMegaMenus);
+        safe('setupSearchOverlay',       setupSearchOverlay);
+        safe('setupMobileMenu',          setupMobileMenu);
+        safe('setupMobileAccordion',     setupMobileAccordion);
+        safe('setupUserDropdown',        setupUserDropdown);
+        safe('setupLanguageDropdown',    setupLanguageDropdown);
+        safe('setupBottomBarActiveState',setupBottomBarActiveState);
+        safe('setupWishlistHearts',      setupWishlistHearts);
+        safe('setupAuthForms',           setupAuthForms);
+        safe('setupHeroCarousel',        setupHeroCarousel);
+        safe('setupProductRails',        setupProductRails);
+        safe('setupStoryViewer',         setupStoryViewer);
+        safe('setupNewsletterForm',      setupNewsletterForm);
+        safe('setupRevealOnScroll',      setupRevealOnScroll);
+        safe('setupShopFilter',          setupShopFilter);
+        safe('setupShopSort',            setupShopSort);
+        safe('setupProductGallery',      setupProductGallery);
+        safe('setupSizePicker',          setupSizePicker);
+        safe('setupQuantityStepper',     setupQuantityStepper);
+        safe('setupLightbox',            setupLightbox);
+        safe('setupReviewForm',          setupReviewForm);
+        safe('setupMyReviewActions',     setupMyReviewActions);
+        safe('setupPdpDescription',      setupPdpDescription);
+        safe('setupColorPicker',         setupColorPicker);
+        safe('setupContactCtas',         setupContactCtas);
+        safe('setupShareRow',            setupShareRow);
+        safe('setupPdpTabs',             setupPdpTabs);
+        safe('setupTileRails',           setupTileRails);
+        safe('setupShopsSearch',         setupShopsSearch);
+
+        // Final safety net: even if every reveal-on-scroll path failed,
+        // any .sb-reveal element still hidden after 1500 ms is force-shown.
+        setTimeout(function () {
+            document.querySelectorAll('.sb-reveal:not(.is-visible)').forEach(function (el) {
+                el.classList.add('is-visible');
+            });
+        }, 1500);
     });
 
     /* ----------- Header scroll-shrink ----------- */
