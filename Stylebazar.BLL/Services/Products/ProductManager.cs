@@ -72,7 +72,7 @@ public class ProductManager : IProductService
                 (!query.IsActive.HasValue || p.IsActive == query.IsActive.Value) &&
                 (!query.Condition.HasValue || p.Condition == query.Condition.Value),
             orderBy: BuildOrder(query.SortBy),
-            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images),
+            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images).Include(p => p.Reviews),
             index: query.Page - 1,
             size: query.PageSize,
             enableTracking: false,
@@ -96,7 +96,7 @@ public class ProductManager : IProductService
         Paginate<Product> page = await _products.GetListAsync(
             predicate: p => p.IsActive && p.IsFeatured && (p.FeaturedUntil == null || p.FeaturedUntil > DateTime.UtcNow),
             orderBy: q => q.OrderByDescending(p => p.CreatedDate),
-            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images),
+            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images).Include(p => p.Reviews),
             index: 0,
             size: take,
             enableTracking: false,
@@ -110,7 +110,7 @@ public class ProductManager : IProductService
         Paginate<Product> page = await _products.GetListAsync(
             predicate: p => p.StoreId == storeId,
             orderBy: q => q.OrderByDescending(p => p.CreatedDate),
-            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images),
+            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images).Include(p => p.Reviews),
             index: 0,
             size: int.MaxValue,
             enableTracking: false,

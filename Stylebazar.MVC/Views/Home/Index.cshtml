@@ -1,0 +1,124 @@
+@model HomeIndexViewModel
+@{
+    ViewData["Title"] = "Ana səhifə";
+    ViewData["WishlistIds"] = Model.WishlistProductIds;
+    var storiesJson = System.Text.Json.JsonSerializer.Serialize(Model.Stories);
+}
+
+@* ============== FEATURED — pastel lilac rail with arrow nav ============== *@
+<section class="sb-tile sb-tile--lilac sb-reveal">
+    <header class="sb-tile__head">
+        <h2>Seçilmiş məhsullar</h2>
+        <a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true" class="sb-tile__view-all">
+            Hamısına bax
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+    </header>
+
+    @if (Model.FeaturedProducts.Any())
+    {
+        <div class="sb-tile__rail-wrap">
+            <button type="button" class="sb-tile__nav sb-tile__nav--prev" data-rail-prev aria-label="Sol">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="sb-tile__rail" data-rail>
+                @{
+                    ViewData["CardVariant"] = "compact";
+                }
+                @foreach (var p in Model.FeaturedProducts)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+                @{
+                    ViewData["CardVariant"] = "rich";
+                }
+            </div>
+            <button type="button" class="sb-tile__nav sb-tile__nav--next" data-rail-next aria-label="Sağ">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="sb-tile__empty"><span>İlk seçilmişlər tezliklə burada görsənəcək.</span></div>
+    }
+</section>
+
+@* ============== STORIES — pastel blush rail ============== *@
+@if (Model.Stories.Any())
+{
+    <section class="sb-tile sb-tile--blush sb-reveal">
+        <header class="sb-tile__head">
+            <h2>Hekayələr</h2>
+        </header>
+        <div class="sb-stories-rail" id="sbStoriesRail">
+            @foreach (var storeGroup in Model.Stories)
+            {
+                <button type="button" class="sb-story-item"
+                        data-store-id="@storeGroup.StoreId"
+                        data-store-name="@storeGroup.StoreName">
+                    <span class="sb-story-item__ring">
+                        <span class="sb-story-item__avatar">
+                            @if (!string.IsNullOrEmpty(storeGroup.StoreProfileImageUrl))
+                            {
+                                <img src="@storeGroup.StoreProfileImageUrl" alt="@storeGroup.StoreName" loading="lazy" />
+                            }
+                            else
+                            {
+                                <span class="sb-story-item__initial">@(storeGroup.StoreName.Length > 0 ? storeGroup.StoreName[0].ToString().ToUpper() : "S")</span>
+                            }
+                        </span>
+                    </span>
+                    <span class="sb-story-item__name">@storeGroup.StoreName</span>
+                </button>
+            }
+        </div>
+    </section>
+}
+
+@* ============== PRODUCTS — pastel mint grid (rich cards) ============== *@
+<section class="sb-tile sb-tile--mint sb-reveal">
+    <header class="sb-tile__head">
+        <h2>Məhsullar</h2>
+        <a asp-controller="Shop" asp-action="Index" class="sb-tile__view-all">
+            Hamısına bax
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+    </header>
+
+    @if (Model.LatestProducts.Any())
+    {
+        <div class="sb-tile__grid">
+            @foreach (var p in Model.LatestProducts)
+            {
+                <partial name="_ProductCard" model="p" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="sb-tile__empty"><span>İlk məhsullar tezliklə görsənəcək.</span></div>
+    }
+</section>
+
+@* ============== STORY VIEWER MODAL ============== *@
+<div class="sb-story-viewer" id="sbStoryViewer" aria-hidden="true">
+    <button type="button" class="sb-story-viewer__close" data-story-close aria-label="Bağla">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="sb-story-viewer__frame">
+        <div class="sb-story-viewer__progress" data-story-progress></div>
+        <header class="sb-story-viewer__head">
+            <span class="sb-story-viewer__avatar" data-story-avatar></span>
+            <span class="sb-story-viewer__store" data-story-store></span>
+        </header>
+        <img class="sb-story-viewer__img" data-story-img alt="" />
+        <span class="sb-story-viewer__caption" data-story-caption></span>
+        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--prev" data-story-prev aria-label="Əvvəlki"></button>
+        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--next" data-story-next aria-label="Növbəti"></button>
+    </div>
+</div>
+
+@section Scripts {
+    <script id="sbStoriesData" type="application/json">@Html.Raw(storiesJson)</script>
+}

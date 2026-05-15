@@ -64,7 +64,9 @@ public class MappingProfile : Profile
             .ForMember(d => d.CategoryName, opt => opt.MapFrom(s => s.Category != null ? s.Category.Name : string.Empty))
             .ForMember(d => d.MainImageUrl, opt => opt.MapFrom(s =>
                 s.Images.Where(i => i.IsMain).Select(i => i.ImageUrl).FirstOrDefault()
-                ?? s.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).FirstOrDefault()));
+                ?? s.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).FirstOrDefault()))
+            .ForMember(d => d.ReviewCount, opt => opt.MapFrom(s => s.Reviews.Count))
+            .ForMember(d => d.AverageRating, opt => opt.MapFrom(s => s.Reviews.Any() ? s.Reviews.Average(r => (double)r.Rating) : 0d));
 
         CreateMap<Product, ProductDetailDto>()
             .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Store != null ? s.Store.Name : string.Empty))

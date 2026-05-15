@@ -2,12 +2,20 @@
 @model Stylebazar.BLL.DTOs.Products.ProductListDto
 @{
     // Wishlist state is published page-side via ViewData["WishlistIds"] (HashSet<int>).
-    // Anonymous / non-wishlist => default false (heart starts empty).
     var wishlistIds = ViewData["WishlistIds"] as HashSet<int>;
     bool isInWishlist = wishlistIds is not null && wishlistIds.Contains(Model.Id);
+
+    // Card variant: ViewData["CardVariant"] = "compact" (rail, minimal) or "rich" (grid, full)
+    string variant = ViewData["CardVariant"] as string ?? "rich";
+    bool isRich = variant != "compact";
+
+    var avg = Model.AverageRating;
+    var fullStars = (int)Math.Floor(avg);
+    var hasHalf = avg - fullStars >= 0.5;
+    bool hasDiscount = Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < Model.Price;
 }
 
-<article class="sb-product">
+<article class="sb-product @(isRich ? "sb-product--rich" : "sb-product--compact")">
     <a class="sb-product__media" asp-controller="Shop" asp-action="Detail" asp-route-id="@Model.Id" aria-label="@Model.Name">
         @if (!string.IsNullOrEmpty(Model.MainImageUrl))
         {
@@ -20,32 +28,47 @@
             </div>
         }
 
-        @* Top-left badge stack: Featured / Discount + Condition *@
-        <div class="sb-product__badges">
-            @if (Model.IsFeatured)
+        @* Status / condition badge — top-right, rounded rect (Geyin-style "In Stock" / "Used") *@
+        <div class="sb-product__status">
+            @if (Model.StockQuantity <= 0)
             {
-                <span class="sb-product__badge sb-product__badge--accent">Featured</span>
+                <span class="sb-product-pill sb-product-pill--muted">Tükəndi</span>
             }
-            else if (Model.DiscountPrice.HasValue)
+            else if (Model.Condition == ProductCondition.SecondHand)
             {
-                var pct = (int)Math.Round(((double)(Model.Price - Model.DiscountPrice.Value) / (double)Model.Price) * 100);
-                <span class="sb-product__badge sb-product__badge--dark">-@pct%</span>
-            }
-
-            @if (Model.Condition == ProductCondition.SecondHand)
-            {
-                <span class="sb-product__badge sb-product__badge--soft">İkinci əl</span>
+                <span class="sb-product-pill sb-product-pill--info">İkinci əl</span>
             }
             else if (Model.Condition == ProductCondition.Vintage)
             {
-                <span class="sb-product__badge sb-product__badge--soft">Vintage</span>
+                <span class="sb-product-pill sb-product-pill--info">Vintage</span>
             }
-
-            @if (Model.StockQuantity <= 0)
+            else
             {
-                <span class="sb-product__badge sb-product__badge--muted">Tükəndi</span>
+                <span class="sb-product-pill sb-product-pill--info">Stokda</span>
             }
         </div>
+
+        @* Featured / discount accent badge — top-left *@
+        @if (Model.IsFeatured || hasDiscount)
+        {
+            <div class="sb-product__accent">
+                @if (Model.IsFeatured)
+                {
+                    <span class="sb-product-pill sb-product-pill--accent">Featured</span>
+                }
+                else if (hasDiscount)
+                {
+                    var pct = (int)Math.Round(((double)(Model.Price - Model.DiscountPrice!.Value) / (double)Model.Price) * 100);
+                    <span class="sb-product-pill sb-product-pill--dark">-@pct%</span>
+                }
+            </div>
+        }
+
+        @* Store chip — bottom-left overlay on image (only on rich variant) *@
+        @if (isRich && !string.IsNullOrWhiteSpace(Model.StoreName))
+        {
+            <span class="sb-product__store-chip">@Model.StoreName</span>
+        }
     </a>
 
     <button type="button"
@@ -57,19 +80,49 @@
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 
-    <h3 class="sb-product__name">
-        <a asp-controller="Shop" asp-action="Detail" asp-route-id="@Model.Id">@Model.Name</a>
-    </h3>
-    <p class="sb-product__store">@Model.StoreName</p>
-    <div class="sb-product__price">
-        @if (Model.DiscountPrice.HasValue)
+    <div class="sb-product__body">
+        <h3 class="sb-product__name">
+            <a asp-controller="Shop" asp-action="Detail" asp-route-id="@Model.Id">@Model.Name</a>
+        </h3>
+
+        @if (isRich && !string.IsNullOrWhiteSpace(Model.Description))
         {
-            <span class="sb-product__price-now sb-product__price-now--accent">@Model.DiscountPrice.Value.ToString("N2") ₼</span>
-            <span class="sb-product__price-old">@Model.Price.ToString("N2") ₼</span>
+            <p class="sb-product__desc">@Model.Description</p>
         }
-        else
+        else if (!isRich)
         {
-            <span class="sb-product__price-now">@Model.Price.ToString("N2") ₼</span>
+            <p class="sb-product__store">@Model.StoreName</p>
         }
+
+        <div class="sb-product__foot">
+            <div class="sb-product__price">
+                @if (hasDiscount)
+                {
+                    <span class="sb-product__price-now sb-product__price-now--accent">
+                        <svg class="sb-product__leaf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.99.3 1.34.3 4 0 8-4 10-10 0-2-1-4-1-4z"/></svg>
+                        @Model.DiscountPrice!.Value.ToString("N2")
+                    </span>
+                    <span class="sb-product__price-old">@Model.Price.ToString("N2") ₼</span>
+                }
+                else
+                {
+                    <span class="sb-product__price-now">
+                        <svg class="sb-product__leaf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.99.3 1.34.3 4 0 8-4 10-10 0-2-1-4-1-4z"/></svg>
+                        @Model.Price.ToString("N2")
+                    </span>
+                }
+            </div>
+
+            @if (isRich)
+            {
+                <div class="sb-product__stars" aria-label="Reytinq: @avg.ToString("F1") / 5">
+                    @for (var i = 1; i <= 5; i++)
+                    {
+                        var filled = i <= fullStars || (i == fullStars + 1 && hasHalf);
+                        <svg class="@(filled ? "" : "is-empty")" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    }
+                </div>
+            }
+        </div>
     </div>
 </article>
