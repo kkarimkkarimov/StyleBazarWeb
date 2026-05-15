@@ -738,7 +738,10 @@
             });
         });
 
-        // Password strength meter
+        // Password strength meter — calibrated against Identity's actual rules
+        // in AddIdentityServices() (min 6 chars + lowercase + digit). Anything
+        // that *passes Identity* is at least Orta. Length / Az alphabet
+        // letters / extra classes promote it to Güclü.
         document.querySelectorAll('[data-pwd-meter]').forEach(function (input) {
             var field = input.closest('.sb-field');
             if (!field) return;
@@ -748,17 +751,23 @@
 
             function score(v) {
                 if (!v) return 0;
-                var s = 0;
-                if (v.length >= 6) s++;
-                if (v.length >= 10 && /[a-z]/.test(v) && /[0-9]/.test(v)) s++;
-                if (v.length >= 12 && /[A-Z]/.test(v) && /[^a-zA-Z0-9]/.test(v)) s++;
-                if (v.length < 6) s = 0;
-                return s; // 0..3
+                var lower    = /[a-zəıöüşçğ]/.test(v);
+                var digit    = /\d/.test(v);
+                var long6    = v.length >= 6;
+                if (!long6) return 0;
+                // Identity-passing baseline (≥6 + lower + digit) = Orta.
+                if (lower && digit) {
+                    var upper  = /[A-ZƏIÖÜŞÇĞ]/.test(v);
+                    var symbol = /[^a-zA-Z0-9əıöüşçğƏIÖÜŞÇĞ]/.test(v);
+                    var long10 = v.length >= 10;
+                    if ((upper && long10) || (symbol && long10) || (upper && symbol)) return 3;
+                    return 2;
+                }
+                return 1;
             }
 
             function render() {
                 var s = score(input.value);
-                var classes = ['is-weak', 'is-medium', 'is-strong'];
                 bars.forEach(function (b, i) {
                     b.classList.remove('is-weak', 'is-medium', 'is-strong');
                     if (i < s) {
@@ -773,10 +782,10 @@
                         label.textContent = 'Çox zəif — minimum 6 simvol';
                         label.classList.add('is-weak');
                     } else if (s === 1) {
-                        label.textContent = 'Zəif';
+                        label.textContent = 'Zəif — rəqəm və hərf əlavə et';
                         label.classList.add('is-weak');
                     } else if (s === 2) {
-                        label.textContent = 'Orta';
+                        label.textContent = 'Yaxşı — qəbul olunur';
                         label.classList.add('is-medium');
                     } else {
                         label.textContent = 'Güclü';
@@ -806,31 +815,71 @@
             });
         });
 
-        // Submit loading — but only paint the spinner when the form is
-        // actually navigating. jQuery Unobtrusive Validation may have called
-        // preventDefault() if AcceptTerms / required fields fail — adding
-        // `is-loading` then would strand a dead button (the class applies
-        // `pointer-events: none`, so the user can't click again to retry).
+        // Auth forms — submit loading + stale-error clearing
         document.querySelectorAll('[data-auth-form]').forEach(function (form) {
             var btn = form.querySelector('[data-submit]');
-            if (!btn) return;
+            var summary = form.querySelector('.sb-form-summary');
 
-            form.addEventListener('submit', function (e) {
-                // setTimeout(0) runs after all sync submit handlers, so
-                // defaultPrevented reflects the final state after validation.
-                setTimeout(function () {
-                    if (!e.defaultPrevented) btn.classList.add('is-loading');
-                }, 0);
-            });
+            // ---- 1. Submit-loading spinner ----------------------------
+            // jQuery Unobtrusive Validation may preventDefault() if a field
+            // is invalid. setTimeout(0) lets that run first, so we only paint
+            // the spinner when the form is actually navigating — otherwise
+            // the button (which has pointer-events: none in is-loading) would
+            // be permanently dead until full page reload.
+            if (btn) {
+                form.addEventListener('submit', function (e) {
+                    setTimeout(function () {
+                        if (!e.defaultPrevented) btn.classList.add('is-loading');
+                    }, 0);
+                });
+            }
 
-            // Belt-and-braces: if a stuck spinner ever lingers (server
-            // round-trip error, slow validator, etc.), any subsequent edit
-            // to the form releases the button so the user can retry.
-            ['input', 'change'].forEach(function (ev) {
-                form.addEventListener(ev, function () {
-                    btn.classList.remove('is-loading');
-                }, true);
-            });
+            // ---- 2. Clear stale server-rendered errors ----------------
+            // When ModelState has errors, asp-validation-for bakes the message
+            // text into <span class="sb-field__error"> server-side. jQuery
+            // Unobtrusive only manages errors it produced — server-rendered
+            // text stays put until the next submit. That's why "Davam etmək
+            // üçün şərtləri qəbul et." persisted in the screenshot even
+            // AFTER the user checked the box.
+            //
+            // We clear the error span + the `is-error` paint on the input
+            // as soon as the user touches the field. The form summary at
+            // the top is cleared on the first edit anywhere.
+            function clearError(field) {
+                if (!field) return;
+                var err = field.querySelector('.sb-field__error');
+                if (err) err.textContent = '';
+                field.querySelectorAll('input, select, textarea').forEach(function (el) {
+                    el.classList.remove('is-error', 'input-validation-error');
+                });
+                // Also clear the wrapper modifier some inputs use.
+                field.classList.remove('is-error');
+            }
+
+            function clearSummary() {
+                if (summary) summary.style.display = 'none';
+            }
+
+            // Inputs / textareas / selects — clear on every keystroke.
+            form.querySelectorAll('.sb-field input, .sb-field textarea, .sb-field select')
+                .forEach(function (el) {
+                    el.addEventListener('input', function () {
+                        clearError(el.closest('.sb-field'));
+                        clearSummary();
+                        if (btn) btn.classList.remove('is-loading');
+                    });
+                });
+
+            // Checkboxes / radios — clear on toggle (covers AcceptTerms,
+            // role cards, RememberMe).
+            form.querySelectorAll('input[type="checkbox"], input[type="radio"]')
+                .forEach(function (el) {
+                    el.addEventListener('change', function () {
+                        clearError(el.closest('.sb-field'));
+                        clearSummary();
+                        if (btn) btn.classList.remove('is-loading');
+                    });
+                });
         });
     }
 

@@ -34,26 +34,50 @@ public class AuthManager : IAuthService
         _loginValidator = loginValidator;
     }
 
-    public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
+    public async Task<RegisterResultDto> RegisterAsync(RegisterDto dto, CancellationToken ct = default)
     {
-        ValidationResult validation = await _registerValidator.ValidateAsync(dto);
+        // ---- 1. DTO shape validation ----------------------------------
+        // Az-message FluentValidation rules — same language as the UI.
+        ValidationResult validation = await _registerValidator.ValidateAsync(dto, ct);
         if (!validation.IsValid)
-            throw new ValidationException(validation.Errors);
+        {
+            return new RegisterResultDto
+            {
+                Succeeded = false,
+                FieldErrors = validation.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
+            };
+        }
 
+        // ---- 2. Identity create ---------------------------------------
         AppUser user = _mapper.Map<AppUser>(dto);
-
         IdentityResult createResult = await _userManager.CreateAsync(user, dto.Password);
         if (!createResult.Succeeded)
-            return createResult;
+            return BuildErrorResult(createResult);
 
+        // ---- 3. Assign role -------------------------------------------
         IdentityResult roleResult = await _userManager.AddToRoleAsync(user, dto.Role.ToString());
         if (!roleResult.Succeeded)
         {
+            // Compensating delete — never leave a user without a role.
             await _userManager.DeleteAsync(user);
-            return roleResult;
+            return BuildErrorResult(roleResult);
         }
 
-        return IdentityResult.Success;
+        // ---- 4. Success -----------------------------------------------
+        string firstName = string.IsNullOrWhiteSpace(dto.FullName)
+            ? "stilist"
+            : dto.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault() ?? "stilist";
+
+        return new RegisterResultDto
+        {
+            Succeeded = true,
+            UserId = user.Id,
+            Email = user.Email,
+            FirstName = firstName
+        };
     }
 
     public async Task<LoginResultDto> LoginAsync(LoginDto dto)
@@ -64,11 +88,11 @@ public class AuthManager : IAuthService
 
         AppUser? user = await _userManager.FindByEmailAsync(dto.Email);
         if (user is null)
-            throw new UnauthorizedException("Invalid credentials.");
+            throw new UnauthorizedException("Email və ya parol səhvdir.");
 
         bool passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
         if (!passwordValid)
-            throw new UnauthorizedException("Invalid credentials.");
+            throw new UnauthorizedException("Email və ya parol səhvdir.");
 
         IList<string> roles = await _userManager.GetRolesAsync(user);
         (string token, DateTime expiresAt) = _tokenService.CreateToken(user, roles);
@@ -84,4 +108,47 @@ public class AuthManager : IAuthService
     }
 
     public Task LogoutAsync() => _signInManager.SignOutAsync();
+
+    // ---------- helpers ----------
+
+    /// <summary>
+    /// Translates a failed IdentityResult into our DTO shape. Errors are
+    /// routed to the most relevant field where the code identifies one —
+    /// password rule violations go to "Password", duplicate-email to "Email",
+    /// everything else lands as a form-level error.
+    /// </summary>
+    private static RegisterResultDto BuildErrorResult(IdentityResult result)
+    {
+        Dictionary<string, List<string>> byField = new();
+        List<string> general = new();
+
+        foreach (IdentityError err in result.Errors)
+        {
+            string az = IdentityErrorTranslator.Translate(err);
+            string? field = err.Code switch
+            {
+                "DuplicateUserName" or "DuplicateEmail" or "InvalidEmail" => "Email",
+                "PasswordTooShort" or "PasswordRequiresUniqueChars"
+                    or "PasswordRequiresNonAlphanumeric" or "PasswordRequiresDigit"
+                    or "PasswordRequiresLower" or "PasswordRequiresUpper" => "Password",
+                _ => null
+            };
+
+            if (field is null)
+                general.Add(az);
+            else
+            {
+                if (!byField.TryGetValue(field, out var list))
+                    byField[field] = list = new List<string>();
+                if (!list.Contains(az)) list.Add(az);
+            }
+        }
+
+        return new RegisterResultDto
+        {
+            Succeeded = false,
+            FieldErrors = byField.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray()),
+            GeneralError = general.Count == 0 ? null : string.Join(" • ", general.Distinct())
+        };
+    }
 }

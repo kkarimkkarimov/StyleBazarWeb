@@ -58,12 +58,19 @@ public class AccountController : Controller
     {
         ViewData["ReturnUrl"] = returnUrl;
 
+        // Defensive: if a stale form is POSTed by an already-signed-in tab,
+        // just send them home — don't double-log a fresh sign-in.
+        if (_signInManager.IsSignedIn(User))
+            return SafeLocalRedirect(returnUrl);
+
         if (!ModelState.IsValid)
             return View(model);
 
         AppUser? user = await _userManager.FindByEmailAsync(model.Email);
         if (user is null)
         {
+            // Same message whether user is missing or password is wrong — no
+            // account-enumeration via the response.
             ModelState.AddModelError(string.Empty, "Email və ya parol səhvdir.");
             return View(model);
         }
@@ -73,7 +80,6 @@ public class AccountController : Controller
 
         if (!result.Succeeded)
         {
-            // Audit-log the failed attempt
             await _events.TrackAsync(user.Id, LoginEventType.FailedSignIn,
                 GetClientIp(), GetUserAgent(), ct);
             ModelState.AddModelError(string.Empty, "Email və ya parol səhvdir.");
@@ -83,10 +89,7 @@ public class AccountController : Controller
         await _events.TrackAsync(user.Id, LoginEventType.SignIn,
             GetClientIp(), GetUserAgent(), ct);
 
-        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            return Redirect(returnUrl);
-
-        return RedirectToAction("Index", "Home");
+        return SafeLocalRedirect(returnUrl);
     }
 
     // -------- Register --------
@@ -103,51 +106,60 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken ct = default)
     {
+        if (_signInManager.IsSignedIn(User))
+            return RedirectToAction("Index", "Home");
+
         if (!ModelState.IsValid)
             return View(model);
 
-        try
+        RegisterDto dto = new()
         {
-            RegisterDto dto = new()
-            {
-                FullName = model.FullName,
-                Email = model.Email,
-                Password = model.Password,
-                ConfirmPassword = model.ConfirmPassword,
-                Role = model.Role
-            };
+            FullName = model.FullName.Trim(),
+            Email = model.Email.Trim(),
+            Password = model.Password,
+            ConfirmPassword = model.ConfirmPassword,
+            Role = model.Role
+        };
 
-            IdentityResult result = await _authService.RegisterAsync(dto);
-            if (!result.Succeeded)
-            {
-                foreach (IdentityError err in result.Errors)
-                    ModelState.AddModelError(string.Empty, err.Description);
-                return View(model);
-            }
+        RegisterResultDto result = await _authService.RegisterAsync(dto, ct);
 
-            AppUser? created = await _userManager.FindByEmailAsync(model.Email);
-            if (created is not null)
-            {
-                await _signInManager.SignInAsync(created, isPersistent: false);
-                await _events.TrackAsync(created.Id, LoginEventType.SignUp,
-                    GetClientIp(), GetUserAgent(), ct);
-            }
-
-            TempData["Success"] = $"Xoş gəldin, {model.FullName.Split(' ')[0]}! Qeydiyyatın tamamlandı.";
-            return RedirectToAction("Index", "Home");
-        }
-        catch (ValidationException vex)
+        if (!result.Succeeded)
         {
-            foreach (KeyValuePair<string, string[]> kv in vex.Errors)
-                foreach (string msg in kv.Value)
-                    ModelState.AddModelError(kv.Key, msg);
+            // Field-keyed errors land next to their inputs.
+            foreach ((string field, string[] messages) in result.FieldErrors)
+                foreach (string msg in messages)
+                    ModelState.AddModelError(field, msg);
+
+            // Anything that doesn't map to a field shows in the form summary.
+            if (!string.IsNullOrEmpty(result.GeneralError))
+                ModelState.AddModelError(string.Empty, result.GeneralError);
+
             return View(model);
         }
-        catch (BusinessException bex)
+
+        // Successful create → sign in + audit log + welcome toast.
+        AppUser? created = await _userManager.FindByIdAsync(result.UserId!);
+        if (created is not null)
         {
-            ModelState.AddModelError(string.Empty, bex.Message);
-            return View(model);
+            await _signInManager.SignInAsync(created, isPersistent: false);
+            await _events.TrackAsync(created.Id, LoginEventType.SignUp,
+                GetClientIp(), GetUserAgent(), ct);
         }
+
+        TempData["Success"] = $"Xoş gəldin, {result.FirstName}! Qeydiyyatın tamamlandı.";
+        return RedirectToAction("Index", "Home");
+    }
+
+    /// <summary>
+    /// Safely follows a returnUrl when local, otherwise sends to home.
+    /// Centralizes the open-redirect guard so every signed-in entry point
+    /// behaves the same way.
+    /// </summary>
+    private IActionResult SafeLocalRedirect(string? returnUrl)
+    {
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+        return RedirectToAction("Index", "Home");
     }
 
     // -------- Logout --------

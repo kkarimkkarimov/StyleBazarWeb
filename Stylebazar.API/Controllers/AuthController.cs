@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.Services.Authentication;
@@ -19,13 +18,20 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    public async Task<IActionResult> Register([FromBody] RegisterDto dto, CancellationToken ct)
     {
-        IdentityResult result = await _authService.RegisterAsync(dto);
+        RegisterResultDto result = await _authService.RegisterAsync(dto, ct);
         if (!result.Succeeded)
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+        {
+            // Same shape as ValidationException emits for the rest of the API.
+            return BadRequest(new
+            {
+                errors = result.FieldErrors,
+                error = result.GeneralError
+            });
+        }
 
-        return Ok(new { message = "Registration successful." });
+        return Ok(new { message = "Registration successful.", userId = result.UserId });
     }
 
     [HttpPost("login")]
