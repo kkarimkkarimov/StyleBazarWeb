@@ -1,6 +1,153 @@
-@model SellerPanelViewModel
+@model SellerProductsPageViewModel
 @{
-    ViewData["StubTitle"] = "Products";
-    ViewData["StubSubtitle"] = "Məhsul siyahısı, edit/silmə, stok yenilənməsi tezliklə.";
+    ViewData["Title"] = "Məhsullarım";
+    var p = Model.Profile;
+
+    string TabClass(bool? v) => Model.IsActive == v ? "is-active" : "";
 }
-@await Html.PartialAsync("_SellerStubPage", Model)
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", p)
+
+    <main class="sb-seller-main">
+        <header class="sb-prod-page-head">
+            <div>
+                <h1>Məhsullar</h1>
+                <p>Mağazandakı bütün məhsulları idarə et — aktivləşdir, redaktə et, yenisini əlavə et.</p>
+            </div>
+            @if (Model.HasAnyStore)
+            {
+                <a asp-action="AddProduct" class="sb-btn-primary sb-btn-primary--cyan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Yeni məhsul</span>
+                </a>
+            }
+        </header>
+
+        @if (TempData["Success"] is string okMsg)
+        {
+            <div class="sb-prod-toast sb-prod-toast--ok">@okMsg</div>
+        }
+        @if (TempData["Error"] is string errMsg)
+        {
+            <div class="sb-prod-toast sb-prod-toast--err">@errMsg</div>
+        }
+
+        @if (!Model.HasAnyStore)
+        {
+            <div class="sb-seller-card sb-prod-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
+                <h2>Mağazan hələ yoxdur</h2>
+                <p>Məhsul əlavə etmək üçün əvvəlcə mağaza adı seç. Sonra Store Settings-də logo, təsvir və əlaqə kanalları əlavə edə bilərsən.</p>
+                <form asp-action="CreateMyStore" method="post" class="sb-prod-store-quick">
+                    @Html.AntiForgeryToken()
+                    <input type="text" name="name" required minlength="2" maxlength="120" placeholder="Mağaza adı" autocomplete="off" />
+                    <button type="submit" class="sb-btn-primary sb-btn-primary--cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Mağaza yarat</span>
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="sb-prod-tabs" role="tablist">
+                <a asp-action="Products" class="sb-prod-tab @TabClass(null)">
+                    Hamısı <span>@Model.TotalCount</span>
+                </a>
+                <a asp-action="Products" asp-route-isActive="true" class="sb-prod-tab @TabClass(true)">
+                    Aktiv <span>@Model.ActiveCount</span>
+                </a>
+                <a asp-action="Products" asp-route-isActive="false" class="sb-prod-tab @TabClass(false)">
+                    Deaktiv <span>@Model.InactiveCount</span>
+                </a>
+            </div>
+
+            @if (!Model.Products.Any())
+            {
+                <div class="sb-seller-card sb-prod-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                    <h2>@(Model.IsActive switch { true => "Aktiv məhsul yoxdur", false => "Deaktiv məhsul yoxdur", _ => "Hələ məhsul əlavə etməmisən" })</h2>
+                    <p>İlk məhsulunu əlavə et — alıcılar mağazanı yalnız aktiv məhsullarla görəcəklər.</p>
+                    <a asp-action="AddProduct" class="sb-btn-primary sb-btn-primary--cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Yeni məhsul</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="sb-prod-grid">
+                    @foreach (var prod in Model.Products)
+                    {
+                        <article class="sb-prod-card @(prod.IsActive ? "" : "is-inactive")" data-product-id="@prod.Id">
+                            <a asp-action="EditProduct" asp-route-id="@prod.Id" class="sb-prod-card__media">
+                                @if (!string.IsNullOrEmpty(prod.MainImageUrl))
+                                {
+                                    <img src="@prod.MainImageUrl" alt="@prod.Name" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <span class="sb-prod-card__placeholder">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    </span>
+                                }
+                                @if (!prod.IsActive)
+                                {
+                                    <span class="sb-prod-card__badge sb-prod-card__badge--off">Deaktiv</span>
+                                }
+                            </a>
+
+                            <div class="sb-prod-card__body">
+                                <h3 class="sb-prod-card__name">
+                                    <a asp-action="EditProduct" asp-route-id="@prod.Id">@prod.Name</a>
+                                </h3>
+                                <div class="sb-prod-card__meta">
+                                    <span class="sb-prod-card__cat">@prod.CategoryName</span>
+                                    @if (prod.StockQuantity > 0)
+                                    {
+                                        <span class="sb-prod-card__stock">Stok: @prod.StockQuantity</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="sb-prod-card__stock sb-prod-card__stock--zero">Stok: 0</span>
+                                    }
+                                </div>
+                                <div class="sb-prod-card__price">
+                                    @if (prod.DiscountPrice.HasValue)
+                                    {
+                                        <strong>@prod.DiscountPrice.Value.ToString("0.##") ₼</strong>
+                                        <span class="sb-prod-card__price-orig">@prod.Price.ToString("0.##") ₼</span>
+                                    }
+                                    else
+                                    {
+                                        <strong>@prod.Price.ToString("0.##") ₼</strong>
+                                    }
+                                </div>
+                            </div>
+
+                            <footer class="sb-prod-card__actions">
+                                <label class="sb-prod-card__toggle" title="@(prod.IsActive ? "Deaktiv et" : "Aktiv et")">
+                                    <input type="checkbox" data-prod-toggle data-prod-id="@prod.Id" @(prod.IsActive ? "checked" : "") />
+                                    <span class="sb-prod-card__toggle-slider"></span>
+                                </label>
+                                <a asp-action="EditProduct" asp-route-id="@prod.Id" class="sb-prod-card__btn" title="Redaktə et">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </a>
+                                <form asp-action="DeleteProduct" asp-route-id="@prod.Id" method="post" class="sb-prod-card__del-form" data-prod-delete-form>
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="sb-prod-card__btn sb-prod-card__btn--danger" title="Sil">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                    </button>
+                                </form>
+                            </footer>
+                        </article>
+                    }
+                </div>
+            }
+        }
+    </main>
+</section>
+
+@* Hidden anti-forgery for AJAX toggle endpoint *@
+<form id="sb-prod-ajax-af" style="display:none">@Html.AntiForgeryToken()</form>

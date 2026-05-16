@@ -21,6 +21,8 @@ public class ProductManager : IProductService
 {
     private readonly IProductRepository _products;
     private readonly IProductImageRepository _images;
+    private readonly IProductSizeRepository _sizes;
+    private readonly IProductColorRepository _colors;
     private readonly IStoreRepository _stores;
     private readonly IMapper _mapper;
     private readonly ProductBusinessRules _rules;
@@ -34,6 +36,8 @@ public class ProductManager : IProductService
     public ProductManager(
         IProductRepository products,
         IProductImageRepository images,
+        IProductSizeRepository sizes,
+        IProductColorRepository colors,
         IStoreRepository stores,
         IMapper mapper,
         ProductBusinessRules rules,
@@ -44,6 +48,8 @@ public class ProductManager : IProductService
     {
         _products = products;
         _images = images;
+        _sizes = sizes;
+        _colors = colors;
         _stores = stores;
         _mapper = mapper;
         _rules = rules;
@@ -119,6 +125,26 @@ public class ProductManager : IProductService
         return _mapper.Map<List<ProductListDto>>(page.Items);
     }
 
+    public async Task<List<ProductListDto>> GetMineAsync(bool? isActive = null, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(_currentUser.UserId))
+            return new List<ProductListDto>();
+
+        string userId = _currentUser.UserId;
+
+        Paginate<Product> page = await _products.GetListAsync(
+            predicate: p => p.Store.OwnerId == userId
+                            && (!isActive.HasValue || p.IsActive == isActive.Value),
+            orderBy: q => q.OrderByDescending(p => p.CreatedDate),
+            include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images).Include(p => p.Reviews),
+            index: 0,
+            size: int.MaxValue,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        return _mapper.Map<List<ProductListDto>>(page.Items);
+    }
+
     public async Task<ProductDetailDto> GetByIdAsync(int id, CancellationToken ct = default)
     {
         Product product = await GetWithDetailsAsync(p => p.Id == id, ct);
@@ -157,16 +183,31 @@ public class ProductManager : IProductService
             Price = dto.Price,
             DiscountPrice = dto.DiscountPrice,
             StockQuantity = dto.StockQuantity,
-            Brand = dto.Brand?.Trim(),
+            Brand = NullIfBlank(dto.Brand),
             Condition = dto.Condition,
             StoreId = dto.StoreId,
             CategoryId = dto.CategoryId,
             IsActive = true,
             IsFeatured = false,
+            HasDelivery = dto.HasDelivery,
+            Material = NullIfBlank(dto.Material),
+            Pattern = NullIfBlank(dto.Pattern),
+            Neckline = NullIfBlank(dto.Neckline),
+            SleeveLength = NullIfBlank(dto.SleeveLength),
+            Fit = NullIfBlank(dto.Fit),
+            Season = NullIfBlank(dto.Season),
+            Style = NullIfBlank(dto.Style),
+            CountryOfOrigin = NullIfBlank(dto.CountryOfOrigin),
             Sizes = dto.Sizes.Select(s => new ProductSize
             {
                 Size = s.Size.Trim(),
                 StockQuantity = s.StockQuantity
+            }).ToList(),
+            Colors = dto.Colors.Select((c, i) => new ProductColor
+            {
+                Name = c.Name.Trim(),
+                Hex = c.Hex.Trim(),
+                DisplayOrder = i
             }).ToList()
         };
 
@@ -180,9 +221,12 @@ public class ProductManager : IProductService
         if (!validation.IsValid)
             throw new ValidationException(validation.Errors);
 
-        Product? tracked = await _products.GetAsync(p => p.Id == id, cancellationToken: ct);
+        Product? tracked = await _products.GetAsync(
+            p => p.Id == id,
+            include: q => q.Include(p => p.Sizes).Include(p => p.Colors),
+            cancellationToken: ct);
         if (tracked is null)
-            throw new NotFoundException(nameof(Product), id);
+            throw new NotFoundException(Messages.Product.NotFound);
 
         Store store = await _rules.StoreMustExistAndBeActiveAsync(tracked.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
@@ -194,18 +238,38 @@ public class ProductManager : IProductService
         string newSlug = string.IsNullOrWhiteSpace(dto.Slug) ? SlugHelper.Slugify(dto.Name) : dto.Slug.Trim();
         await _rules.SlugMustBeUniqueAsync(newSlug, excludeId: id, ct: ct);
 
+        // ---- core fields ----
         tracked.Name = dto.Name.Trim();
         tracked.Slug = newSlug;
         tracked.Description = dto.Description.Trim();
         tracked.Price = dto.Price;
         tracked.DiscountPrice = dto.DiscountPrice;
         tracked.StockQuantity = dto.StockQuantity;
-        tracked.Brand = dto.Brand?.Trim();
+        tracked.Brand = NullIfBlank(dto.Brand);
         tracked.Condition = dto.Condition;
         tracked.CategoryId = dto.CategoryId;
         tracked.IsActive = dto.IsActive;
+        tracked.HasDelivery = dto.HasDelivery;
+        tracked.Material = NullIfBlank(dto.Material);
+        tracked.Pattern = NullIfBlank(dto.Pattern);
+        tracked.Neckline = NullIfBlank(dto.Neckline);
+        tracked.SleeveLength = NullIfBlank(dto.SleeveLength);
+        tracked.Fit = NullIfBlank(dto.Fit);
+        tracked.Season = NullIfBlank(dto.Season);
+        tracked.Style = NullIfBlank(dto.Style);
+        tracked.CountryOfOrigin = NullIfBlank(dto.CountryOfOrigin);
 
         await _products.UpdateAsync(tracked, ct);
+
+        // ---- sizes diff ----
+        // Replace-all semantics: tags the user removed get deleted, new tags
+        // are inserted, kept tags update their stock without losing their Id
+        // (so any inbound references — none today, but future-proof — survive).
+        await SyncSizesAsync(tracked.Id, tracked.Sizes.ToList(), dto.Sizes, ct);
+
+        // ---- colors diff ----
+        await SyncColorsAsync(tracked.Id, tracked.Colors.ToList(), dto.Colors, ct);
+
         return await GetByIdAsync(id, ct);
     }
 
@@ -216,7 +280,7 @@ public class ProductManager : IProductService
             include: q => q.Include(p => p.Images),
             cancellationToken: ct);
         if (tracked is null)
-            throw new NotFoundException(nameof(Product), id);
+            throw new NotFoundException(Messages.Product.NotFound);
 
         Store store = await _rules.StoreMustExistAndBeActiveAsync(tracked.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
@@ -227,6 +291,20 @@ public class ProductManager : IProductService
         await _products.DeleteAsync(tracked, permanent: false, cancellationToken: ct);
     }
 
+    public async Task<ProductDetailDto> ToggleActiveAsync(int id, CancellationToken ct = default)
+    {
+        Product? tracked = await _products.GetAsync(p => p.Id == id, cancellationToken: ct);
+        if (tracked is null) throw new NotFoundException(Messages.Product.NotFound);
+
+        Store store = await _rules.StoreMustExistAndBeActiveAsync(tracked.StoreId, ct);
+        bool isAdmin = _currentUser.IsInRole("Admin");
+        _rules.MustOwnStore(store, _currentUser.UserId, isAdmin);
+
+        tracked.IsActive = !tracked.IsActive;
+        await _products.UpdateAsync(tracked, ct);
+        return await GetByIdAsync(id, ct);
+    }
+
     // ---------- Images ----------
 
     public async Task<ProductImageDto> AddImageAsync(int productId, IFormFile file, bool isMain, CancellationToken ct = default)
@@ -235,8 +313,12 @@ public class ProductManager : IProductService
 
         string url = await _fileStorage.SaveAsync(file, ImagesSubfolder, ct);
 
-        // If flagged as main, demote any existing main image first.
-        if (isMain)
+        // If flagged as main OR this is the very first image, ensure exactly
+        // one main exists. First-image auto-promotion saves the seller a click.
+        int existingCount = await CountImagesAsync(productId, ct);
+        bool shouldBeMain = isMain || existingCount == 0;
+
+        if (shouldBeMain)
         {
             Paginate<ProductImage> mains = await _images.GetListAsync(
                 predicate: i => i.ProductId == productId && i.IsMain,
@@ -257,7 +339,7 @@ public class ProductManager : IProductService
         {
             ProductId = productId,
             ImageUrl = url,
-            IsMain = isMain,
+            IsMain = shouldBeMain,
             DisplayOrder = displayOrder
         };
         ProductImage created = await _images.AddAsync(entity, ct);
@@ -274,9 +356,27 @@ public class ProductManager : IProductService
         if (image is null)
             throw new NotFoundException(Messages.Product.ImageNotFound);
 
+        bool wasMain = image.IsMain;
+
         // Best-effort delete on disk; database delete is the source of truth.
         await _fileStorage.DeleteAsync(image.ImageUrl, ct);
         await _images.DeleteAsync(image, permanent: true, cancellationToken: ct);
+
+        // Promote the next image to main so the PDP card never shows a fallback.
+        if (wasMain)
+        {
+            Paginate<ProductImage> next = await _images.GetListAsync(
+                predicate: i => i.ProductId == productId,
+                orderBy: q => q.OrderBy(i => i.DisplayOrder).ThenBy(i => i.Id),
+                index: 0, size: 1,
+                cancellationToken: ct);
+            ProductImage? successor = next.Items.FirstOrDefault();
+            if (successor is not null)
+            {
+                successor.IsMain = true;
+                await _images.UpdateAsync(successor, ct);
+            }
+        }
     }
 
     public async Task<ProductImageDto> SetMainImageAsync(int productId, int imageId, CancellationToken ct = default)
@@ -315,7 +415,7 @@ public class ProductManager : IProductService
 
         Product? tracked = await _products.GetAsync(p => p.Id == productId, cancellationToken: ct);
         if (tracked is null)
-            throw new NotFoundException(nameof(Product), productId);
+            throw new NotFoundException(Messages.Product.NotFound);
 
         tracked.IsFeatured = true;
         tracked.FeaturedUntil = days.HasValue ? DateTime.UtcNow.AddDays(days.Value) : null;
@@ -333,12 +433,23 @@ public class ProductManager : IProductService
             enableTracking: false,
             cancellationToken: ct);
         if (product is null)
-            throw new NotFoundException(nameof(Product), productId);
+            throw new NotFoundException(Messages.Product.NotFound);
 
         Store store = await _rules.StoreMustExistAndBeActiveAsync(product.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
         _rules.MustOwnStore(store, _currentUser.UserId, isAdmin);
         return product;
+    }
+
+    private async Task<int> CountImagesAsync(int productId, CancellationToken ct)
+    {
+        Paginate<ProductImage> page = await _images.GetListAsync(
+            predicate: i => i.ProductId == productId,
+            orderBy: q => q.OrderBy(i => i.Id),
+            index: 0, size: 1,
+            enableTracking: false,
+            cancellationToken: ct);
+        return page.Count;
     }
 
     private async Task<int> NextDisplayOrderAsync(int productId, CancellationToken ct)
@@ -369,10 +480,111 @@ public class ProductManager : IProductService
             cancellationToken: ct);
 
         if (product is null)
-            throw new NotFoundException(nameof(Product), 0);
+            throw new NotFoundException(Messages.Product.NotFound);
 
         return product;
     }
+
+    /// <summary>
+    /// Diff existing sizes against the incoming list. Keeps rows with matching
+    /// labels (updates their stock), deletes the rest, adds new ones.
+    /// </summary>
+    private async Task SyncSizesAsync(int productId, List<ProductSize> existing, List<CreateProductSizeDto> incoming, CancellationToken ct)
+    {
+        // Normalise inbound — keep only the last entry for duplicate labels
+        var byLabel = new Dictionary<string, CreateProductSizeDto>(StringComparer.OrdinalIgnoreCase);
+        foreach (var s in incoming)
+        {
+            string label = (s.Size ?? string.Empty).Trim();
+            if (label.Length == 0) continue;
+            byLabel[label] = s;
+        }
+
+        // Delete rows whose label is no longer in the inbound set
+        foreach (ProductSize row in existing)
+        {
+            if (!byLabel.ContainsKey(row.Size))
+                await _sizes.DeleteAsync(row, permanent: true, cancellationToken: ct);
+        }
+
+        // Upsert: update stock for existing labels, add new
+        var existingByLabel = existing.ToDictionary(r => r.Size, r => r, StringComparer.OrdinalIgnoreCase);
+        foreach (var (label, dto) in byLabel)
+        {
+            if (existingByLabel.TryGetValue(label, out ProductSize? row))
+            {
+                if (row.StockQuantity != dto.StockQuantity)
+                {
+                    row.StockQuantity = dto.StockQuantity;
+                    await _sizes.UpdateAsync(row, ct);
+                }
+            }
+            else
+            {
+                await _sizes.AddAsync(new ProductSize
+                {
+                    ProductId = productId,
+                    Size = label,
+                    StockQuantity = dto.StockQuantity
+                }, ct);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Same shape as <see cref="SyncSizesAsync"/> but for colours — matched by
+    /// case-insensitive name. Hex code updates in place; new names appended at end.
+    /// </summary>
+    private async Task SyncColorsAsync(int productId, List<ProductColor> existing, List<CreateProductColorDto> incoming, CancellationToken ct)
+    {
+        var byName = new Dictionary<string, CreateProductColorDto>(StringComparer.OrdinalIgnoreCase);
+        int order = 0;
+        var orderMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var c in incoming)
+        {
+            string name = (c.Name ?? string.Empty).Trim();
+            if (name.Length == 0) continue;
+            byName[name] = c;
+            orderMap[name] = order++;
+        }
+
+        foreach (ProductColor row in existing)
+        {
+            if (!byName.ContainsKey(row.Name))
+                await _colors.DeleteAsync(row, permanent: true, cancellationToken: ct);
+        }
+
+        var existingByName = existing.ToDictionary(r => r.Name, r => r, StringComparer.OrdinalIgnoreCase);
+        foreach (var (name, dto) in byName)
+        {
+            string hex = dto.Hex.Trim();
+            int desiredOrder = orderMap[name];
+
+            if (existingByName.TryGetValue(name, out ProductColor? row))
+            {
+                bool changed = row.Hex != hex || row.DisplayOrder != desiredOrder;
+                if (changed)
+                {
+                    row.Hex = hex;
+                    row.DisplayOrder = desiredOrder;
+                    await _colors.UpdateAsync(row, ct);
+                }
+            }
+            else
+            {
+                await _colors.AddAsync(new ProductColor
+                {
+                    ProductId = productId,
+                    Name = name,
+                    Hex = hex,
+                    DisplayOrder = desiredOrder
+                }, ct);
+            }
+        }
+    }
+
+    private static string? NullIfBlank(string? s) =>
+        string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
     private static Func<IQueryable<Product>, IOrderedQueryable<Product>> BuildOrder(string? sortBy) =>
         sortBy switch

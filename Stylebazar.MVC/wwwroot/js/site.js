@@ -86,6 +86,7 @@
         safe('setupSellerProfile',       setupSellerProfile);
         safe('setupChangePasswordModal', setupChangePasswordModal);
         safe('setupAddresses',           setupAddresses);
+        safe('setupSellerProducts',      setupSellerProducts);
 
         // Final safety net: even if every reveal-on-scroll path failed,
         // any .sb-reveal element still hidden after 1500 ms is force-shown.
@@ -2138,5 +2139,342 @@
 
         // Initial sync of empty-state flag in case it drifted server-side.
         refreshEmptyState();
+    }
+
+    /* -----------------------------------------------------------
+       Seller — Products (Phase 6c)
+       - Tag input for sizes/colors (Enter → tag, with stock or color picker)
+       - Image gallery: multi-upload, set-main, delete (all AJAX)
+       - List inline toggle (active/inactive)
+       - Delete-product confirm
+       ----------------------------------------------------------- */
+    function setupSellerProducts() {
+        var token = getAntiForgeryToken();
+
+        // ---------- 1. Tag input (sizes + colors) ----------
+        document.querySelectorAll('[data-tag-input]').forEach(function (root) {
+            var kind = root.getAttribute('data-tag-kind');  // 'size' | 'color'
+            var list = root.querySelector('[data-tag-list]');
+            var entry = root.querySelector('[data-tag-entry]');
+            if (!list || !entry) return;
+
+            var colorInput = root.querySelector('[data-tag-color]');
+            var colorPreview = root.querySelector('[data-tag-color-preview]');
+            if (colorInput && colorPreview) {
+                colorInput.addEventListener('input', function () {
+                    colorPreview.style.background = colorInput.value;
+                });
+            }
+
+            function makeIndexNames() {
+                // Re-index hidden field names so the model binder sees a
+                // contiguous Form.Sizes[0..n] / Form.Colors[0..n] array.
+                var tags = list.querySelectorAll('[data-tag]');
+                tags.forEach(function (tag, i) {
+                    var labelInput = tag.querySelector('[data-tag-hidden-label]');
+                    var stockInput = tag.querySelector('[data-tag-hidden-stock]');
+                    if (labelInput) {
+                        labelInput.name = kind === 'size'
+                            ? 'Form.Sizes[' + i + '].Size'
+                            : 'Form.Colors[' + i + '].Name';
+                    }
+                    if (stockInput) {
+                        stockInput.name = kind === 'size'
+                            ? 'Form.Sizes[' + i + '].StockQuantity'
+                            : 'Form.Colors[' + i + '].Hex';
+                    }
+                });
+            }
+
+            function buildSizeTag(label, stock) {
+                var tag = document.createElement('span');
+                tag.className = 'sb-tag';
+                tag.setAttribute('data-tag', '');
+                tag.innerHTML =
+                    '<span class="sb-tag__label" data-tag-label></span>' +
+                    '<input class="sb-tag__stock" type="number" min="0" step="1" data-tag-stock />' +
+                    '<input type="hidden" data-tag-hidden-label />' +
+                    '<input type="hidden" data-tag-hidden-stock />' +
+                    '<button type="button" class="sb-tag__remove" data-tag-remove aria-label="Sil">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>';
+                tag.querySelector('[data-tag-label]').textContent = label;
+                tag.querySelector('[data-tag-stock]').value = String(stock);
+                tag.querySelector('[data-tag-hidden-label]').value = label;
+                tag.querySelector('[data-tag-hidden-stock]').value = String(stock);
+                return tag;
+            }
+
+            function buildColorTag(name, hex) {
+                var tag = document.createElement('span');
+                tag.className = 'sb-tag sb-tag--color';
+                tag.setAttribute('data-tag', '');
+                tag.innerHTML =
+                    '<span class="sb-tag__swatch"></span>' +
+                    '<span class="sb-tag__label" data-tag-label></span>' +
+                    '<input type="hidden" data-tag-hidden-label />' +
+                    '<input type="hidden" data-tag-hidden-stock />' +
+                    '<button type="button" class="sb-tag__remove" data-tag-remove aria-label="Sil">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>';
+                tag.querySelector('.sb-tag__swatch').style.background = hex;
+                tag.querySelector('[data-tag-label]').textContent = name;
+                tag.querySelector('[data-tag-hidden-label]').value = name;
+                tag.querySelector('[data-tag-hidden-stock]').value = hex;
+                return tag;
+            }
+
+            function tryAdd(value) {
+                value = (value || '').trim();
+                if (!value) return;
+
+                // De-dup by label (case-insensitive)
+                var existing = Array.from(list.querySelectorAll('[data-tag-label]'))
+                    .some(function (el) { return el.textContent.trim().toLowerCase() === value.toLowerCase(); });
+                if (existing) { entry.value = ''; return; }
+
+                var tag;
+                if (kind === 'size') {
+                    tag = buildSizeTag(value, 0);
+                } else {
+                    var hex = colorInput ? colorInput.value : '#000000';
+                    tag = buildColorTag(value, hex);
+                }
+                list.appendChild(tag);
+                makeIndexNames();
+                entry.value = '';
+            }
+
+            entry.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    tryAdd(entry.value);
+                } else if (e.key === 'Backspace' && !entry.value) {
+                    // Quick-delete last tag on backspace in an empty entry
+                    var last = list.querySelector('[data-tag]:last-child');
+                    if (last) {
+                        last.remove();
+                        makeIndexNames();
+                    }
+                }
+            });
+            entry.addEventListener('blur', function () { tryAdd(entry.value); });
+
+            // Delegated handlers — remove + stock-input sync
+            list.addEventListener('click', function (e) {
+                var rm = e.target.closest('[data-tag-remove]');
+                if (rm) {
+                    rm.closest('[data-tag]').remove();
+                    makeIndexNames();
+                }
+            });
+            list.addEventListener('input', function (e) {
+                var stockEl = e.target.closest('[data-tag-stock]');
+                if (!stockEl) return;
+                var tag = stockEl.closest('[data-tag]');
+                var hidden = tag.querySelector('[data-tag-hidden-stock]');
+                if (hidden) hidden.value = stockEl.value || '0';
+            });
+
+            // Server-rendered tags already have hidden inputs — make sure
+            // they're indexed before first submit in case the order shifted.
+            makeIndexNames();
+        });
+
+        // ---------- 2. Image gallery (EditProduct) ----------
+        var imgRoot = document.querySelector('[data-prod-images]');
+        if (imgRoot) {
+            var productId = parseInt(imgRoot.getAttribute('data-product-id'), 10);
+            var gallery = imgRoot.querySelector('[data-img-gallery]');
+            var uploader = imgRoot.querySelector('[data-img-uploader]');
+            var fileInput = imgRoot.querySelector('[data-img-input]');
+            var errBox = imgRoot.querySelector('[data-img-error]');
+
+            function showImgError(msg) {
+                if (!errBox) return;
+                errBox.textContent = msg;
+                errBox.hidden = false;
+                setTimeout(function () { errBox.hidden = true; }, 4000);
+            }
+
+            function buildTile(image) {
+                var tile = document.createElement('figure');
+                tile.className = 'sb-img-tile' + (image.isMain ? ' is-main' : '');
+                tile.setAttribute('data-image-id', String(image.id));
+                tile.innerHTML =
+                    '<img src="' + image.imageUrl + '" alt="" />' +
+                    (image.isMain ? '<span class="sb-img-tile__main-badge">Əsas</span>' : '') +
+                    '<div class="sb-img-tile__actions">' +
+                        (image.isMain ? '' :
+                            '<button type="button" class="sb-img-tile__btn" data-img-set-main title="Əsas et">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
+                            '</button>') +
+                        '<button type="button" class="sb-img-tile__btn sb-img-tile__btn--danger" data-img-delete title="Sil">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>' +
+                        '</button>' +
+                    '</div>';
+                return tile;
+            }
+
+            function clearAllMainBadges() {
+                gallery.querySelectorAll('.sb-img-tile.is-main').forEach(function (t) {
+                    t.classList.remove('is-main');
+                    var badge = t.querySelector('.sb-img-tile__main-badge');
+                    if (badge) badge.remove();
+                    var actions = t.querySelector('.sb-img-tile__actions');
+                    if (actions && !actions.querySelector('[data-img-set-main]')) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'sb-img-tile__btn';
+                        btn.setAttribute('data-img-set-main', '');
+                        btn.title = 'Əsas et';
+                        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                        actions.insertBefore(btn, actions.firstChild);
+                    }
+                });
+            }
+
+            function markAsMain(tile) {
+                clearAllMainBadges();
+                tile.classList.add('is-main');
+                var badge = document.createElement('span');
+                badge.className = 'sb-img-tile__main-badge';
+                badge.textContent = 'Əsas';
+                tile.insertBefore(badge, tile.firstChild.nextSibling);
+                var setBtn = tile.querySelector('[data-img-set-main]');
+                if (setBtn) setBtn.remove();
+            }
+
+            function uploadFiles(files) {
+                if (!files || !files.length) return;
+                Array.from(files).forEach(function (file) {
+                    if (!file.type.startsWith('image/')) return;
+                    if (file.size > 10 * 1024 * 1024) {
+                        showImgError('Şəkil 10 MB-dan böyük ola bilməz.');
+                        return;
+                    }
+
+                    var fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('isMain', 'false');
+                    if (token) fd.append('__RequestVerificationToken', token);
+
+                    fetch('/Seller/Products/' + productId + '/Images/Upload', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: fd
+                    })
+                    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                    .then(function (r) {
+                        if (!r.ok) {
+                            showImgError((r.json && r.json.error) || 'Yüklənmədi.');
+                            return;
+                        }
+                        var tile = buildTile(r.json.image);
+                        gallery.insertBefore(tile, uploader);
+                        if (r.json.image.isMain) markAsMain(tile);
+                        showToast('Şəkil yükləndi', 'success');
+                    })
+                    .catch(function () { showImgError('Şəbəkə xətası.'); });
+                });
+            }
+
+            if (uploader && fileInput) {
+                fileInput.addEventListener('change', function () {
+                    uploadFiles(fileInput.files);
+                    fileInput.value = '';
+                });
+            }
+
+            // Delegated actions on each tile (set-main + delete)
+            gallery.addEventListener('click', function (e) {
+                var tile = e.target.closest('[data-image-id]');
+                if (!tile) return;
+                var imageId = parseInt(tile.getAttribute('data-image-id'), 10);
+
+                if (e.target.closest('[data-img-set-main]')) {
+                    var fd = new FormData();
+                    if (token) fd.append('__RequestVerificationToken', token);
+                    fetch('/Seller/Products/' + productId + '/Images/' + imageId + '/SetMain', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: fd
+                    })
+                    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                    .then(function (r) {
+                        if (!r.ok) { showImgError((r.json && r.json.error) || 'Yenilənmədi.'); return; }
+                        markAsMain(tile);
+                        showToast('Əsas şəkil təyin edildi', 'success');
+                    })
+                    .catch(function () { showImgError('Şəbəkə xətası.'); });
+                    return;
+                }
+                if (e.target.closest('[data-img-delete]')) {
+                    if (!window.confirm('Bu şəkli silmək istədiyinə əminsən?')) return;
+                    var fd2 = new FormData();
+                    if (token) fd2.append('__RequestVerificationToken', token);
+                    fetch('/Seller/Products/' + productId + '/Images/' + imageId + '/Delete', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: fd2
+                    })
+                    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                    .then(function (r) {
+                        if (!r.ok) { showImgError((r.json && r.json.error) || 'Silinmədi.'); return; }
+                        tile.style.transition = 'opacity .25s ease, transform .25s ease';
+                        tile.style.opacity = '0';
+                        tile.style.transform = 'scale(.85)';
+                        setTimeout(function () { tile.remove(); }, 230);
+                        showToast('Şəkil silindi', 'success');
+                    })
+                    .catch(function () { showImgError('Şəbəkə xətası.'); });
+                }
+            });
+        }
+
+        // ---------- 3. Inline toggle (Products list) ----------
+        document.querySelectorAll('[data-prod-toggle]').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                var pid = parseInt(cb.getAttribute('data-prod-id'), 10);
+                var fd = new FormData();
+                if (token) fd.append('__RequestVerificationToken', token);
+                cb.disabled = true;
+                fetch('/Seller/ToggleProductActive/' + pid, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                .then(function (r) {
+                    if (!r.ok) {
+                        // Revert checkbox state
+                        cb.checked = !cb.checked;
+                        showToast((r.json && r.json.error) || 'Yenilənmədi.', 'error');
+                        return;
+                    }
+                    var card = cb.closest('[data-product-id]');
+                    if (card) card.classList.toggle('is-inactive', !r.json.isActive);
+                    showToast(r.json.isActive ? 'Məhsul aktivləşdirildi' : 'Məhsul deaktiv edildi', 'success');
+                })
+                .catch(function () {
+                    cb.checked = !cb.checked;
+                    showToast('Şəbəkə xətası.', 'error');
+                })
+                .finally(function () { cb.disabled = false; });
+            });
+        });
+
+        // ---------- 4. Delete-product confirm ----------
+        document.querySelectorAll('[data-prod-delete-form]').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (!window.confirm('Bu məhsulu silmək istədiyinə əminsən? Bu əməliyyat geri qaytarıla bilməz.')) {
+                    e.preventDefault();
+                }
+            });
+        });
     }
 })();

@@ -26,12 +26,14 @@ public static class Messages
 
     public static class Product
     {
-        public const string NotFound = "Product was not found.";
-        public const string ImageNotFound = "Product image was not found.";
-        public const string SizeNotFound = "Product size was not found.";
-        public const string SlugAlreadyExists = "A product with this slug already exists.";
-        public const string DiscountTooHigh = "Discount price must be less than price.";
-        public const string NotStoreOwner = "You can only manage products in stores you own.";
+        public const string NotFound = "Məhsul tapılmadı.";
+        public const string ImageNotFound = "Məhsul şəkli tapılmadı.";
+        public const string SizeNotFound = "Məhsul ölçüsü tapılmadı.";
+        public const string SlugAlreadyExists = "Bu slug ilə məhsul artıq mövcuddur.";
+        public const string DiscountTooHigh = "Endirimli qiymət əsas qiymətdən kiçik olmalıdır.";
+        public const string NotStoreOwner = "Yalnız öz mağazanızın məhsullarını idarə edə bilərsiniz.";
+        public const string NoStoreYet = "Məhsul əlavə etməzdən əvvəl bir mağaza yaratmalısınız.";
+        public const string ImageRequired = "Şəkil seçilməyib.";
     }
 
     public static class Wishlist

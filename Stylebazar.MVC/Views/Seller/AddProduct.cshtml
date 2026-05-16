@@ -1,6 +1,53 @@
-@model SellerPanelViewModel
+@model SellerProductFormViewModel
 @{
-    ViewData["StubTitle"] = "Add Product";
-    ViewData["StubSubtitle"] = "Yeni məhsul əlavə etmə formu Phase 6c-də.";
+    ViewData["Title"] = "Yeni məhsul";
+    var p = Model.Profile;
+    var f = Model.Form;
 }
-@await Html.PartialAsync("_SellerStubPage", Model)
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", p)
+
+    <main class="sb-seller-main">
+        <nav class="sb-breadcrumb sb-acc-breadcrumb" aria-label="Breadcrumb">
+            <a asp-action="Dashboard">Seller Panel</a>
+            <span class="sb-breadcrumb__sep" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <a asp-action="Products">Məhsullar</a>
+            <span class="sb-breadcrumb__sep" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+            <span class="sb-breadcrumb__current">Yeni məhsul</span>
+        </nav>
+
+        <form asp-action="AddProduct" method="post" class="sb-prod-form" novalidate data-auth-form>
+            @Html.AntiForgeryToken()
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+            {
+                <div class="sb-form-summary">
+                    @foreach (var err in ViewData.ModelState[""]!.Errors) { @err.ErrorMessage <br /> }
+                </div>
+            }
+
+            @await Html.PartialAsync("_ProductFormFields", Model)
+
+            <div class="sb-prod-form__footer">
+                <a asp-action="Products" class="sb-btn-ghost">Ləğv</a>
+                <button type="submit" class="sb-btn-primary sb-btn-primary--cyan sb-btn-primary--lg" data-submit>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Yarat və davam et</span>
+                </button>
+            </div>
+            <p class="sb-prod-form__hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Məhsul yaradıldıqdan sonra şəkilləri yükləyə biləcəksiniz.
+            </p>
+        </form>
+    </main>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
