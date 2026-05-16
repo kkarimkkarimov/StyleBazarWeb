@@ -389,8 +389,135 @@ public class SellerController : Controller
     [HttpGet] public async Task<IActionResult> Analytics(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));
 
-    [HttpGet] public async Task<IActionResult> StoreSettings(CancellationToken ct)
-        => View(await BuildPanelVmAsync(ct));
+    // ============== STORE SETTINGS (Phase 6e) ==============
+
+    [HttpGet]
+    public async Task<IActionResult> StoreSettings(CancellationToken ct)
+    {
+        var panel = await BuildPanelVmAsync(ct);
+        if (panel.PrimaryStore is null)
+        {
+            // No store yet → bounce to Products page where the quick-create
+            // form lives. Single onboarding entry point.
+            TempData["Error"] = "Əvvəlcə bir mağaza yarat.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        return View(BuildStoreSettingsVm(panel, populateFromStore: true));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> StoreSettings(StoreSettingsFormInput form, CancellationToken ct)
+    {
+        var panel = await BuildPanelVmAsync(ct);
+        if (panel.PrimaryStore is null)
+        {
+            TempData["Error"] = "Əvvəlcə bir mağaza yarat.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        if (!ModelState.IsValid)
+            return View(BuildStoreSettingsVm(panel, populateFromStore: false, overrideForm: form));
+
+        try
+        {
+            var dto = new UpdateStoreDto
+            {
+                Name = form.Name,
+                Slug = form.Slug,
+                Description = form.Description,
+                // Don't touch image URLs from the text form — the dedicated
+                // upload endpoints own those fields.
+                ProfileImageUrl = null,
+                CoverImageUrl = panel.PrimaryStore.CoverImageUrl,
+                ContactPhone = form.ContactPhone,
+                Address = form.Address,
+                WhatsAppNumber = form.WhatsAppNumber,
+                InstagramHandle = form.InstagramHandle,
+                TelegramHandle = form.TelegramHandle,
+                FacebookHandle = form.FacebookHandle,
+                TikTokHandle = form.TikTokHandle
+            };
+            await _stores.UpdateAsync(panel.PrimaryStore.Id, dto, ct);
+            TempData["Success"] = "Mağaza məlumatları yeniləndi.";
+            return RedirectToAction(nameof(StoreSettings));
+        }
+        catch (ValidationException vex)
+        {
+            foreach (var (field, msgs) in vex.Errors)
+                foreach (var m in msgs)
+                    ModelState.AddModelError(field, m);
+            return View(BuildStoreSettingsVm(panel, populateFromStore: false, overrideForm: form));
+        }
+        catch (BusinessException bex)
+        {
+            ModelState.AddModelError(string.Empty, bex.Message);
+            return View(BuildStoreSettingsVm(panel, populateFromStore: false, overrideForm: form));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> UploadStoreProfileImage([FromForm] int storeId, IFormFile? file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { ok = false, error = "Şəkil seçilməyib." });
+
+        try
+        {
+            string url = await _stores.UploadProfileImageAsync(storeId, file, ct);
+            return Json(new { ok = true, url });
+        }
+        catch (ValidationException ex)  { return BadRequest(new { ok = false, errors = ex.Errors }); }
+        catch (NotFoundException ex)    { return NotFound(new { ok = false, error = ex.Message }); }
+        catch (BusinessException ex)    { return UnprocessableEntity(new { ok = false, error = ex.Message }); }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadStoreCoverImage([FromForm] int storeId, IFormFile? file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { ok = false, error = "Şəkil seçilməyib." });
+
+        try
+        {
+            string url = await _stores.UploadCoverImageAsync(storeId, file, ct);
+            return Json(new { ok = true, url });
+        }
+        catch (ValidationException ex)  { return BadRequest(new { ok = false, errors = ex.Errors }); }
+        catch (NotFoundException ex)    { return NotFound(new { ok = false, error = ex.Message }); }
+        catch (BusinessException ex)    { return UnprocessableEntity(new { ok = false, error = ex.Message }); }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveStoreCoverImage([FromForm] int storeId, CancellationToken ct)
+    {
+        try
+        {
+            await _stores.RemoveCoverImageAsync(storeId, ct);
+            return Json(new { ok = true });
+        }
+        catch (NotFoundException ex) { return NotFound(new { ok = false, error = ex.Message }); }
+        catch (BusinessException ex) { return UnprocessableEntity(new { ok = false, error = ex.Message }); }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleStoreActive([FromForm] int storeId, CancellationToken ct)
+    {
+        try
+        {
+            var updated = await _stores.ToggleActiveAsync(storeId, ct);
+            return Json(new { ok = true, isActive = updated.IsActive });
+        }
+        catch (NotFoundException ex)   { return NotFound(new { ok = false, error = ex.Message }); }
+        catch (BusinessException ex)   { return UnprocessableEntity(new { ok = false, error = ex.Message }); }
+    }
 
     // -------- helpers --------
 
@@ -456,6 +583,37 @@ public class SellerController : Controller
             Categories = categories.Items.ToList(),
             IsEdit = product is not null,
             Product = product,
+            Form = form
+        };
+    }
+
+    private SellerStoreSettingsViewModel BuildStoreSettingsVm(
+        SellerPanelViewModel panel,
+        bool populateFromStore,
+        StoreSettingsFormInput? overrideForm = null)
+    {
+        var st = panel.PrimaryStore!;
+        var form = overrideForm ?? (populateFromStore
+            ? new StoreSettingsFormInput
+            {
+                Name = st.Name,
+                Slug = st.Slug,
+                Description = st.Description,
+                ContactPhone = st.ContactPhone,
+                Address = st.Address,
+                WhatsAppNumber = st.WhatsAppNumber,
+                InstagramHandle = st.InstagramHandle,
+                TelegramHandle = st.TelegramHandle,
+                FacebookHandle = st.FacebookHandle,
+                TikTokHandle = st.TikTokHandle
+            }
+            : new StoreSettingsFormInput());
+
+        return new SellerStoreSettingsViewModel
+        {
+            Profile = panel.Profile,
+            PrimaryStore = panel.PrimaryStore,
+            Store = panel.PrimaryStore,
             Form = form
         };
     }

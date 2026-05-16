@@ -2,6 +2,7 @@ using AutoMapper;
 using Core.Persistence.Paging;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.Constants;
 using Stylebazar.BLL.DTOs.Stores;
@@ -9,6 +10,7 @@ using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Helpers;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.CurrentUser;
+using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Repositories.Abstract;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
@@ -17,10 +19,14 @@ namespace Stylebazar.BLL.Services.Stores;
 
 public class StoreManager : IStoreService
 {
+    private const string ProfileSubfolder = "stores/profile";
+    private const string CoverSubfolder = "stores/cover";
+
     private readonly IStoreRepository _repo;
     private readonly IMapper _mapper;
     private readonly StoreBusinessRules _rules;
     private readonly ICurrentUserService _currentUser;
+    private readonly IFileStorageService _files;
     private readonly IValidator<CreateStoreDto> _createValidator;
     private readonly IValidator<UpdateStoreDto> _updateValidator;
 
@@ -29,6 +35,7 @@ public class StoreManager : IStoreService
         IMapper mapper,
         StoreBusinessRules rules,
         ICurrentUserService currentUser,
+        IFileStorageService files,
         IValidator<CreateStoreDto> createValidator,
         IValidator<UpdateStoreDto> updateValidator)
     {
@@ -36,6 +43,7 @@ public class StoreManager : IStoreService
         _mapper = mapper;
         _rules = rules;
         _currentUser = currentUser;
+        _files = files;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -142,16 +150,21 @@ public class StoreManager : IStoreService
 
         Store? tracked = await _repo.GetAsync(s => s.Id == id, cancellationToken: ct);
         if (tracked is null)
-            throw new NotFoundException(nameof(Store), id);
+            throw new NotFoundException(Messages.Store.NotFound);
 
         tracked.Name = dto.Name.Trim();
         tracked.Slug = newSlug;
-        tracked.Description = dto.Description?.Trim();
+        tracked.Description = NullIfBlank(dto.Description);
+        // ProfileImageUrl + CoverImageUrl are managed by the dedicated image
+        // upload endpoints — UpdateAsync only changes them if the caller
+        // explicitly provides a non-empty value (lets the form post safely
+        // omit the field without wiping the saved image).
         if (!string.IsNullOrWhiteSpace(dto.ProfileImageUrl))
             tracked.ProfileImageUrl = dto.ProfileImageUrl.Trim();
-        tracked.CoverImageUrl = dto.CoverImageUrl?.Trim();
-        tracked.ContactPhone = dto.ContactPhone?.Trim();
-        tracked.Address = dto.Address?.Trim();
+        if (dto.CoverImageUrl is not null)
+            tracked.CoverImageUrl = NullIfBlank(dto.CoverImageUrl);
+        tracked.ContactPhone = NullIfBlank(dto.ContactPhone);
+        tracked.Address = NullIfBlank(dto.Address);
         tracked.WhatsAppNumber = NullIfBlank(dto.WhatsAppNumber);
         tracked.InstagramHandle = NullIfBlank(dto.InstagramHandle);
         tracked.TelegramHandle = NullIfBlank(dto.TelegramHandle);
@@ -186,11 +199,76 @@ public class StoreManager : IStoreService
 
         Store? tracked = await _repo.GetAsync(s => s.Id == id, cancellationToken: ct);
         if (tracked is null)
-            throw new NotFoundException(nameof(Store), id);
+            throw new NotFoundException(Messages.Store.NotFound);
+
+        // Owner guard — Admins can override.
+        bool isAdmin = _currentUser.IsInRole("Admin");
+        if (!isAdmin)
+            _rules.MustBeOwner(existing, _currentUser.UserId);
 
         tracked.IsActive = !tracked.IsActive;
         await _repo.UpdateAsync(tracked, ct);
         return await GetByIdAsync(id, ct);
+    }
+
+    // ---------- Image uploads ----------
+
+    public async Task<string> UploadProfileImageAsync(int storeId, IFormFile file, CancellationToken ct = default)
+    {
+        Store tracked = await RequireOwnedStoreAsync(storeId, ct);
+
+        string? previous = string.IsNullOrEmpty(tracked.ProfileImageUrl) ? null : tracked.ProfileImageUrl;
+        string url = await _files.SaveAsync(file, ProfileSubfolder, ct);
+
+        tracked.ProfileImageUrl = url;
+        await _repo.UpdateAsync(tracked, ct);
+
+        // Best-effort delete of the prior image — never blocks the upload.
+        if (!string.IsNullOrEmpty(previous))
+            await _files.DeleteAsync(previous, ct);
+
+        return url;
+    }
+
+    public async Task<string> UploadCoverImageAsync(int storeId, IFormFile file, CancellationToken ct = default)
+    {
+        Store tracked = await RequireOwnedStoreAsync(storeId, ct);
+
+        string? previous = tracked.CoverImageUrl;
+        string url = await _files.SaveAsync(file, CoverSubfolder, ct);
+
+        tracked.CoverImageUrl = url;
+        await _repo.UpdateAsync(tracked, ct);
+
+        if (!string.IsNullOrEmpty(previous))
+            await _files.DeleteAsync(previous, ct);
+
+        return url;
+    }
+
+    public async Task RemoveCoverImageAsync(int storeId, CancellationToken ct = default)
+    {
+        Store tracked = await RequireOwnedStoreAsync(storeId, ct);
+
+        string? previous = tracked.CoverImageUrl;
+        if (string.IsNullOrEmpty(previous)) return;
+
+        tracked.CoverImageUrl = null;
+        await _repo.UpdateAsync(tracked, ct);
+        await _files.DeleteAsync(previous, ct);
+    }
+
+    private async Task<Store> RequireOwnedStoreAsync(int storeId, CancellationToken ct)
+    {
+        Store? tracked = await _repo.GetAsync(s => s.Id == storeId, cancellationToken: ct);
+        if (tracked is null)
+            throw new NotFoundException(Messages.Store.NotFound);
+
+        bool isAdmin = _currentUser.IsInRole("Admin");
+        if (!isAdmin)
+            _rules.MustBeOwner(tracked, _currentUser.UserId);
+
+        return tracked;
     }
 
     private async Task<Store> GetWithDetailsAsync(System.Linq.Expressions.Expression<Func<Store, bool>> predicate, CancellationToken ct)
@@ -204,7 +282,7 @@ public class StoreManager : IStoreService
             cancellationToken: ct);
 
         if (store is null)
-            throw new NotFoundException(nameof(Store), 0);
+            throw new NotFoundException(Messages.Store.NotFound);
 
         return store;
     }

@@ -6783,6 +6783,242 @@ body:has(.sb-seller-layout) {
 }
 
 /* -----------------------------------------------------------
+   17af. Seller — Store Settings (Phase 6e)
+   ----------------------------------------------------------- */
+.sb-store-banner-card {
+    background: #fff;
+    border: 1px solid var(--sb-line);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+}
+
+.sb-store-cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/5;
+    background: linear-gradient(135deg, #E6F4F6 0%, #c8e6e9 100%);
+    overflow: hidden;
+}
+.sb-store-cover img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.sb-store-cover.is-empty img { display: none; }
+.sb-store-cover__placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--sb-acc-cyan);
+    opacity: .55;
+    gap: 8px;
+}
+.sb-store-cover__placeholder svg { width: 36px; height: 36px; stroke-width: 1.5; }
+.sb-store-cover__placeholder span { font-size: .85rem; font-weight: 500; }
+
+.sb-store-cover__actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 8px;
+}
+.sb-store-cover__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+.sb-store-cover__btn:hover { background: var(--sb-acc-cyan); }
+.sb-store-cover__btn--danger { padding: 8px; }
+.sb-store-cover__btn--danger:hover { background: #DC2626; }
+.sb-store-cover__btn svg { width: 14px; height: 14px; }
+
+.sb-store-banner-card__body {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 16px 22px 20px;
+    position: relative;
+}
+@@media (max-width: 720px) {
+    .sb-store-banner-card__body {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+    }
+    .sb-store-banner-card__status {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
+.sb-store-avatar {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    margin-top: -42px;
+}
+.sb-store-avatar__img {
+    width: 92px; height: 92px;
+    border-radius: 18px;
+    background: #fff;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 24px rgba(15,23,42,.18);
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sb-acc-cyan);
+    transition: transform .2s ease;
+}
+.sb-store-avatar:hover .sb-store-avatar__img { transform: scale(1.04); }
+.sb-store-avatar__img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+.sb-store-avatar__img svg {
+    width: 40px; height: 40px;
+    stroke-width: 1.6;
+}
+.sb-store-avatar__cam {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--sb-acc-cyan);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    transition: transform .15s ease;
+}
+.sb-store-avatar:hover .sb-store-avatar__cam { transform: scale(1.1); }
+.sb-store-avatar__cam svg { width: 13px; height: 13px; stroke-width: 1.8; }
+
+.sb-store-banner-card__meta h1 {
+    margin: 0 0 6px;
+    font-family: var(--sb-font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--sb-ink);
+}
+
+.sb-store-banner-card__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.sb-store-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--sb-acc-cyan-soft);
+    color: var(--sb-acc-cyan);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .15s ease;
+}
+.sb-store-chip svg { width: 12px; height: 12px; stroke-width: 1.8; }
+.sb-store-chip--link:hover { background: var(--sb-acc-cyan); color: #fff; }
+.sb-store-chip--date {
+    background: transparent;
+    color: var(--sb-muted);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
+/* iOS-style toggle for store active state */
+.sb-store-status-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+.sb-store-status-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.sb-store-status-toggle__slider {
+    width: 44px;
+    height: 24px;
+    background: var(--sb-line);
+    border-radius: 999px;
+    position: relative;
+    transition: background .2s ease;
+    flex-shrink: 0;
+}
+.sb-store-status-toggle__slider::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform .2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,.18);
+}
+.sb-store-status-toggle input:checked ~ .sb-store-status-toggle__slider {
+    background: #10B981;
+}
+.sb-store-status-toggle input:checked ~ .sb-store-status-toggle__slider::after {
+    transform: translateX(20px);
+}
+.sb-store-status-toggle__label {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--sb-muted);
+}
+.sb-store-status-toggle.is-on .sb-store-status-toggle__label { color: #047857; }
+
+.sb-store-banner-card__error {
+    padding: 10px 22px;
+    background: rgba(220,38,38,.06);
+    color: #DC2626;
+    font-size: .82rem;
+    border-top: 1px solid rgba(220,38,38,.15);
+}
+
+/* Social channel form grid (5 rows) */
+.sb-store-social-grid {
+    display: grid;
+    gap: 14px;
+}
+.sb-store-social-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 14px;
+    align-items: center;
+}
+.sb-store-social-row__field { margin: 0; }
+.sb-store-social-row__field label { margin-bottom: 4px; }
+
+.sb-seller-social-icon--tg {
+    background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
+}
+
+/* -----------------------------------------------------------
    18. Utilities
    ----------------------------------------------------------- */
 .sb-sr-only {

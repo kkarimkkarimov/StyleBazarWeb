@@ -15,13 +15,14 @@ public static class Messages
 
     public static class Store
     {
-        public const string NotFound = "Store was not found.";
-        public const string SlugAlreadyExists = "A store with this slug already exists.";
-        public const string OwnerNotAuthenticated = "You must be signed in to perform this action.";
-        public const string OwnerMustBeSeller = "Only sellers can own a store.";
-        public const string NotOwner = "You are not the owner of this store.";
-        public const string HasProducts = "Store has products. Remove or reassign them first.";
-        public const string Inactive = "This store is inactive and cannot accept new products.";
+        public const string NotFound = "Mağaza tapılmadı.";
+        public const string SlugAlreadyExists = "Bu slug ilə mağaza artıq mövcuddur.";
+        public const string OwnerNotAuthenticated = "Bu əməliyyat üçün hesabınıza daxil olun.";
+        public const string OwnerMustBeSeller = "Yalnız satıcılar mağaza yarada bilər.";
+        public const string NotOwner = "Bu mağazanın sahibi siz deyilsiniz.";
+        public const string HasProducts = "Mağazada məhsullar var. Əvvəlcə onları silin və ya başqa mağazaya köçürün.";
+        public const string Inactive = "Bu mağaza deaktivdir və yeni məhsul qəbul edə bilmir.";
+        public const string ImageRequired = "Şəkil seçilməyib.";
     }
 
     public static class Product

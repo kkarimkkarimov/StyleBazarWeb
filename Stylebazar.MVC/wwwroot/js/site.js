@@ -87,6 +87,7 @@
         safe('setupChangePasswordModal', setupChangePasswordModal);
         safe('setupAddresses',           setupAddresses);
         safe('setupSellerProducts',      setupSellerProducts);
+        safe('setupStoreSettings',       setupStoreSettings);
 
         // Final safety net: even if every reveal-on-scroll path failed,
         // any .sb-reveal element still hidden after 1500 ms is force-shown.
@@ -2476,5 +2477,193 @@
                 }
             });
         });
+    }
+
+    /* -----------------------------------------------------------
+       Seller — Store Settings (Phase 6e)
+       - Cover banner upload + remove
+       - Square logo / avatar upload (overlapping the cover)
+       - Active/Deaktiv toggle
+       ----------------------------------------------------------- */
+    function setupStoreSettings() {
+        var root = document.querySelector('[data-store-id]');
+        if (!root) return;
+        var storeId = parseInt(root.getAttribute('data-store-id'), 10);
+        if (!storeId) return;
+
+        var token = getAntiForgeryToken();
+        var errBox = root.querySelector('[data-store-img-error]');
+
+        function showErr(msg) {
+            if (errBox) {
+                errBox.textContent = msg;
+                errBox.hidden = false;
+                setTimeout(function () { errBox.hidden = true; }, 4500);
+            } else {
+                showToast(msg, 'error');
+            }
+        }
+
+        // ---------- Cover banner ----------
+        var coverWrap = root.querySelector('[data-store-cover]');
+        var coverInput = root.querySelector('[data-store-cover-input]');
+        var coverImg = root.querySelector('[data-store-cover-img]');
+        var coverPlaceholder = root.querySelector('[data-store-cover-placeholder]');
+        var coverRemove = root.querySelector('[data-store-cover-remove]');
+
+        function setCoverUrl(url) {
+            if (!coverWrap) return;
+            if (url) {
+                coverWrap.classList.remove('is-empty');
+                if (coverImg) {
+                    coverImg.src = url;
+                } else {
+                    var img = document.createElement('img');
+                    img.src = url;
+                    img.alt = '';
+                    img.setAttribute('data-store-cover-img', '');
+                    coverWrap.insertBefore(img, coverWrap.firstChild);
+                    coverImg = img;
+                }
+                if (coverPlaceholder) coverPlaceholder.style.display = 'none';
+                if (coverRemove) coverRemove.hidden = false;
+            } else {
+                coverWrap.classList.add('is-empty');
+                if (coverImg) { coverImg.remove(); coverImg = null; }
+                if (coverPlaceholder) coverPlaceholder.style.display = '';
+                if (coverRemove) coverRemove.hidden = true;
+            }
+        }
+
+        if (coverInput) {
+            coverInput.addEventListener('change', function () {
+                var file = coverInput.files && coverInput.files[0];
+                if (!file) return;
+                if (file.size > 10 * 1024 * 1024) { showErr('Banner 10 MB-dan böyük ola bilməz.'); return; }
+
+                var fd = new FormData();
+                fd.append('storeId', String(storeId));
+                fd.append('file', file);
+                if (token) fd.append('__RequestVerificationToken', token);
+
+                fetch('/Seller/UploadStoreCoverImage', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                .then(function (r) {
+                    if (!r.ok) { showErr((r.json && r.json.error) || 'Banner yüklənmədi.'); return; }
+                    setCoverUrl(r.json.url);
+                    showToast('Banner yeniləndi', 'success');
+                })
+                .catch(function () { showErr('Şəbəkə xətası.'); })
+                .finally(function () { coverInput.value = ''; });
+            });
+        }
+
+        if (coverRemove) {
+            coverRemove.addEventListener('click', function () {
+                if (!window.confirm('Banner şəklini silmək istədiyinə əminsən?')) return;
+                var fd = new FormData();
+                fd.append('storeId', String(storeId));
+                if (token) fd.append('__RequestVerificationToken', token);
+                fetch('/Seller/RemoveStoreCoverImage', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                .then(function (r) {
+                    if (!r.ok) { showErr((r.json && r.json.error) || 'Silinmədi.'); return; }
+                    setCoverUrl(null);
+                    showToast('Banner silindi', 'success');
+                })
+                .catch(function () { showErr('Şəbəkə xətası.'); });
+            });
+        }
+
+        // ---------- Avatar / logo ----------
+        var avatarLabel = root.querySelector('[data-store-avatar]');
+        var avatarInput = root.querySelector('[data-store-avatar-input]');
+        var avatarPreview = root.querySelector('[data-store-avatar-preview]');
+
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function () {
+                var file = avatarInput.files && avatarInput.files[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) { showErr('Logo 5 MB-dan böyük ola bilməz.'); return; }
+
+                // Optimistic local preview
+                var localUrl = URL.createObjectURL(file);
+                avatarPreview.innerHTML = '<img src="' + localUrl + '" alt="" />';
+
+                var fd = new FormData();
+                fd.append('storeId', String(storeId));
+                fd.append('file', file);
+                if (token) fd.append('__RequestVerificationToken', token);
+
+                fetch('/Seller/UploadStoreProfileImage', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                .then(function (r) {
+                    if (!r.ok) {
+                        showErr((r.json && r.json.error) || 'Logo yüklənmədi.');
+                        return;
+                    }
+                    avatarPreview.innerHTML = '<img src="' + r.json.url + '" alt="" />';
+                    showToast('Logo yeniləndi', 'success');
+                })
+                .catch(function () { showErr('Şəbəkə xətası.'); })
+                .finally(function () { avatarInput.value = ''; });
+            });
+        }
+
+        // ---------- Active / deactive toggle ----------
+        var statusCb = root.querySelector('[data-store-toggle]');
+        if (statusCb) {
+            var statusWrap = statusCb.closest('.sb-store-status-toggle');
+            var statusLabel = statusWrap ? statusWrap.querySelector('.sb-store-status-toggle__label') : null;
+
+            statusCb.addEventListener('change', function () {
+                var fd = new FormData();
+                fd.append('storeId', String(storeId));
+                if (token) fd.append('__RequestVerificationToken', token);
+                statusCb.disabled = true;
+
+                fetch('/Seller/ToggleStoreActive', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                .then(function (r) {
+                    if (!r.ok) {
+                        statusCb.checked = !statusCb.checked;  // revert
+                        showErr((r.json && r.json.error) || 'Status dəyişmədi.');
+                        return;
+                    }
+                    var on = !!r.json.isActive;
+                    if (statusWrap) {
+                        statusWrap.classList.toggle('is-on', on);
+                        statusWrap.classList.toggle('is-off', !on);
+                    }
+                    if (statusLabel) statusLabel.textContent = on ? 'Aktiv' : 'Deaktiv';
+                    showToast(on ? 'Mağaza aktivdir' : 'Mağaza deaktiv edildi', 'success');
+                })
+                .catch(function () {
+                    statusCb.checked = !statusCb.checked;
+                    showErr('Şəbəkə xətası.');
+                })
+                .finally(function () { statusCb.disabled = false; });
+            });
+        }
     }
 })();
