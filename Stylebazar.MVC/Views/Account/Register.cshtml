@@ -101,9 +101,18 @@
                 <span class="sb-field__error" asp-validation-for="ConfirmPassword"></span>
             </div>
 
+            @* AcceptTerms — rendered manually so ASP.NET does NOT auto-attach
+               a data-val-required rule with an English default message. Our
+               custom [MustBeTrue] attribute supplies the only validator. *@
             <div class="sb-field">
                 <label class="sb-check">
-                    <input asp-for="AcceptTerms" type="checkbox" />
+                    <input id="AcceptTerms"
+                           name="AcceptTerms"
+                           type="checkbox"
+                           value="true"
+                           @(Model.AcceptTerms ? "checked=\"checked\"" : null)
+                           data-val="true"
+                           data-val-mustbetrue="Davam etmək üçün şərtləri qəbul et." />
                     <span class="sb-check__box">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </span>

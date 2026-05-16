@@ -18,7 +18,39 @@
         }
     }
 
+    // jQuery Validate adapter for our custom [MustBeTrue] server-side attribute.
+    // Must register BEFORE jquery.validate.unobtrusive auto-parses the forms,
+    // which happens on its own DOMContentLoaded. Run on our IIFE's
+    // DOMContentLoaded via the safe() wrapper below — by then all <script>
+    // tags have parsed and $.validator is on window.
+    function setupMustBeTrueAdapter() {
+        if (typeof window.jQuery === 'undefined') return;
+        var $$ = window.jQuery;
+        if (!$$.validator || !$$.validator.unobtrusive) return;
+        if ($$.validator.methods.mustbetrue) return;  // idempotent
+
+        $$.validator.addMethod('mustbetrue', function (value, element) {
+            // Checkboxes report value="true" via .val() regardless of checked
+            // state, so we MUST use element.checked instead.
+            if (element.type === 'checkbox' || element.type === 'radio') {
+                return element.checked === true;
+            }
+            return value === true || value === 'true';
+        });
+        $$.validator.unobtrusive.adapters.addBool('mustbetrue');
+
+        // jquery.validate.unobtrusive already auto-parsed the form on its own
+        // DOMContentLoaded — before we registered the adapter. Re-parse so our
+        // mustbetrue rule attaches to the existing inputs.
+        $$('form').each(function () {
+            var $form = $$(this);
+            $form.removeData('validator').removeData('unobtrusiveValidation');
+            $$.validator.unobtrusive.parse($form);
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        safe('setupMustBeTrueAdapter',   setupMustBeTrueAdapter);
         safe('setupScrollHeader',        setupScrollHeader);
         safe('setupMegaMenus',           setupMegaMenus);
         safe('setupSearchOverlay',       setupSearchOverlay);

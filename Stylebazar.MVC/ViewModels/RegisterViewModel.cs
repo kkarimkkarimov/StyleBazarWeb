@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Stylebazar.DAL.Entities.Enums;
+using Stylebazar.MVC.Validation;
 
 namespace Stylebazar.MVC.ViewModels;
 
@@ -37,7 +38,16 @@ public class RegisterViewModel
     [Required(ErrorMessage = "Rol seç.")]
     public UserRole Role { get; set; } = UserRole.Buyer;
 
+    // [MustBeTrue] emits a clean `data-val-mustbetrue` rule for jQuery
+    // Validation. The previously-used `[Range(typeof(bool), "True", "True")]`
+    // was broken client-side: jQuery's range adapter parses min/max as
+    // floats, gets NaN from "True", and erroneously kept rendering the error
+    // even when the box was ticked.
+    //
+    // The checkbox is rendered manually in Register.cshtml (no asp-for) so
+    // ASP.NET does NOT auto-add a `data-val-required` rule with an English
+    // default message on top of ours.
     [Display(Name = "İstifadə şərtlərini qəbul edirəm")]
-    [Range(typeof(bool), "true", "true", ErrorMessage = "Davam etmək üçün şərtləri qəbul et.")]
+    [MustBeTrue(ErrorMessage = "Davam etmək üçün şərtləri qəbul et.")]
     public bool AcceptTerms { get; set; }
 }
