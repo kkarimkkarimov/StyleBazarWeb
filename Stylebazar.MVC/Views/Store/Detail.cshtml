@@ -1,6 +1,20 @@
-@model Stylebazar.BLL.DTOs.Stores.StoreDetailDto
+@using Microsoft.AspNetCore.Identity
+@using Stylebazar.DAL.Entities
+@inject SignInManager<AppUser> SignInManager
+@model StoreDetailPageViewModel
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model.Store.Name;
+    var st = Model.Store;
+    var isAuthed = SignInManager.IsSignedIn(User);
+    var storiesJson = System.Text.Json.JsonSerializer.Serialize(Model.Stories.Select(s => new {
+        id = s.Id,
+        storeName = st.Name,
+        storeLogoUrl = st.ProfileImageUrl,
+        imageUrl = s.ImageUrl,
+        caption = s.Caption,
+        linkUrl = s.LinkUrl
+    }));
+    ViewData["WishlistIds"] = Model.WishlistProductIds;
 }
 
 <nav class="sb-breadcrumb" aria-label="Breadcrumb">
@@ -12,39 +26,207 @@
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
-    <span class="sb-breadcrumb__current">@Model.Name</span>
+    <span class="sb-breadcrumb__current">@st.Name</span>
 </nav>
 
-<section class="sb-store-detail-placeholder">
-    <div class="sb-store-detail-placeholder__cover">
-        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
-        {
-            <img src="@Model.CoverImageUrl" alt="@Model.Name kover" />
-        }
-    </div>
-    <div class="sb-store-detail-placeholder__head">
-        <div class="sb-store-detail-placeholder__avatar">
-            @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+<section class="sb-storepage" data-store-id="@st.Id">
+
+    @* ============== HERO BANNER (cover + circle avatar overlap + meta) ============== *@
+    <div class="sb-storepage__hero">
+        <div class="sb-storepage__cover">
+            @if (!string.IsNullOrEmpty(st.CoverImageUrl))
             {
-                <img src="@Model.ProfileImageUrl" alt="@Model.Name" />
+                <img src="@st.CoverImageUrl" alt="@st.Name banner" />
             }
             else
             {
-                <span>@(Model.Name.Length > 0 ? Model.Name[0].ToString().ToUpper() : "S")</span>
+                <div class="sb-storepage__cover-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
             }
         </div>
-        <div>
-            <h1>@Model.Name</h1>
-            @if (!string.IsNullOrWhiteSpace(Model.Description))
-            {
-                <p>@Model.Description</p>
-            }
+
+        <div class="sb-storepage__head">
+            <div class="sb-storepage__avatar">
+                @if (!string.IsNullOrEmpty(st.ProfileImageUrl))
+                {
+                    <img src="@st.ProfileImageUrl" alt="@st.Name logo" />
+                }
+                else
+                {
+                    <span class="sb-storepage__avatar-letter">@(st.Name.Length > 0 ? st.Name[0].ToString().ToUpper() : "S")</span>
+                }
+            </div>
+
+            <div class="sb-storepage__meta">
+                <h1 class="sb-storepage__name">@st.Name</h1>
+                @if (!string.IsNullOrWhiteSpace(st.Description))
+                {
+                    <p class="sb-storepage__desc">@st.Description</p>
+                }
+
+                <div class="sb-storepage__cta-row">
+                    @if (isAuthed)
+                    {
+                        <button type="button"
+                                class="sb-storepage__follow @(Model.IsFollowedByCurrentUser ? "is-following" : "")"
+                                data-store-follow
+                                data-store-id="@st.Id">
+                            <svg class="sb-storepage__follow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+                                @if (Model.IsFollowedByCurrentUser)
+                                {
+                                    <polyline points="20 6 9 17 4 12"/>
+                                }
+                                else
+                                {
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                }
+                            </svg>
+                            <span data-store-follow-label>@(Model.IsFollowedByCurrentUser ? "İzlənilir" : "İzlə")</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Detail", new { slug = st.Slug })"
+                           class="sb-storepage__follow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            <span>İzlə</span>
+                        </a>
+                    }
+
+                    <span class="sb-storepage__follower-count">
+                        <strong data-store-follower-count>@Model.FollowerCount</strong>
+                        <span>izləyici</span>
+                    </span>
+                </div>
+
+                <div class="sb-storepage__chips">
+                    @if (!string.IsNullOrEmpty(st.InstagramHandle))
+                    {
+                        <a class="sb-storepage__chip sb-storepage__chip--ig"
+                           href="https://instagram.com/@st.InstagramHandle" target="_blank" rel="noopener">
+                            <span class="sb-storepage__chip-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                            </span>
+                            <span>@st.InstagramHandle</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(st.WhatsAppNumber))
+                    {
+                        <a class="sb-storepage__chip sb-storepage__chip--wa"
+                           href="https://wa.me/@st.WhatsAppNumber" target="_blank" rel="noopener">
+                            <span class="sb-storepage__chip-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.2 1.2 15.2 0 12 0 5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.3zM12 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7.9.9-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.1 0-5.5 4.5-9.9 9.9-9.9 2.7 0 5.2 1 7 2.9 1.9 1.9 2.9 4.4 2.9 7 .1 5.6-4.4 9.8-9.8 9.8z"/></svg>
+                            </span>
+                            <span>+@st.WhatsAppNumber</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(st.TelegramHandle))
+                    {
+                        <a class="sb-storepage__chip sb-storepage__chip--tg"
+                           href="https://t.me/@st.TelegramHandle" target="_blank" rel="noopener">
+                            <span class="sb-storepage__chip-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.46l-.36 5.07c.51 0 .73-.22 1-.49l2.4-2.3 4.97 3.64c.91.5 1.55.24 1.8-.84l3.26-15.27c.29-1.35-.49-1.88-1.38-1.55L1.36 9.69c-1.32.51-1.3 1.24-.23 1.57l4.94 1.54 11.46-7.22c.54-.36 1.03-.16.63.2"/></svg>
+                            </span>
+                            <span>@st.TelegramHandle</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(st.FacebookHandle))
+                    {
+                        <a class="sb-storepage__chip sb-storepage__chip--fb"
+                           href="https://facebook.com/@st.FacebookHandle" target="_blank" rel="noopener">
+                            <span class="sb-storepage__chip-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.6 9.9v-7H8v-3h2.4V9.4c0-2.4 1.4-3.7 3.6-3.7 1 0 2.1.2 2.1.2v2.3h-1.2c-1.2 0-1.5.7-1.5 1.5V12H16l-.4 3h-2.2v7A10 10 0 0022 12z"/></svg>
+                            </span>
+                            <span>@st.FacebookHandle</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(st.TikTokHandle))
+                    {
+                        <a class="sb-storepage__chip sb-storepage__chip--tt"
+                           href="https://tiktok.com/@@@st.TikTokHandle" target="_blank" rel="noopener">
+                            <span class="sb-storepage__chip-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9.5a6.5 6.5 0 01-4-1.37V17a5 5 0 11-5-5 4.7 4.7 0 011 .12V15a2.5 2.5 0 102 2.5V2h2.5a4 4 0 003.5 4z"/></svg>
+                            </span>
+                            <span>@st.TikTokHandle</span>
+                        </a>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="sb-tab-empty" style="margin-top: 32px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-        <strong>Mağaza səhifəsi tezliklə</strong>
-        <span>Bu mağazanın bütün məhsulları, hekayələri və əlaqə kanalları burada görünəcək.</span>
-    </div>
+    @* ============== STORIES (only if any active) ============== *@
+    @if (Model.Stories.Any())
+    {
+        <div class="sb-storepage__stories-card">
+            <h2 class="sb-storepage__stories-title">Hekayələr</h2>
+            <div class="sb-storepage__stories-rail" data-store-stories>
+                @for (int i = 0; i < Model.Stories.Count; i++)
+                {
+                    var s = Model.Stories[i];
+                    <button type="button" class="sb-storepage__story-bubble" data-story-open data-story-index="@i">
+                        <span class="sb-storepage__story-ring">
+                            <span class="sb-storepage__story-img">
+                                <img src="@s.ImageUrl" alt="@(s.Caption ?? st.Name)" loading="lazy" />
+                            </span>
+                        </span>
+                    </button>
+                }
+            </div>
+        </div>
+    }
+
+    @* ============== PRODUCTS HEADER + FILTERS ============== *@
+    <header class="sb-storepage__products-head">
+        <h2>@st.Name <span class="sb-storepage__count">(@Model.Products.Count) məhsul</span></h2>
+
+        <form method="get" class="sb-storepage__filter-row">
+            <label class="sb-storepage__filter-pill">
+                <input type="checkbox" name="inStock" value="true" @(Model.ShowInStockOnly ? "checked" : "") onchange="this.form.submit()" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                <span>Yalnız stokda</span>
+            </label>
+
+            <select name="sort" onchange="this.form.submit()" class="sb-storepage__sort-select">
+                <option value="newest" selected="@(Model.Sort == "newest")">Ən yeni</option>
+                <option value="price-asc" selected="@(Model.Sort == "price-asc")">Ucuzdan bahaya</option>
+                <option value="price-desc" selected="@(Model.Sort == "price-desc")">Bahadan ucuza</option>
+            </select>
+        </form>
+    </header>
+
+    @* ============== PRODUCTS GRID ============== *@
+    @if (!Model.Products.Any())
+    {
+        <div class="sb-storepage__products-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            <strong>Bu mağazada hələ məhsul yoxdur</strong>
+            <span>Satıcı tezliklə yeni məhsullar əlavə edəcək — geri qayıt və yeniləri kəşf et.</span>
+        </div>
+    }
+    else
+    {
+        <div class="sb-storepage__products-grid">
+            @foreach (var prod in Model.Products)
+            {
+                @await Html.PartialAsync("_ProductCard", prod)
+            }
+        </div>
+    }
 </section>
+
+@* Stories JSON payload — consumed by setupStorePage to feed the viewer *@
+@if (Model.Stories.Any())
+{
+    <script type="application/json" id="sbStorePageStories">@Html.Raw(storiesJson)</script>
+}
+
+@* Hidden form holding the anti-forgery token for the AJAX follow toggle *@
+<form id="sb-store-af" style="display:none">@Html.AntiForgeryToken()</form>

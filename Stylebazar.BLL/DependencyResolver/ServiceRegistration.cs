@@ -18,6 +18,7 @@ using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Services.Stories;
+using Stylebazar.BLL.Services.StoreFollowers;
 using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
@@ -93,6 +94,7 @@ public static class ServiceRegistration
         services.AddScoped<ILoginEventService, LoginEventManager>();
         services.AddScoped<IAccountService, AccountManager>();
         services.AddScoped<IAddressService, AddressManager>();
+        services.AddScoped<IStoreFollowerService, StoreFollowerManager>();
 
         return services;
     }

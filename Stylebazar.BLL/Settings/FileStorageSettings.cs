@@ -10,7 +10,7 @@ public class FileStorageSettings
     /// <summary>URL prefix that maps to RootPath (must match StaticFiles config).</summary>
     public string BaseUrl { get; set; } = "/uploads";
 
-    public long MaxFileSizeBytes { get; set; } = 5 * 1024 * 1024;
+    public long MaxFileSizeBytes { get; set; } = 10 * 1024 * 1024;
 
     public string[] AllowedContentTypes { get; set; } =
     {

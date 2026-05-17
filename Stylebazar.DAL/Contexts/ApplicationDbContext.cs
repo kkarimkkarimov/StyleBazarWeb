@@ -31,6 +31,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
     public DbSet<LoginEvent> LoginEvents => Set<LoginEvent>();
     public DbSet<Address> Addresses => Set<Address>();
+    public DbSet<StoreFollower> StoreFollowers => Set<StoreFollower>();
 
     public override int SaveChanges()
     {

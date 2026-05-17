@@ -40,4 +40,5 @@ public class Store : Entity<int>
 
     public virtual AppUser Owner { get; set; } = null!;
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<StoreFollower> Followers { get; set; } = new List<StoreFollower>();
 }

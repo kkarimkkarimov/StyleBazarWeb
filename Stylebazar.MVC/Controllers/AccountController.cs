@@ -264,7 +264,7 @@ public class AccountController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(5 * 1024 * 1024)]
+    [RequestSizeLimit(10 * 1024 * 1024)]
     public async Task<IActionResult> UploadAvatar(IFormFile? file, CancellationToken ct)
     {
         if (file is null || file.Length == 0)

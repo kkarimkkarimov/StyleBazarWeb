@@ -92,4 +92,9 @@ public static class Messages
         public const string NotOwner = "Yalnız öz ünvanlarınızı dəyişə bilərsiniz.";
         public const string MaxLimitReached = "Bir hesab üçün maksimum 10 ünvan saxlana bilər.";
     }
+
+    public static class StoreFollower
+    {
+        public const string NotAuthenticated = "Mağazanı izləmək üçün hesabınıza daxil olun.";
+    }
 }

@@ -937,6 +937,40 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("Stores");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.StoreFollower", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StoreId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
+
+                    b.HasIndex("UserId", "StoreId")
+                        .IsUnique();
+
+                    b.ToTable("StoreFollowers");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Story", b =>
                 {
                     b.Property<int>("Id")
@@ -1198,6 +1232,25 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.StoreFollower", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.Store", "Store")
+                        .WithMany("Followers")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
+                        .WithMany("StoreFollows")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Store");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Story", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Store", "Store")
@@ -1234,6 +1287,8 @@ namespace Stylebazar.DAL.Migrations
 
                     b.Navigation("Reviews");
 
+                    b.Navigation("StoreFollows");
+
                     b.Navigation("Stores");
 
                     b.Navigation("Wishlists");
@@ -1266,6 +1321,8 @@ namespace Stylebazar.DAL.Migrations
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Store", b =>
                 {
+                    b.Navigation("Followers");
+
                     b.Navigation("Products");
                 });
 #pragma warning restore 612, 618

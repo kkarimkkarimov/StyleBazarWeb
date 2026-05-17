@@ -88,6 +88,7 @@
         safe('setupAddresses',           setupAddresses);
         safe('setupSellerProducts',      setupSellerProducts);
         safe('setupStoreSettings',       setupStoreSettings);
+        safe('setupStorePage',           setupStorePage);
 
         // Final safety net: even if every reveal-on-scroll path failed,
         // any .sb-reveal element still hidden after 1500 ms is force-shown.
@@ -2663,6 +2664,113 @@
                     showErr('Şəbəkə xətası.');
                 })
                 .finally(function () { statusCb.disabled = false; });
+            });
+        }
+    }
+
+    /* -----------------------------------------------------------
+       Public Store page (Phase 6f) — /Store/Detail/{slug}
+       - Follow / unfollow toggle (AJAX) with optimistic UI
+       - Hook into the existing setupStoryViewer via the
+         #sbStorePageStories JSON payload
+       ----------------------------------------------------------- */
+    function setupStorePage() {
+        var followBtn = document.querySelector('[data-store-follow]');
+        var counter = document.querySelector('[data-store-follower-count]');
+        var afForm = document.getElementById('sb-store-af');
+        var token = afForm
+            ? afForm.querySelector('input[name="__RequestVerificationToken"]')?.value
+            : getAntiForgeryToken();
+
+        if (followBtn && token) {
+            followBtn.addEventListener('click', function () {
+                if (followBtn.classList.contains('is-loading')) return;
+                var storeId = followBtn.getAttribute('data-store-id');
+                var willFollow = !followBtn.classList.contains('is-following');
+                followBtn.classList.add('is-loading');
+
+                var fd = new FormData();
+                fd.append('storeId', storeId);
+                fd.append('__RequestVerificationToken', token);
+
+                fetch(willFollow ? '/Store/Follow' : '/Store/Unfollow', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(function (res) {
+                    if (res.status === 401) {
+                        // Not signed in — bounce to login with returnUrl.
+                        window.location.href = '/Account/Login?ReturnUrl=' + encodeURIComponent(window.location.pathname);
+                        return null;
+                    }
+                    return res.json().then(function (j) { return { ok: res.ok, json: j }; });
+                })
+                .then(function (r) {
+                    if (!r) return;  // already redirected
+                    if (!r.ok) {
+                        showToast((r.json && r.json.error) || 'Yenilənmədi.', 'error');
+                        return;
+                    }
+                    var nowFollowing = !!r.json.isFollowing;
+                    followBtn.classList.toggle('is-following', nowFollowing);
+                    var label = followBtn.querySelector('[data-store-follow-label]');
+                    if (label) label.textContent = nowFollowing ? 'İzlənilir' : 'İzlə';
+                    // Swap the icon — plus → check
+                    var icon = followBtn.querySelector('.sb-storepage__follow-icon');
+                    if (icon) {
+                        icon.innerHTML = nowFollowing
+                            ? '<polyline points="20 6 9 17 4 12"/>'
+                            : '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
+                    }
+                    if (counter) counter.textContent = String(r.json.followerCount);
+                    showToast(nowFollowing ? 'Mağaza izlənir' : 'İzləməni dayandırdın', 'success');
+                })
+                .catch(function () { showToast('Şəbəkə xətası.', 'error'); })
+                .finally(function () { followBtn.classList.remove('is-loading'); });
+            });
+        }
+
+        // ---------- Stories hook ----------
+        // Wire each story bubble click into the existing #sbStoryViewer modal
+        // already initialised by setupStoryViewer. The viewer reads a global
+        // dataset of stories, so we feed our store-scoped list into the same
+        // model by triggering the same event the rail uses on Home.
+        var storiesScript = document.getElementById('sbStorePageStories');
+        var bubbles = document.querySelectorAll('[data-story-open]');
+        if (storiesScript && bubbles.length) {
+            var stories;
+            try { stories = JSON.parse(storiesScript.textContent); }
+            catch (e) { stories = []; }
+
+            // Re-package as a single "store group" matching the home rail's shape.
+            var storeGroup = stories.length ? {
+                storeName: stories[0].storeName,
+                storeLogoUrl: stories[0].storeLogoUrl,
+                stories: stories
+            } : null;
+
+            bubbles.forEach(function (btn, idx) {
+                btn.addEventListener('click', function () {
+                    var viewer = document.getElementById('sbStoryViewer');
+                    if (!viewer || !storeGroup) {
+                        // No viewer on the page — just open the linkUrl or image.
+                        var s = stories[idx];
+                        if (s && s.linkUrl) window.open(s.linkUrl, '_blank');
+                        else if (s) window.open(s.imageUrl, '_blank');
+                        return;
+                    }
+                    // Use a global hook exposed by setupStoryViewer (if present).
+                    if (typeof window.__sbOpenStoryGroup === 'function') {
+                        window.__sbOpenStoryGroup(storeGroup, idx);
+                    } else {
+                        // Graceful fallback: open the image directly.
+                        var s2 = stories[idx];
+                        if (s2 && s2.linkUrl) window.open(s2.linkUrl, '_blank');
+                        else if (s2) window.open(s2.imageUrl, '_blank');
+                    }
+                });
             });
         }
     }

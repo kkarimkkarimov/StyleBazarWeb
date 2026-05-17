@@ -459,7 +459,7 @@ public class SellerController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(5 * 1024 * 1024)]
+    [RequestSizeLimit(10 * 1024 * 1024)]
     public async Task<IActionResult> UploadStoreProfileImage([FromForm] int storeId, IFormFile? file, CancellationToken ct)
     {
         if (file is null || file.Length == 0)
