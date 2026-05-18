@@ -5,6 +5,59 @@
     var storiesJson = System.Text.Json.JsonSerializer.Serialize(Model.Stories);
 }
 
+@* ============== HERO BANNER RAIL — admin-curated, auto-rotating ============== *@
+@if (Model.HeroBanners.Any())
+{
+    <section id="sbHeroCarousel" class="sb-hero-rail @(Model.HeroBanners.Count > 1 ? "sb-hero-rail--carousel" : "")" data-hero-rail data-autoplay="6000" aria-roledescription="carousel">
+        <div class="sb-hero-rail__track" data-hero-track>
+            @for (int i = 0; i < Model.HeroBanners.Count; i++)
+            {
+                var b = Model.HeroBanners[i];
+                <article class="sb-hero-slide @(i == 0 ? "is-active" : "")"
+                         data-hero-slide="@i"
+                         aria-hidden="@(i == 0 ? "false" : "true")"
+                         style="@(string.IsNullOrEmpty(b.ImageUrl) ? "" : $"background-image: url('{b.ImageUrl}');")">
+                    <div class="sb-hero-slide__overlay"></div>
+                    <div class="sb-hero-slide__inner">
+                        @if (!string.IsNullOrEmpty(b.Eyebrow))
+                        {
+                            <span class="sb-hero-slide__eyebrow">@b.Eyebrow</span>
+                        }
+                        <h1 class="sb-hero-slide__title">@b.Title</h1>
+                        @if (!string.IsNullOrEmpty(b.Subtitle))
+                        {
+                            <p class="sb-hero-slide__subtitle">@b.Subtitle</p>
+                        }
+                        @if (!string.IsNullOrEmpty(b.CtaUrl) && !string.IsNullOrEmpty(b.CtaText))
+                        {
+                            <a class="sb-btn sb-btn--accent sb-btn--lg sb-hero-slide__cta" href="@b.CtaUrl">@b.CtaText</a>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+
+        @if (Model.HeroBanners.Count > 1)
+        {
+            <button type="button" class="sb-hero-rail__nav sb-hero-rail__nav--prev" data-hero-prev aria-label="Əvvəlki banner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button type="button" class="sb-hero-rail__nav sb-hero-rail__nav--next" data-hero-next aria-label="Növbəti banner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="sb-hero-rail__dots" data-hero-dots role="tablist">
+                @for (int i = 0; i < Model.HeroBanners.Count; i++)
+                {
+                    <button type="button" class="sb-hero-rail__dot @(i == 0 ? "is-active" : "")"
+                            data-hero-dot="@i" role="tab"
+                            aria-label="Banner @(i + 1)"
+                            aria-selected="@(i == 0 ? "true" : "false")"></button>
+                }
+            </div>
+        }
+    </section>
+}
+
 @* ============== FEATURED — pastel lilac rail with arrow nav ============== *@
 <section class="sb-tile sb-tile--lilac">
     <header class="sb-tile__head">

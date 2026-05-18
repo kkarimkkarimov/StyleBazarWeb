@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Stylebazar.BLL.DTOs.Newsletter;
 using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.Exceptions;
+using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Stories;
@@ -27,22 +28,26 @@ public class HomeController : Controller
     private readonly IStoryService _stories;
     private readonly INewsletterService _newsletter;
     private readonly IWishlistService _wishlist;
+    private readonly IHeroBannerService _heroBanners;
 
     public HomeController(
         IProductService products,
         IStoryService stories,
         INewsletterService newsletter,
-        IWishlistService wishlist)
+        IWishlistService wishlist,
+        IHeroBannerService heroBanners)
     {
         _products = products;
         _stories = stories;
         _newsletter = newsletter;
         _wishlist = wishlist;
+        _heroBanners = heroBanners;
     }
 
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         // Sequential awaits — scoped DbContext, no Task.WhenAll.
+        var heroBanners = await _heroBanners.GetActiveAsync(ct);
         var stories = await _stories.GetActiveFeedAsync(ct);
         var featured = await _products.GetFeaturedAsync(12, ct);
         Paginate<ProductListDto> latest = await _products.GetListAsync(
@@ -53,6 +58,7 @@ public class HomeController : Controller
 
         return View(new HomeIndexViewModel
         {
+            HeroBanners = heroBanners,
             Stories = stories,
             FeaturedProducts = featured,
             LatestProducts = latest.Items.ToList(),
