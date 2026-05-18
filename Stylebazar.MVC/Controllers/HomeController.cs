@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Core.Persistence.Paging;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Stylebazar.BLL.DTOs.Newsletter;
 using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.Exceptions;
@@ -63,6 +64,8 @@ public class HomeController : Controller
 
     /// <summary>AJAX endpoint used by the homepage newsletter form.</summary>
     [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("write-default")]
     public async Task<IActionResult> Subscribe([FromBody] SubscribeDto dto, CancellationToken ct)
     {
         try

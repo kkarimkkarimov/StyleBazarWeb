@@ -101,6 +101,21 @@
     }
 </section>
 
+@* ============== NEWSLETTER — ink-dark CTA with AJAX form ============== *@
+<section class="sb-section">
+    <div class="sb-newsletter">
+        <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">Yeniliklərə abunə</span>
+        <h2>İlk biz xəbər verək</h2>
+        <p>Yeni mağazalar, kolleksiyalar və endirimlər — həftədə bir email, spam yox.</p>
+        <form id="sbNewsletterForm" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="email" name="email" placeholder="sen@example.com" required autocomplete="email" aria-label="Email" />
+            <button type="submit" class="sb-btn sb-btn--accent">Abunə ol</button>
+        </form>
+        <div id="sbNewsletterResult" class="sb-newsletter__result" aria-live="polite"></div>
+    </div>
+</section>
+
 @* ============== STORY VIEWER MODAL ============== *@
 <div class="sb-story-viewer" id="sbStoryViewer" aria-hidden="true">
     <button type="button" class="sb-story-viewer__close" data-story-close aria-label="Bağla">

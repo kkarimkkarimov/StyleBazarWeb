@@ -670,9 +670,13 @@
             result.className = 'sb-newsletter__result';
             result.textContent = '';
 
+            var headers = { 'Content-Type': 'application/json' };
+            var token = getAntiForgeryToken();
+            if (token) headers['RequestVerificationToken'] = token;
+
             fetch('/Home/Subscribe', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify({ email: emailInput.value })
             }).then(function (r) {
                 if (submitBtn) submitBtn.classList.remove('is-loading');
@@ -680,6 +684,9 @@
                     result.classList.add('is-success');
                     result.textContent = 'Təşəkkürlər! Abunəliyin təsdiqləndi.';
                     emailInput.value = '';
+                } else if (r.status === 429) {
+                    result.classList.add('is-error');
+                    result.textContent = 'Çox tez-tez cəhd edirsən. Bir az gözlə.';
                 } else {
                     result.classList.add('is-error');
                     result.textContent = 'Email düzgün formatda deyil. Yenidən cəhd et.';
