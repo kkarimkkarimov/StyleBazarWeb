@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Authentication;
@@ -60,6 +61,7 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth-strict")]
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null, CancellationToken ct = default)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -136,6 +138,7 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth-strict")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -174,6 +177,7 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth-strict")]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
@@ -231,6 +235,7 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("write-default")]
     public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken ct = default)
     {
         if (_signInManager.IsSignedIn(User))

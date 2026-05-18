@@ -1,3 +1,6 @@
+using System.Net;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
 using Stylebazar.DAL.Seeders;
@@ -6,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<Stylebazar.DAL.Contexts.ApplicationDbContext>(name: "db");
 
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddIdentityServices();
@@ -16,6 +21,66 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
+
+    // Cookie hardening — Identity already sets HttpOnly + SameSite=Lax by
+    // default; we just lock down the production-secure flag.
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.None
+        : CookieSecurePolicy.Always;
+});
+
+// ---- Rate limiting (Phase 9) ----
+// Per-IP fixed-window buckets. Numbers tuned for our scale: tight on the
+// auth endpoints (brute-force defense layered on top of Identity lockout),
+// generous on signed-in API surface so the admin dashboard never throttles.
+builder.Services.AddRateLimiter(opts =>
+{
+    opts.RejectionStatusCode = (int)HttpStatusCode.TooManyRequests;
+
+    // Most aggressive — login + forgot password. Trip wires brute-force
+    // scripts well before Identity's 5-strike lockout kicks in.
+    opts.AddPolicy("auth-strict", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    // Mid — register, contact form, address create, store actions.
+    opts.AddPolicy("write-default", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    opts.OnRejected = async (context, ct) =>
+    {
+        context.HttpContext.Response.Headers["Retry-After"] = "60";
+        if (context.HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.HttpContext.Response.ContentType = "application/json";
+            await context.HttpContext.Response.WriteAsync(
+                """{"ok":false,"error":"Çox tez-tez cəhd. Bir dəqiqə sonra yenidən cəhd et."}""",
+                ct);
+        }
+        else
+        {
+            context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+            await context.HttpContext.Response.WriteAsync(
+                "Çox tez-tez cəhd. Bir dəqiqə sonra yenidən cəhd et.", ct);
+        }
+    };
 });
 
 // Resolve file-storage RootPath against the web project's wwwroot.
@@ -52,10 +117,48 @@ if (!app.Environment.IsDevelopment())
 // (header, footer, brand) renders consistently around the error message.
 app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
 
+// ---- Security headers (Phase 9) ----
+// Applied to every response (HTML + static + API). Minimal CSP — fonts.gstatic
+// and Google Fonts CSS are allow-listed; img/connect-src kept wide to let
+// uploaded products and the upcoming Cloudinary swap render without churn.
+app.Use(async (ctx, next) =>
+{
+    var headers = ctx.Response.Headers;
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["X-Frame-Options"] = "SAMEORIGIN";
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
+
+    // CSP — kept pragmatic for an MVP. Production tightens img-src/connect-src
+    // to the actual CDN + domains being used.
+    if (!headers.ContainsKey("Content-Security-Policy"))
+    {
+        headers["Content-Security-Policy"] =
+            "default-src 'self'; " +
+            "script-src 'self' 'unsafe-inline'; " +
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+            "font-src 'self' https://fonts.gstatic.com data:; " +
+            "img-src 'self' data: blob: https:; " +
+            "connect-src 'self'; " +
+            "frame-ancestors 'self'; " +
+            "base-uri 'self'; " +
+            "form-action 'self';";
+    }
+    await next();
+});
+
 app.UseRouting();
+
+// Rate limiter sits between routing and auth so endpoint metadata
+// (like [EnableRateLimiting]) is already resolved.
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Liveness + readiness check — wired to DbContext so a DB outage shows
+// "Unhealthy" without polling controllers.
+app.MapHealthChecks("/health");
 
 app.MapStaticAssets();
 
