@@ -1,6 +1,179 @@
-@model SellerPanelViewModel
+@model SellerAnalyticsPageViewModel
+@using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["StubTitle"] = "Analytics";
-    ViewData["StubSubtitle"] = "Görüntü, wishlist və əlaqə click statistikası tezliklə.";
+    ViewData["Title"] = "Statistika";
+
+    string ChannelLabel(ContactType t) => t switch
+    {
+        ContactType.WhatsApp => "WhatsApp",
+        ContactType.Instagram => "Instagram",
+        ContactType.Telegram => "Telegram",
+        ContactType.Phone => "Telefon",
+        ContactType.Facebook => "Facebook",
+        ContactType.TikTok => "TikTok",
+        ContactType.Email => "Email",
+        _ => t.ToString()
+    };
+
+    string ChannelClass(ContactType t) => t switch
+    {
+        ContactType.WhatsApp => "wa",
+        ContactType.Instagram => "ig",
+        ContactType.Telegram => "tg",
+        ContactType.Phone => "ph",
+        ContactType.Facebook => "fb",
+        ContactType.TikTok => "tt",
+        ContactType.Email => "em",
+        _ => "default"
+    };
+
+    int totalClicks = Model.Stats.Contacts.TotalClicks;
+    int maxChannel = Model.Stats.Contacts.ByContactType.Any() ? Model.Stats.Contacts.ByContactType.Max(b => b.Count) : 1;
 }
-@await Html.PartialAsync("_SellerStubPage", Model)
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", Model.Profile)
+
+    <main class="sb-seller-main">
+        <header class="sb-acc-section-title">
+            <h1>Statistika</h1>
+            <p class="sb-acc-section-title__sub">Mağazaların ümumi performansı və alıcı maraq göstəriciləri</p>
+        </header>
+
+        @* ============== KPI GRID (8 cards) ============== *@
+        <div class="sb-ana-kpi">
+            <div class="sb-ana-kpi__card sb-ana-kpi__card--primary">
+                <span class="sb-ana-kpi__label">Ümumi əlaqə click</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.Contacts.TotalClicks</strong>
+                <span class="sb-ana-kpi__sub">son 7 gün: <b>@Model.Stats.Contacts.ClicksLast7Days</b></span>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">Son 30 gün click</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.Contacts.ClicksLast30Days</strong>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">Wishlist əlavə</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.TotalWishlistAdds</strong>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">İzləyici</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.TotalFollowers</strong>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">Aktiv məhsul</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.TotalActiveProducts</strong>
+                <span class="sb-ana-kpi__sub">cəmi: <b>@Model.Stats.TotalProducts</b></span>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">Mağaza</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.TotalStores</strong>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">Rəylər</span>
+                <strong class="sb-ana-kpi__value">@Model.Stats.TotalReviews</strong>
+            </div>
+            <div class="sb-ana-kpi__card">
+                <span class="sb-ana-kpi__label">Ortalama reytinq</span>
+                <strong class="sb-ana-kpi__value">
+                    @(Model.Stats.TotalReviews > 0 ? Model.Stats.AverageRating.ToString("0.0") : "—")
+                    <span class="sb-ana-kpi__stars" aria-hidden="true">★</span>
+                </strong>
+            </div>
+        </div>
+
+        @* ============== TWO-COLUMN BLOCK: channel breakdown + top products ============== *@
+        <div class="sb-ana-grid">
+
+            <section class="sb-ana-section">
+                <header class="sb-ana-section__head">
+                    <h2>Kanal bölgüsü</h2>
+                    <span class="sb-ana-section__sub">Alıcılar səni necə tapır?</span>
+                </header>
+
+                @if (totalClicks == 0)
+                {
+                    <div class="sb-ana-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <strong>Hələ click yoxdur</strong>
+                        <p>Alıcılar məhsulların kontakt düymələrinə basdıqda burada görünəcək.</p>
+                    </div>
+                }
+                else
+                {
+                    <ul class="sb-ana-channels">
+                        @foreach (var ch in Model.Stats.Contacts.ByContactType)
+                        {
+                            int percent = totalClicks == 0 ? 0 : (int)Math.Round(ch.Count * 100.0 / totalClicks);
+                            int barWidth = maxChannel == 0 ? 0 : (int)Math.Round(ch.Count * 100.0 / maxChannel);
+                            <li class="sb-ana-channel">
+                                <div class="sb-ana-channel__head">
+                                    <span class="sb-ana-channel__dot sb-ana-channel__dot--@ChannelClass(ch.ContactType)"></span>
+                                    <span class="sb-ana-channel__name">@ChannelLabel(ch.ContactType)</span>
+                                    <span class="sb-ana-channel__count">@ch.Count <em>(@percent%)</em></span>
+                                </div>
+                                <div class="sb-ana-channel__track">
+                                    <span class="sb-ana-channel__fill sb-ana-channel__fill--@ChannelClass(ch.ContactType)" style="width: @(barWidth)%"></span>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+
+            <section class="sb-ana-section">
+                <header class="sb-ana-section__head">
+                    <h2>Ən populyar məhsullar</h2>
+                    <span class="sb-ana-section__sub">click sayına görə top 5</span>
+                </header>
+
+                @if (!Model.Stats.Contacts.TopProducts.Any())
+                {
+                    <div class="sb-ana-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+                        <strong>Hələ data yoxdur</strong>
+                        <p>Məhsul detallarına ən çox click edilənlər burada görünəcək.</p>
+                    </div>
+                }
+                else
+                {
+                    <ol class="sb-ana-top-list">
+                        @foreach (var p in Model.Stats.Contacts.TopProducts)
+                        {
+                            <li class="sb-ana-top-item">
+                                <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.ProductId" target="_blank" rel="noopener" class="sb-ana-top-item__link">
+                                    @if (!string.IsNullOrEmpty(p.ProductImageUrl))
+                                    {
+                                        <img src="@p.ProductImageUrl" alt="@p.ProductName" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span class="sb-ana-top-item__thumb-fallback"></span>
+                                    }
+                                    <div class="sb-ana-top-item__meta">
+                                        <strong>@p.ProductName</strong>
+                                        <span>@p.StoreName</span>
+                                    </div>
+                                    <span class="sb-ana-top-item__count">
+                                        @p.ClickCount
+                                        <em>click</em>
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ol>
+                }
+            </section>
+        </div>
+
+        @if (totalClicks > 0)
+        {
+            <div class="sb-ana-tip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M9 11.5L11 13.5L15 9.5"/><circle cx="12" cy="12" r="10"/></svg>
+                <span>
+                    <strong>Məsləhət:</strong>
+                    Ən çox click alan kanalı vurğulamaq üçün satıcı profilində o kanalın ikonunu birinci sıraya gətirə bilərsən.
+                </span>
+            </div>
+        }
+    </main>
+</section>

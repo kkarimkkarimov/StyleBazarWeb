@@ -1,5 +1,6 @@
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Addresses;
+using Stylebazar.BLL.DTOs.Analytics;
 using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.BLL.Services.Reviews;
 
@@ -31,4 +32,9 @@ public class SellerReviewsPageViewModel : SellerPanelViewModel
     public int FiveStarCount { get; set; }
     public int LowStarCount { get; set; }   // 1–2 stars — needs attention
     public int? MaxRatingFilter { get; set; }
+}
+
+public class SellerAnalyticsPageViewModel : SellerPanelViewModel
+{
+    public SellerAnalyticsDto Stats { get; set; } = new();
 }

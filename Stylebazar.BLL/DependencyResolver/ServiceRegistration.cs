@@ -112,6 +112,7 @@ public static class ServiceRegistration
 
         // Analytics — contact-click tracking + seller stats
         services.AddScoped<IContactClickService, ContactClickManager>();
+        services.AddScoped<ISellerAnalyticsService, SellerAnalyticsManager>();
 
         return services;
     }

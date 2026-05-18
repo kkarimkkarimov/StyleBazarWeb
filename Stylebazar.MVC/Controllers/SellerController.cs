@@ -9,6 +9,7 @@ using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Account;
 using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Categories;
+using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
@@ -34,6 +35,7 @@ public class SellerController : Controller
     private readonly ICategoryService _categories;
     private readonly ILoginEventService _events;
     private readonly IReviewService _reviews;
+    private readonly ISellerAnalyticsService _analytics;
     private readonly UserManager<AppUser> _userManager;
 
     public SellerController(
@@ -44,6 +46,7 @@ public class SellerController : Controller
         ICategoryService categories,
         ILoginEventService events,
         IReviewService reviews,
+        ISellerAnalyticsService analytics,
         UserManager<AppUser> userManager)
     {
         _account = account;
@@ -53,6 +56,7 @@ public class SellerController : Controller
         _categories = categories;
         _events = events;
         _reviews = reviews;
+        _analytics = analytics;
         _userManager = userManager;
     }
 
@@ -413,8 +417,18 @@ public class SellerController : Controller
     [HttpGet] public async Task<IActionResult> Integration(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));
 
-    [HttpGet] public async Task<IActionResult> Analytics(CancellationToken ct)
-        => View(await BuildPanelVmAsync(ct));
+    [HttpGet]
+    public async Task<IActionResult> Analytics(CancellationToken ct)
+    {
+        var basePanel = await BuildPanelVmAsync(ct);
+        var stats = await _analytics.GetForCurrentSellerAsync(ct);
+        return View(new SellerAnalyticsPageViewModel
+        {
+            Profile = basePanel.Profile,
+            PrimaryStore = basePanel.PrimaryStore,
+            Stats = stats
+        });
+    }
 
     // ============== STORE SETTINGS (Phase 6e) ==============
 
