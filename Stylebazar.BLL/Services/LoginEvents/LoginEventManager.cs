@@ -107,6 +107,7 @@ public class LoginEventManager : ILoginEventService
             LoginEventType.PasswordReset => "Password Reset",
             LoginEventType.EmailVerified => "Email Verified",
             LoginEventType.TwoFactorChallenge => "2FA Prompt",
+            LoginEventType.Locked => "Account Locked",
             _ => e.EventType.ToString()
         },
         IpAddress = e.IpAddress,

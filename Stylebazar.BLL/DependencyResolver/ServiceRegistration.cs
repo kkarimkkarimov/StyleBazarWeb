@@ -10,6 +10,7 @@ using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Contact;
 using Stylebazar.BLL.Services.CurrentUser;
+using Stylebazar.BLL.Services.Email;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.BLL.Services.HeroBanners;
@@ -43,6 +44,15 @@ public static class ServiceRegistration
                 options.User.RequireUniqueEmail = true;
 
                 options.SignIn.RequireConfirmedEmail = false;
+
+                // Lockout — brute-force protection. AllowedForNewUsers ensures
+                // accounts created via /Account/Register inherit the policy
+                // without per-user wiring; AccountManager.ToggleSuspensionAsync
+                // still needs to flip the flag explicitly when an admin
+                // un-suspends someone, which it already does.
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
@@ -60,6 +70,9 @@ public static class ServiceRegistration
 
         // File storage (local disk impl; swap to CloudinaryFileStorageService later)
         services.AddSingleton<IFileStorageService, LocalFileStorageService>();
+
+        // Email (dev: writes to ILogger; production swaps to SMTP/SendGrid)
+        services.AddScoped<IEmailService, LogEmailService>();
 
         // Auth
         services.AddScoped<ITokenService, TokenService>();

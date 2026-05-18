@@ -1,12 +1,15 @@
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Authentication;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Account;
 using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Authentication;
+using Stylebazar.BLL.Services.Email;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Entities.Enums;
@@ -21,6 +24,7 @@ public class AccountController : Controller
     private readonly IAccountService _account;
     private readonly IAddressService _addresses;
     private readonly ILoginEventService _events;
+    private readonly IEmailService _email;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly UserManager<AppUser> _userManager;
 
@@ -29,6 +33,7 @@ public class AccountController : Controller
         IAccountService account,
         IAddressService addresses,
         ILoginEventService events,
+        IEmailService email,
         SignInManager<AppUser> signInManager,
         UserManager<AppUser> userManager)
     {
@@ -36,6 +41,7 @@ public class AccountController : Controller
         _account = account;
         _addresses = addresses;
         _events = events;
+        _email = email;
         _signInManager = signInManager;
         _userManager = userManager;
     }
@@ -75,14 +81,40 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // lockoutOnFailure: true — let Identity track AccessFailedCount and
+        // flip LockoutEnd once we hit MaxFailedAccessAttempts.
         Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(
-            user, model.Password, model.RememberMe, lockoutOnFailure: false);
+            user, model.Password, model.RememberMe, lockoutOnFailure: true);
+
+        if (result.IsLockedOut)
+        {
+            // First lockout — track once. Subsequent attempts during the
+            // lockout window will return IsLockedOut without incrementing
+            // AccessFailedCount, so we don't double-log.
+            DateTimeOffset? until = await _userManager.GetLockoutEndDateAsync(user);
+            int minutes = until.HasValue
+                ? Math.Max(1, (int)Math.Ceiling((until.Value - DateTimeOffset.UtcNow).TotalMinutes))
+                : 15;
+
+            await _events.TrackAsync(user.Id, LoginEventType.Locked,
+                GetClientIp(), GetUserAgent(), ct);
+            ModelState.AddModelError(string.Empty,
+                $"Çox uğursuz cəhd. Hesabınız {minutes} dəqiqəliyinə bloklandı.");
+            return View(model);
+        }
 
         if (!result.Succeeded)
         {
             await _events.TrackAsync(user.Id, LoginEventType.FailedSignIn,
                 GetClientIp(), GetUserAgent(), ct);
-            ModelState.AddModelError(string.Empty, "Email və ya parol səhvdir.");
+
+            // Tell the user how many tries are left BEFORE the next lockout.
+            int failed = await _userManager.GetAccessFailedCountAsync(user);
+            int remaining = Math.Max(0, 5 - failed);
+            string msg = remaining <= 2
+                ? $"Email və ya parol səhvdir. {remaining} cəhd qalıb."
+                : "Email və ya parol səhvdir.";
+            ModelState.AddModelError(string.Empty, msg);
             return View(model);
         }
 
@@ -90,6 +122,101 @@ public class AccountController : Controller
             GetClientIp(), GetUserAgent(), ct);
 
         return SafeLocalRedirect(returnUrl);
+    }
+
+    // -------- Forgot / reset password --------
+
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        if (_signInManager.IsSignedIn(User))
+            return RedirectToAction("Index", "Home");
+        return View(new ForgotPasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        // Same response whether the email exists or not — no enumeration.
+        AppUser? user = await _userManager.FindByEmailAsync(model.Email.Trim());
+        if (user is not null)
+        {
+            string rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // URL-safe Base64 — Identity tokens contain `+` and `/` otherwise.
+            string encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(rawToken));
+            string resetUrl = Url.Action(
+                action: nameof(ResetPassword),
+                controller: "Account",
+                values: new { email = user.Email, token = encoded },
+                protocol: Request.Scheme,
+                host: Request.Host.Value)!;
+
+            await _email.SendPasswordResetAsync(user.Email!, user.FullName, resetUrl, ct);
+        }
+
+        return View("ForgotPasswordConfirmation", model.Email);
+    }
+
+    [HttpGet]
+    public IActionResult ResetPassword(string? email, string? token)
+    {
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+        {
+            TempData["Error"] = "Bərpa linki etibarsızdır. Yeni link tələb et.";
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+        return View(new ResetPasswordViewModel { Email = email, Token = token });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        AppUser? user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+        {
+            // Generic message — no enumeration via the response.
+            ModelState.AddModelError(string.Empty, "Bərpa linki etibarsızdır və ya bitib.");
+            return View(model);
+        }
+
+        string decodedToken;
+        try
+        {
+            decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+        }
+        catch
+        {
+            ModelState.AddModelError(string.Empty, "Bərpa linki etibarsızdır və ya bitib.");
+            return View(model);
+        }
+
+        IdentityResult result = await _userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            // Translate Identity errors via the same helper Register uses.
+            string aggregated = Stylebazar.BLL.Services.Authentication.IdentityErrorTranslator.Translate(result);
+            ModelState.AddModelError(string.Empty, aggregated);
+            return View(model);
+        }
+
+        // Clear lockout — successful reset means the user owns the email,
+        // so any prior lockout state should be wiped.
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.ResetAccessFailedCountAsync(user);
+
+        await _events.TrackAsync(user.Id, LoginEventType.PasswordReset,
+            GetClientIp(), GetUserAgent(), ct);
+
+        TempData["Success"] = "Parolun bərpa olundu. İndi yeni parol ilə daxil ola bilərsən.";
+        return RedirectToAction(nameof(Login));
     }
 
     // -------- Register --------

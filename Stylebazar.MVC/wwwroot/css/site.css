@@ -7019,6 +7019,39 @@ body:has(.sb-seller-layout) {
 }
 
 /* -----------------------------------------------------------
+   17ai. Auth — Forgot/Reset password additions (Phase 8)
+   ----------------------------------------------------------- */
+.sb-auth__form--centered {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+.sb-auth__icon-circle {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--sb-accent-soft, #fff1f0);
+    color: var(--sb-accent, #ff5d4b);
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    margin-bottom: 4px;
+}
+.sb-auth__icon-circle svg { width: 30px; height: 30px; stroke-width: 1.6; }
+.sb-auth__alt--row { width: 100%; margin-top: 6px; }
+.sb-auth__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--sb-muted);
+    font-size: .82rem;
+    margin: 12px 0 0;
+    text-align: left;
+}
+.sb-auth__hint svg { width: 14px; height: 14px; stroke-width: 1.7; flex-shrink: 0; }
+.sb-auth__hint a { color: var(--sb-accent, #ff5d4b); text-decoration: underline; }
+
+/* -----------------------------------------------------------
    17ag. Public Store page (Phase 6f) — /Store/Detail/{slug}
    ----------------------------------------------------------- */
 .sb-storepage {
