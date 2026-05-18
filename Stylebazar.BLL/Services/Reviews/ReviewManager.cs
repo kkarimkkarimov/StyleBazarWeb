@@ -230,4 +230,39 @@ public class ReviewManager : IReviewService
             ProductName = r.Product?.Name ?? string.Empty
         }).ToList();
     }
+
+    public async Task<List<SellerReviewRowDto>> GetForCurrentSellerAsync(int? maxRating = null, int take = 100, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(_currentUser.UserId))
+            return new List<SellerReviewRowDto>();
+
+        string sellerId = _currentUser.UserId;
+
+        Paginate<Review> page = await _reviews.GetListAsync(
+            predicate: r =>
+                r.Product.Store.OwnerId == sellerId &&
+                (!maxRating.HasValue || r.Rating <= maxRating.Value),
+            orderBy: q => q.OrderByDescending(r => r.CreatedDate),
+            include: q => q
+                .Include(r => r.User)
+                .Include(r => r.Product).ThenInclude(p => p.Store)
+                .Include(r => r.Product).ThenInclude(p => p.Images),
+            index: 0, size: take,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        return page.Items.Select(r => new SellerReviewRowDto
+        {
+            Review = _mapper.Map<ReviewDto>(r),
+            ProductId = r.ProductId,
+            ProductName = r.Product?.Name ?? string.Empty,
+            ProductSlug = r.Product?.Slug,
+            ProductImageUrl = r.Product?.Images?
+                .OrderBy(i => i.DisplayOrder)
+                .Select(i => i.ImageUrl)
+                .FirstOrDefault(),
+            StoreId = r.Product?.StoreId ?? 0,
+            StoreName = r.Product?.Store?.Name ?? string.Empty
+        }).ToList();
+    }
 }

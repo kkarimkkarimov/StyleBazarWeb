@@ -28,6 +28,13 @@ public interface IReviewService
     /// name attached. Filters by max rating + comment search. Hard-capped.
     /// </summary>
     Task<List<AdminReviewRowDto>> GetAllForAdminAsync(int? maxRating = null, string? search = null, int take = 100, CancellationToken ct = default);
+
+    /// <summary>
+    /// Seller-scoped review feed: returns reviews on products in stores
+    /// owned by the current user. Used by /Seller/Reviews. Ordered
+    /// newest-first, hard-capped at <paramref name="take"/>.
+    /// </summary>
+    Task<List<SellerReviewRowDto>> GetForCurrentSellerAsync(int? maxRating = null, int take = 100, CancellationToken ct = default);
 }
 
 public class AdminReviewRowDto
@@ -35,4 +42,15 @@ public class AdminReviewRowDto
     public ReviewDto Review { get; set; } = new();
     public int ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
+}
+
+public class SellerReviewRowDto
+{
+    public ReviewDto Review { get; set; } = new();
+    public int ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public string? ProductSlug { get; set; }
+    public string? ProductImageUrl { get; set; }
+    public int StoreId { get; set; }
+    public string StoreName { get; set; } = string.Empty;
 }

@@ -11,6 +11,7 @@ using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.Products;
+using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Entities.Enums;
@@ -32,6 +33,7 @@ public class SellerController : Controller
     private readonly IProductService _products;
     private readonly ICategoryService _categories;
     private readonly ILoginEventService _events;
+    private readonly IReviewService _reviews;
     private readonly UserManager<AppUser> _userManager;
 
     public SellerController(
@@ -41,6 +43,7 @@ public class SellerController : Controller
         IProductService products,
         ICategoryService categories,
         ILoginEventService events,
+        IReviewService reviews,
         UserManager<AppUser> userManager)
     {
         _account = account;
@@ -49,6 +52,7 @@ public class SellerController : Controller
         _products = products;
         _categories = categories;
         _events = events;
+        _reviews = reviews;
         _userManager = userManager;
     }
 
@@ -371,8 +375,31 @@ public class SellerController : Controller
     [HttpGet] public async Task<IActionResult> SmartUpload(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));
 
-    [HttpGet] public async Task<IActionResult> Reviews(CancellationToken ct)
-        => View(await BuildPanelVmAsync(ct));
+    [HttpGet]
+    public async Task<IActionResult> Reviews(int? maxRating, CancellationToken ct)
+    {
+        var basePanel = await BuildPanelVmAsync(ct);
+        var rows = await _reviews.GetForCurrentSellerAsync(maxRating: maxRating, take: 100, ct);
+
+        // KPI cards: average rating + buckets across the (uncapped) seller feed.
+        // We computed on the loaded rows; for >100 items add a separate aggregate query later.
+        int total = rows.Count;
+        double avg = total > 0 ? rows.Average(r => r.Review.Rating) : 0d;
+        int fiveStar = rows.Count(r => r.Review.Rating == 5);
+        int lowStar = rows.Count(r => r.Review.Rating <= 2);
+
+        return View(new SellerReviewsPageViewModel
+        {
+            Profile = basePanel.Profile,
+            PrimaryStore = basePanel.PrimaryStore,
+            Reviews = rows,
+            AverageRating = Math.Round(avg, 2),
+            TotalCount = total,
+            FiveStarCount = fiveStar,
+            LowStarCount = lowStar,
+            MaxRatingFilter = maxRating
+        });
+    }
 
     [HttpGet] public async Task<IActionResult> Notifications(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));
