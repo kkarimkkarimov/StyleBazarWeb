@@ -1,6 +1,132 @@
-@model AccountPanelViewModel
+@model AccountNotificationsPageViewModel
+@using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["StubTitle"] = "Notifications";
-    ViewData["StubSubtitle"] = "Bildirişlər tezliklə əlavə olunacaq.";
+    ViewData["Title"] = "Bildirişlər";
+
+    string EventIcon(LoginEventType t) => t switch
+    {
+        LoginEventType.SignIn => "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4 M10 17l5-5-5-5 M15 12H3",
+        LoginEventType.SignUp => "M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M8.5 7.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z M20 8v6 M23 11h-6",
+        LoginEventType.SignOut => "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9",
+        LoginEventType.PasswordChanged => "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4",
+        LoginEventType.PasswordReset => "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8 M21 3v5h-5 M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16 M8 16H3v5",
+        LoginEventType.FailedSignIn => "M12 9v2m0 4h.01 M4.93 4.93l14.14 14.14 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z",
+        LoginEventType.Locked => "M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 10 0v4",
+        _ => "M12 8v4 M12 16h.01 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+    };
+
+    string EventTone(LoginEventType t) => t switch
+    {
+        LoginEventType.SignIn => "ok",
+        LoginEventType.SignUp => "ok",
+        LoginEventType.PasswordChanged => "info",
+        LoginEventType.PasswordReset => "info",
+        LoginEventType.EmailVerified => "ok",
+        LoginEventType.FailedSignIn => "warn",
+        LoginEventType.Locked => "danger",
+        LoginEventType.SignOut => "muted",
+        _ => "muted"
+    };
+
+    string EventTitle(LoginEventType t) => t switch
+    {
+        LoginEventType.SignIn => "Hesaba giriş",
+        LoginEventType.SignUp => "Hesab yaradıldı",
+        LoginEventType.SignOut => "Hesabdan çıxış",
+        LoginEventType.FailedSignIn => "Uğursuz giriş cəhdi",
+        LoginEventType.PasswordChanged => "Parol dəyişdirildi",
+        LoginEventType.PasswordReset => "Parol bərpa edildi",
+        LoginEventType.EmailVerified => "Email təsdiqləndi",
+        LoginEventType.TwoFactorChallenge => "İki addımlı doğrulama",
+        LoginEventType.Locked => "Hesab müvəqqəti bloklandı",
+        _ => "Hadisə"
+    };
+
+    string EventBody(LoginEventDto e) => e.EventType switch
+    {
+        LoginEventType.SignIn => $"{e.DeviceLabel} cihazından, {e.IpAddress ?? "—"}",
+        LoginEventType.SignOut => $"{e.DeviceLabel} cihazından",
+        LoginEventType.FailedSignIn => $"{e.IpAddress ?? "—"} ünvanından yanlış parol",
+        LoginEventType.Locked => "5 ardıcıl uğursuz giriş — 15 dəqiqəlik blok",
+        LoginEventType.PasswordReset => "Email vasitəsilə bərpa linki istifadə olundu",
+        LoginEventType.PasswordChanged => "Hesabın parolu yeniləndi",
+        _ => e.DeviceLabel ?? string.Empty
+    };
+
+    string Relative(DateTime dtUtc)
+    {
+        var now = DateTime.UtcNow;
+        var span = now - dtUtc;
+        if (span.TotalMinutes < 1) return "indicə";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dəq əvvəl";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat əvvəl";
+        if (span.TotalDays < 2) return "dünən";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} gün əvvəl";
+        return dtUtc.ToLocalTime().ToString("dd MMM yyyy", new System.Globalization.CultureInfo("az-Latn-AZ"));
+    }
+
+    // Group events by day bucket
+    DateTime nowUtc = DateTime.UtcNow;
+    DateTime todayUtc = nowUtc.Date;
+    DateTime yesterdayUtc = todayUtc.AddDays(-1);
+    DateTime weekAgoUtc = todayUtc.AddDays(-7);
+
+    string Bucket(DateTime dt) =>
+        dt.Date == todayUtc ? "Bu gün"
+        : dt.Date == yesterdayUtc ? "Dünən"
+        : dt.Date > weekAgoUtc ? "Bu həftə"
+        : "Daha əvvəl";
+
+    var grouped = Model.Events
+        .GroupBy(e => Bucket(e.CreatedDate))
+        .Select(g => new { Title = g.Key, Items = g.ToList() })
+        .ToList();
 }
-@await Html.PartialAsync("_AccountStubPage", Model)
+
+<section class="sb-acc-layout">
+    @await Html.PartialAsync("_AccountSidebar", Model.Profile)
+
+    <main class="sb-acc-main">
+        <header class="sb-acc-section-title">
+            <h1>Bildirişlər</h1>
+            <p class="sb-acc-section-title__sub">Son 30 günün hesab aktivliyi</p>
+        </header>
+
+        @if (!Model.Events.Any())
+        {
+            <div class="sb-acc-card sb-acc-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <strong>Hələ bildiriş yoxdur</strong>
+                <p>Sənə yeni bildiriş gəldikdə burada görünəcək.</p>
+            </div>
+        }
+        else
+        {
+            <div class="sb-notif-timeline">
+                @foreach (var group in grouped)
+                {
+                    <div class="sb-notif-group">
+                        <h2 class="sb-notif-group__title">@group.Title</h2>
+                        <ol class="sb-notif-list">
+                            @foreach (var e in group.Items)
+                            {
+                                <li class="sb-notif-item sb-notif-item--@EventTone(e.EventType)">
+                                    <span class="sb-notif-item__dot" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+                                            <path d="@EventIcon(e.EventType)" />
+                                        </svg>
+                                    </span>
+                                    <div class="sb-notif-item__body">
+                                        <div class="sb-notif-item__title">@EventTitle(e.EventType)</div>
+                                        <div class="sb-notif-item__meta">@EventBody(e)</div>
+                                    </div>
+                                    <time class="sb-notif-item__time" datetime="@e.CreatedDate.ToString("o")">@Relative(e.CreatedDate)</time>
+                                </li>
+                            }
+                        </ol>
+                    </div>
+                }
+            </div>
+        }
+    </main>
+</section>

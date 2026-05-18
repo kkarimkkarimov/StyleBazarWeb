@@ -23,3 +23,13 @@ public class AccountAddressesPageViewModel : AccountPanelViewModel
 {
     public List<AddressDto> Addresses { get; set; } = new();
 }
+
+/// <summary>
+/// Notifications timeline (last 30 days). Today only seeded by LoginEvent
+/// rows (sign-in, password change, lockout, etc.); future enrichments
+/// (new review, new follower) will plug into the same list.
+/// </summary>
+public class AccountNotificationsPageViewModel : AccountPanelViewModel
+{
+    public List<LoginEventDto> Events { get; set; } = new();
+}

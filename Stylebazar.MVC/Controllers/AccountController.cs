@@ -416,7 +416,13 @@ public class AccountController : Controller
     [HttpGet] [Authorize]
     public async Task<IActionResult> Notifications(CancellationToken ct)
     {
-        return View(new AccountPanelViewModel { Profile = await _account.GetMineAsync(ct) });
+        var profile = await _account.GetMineAsync(ct);
+        var events = await _events.GetMyHistoryAsync(days: 30, ct);
+        return View(new AccountNotificationsPageViewModel
+        {
+            Profile = profile,
+            Events = events
+        });
     }
 
     [HttpGet] [Authorize]
