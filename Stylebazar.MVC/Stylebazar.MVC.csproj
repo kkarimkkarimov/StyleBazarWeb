@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Views\" />
-    <Folder Include="Areas\Seller\Views\" />
     <Folder Include="Views\Account\" />
     <Folder Include="Views\Store\" />
     <Folder Include="Views\Shop\" />
