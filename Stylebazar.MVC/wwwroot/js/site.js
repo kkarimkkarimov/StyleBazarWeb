@@ -89,6 +89,7 @@
         safe('setupSellerProducts',      setupSellerProducts);
         safe('setupStoreSettings',       setupStoreSettings);
         safe('setupStorePage',           setupStorePage);
+        safe('setupAdmin',               setupAdmin);
 
         // Final safety net: even if every reveal-on-scroll path failed,
         // any .sb-reveal element still hidden after 1500 ms is force-shown.
@@ -2772,6 +2773,187 @@
                     }
                 });
             });
+        }
+    }
+
+    /* -----------------------------------------------------------
+       Admin Dashboard (Phase 7) — Areas/Admin/*
+       - Mobile sidebar toggle
+       - Bulk select (master checkbox + per-row + floating action bar)
+       - data-confirm interceptor (window.confirm before form submit / click)
+       - Category modal-less in-place edit (single form, JS swaps fields)
+       - Hero banner modal-less in-place edit (single form, JS swaps fields)
+       - Auto-hide toasts after 4.5 s
+       ----------------------------------------------------------- */
+    function setupAdmin() {
+        // ---- 1. Mobile sidebar toggle ----
+        var menuBtn = document.querySelector('[data-admin-menu-toggle]');
+        var sidebar = document.querySelector('[data-admin-sidebar]');
+        if (menuBtn && sidebar) {
+            menuBtn.addEventListener('click', function () {
+                sidebar.classList.toggle('is-open');
+            });
+            // Close sidebar on outside click (mobile)
+            document.addEventListener('click', function (e) {
+                if (!sidebar.classList.contains('is-open')) return;
+                if (sidebar.contains(e.target) || menuBtn.contains(e.target)) return;
+                sidebar.classList.remove('is-open');
+            });
+        }
+
+        // ---- 2. Auto-hide toasts ----
+        document.querySelectorAll('[data-admin-toast]').forEach(function (el) {
+            setTimeout(function () {
+                el.style.transition = 'opacity .35s ease, transform .35s ease';
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-6px)';
+                setTimeout(function () { el.remove(); }, 360);
+            }, 4500);
+        });
+
+        // ---- 3. data-confirm interceptor (forms + buttons + links) ----
+        document.addEventListener('click', function (e) {
+            var trigger = e.target.closest('[data-confirm]');
+            if (!trigger) return;
+
+            // For buttons inside forms, we let the form submit handler do the prompt.
+            // For raw buttons / links, prompt here.
+            if (trigger.tagName === 'BUTTON' && trigger.type === 'submit') {
+                // Defer to the submit handler below.
+                return;
+            }
+            if (!window.confirm(trigger.getAttribute('data-confirm'))) {
+                e.preventDefault();
+            }
+        });
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (!form || form.tagName !== 'FORM') return;
+            // Confirm if the submitter has data-confirm OR the form itself has it.
+            var submitter = e.submitter;
+            var msg = (submitter && submitter.getAttribute('data-confirm'))
+                || form.getAttribute('data-confirm');
+            if (msg && !window.confirm(msg)) e.preventDefault();
+        });
+
+        // ---- 4. Bulk select ----
+        document.querySelectorAll('[data-admin-bulk-form]').forEach(function (form) {
+            var master = form.querySelector('[data-admin-bulk-toggle]');
+            var bar = form.querySelector('[data-admin-bulk-bar]');
+            var counter = form.querySelector('[data-admin-bulk-count]');
+            var items = function () { return form.querySelectorAll('[data-admin-bulk-item]'); };
+
+            function refresh() {
+                var checked = Array.from(items()).filter(function (cb) { return cb.checked; });
+                var n = checked.length;
+                if (counter) counter.textContent = String(n);
+                if (bar) bar.hidden = n === 0;
+                if (master) {
+                    var total = items().length;
+                    master.checked = total > 0 && n === total;
+                    master.indeterminate = n > 0 && n < total;
+                }
+            }
+
+            if (master) {
+                master.addEventListener('change', function () {
+                    items().forEach(function (cb) { cb.checked = master.checked; });
+                    refresh();
+                });
+            }
+            form.addEventListener('change', function (e) {
+                if (e.target && e.target.matches('[data-admin-bulk-item]')) refresh();
+            });
+            refresh();
+        });
+
+        // ---- 5. Category modal-less in-place edit ----
+        var catForm = document.querySelector('[data-admin-cat-form]');
+        if (catForm) {
+            var catTitle = document.querySelector('[data-admin-cat-form-title]');
+            var catIdInput = catForm.querySelector('[data-admin-cat-id]');
+            var catNameInput = catForm.querySelector('[data-admin-cat-name]');
+            var catSlugInput = catForm.querySelector('[data-admin-cat-slug]');
+            var catParentSelect = catForm.querySelector('[data-admin-cat-parent]');
+            var catSubmit = catForm.querySelector('[data-admin-cat-submit]');
+            var catCancel = catForm.querySelector('[data-admin-cat-cancel]');
+
+            function resetCatForm() {
+                catForm.action = catForm.action.replace(/\/Update\/\d+/, '/Create');
+                if (catIdInput) catIdInput.value = '';
+                if (catNameInput) catNameInput.value = '';
+                if (catSlugInput) catSlugInput.value = '';
+                if (catParentSelect) catParentSelect.value = '';
+                if (catTitle) catTitle.textContent = 'Yeni kateqoriya';
+                if (catSubmit) catSubmit.textContent = 'Yarat';
+            }
+
+            document.querySelectorAll('[data-admin-cat-edit]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = btn.getAttribute('data-id');
+                    catForm.action = catForm.action.replace(/\/(Create|Update\/\d+)$/, '/Update/' + id);
+                    if (catIdInput) catIdInput.value = id;
+                    if (catNameInput) catNameInput.value = btn.getAttribute('data-name') || '';
+                    if (catSlugInput) catSlugInput.value = btn.getAttribute('data-slug') || '';
+                    if (catParentSelect) catParentSelect.value = btn.getAttribute('data-parent') || '';
+                    if (catTitle) catTitle.textContent = 'Kateqoriyanı redaktə et';
+                    if (catSubmit) catSubmit.textContent = 'Yenilə';
+                    catForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+            if (catCancel) catCancel.addEventListener('click', resetCatForm);
+        }
+
+        // ---- 6. Hero banner modal-less in-place edit ----
+        var bForm = document.querySelector('[data-admin-banner-form]');
+        if (bForm) {
+            var bTitle = document.querySelector('[data-admin-banner-form-title]');
+            var bId = bForm.querySelector('[data-admin-banner-id]');
+            var bT = bForm.querySelector('[data-admin-banner-title]');
+            var bE = bForm.querySelector('[data-admin-banner-eyebrow]');
+            var bS = bForm.querySelector('[data-admin-banner-subtitle]');
+            var bCt = bForm.querySelector('[data-admin-banner-ctatext]');
+            var bCu = bForm.querySelector('[data-admin-banner-ctaurl]');
+            var bO = bForm.querySelector('[data-admin-banner-order]');
+            var bA = bForm.querySelector('[data-admin-banner-active]');
+            var bAField = bForm.querySelector('[data-admin-banner-active-field]');
+            var bSubmit = bForm.querySelector('[data-admin-banner-submit]');
+            var bCancel = bForm.querySelector('[data-admin-banner-cancel]');
+
+            function resetBannerForm() {
+                bForm.action = bForm.action.replace(/\/Update\/\d+/, '/Create');
+                if (bId) bId.value = '';
+                if (bT) bT.value = '';
+                if (bE) bE.value = '';
+                if (bS) bS.value = '';
+                if (bCt) bCt.value = '';
+                if (bCu) bCu.value = '';
+                if (bO) bO.value = '0';
+                if (bA) bA.checked = true;
+                if (bAField) bAField.hidden = true;
+                if (bTitle) bTitle.textContent = 'Yeni banner';
+                if (bSubmit) bSubmit.textContent = 'Yarat';
+            }
+
+            document.querySelectorAll('[data-admin-banner-edit]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = btn.getAttribute('data-id');
+                    bForm.action = bForm.action.replace(/\/(Create|Update\/\d+)$/, '/Update/' + id);
+                    if (bId) bId.value = id;
+                    if (bT) bT.value = btn.getAttribute('data-title') || '';
+                    if (bE) bE.value = btn.getAttribute('data-eyebrow') || '';
+                    if (bS) bS.value = btn.getAttribute('data-subtitle') || '';
+                    if (bCt) bCt.value = btn.getAttribute('data-ctatext') || '';
+                    if (bCu) bCu.value = btn.getAttribute('data-ctaurl') || '';
+                    if (bO) bO.value = btn.getAttribute('data-order') || '0';
+                    if (bA) bA.checked = btn.getAttribute('data-active') === 'true';
+                    if (bAField) bAField.hidden = false;
+                    if (bTitle) bTitle.textContent = 'Banner redaktə et';
+                    if (bSubmit) bSubmit.textContent = 'Yenilə';
+                    bForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+            if (bCancel) bCancel.addEventListener('click', resetBannerForm);
         }
     }
 })();

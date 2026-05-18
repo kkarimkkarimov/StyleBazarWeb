@@ -59,6 +59,12 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+// Admin area first so /Admin/* never falls through to the catch-all route.
+app.MapControllerRoute(
+    name: "admin",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")

@@ -1,0 +1,92 @@
+@model AdminUsersPageViewModel
+@{
+    ViewData["Title"] = "İstifadəçilər";
+    ViewData["PageTitle"] = "İstifadəçilər";
+    var f = Model.Filter;
+}
+
+<form method="get" class="sb-admin-filter-bar">
+    <input type="text" name="Search" value="@f.Search" placeholder="Ad və ya email axtar..." class="sb-admin-search" />
+    <select name="Role" class="sb-admin-select">
+        <option value="" selected="@(string.IsNullOrEmpty(f.Role))">Bütün rollar</option>
+        <option value="Buyer" selected="@(f.Role == "Buyer")">Alıcı</option>
+        <option value="Seller" selected="@(f.Role == "Seller")">Satıcı</option>
+        <option value="Admin" selected="@(f.Role == "Admin")">Admin</option>
+    </select>
+    <select name="Status" class="sb-admin-select">
+        <option value="" selected="@(string.IsNullOrEmpty(f.Status))">Bütün statuslar</option>
+        <option value="active" selected="@(f.Status == "active")">Aktiv</option>
+        <option value="suspended" selected="@(f.Status == "suspended")">Bloklu</option>
+    </select>
+    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Filter</button>
+</form>
+
+<form asp-area="Admin" asp-controller="User" asp-action="BulkAction" method="post" data-admin-bulk-form>
+    @Html.AntiForgeryToken()
+
+    <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
+        <span><strong data-admin-bulk-count>0</strong> seçildi</span>
+        <button type="submit" name="action" value="suspend" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Seçilmiş istifadəçilərin statusunu dəyişməyə əminsən?">Blok et / aç</button>
+        <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Seçilmiş istifadəçiləri silməyə əminsən? Geri qaytarıla bilməz.">Sil</button>
+    </div>
+
+    <div class="sb-admin-card sb-admin-table-card">
+        @if (!Model.Users.Items.Any())
+        {
+            <div class="sb-admin-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <strong>İstifadəçi tapılmadı</strong>
+                <span>Filtri dəyişdirməyə cəhd et.</span>
+            </div>
+        }
+        else
+        {
+            <table class="sb-admin-table">
+                <thead>
+                    <tr>
+                        <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle /></th>
+                        <th>İstifadəçi</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Mağazalar</th>
+                        <th>Status</th>
+                        <th>Qoşulub</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Users.Items)
+                    {
+                        <tr>
+                            <td><input type="checkbox" name="ids" value="@u.Id" data-admin-bulk-item /></td>
+                            <td>
+                                <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@u.Id" class="sb-admin-user-cell">
+                                    <span class="sb-admin-avatar">
+                                        @if (!string.IsNullOrEmpty(u.ProfileImageUrl)) { <img src="@u.ProfileImageUrl" alt="" /> }
+                                        else { <span>@(u.FullName.Length > 0 ? u.FullName[0].ToString().ToUpper() : "?")</span> }
+                                    </span>
+                                    <strong>@u.FullName</strong>
+                                </a>
+                            </td>
+                            <td>@u.Email</td>
+                            <td><span class="sb-admin-chip sb-admin-chip--@u.Role.ToLower()">@u.Role</span></td>
+                            <td>@u.StoreCount</td>
+                            <td>
+                                @if (u.IsSuspended) { <span class="sb-admin-chip sb-admin-chip--danger">Bloklu</span> }
+                                else { <span class="sb-admin-chip sb-admin-chip--ok">Aktiv</span> }
+                            </td>
+                            <td><span class="sb-admin-date">@u.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</span></td>
+                            <td class="sb-admin-table__actions">
+                                <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@u.Id" class="sb-admin-icon-btn" title="Bax">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</form>
+
+@await Html.PartialAsync("_AdminPagination", new Tuple<int,int,int>(Model.Users.Index + 1, Model.Users.Pages, Model.Users.Count))

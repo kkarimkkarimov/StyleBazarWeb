@@ -1,0 +1,135 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageTitle"] = "Dashboard — ümumi baxış";
+}
+
+<div class="sb-admin-kpi-grid">
+    <a asp-area="Admin" asp-controller="User" asp-action="Index" class="sb-admin-kpi sb-admin-kpi--users">
+        <div class="sb-admin-kpi__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="sb-admin-kpi__body">
+            <span class="sb-admin-kpi__label">İstifadəçilər</span>
+            <strong class="sb-admin-kpi__value">@Model.TotalUsers</strong>
+        </div>
+    </a>
+
+    <a asp-area="Admin" asp-controller="User" asp-action="Index" asp-route-Role="Seller" class="sb-admin-kpi sb-admin-kpi--sellers">
+        <div class="sb-admin-kpi__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
+        </div>
+        <div class="sb-admin-kpi__body">
+            <span class="sb-admin-kpi__label">Satıcılar</span>
+            <strong class="sb-admin-kpi__value">@Model.TotalSellers</strong>
+        </div>
+    </a>
+
+    <a asp-area="Admin" asp-controller="Store" asp-action="Index" class="sb-admin-kpi sb-admin-kpi--stores">
+        <div class="sb-admin-kpi__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="sb-admin-kpi__body">
+            <span class="sb-admin-kpi__label">Mağazalar</span>
+            <strong class="sb-admin-kpi__value">@Model.TotalStores</strong>
+        </div>
+    </a>
+
+    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="sb-admin-kpi sb-admin-kpi--products">
+        <div class="sb-admin-kpi__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        </div>
+        <div class="sb-admin-kpi__body">
+            <span class="sb-admin-kpi__label">Məhsullar</span>
+            <strong class="sb-admin-kpi__value">@Model.TotalProducts</strong>
+        </div>
+    </a>
+
+    <a asp-area="Admin" asp-controller="Story" asp-action="Index" class="sb-admin-kpi sb-admin-kpi--stories">
+        <div class="sb-admin-kpi__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="sb-admin-kpi__body">
+            <span class="sb-admin-kpi__label">Aktiv hekayələr</span>
+            <strong class="sb-admin-kpi__value">@Model.ActiveStories</strong>
+        </div>
+    </a>
+
+    <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" asp-route-status="New" class="sb-admin-kpi sb-admin-kpi--contact">
+        <div class="sb-admin-kpi__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="sb-admin-kpi__body">
+            <span class="sb-admin-kpi__label">Oxunmamış mesaj</span>
+            <strong class="sb-admin-kpi__value">@Model.UnreadContactMessages</strong>
+        </div>
+    </a>
+</div>
+
+<div class="sb-admin-grid-2col">
+    <div class="sb-admin-card">
+        <header class="sb-admin-card__head">
+            <h2>Son qeydiyyatlar</h2>
+            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="sb-admin-card__link">Hamısı →</a>
+        </header>
+        @if (!Model.RecentUsers.Any())
+        {
+            <p class="sb-admin-empty-line">Hələ qeydiyyat yoxdur.</p>
+        }
+        else
+        {
+            <ul class="sb-admin-feed">
+                @foreach (var u in Model.RecentUsers)
+                {
+                    <li>
+                        <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@u.Id">
+                            <div class="sb-admin-feed__avatar">
+                                @if (!string.IsNullOrEmpty(u.ProfileImageUrl))
+                                {
+                                    <img src="@u.ProfileImageUrl" alt="" />
+                                }
+                                else
+                                {
+                                    <span>@(u.FullName.Length > 0 ? u.FullName[0].ToString().ToUpper() : "?")</span>
+                                }
+                            </div>
+                            <div class="sb-admin-feed__body">
+                                <strong>@u.FullName</strong>
+                                <span>@u.Email · @u.Role</span>
+                            </div>
+                            <span class="sb-admin-feed__date">@u.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="sb-admin-card">
+        <header class="sb-admin-card__head">
+            <h2>Son mesajlar</h2>
+            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" class="sb-admin-card__link">Hamısı →</a>
+        </header>
+        @if (!Model.RecentMessages.Any())
+        {
+            <p class="sb-admin-empty-line">Hələ mesaj yoxdur.</p>
+        }
+        else
+        {
+            <ul class="sb-admin-feed sb-admin-feed--msgs">
+                @foreach (var m in Model.RecentMessages)
+                {
+                    <li>
+                        <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index">
+                            <div class="sb-admin-feed__body">
+                                <strong>@m.FullName <span class="sb-admin-feed__status sb-admin-feed__status--@m.Status.ToString().ToLower()">@m.Status</span></strong>
+                                <span>@(string.IsNullOrEmpty(m.Subject) ? "(başlıqsız)" : m.Subject)</span>
+                            </div>
+                            <span class="sb-admin-feed__date">@m.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>

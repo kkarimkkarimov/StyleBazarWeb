@@ -1,0 +1,92 @@
+@model AdminUserDetailViewModel
+@{
+    ViewData["Title"] = Model.User.FullName;
+    ViewData["PageTitle"] = Model.User.FullName;
+    var u = Model.User;
+    string CurrentRole = u.Role;
+}
+
+<nav class="sb-admin-breadcrumb">
+    <a asp-area="Admin" asp-controller="User" asp-action="Index">İstifadəçilər</a>
+    <span>/</span>
+    <span>@u.FullName</span>
+</nav>
+
+<div class="sb-admin-grid-2col">
+    <div class="sb-admin-card">
+        <div class="sb-admin-user-hero">
+            <span class="sb-admin-avatar sb-admin-avatar--lg">
+                @if (!string.IsNullOrEmpty(u.ProfileImageUrl)) { <img src="@u.ProfileImageUrl" alt="" /> }
+                else { <span>@(u.FullName.Length > 0 ? u.FullName[0].ToString().ToUpper() : "?")</span> }
+            </span>
+            <div>
+                <h2>@u.FullName</h2>
+                <p>@u.Email · <span class="sb-admin-chip sb-admin-chip--@u.Role.ToLower()">@u.Role</span></p>
+                <p class="sb-admin-meta">Telefon: @(u.PhoneNumber ?? "—") · Qoşulub @u.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
+            </div>
+        </div>
+
+        <div class="sb-admin-detail-actions">
+            <form asp-area="Admin" asp-controller="User" asp-action="SetRole" method="post" class="sb-admin-inline-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@u.Id" />
+                <label class="sb-admin-field-label">Rol dəyiş</label>
+                <select name="role" class="sb-admin-select">
+                    <option value="Buyer" selected="@(CurrentRole == "Buyer")">Alıcı</option>
+                    <option value="Seller" selected="@(CurrentRole == "Seller")">Satıcı</option>
+                    <option value="Admin" selected="@(CurrentRole == "Admin")">Admin</option>
+                </select>
+                <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Yenilə</button>
+            </form>
+
+            <form asp-area="Admin" asp-controller="User" asp-action="ToggleSuspension" method="post" class="sb-admin-inline-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@u.Id" />
+                @if (u.IsSuspended)
+                {
+                    <button type="submit" class="sb-admin-btn sb-admin-btn--ok" data-confirm="Blokunu açmağa əminsən?">Bloku aç</button>
+                }
+                else
+                {
+                    <button type="submit" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Bu istifadəçini blok etməyə əminsən?">Blok et</button>
+                }
+            </form>
+
+            <form asp-area="Admin" asp-controller="User" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@u.Id" />
+                <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Bu istifadəçini həmişəlik silməyə əminsən?">Sil</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="sb-admin-card">
+        <header class="sb-admin-card__head">
+            <h2>Sahib olduğu mağazalar (@Model.Stores.Count)</h2>
+        </header>
+        @if (!Model.Stores.Any())
+        {
+            <p class="sb-admin-empty-line">Mağaza yoxdur.</p>
+        }
+        else
+        {
+            <ul class="sb-admin-feed">
+                @foreach (var s in Model.Stores)
+                {
+                    <li>
+                        <a asp-area="" asp-controller="Store" asp-action="Detail" asp-route-slug="@s.Slug" target="_blank">
+                            <div class="sb-admin-feed__avatar">
+                                @if (!string.IsNullOrEmpty(s.ProfileImageUrl)) { <img src="@s.ProfileImageUrl" alt="" /> }
+                                else { <span>@(s.Name.Length > 0 ? s.Name[0].ToString().ToUpper() : "?")</span> }
+                            </div>
+                            <div class="sb-admin-feed__body">
+                                <strong>@s.Name</strong>
+                                <span>@s.ProductCount məhsul · @(s.IsActive ? "Aktiv" : "Deaktiv")</span>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>

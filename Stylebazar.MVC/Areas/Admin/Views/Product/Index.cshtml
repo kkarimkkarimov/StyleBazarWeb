@@ -1,0 +1,113 @@
+@model AdminProductsPageViewModel
+@{
+    ViewData["Title"] = "Məhsullar";
+    ViewData["PageTitle"] = "Məhsullar";
+    var q = Model.Query;
+}
+
+<form method="get" class="sb-admin-filter-bar">
+    <input type="text" name="Search" value="@q.Search" placeholder="Məhsul adı axtar..." class="sb-admin-search" />
+    <select name="StoreId" class="sb-admin-select">
+        <option value="">Bütün mağazalar</option>
+        @foreach (var s in Model.Stores)
+        {
+            <option value="@s.Id" selected="@(q.StoreId == s.Id)">@s.Name</option>
+        }
+    </select>
+    <select name="CategoryId" class="sb-admin-select">
+        <option value="">Bütün kateqoriyalar</option>
+        @foreach (var c in Model.Categories)
+        {
+            <option value="@c.Id" selected="@(q.CategoryId == c.Id)">@c.Name</option>
+        }
+    </select>
+    <select name="IsActive" class="sb-admin-select">
+        <option value="">Bütün statuslar</option>
+        <option value="true" selected="@(q.IsActive == true)">Aktiv</option>
+        <option value="false" selected="@(q.IsActive == false)">Deaktiv</option>
+    </select>
+    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Filter</button>
+</form>
+
+<form asp-area="Admin" asp-controller="Product" asp-action="BulkAction" method="post" data-admin-bulk-form>
+    @Html.AntiForgeryToken()
+    <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
+        <span><strong data-admin-bulk-count>0</strong> seçildi</span>
+        <button type="submit" name="action" value="toggle" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Statusu dəyişməyə əminsən?">Aktiv/Deaktiv</button>
+        <button type="submit" name="action" value="feature" class="sb-admin-btn sb-admin-btn--ok" data-confirm="14 gün boyu featured edilsin?">Featured et</button>
+        <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Silməyə əminsən?">Sil</button>
+    </div>
+
+    <div class="sb-admin-card sb-admin-table-card">
+        @if (!Model.Products.Items.Any())
+        {
+            <div class="sb-admin-empty"><strong>Məhsul tapılmadı</strong></div>
+        }
+        else
+        {
+            <table class="sb-admin-table">
+                <thead>
+                    <tr>
+                        <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle /></th>
+                        <th>Məhsul</th>
+                        <th>Mağaza</th>
+                        <th>Kateqoriya</th>
+                        <th>Qiymət</th>
+                        <th>Stok</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Products.Items)
+                    {
+                        <tr>
+                            <td><input type="checkbox" name="ids" value="@p.Id" data-admin-bulk-item /></td>
+                            <td>
+                                <div class="sb-admin-user-cell">
+                                    <span class="sb-admin-thumb">
+                                        @if (!string.IsNullOrEmpty(p.MainImageUrl)) { <img src="@p.MainImageUrl" alt="" /> }
+                                    </span>
+                                    <div>
+                                        <strong>@p.Name</strong>
+                                        @if (p.IsFeatured) { <span class="sb-admin-chip sb-admin-chip--accent">Featured</span> }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@p.StoreName</td>
+                            <td>@p.CategoryName</td>
+                            <td>
+                                @if (p.DiscountPrice.HasValue)
+                                { <strong>@p.DiscountPrice.Value.ToString("0.##") ₼</strong> <s>@p.Price.ToString("0.##") ₼</s> }
+                                else { <strong>@p.Price.ToString("0.##") ₼</strong> }
+                            </td>
+                            <td>@(p.StockQuantity > 0 ? p.StockQuantity.ToString() : "0")</td>
+                            <td>@(p.IsActive ? Html.Raw("<span class='sb-admin-chip sb-admin-chip--ok'>Aktiv</span>") : Html.Raw("<span class='sb-admin-chip sb-admin-chip--danger'>Deaktiv</span>"))</td>
+                            <td class="sb-admin-table__actions">
+                                <a asp-area="" asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id" target="_blank" class="sb-admin-icon-btn" title="Saytda bax">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                </a>
+                                <form asp-area="Admin" asp-controller="Product" asp-action="ToggleActive" method="post" class="sb-admin-inline-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="submit" class="sb-admin-icon-btn" title="Aktiv/Deaktiv">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    </button>
+                                </form>
+                                <form asp-area="Admin" asp-controller="Product" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</form>
+
+@await Html.PartialAsync("_AdminPagination", new Tuple<int,int,int>(Model.Products.Index + 1, Model.Products.Pages, Model.Products.Count))

@@ -1,0 +1,104 @@
+@model AdminCategoriesPageViewModel
+@{
+    ViewData["Title"] = "Kateqoriyalar";
+    ViewData["PageTitle"] = "Kateqoriyalar";
+    // Group by parent
+    var roots = Model.Categories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.Name).ToList();
+    var childrenLookup = Model.Categories.Where(c => c.ParentCategoryId != null).GroupBy(c => c.ParentCategoryId!.Value).ToDictionary(g => g.Key, g => g.OrderBy(c => c.Name).ToList());
+}
+
+<div class="sb-admin-grid-2col sb-admin-grid-2col--3-1">
+    <div class="sb-admin-card sb-admin-table-card">
+        @if (!Model.Categories.Any())
+        {
+            <div class="sb-admin-empty"><strong>Kateqoriya yoxdur</strong><span>Sağdakı formadan birinci kateqoriyanı yarat.</span></div>
+        }
+        else
+        {
+            <table class="sb-admin-table">
+                <thead>
+                    <tr><th>Ad</th><th>Slug</th><th>Yaradılıb</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var root in roots)
+                    {
+                        <tr class="sb-admin-cat-row sb-admin-cat-row--root">
+                            <td><strong>@root.Name</strong></td>
+                            <td><code>@root.Slug</code></td>
+                            <td><span class="sb-admin-date">@root.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</span></td>
+                            <td class="sb-admin-table__actions">
+                                <button type="button" class="sb-admin-icon-btn" data-admin-cat-edit
+                                        data-id="@root.Id" data-name="@root.Name" data-slug="@root.Slug" data-parent="" title="Redaktə et">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <form asp-area="Admin" asp-controller="Category" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@root.Id" />
+                                    <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @if (childrenLookup.TryGetValue(root.Id, out var kids))
+                        {
+                            foreach (var c in kids)
+                            {
+                                <tr class="sb-admin-cat-row sb-admin-cat-row--child">
+                                    <td>↳ @c.Name</td>
+                                    <td><code>@c.Slug</code></td>
+                                    <td><span class="sb-admin-date">@c.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</span></td>
+                                    <td class="sb-admin-table__actions">
+                                        <button type="button" class="sb-admin-icon-btn" data-admin-cat-edit
+                                                data-id="@c.Id" data-name="@c.Name" data-slug="@c.Slug" data-parent="@c.ParentCategoryId" title="Redaktə et">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </button>
+                                        <form asp-area="Admin" asp-controller="Category" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@c.Id" />
+                                            <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="sb-admin-card">
+        <header class="sb-admin-card__head"><h2 data-admin-cat-form-title>Yeni kateqoriya</h2></header>
+        <form asp-area="Admin" asp-controller="Category" asp-action="Create" method="post" data-admin-cat-form>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="" data-admin-cat-id />
+
+            <div class="sb-admin-field">
+                <label>Ad</label>
+                <input type="text" name="name" required maxlength="100" data-admin-cat-name />
+            </div>
+            <div class="sb-admin-field">
+                <label>Slug <small>(boş = avtomatik)</small></label>
+                <input type="text" name="slug" maxlength="120" data-admin-cat-slug />
+            </div>
+            <div class="sb-admin-field">
+                <label>Ana kateqoriya</label>
+                <select name="parentCategoryId" data-admin-cat-parent>
+                    <option value="">(yoxdur — root)</option>
+                    @foreach (var root in roots)
+                    {
+                        <option value="@root.Id">@root.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="sb-admin-field-actions">
+                <button type="button" class="sb-admin-btn sb-admin-btn--ghost" data-admin-cat-cancel>Reset</button>
+                <button type="submit" class="sb-admin-btn sb-admin-btn--primary" data-admin-cat-submit>Yarat</button>
+            </div>
+        </form>
+    </div>
+</div>

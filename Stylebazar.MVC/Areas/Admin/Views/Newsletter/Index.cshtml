@@ -1,0 +1,46 @@
+@model AdminNewsletterPageViewModel
+@{
+    ViewData["Title"] = "Newsletter";
+    ViewData["PageTitle"] = "Newsletter abunəçiləri";
+}
+
+<div class="sb-admin-filter-bar">
+    <form method="get" style="display:contents">
+        <select name="isActive" class="sb-admin-select" onchange="this.form.submit()">
+            <option value="" selected="@(Model.ActiveFilter == null)">Hamısı</option>
+            <option value="true" selected="@(Model.ActiveFilter == true)">Aktiv</option>
+            <option value="false" selected="@(Model.ActiveFilter == false)">İmtina edənlər</option>
+        </select>
+    </form>
+    <a asp-area="Admin" asp-controller="Newsletter" asp-action="ExportCsv" class="sb-admin-btn sb-admin-btn--ghost" style="margin-left:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>CSV yüklə</span>
+    </a>
+</div>
+
+<div class="sb-admin-card sb-admin-table-card">
+    @if (!Model.Subscribers.Items.Any())
+    {
+        <div class="sb-admin-empty"><strong>Abunəçi yoxdur</strong></div>
+    }
+    else
+    {
+        <table class="sb-admin-table">
+            <thead>
+                <tr><th>Email</th><th>Qoşulub</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.Subscribers.Items)
+                {
+                    <tr>
+                        <td><strong>@s.Email</strong></td>
+                        <td><span class="sb-admin-date">@s.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</span></td>
+                        <td>@(s.IsActive ? Html.Raw("<span class='sb-admin-chip sb-admin-chip--ok'>Aktiv</span>") : Html.Raw("<span class='sb-admin-chip sb-admin-chip--muted'>İmtina</span>"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@await Html.PartialAsync("_AdminPagination", new Tuple<int,int,int>(Model.Subscribers.Index + 1, Model.Subscribers.Pages, Model.Subscribers.Count))

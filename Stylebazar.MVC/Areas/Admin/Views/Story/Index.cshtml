@@ -1,0 +1,69 @@
+@model AdminStoriesPageViewModel
+@{
+    ViewData["Title"] = "Hekayələr";
+    ViewData["PageTitle"] = "Hekayələr";
+}
+
+<form asp-area="Admin" asp-controller="Story" asp-action="BulkDelete" method="post" data-admin-bulk-form>
+    @Html.AntiForgeryToken()
+    <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
+        <span><strong data-admin-bulk-count>0</strong> seçildi</span>
+        <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Seçilmiş hekayələri silməyə əminsən?">Sil</button>
+    </div>
+
+    <div class="sb-admin-card sb-admin-table-card">
+        @if (!Model.Stories.Any())
+        {
+            <div class="sb-admin-empty"><strong>Hekayə yoxdur</strong></div>
+        }
+        else
+        {
+            <table class="sb-admin-table">
+                <thead>
+                    <tr>
+                        <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle /></th>
+                        <th>Önizləmə</th>
+                        <th>Mağaza</th>
+                        <th>Açıqlama</th>
+                        <th>Baxış</th>
+                        <th>Bitmə tarixi</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Stories)
+                    {
+                        var s = row.Story;
+                        bool expired = s.ExpiresAt < DateTime.UtcNow;
+                        <tr class="@(expired ? "is-expired" : "")">
+                            <td><input type="checkbox" name="ids" value="@s.Id" data-admin-bulk-item /></td>
+                            <td>
+                                <a href="@s.ImageUrl" target="_blank" class="sb-admin-story-thumb">
+                                    <img src="@s.ImageUrl" alt="" />
+                                </a>
+                            </td>
+                            <td>
+                                <a asp-area="" asp-controller="Store" asp-action="Detail" asp-route-slug="@row.StoreSlug" target="_blank">@row.StoreName</a>
+                            </td>
+                            <td><span class="sb-admin-clamp-2">@(string.IsNullOrEmpty(s.Caption) ? "—" : s.Caption)</span></td>
+                            <td>@s.ViewCount</td>
+                            <td>
+                                <span class="sb-admin-date">@s.ExpiresAt.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                                @if (expired) { <span class="sb-admin-chip sb-admin-chip--muted">Bitib</span> }
+                            </td>
+                            <td class="sb-admin-table__actions">
+                                <form asp-area="Admin" asp-controller="Story" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@s.Id" />
+                                    <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</form>

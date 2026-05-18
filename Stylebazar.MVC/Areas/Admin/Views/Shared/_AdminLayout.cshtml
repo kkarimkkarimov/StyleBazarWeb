@@ -1,0 +1,79 @@
+@using Microsoft.AspNetCore.Identity
+@using Stylebazar.DAL.Entities
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+@{
+    string section = (ViewContext.RouteData.Values["controller"] as string ?? "Dashboard").ToLowerInvariant();
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Admin") — StyleBazar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="sb-admin-body">
+
+<div class="sb-admin-layout">
+    @await Html.PartialAsync("_AdminSidebar", section)
+
+    <div class="sb-admin-content">
+        <header class="sb-admin-topbar">
+            <div class="sb-admin-topbar__left">
+                <button type="button" class="sb-admin-topbar__menu-btn" data-admin-menu-toggle aria-label="Menyu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <h1 class="sb-admin-topbar__title">@(ViewData["PageTitle"] ?? ViewData["Title"] ?? "Admin Panel")</h1>
+            </div>
+            <div class="sb-admin-topbar__right">
+                <a href="/" class="sb-admin-topbar__link" title="Sayta qayıt">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a2 2 0 002 2h10a2 2 0 002-2V10"/></svg>
+                    <span>Sayt</span>
+                </a>
+                @if (currentUser is not null)
+                {
+                    <div class="sb-admin-topbar__user">
+                        <div class="sb-admin-topbar__user-avatar">
+                            @if (!string.IsNullOrEmpty(currentUser.ProfileImageUrl))
+                            {
+                                <img src="@currentUser.ProfileImageUrl" alt="@currentUser.FullName" />
+                            }
+                            else
+                            {
+                                <span>@(currentUser.FullName.Length > 0 ? currentUser.FullName[0].ToString().ToUpper() : "A")</span>
+                            }
+                        </div>
+                        <div class="sb-admin-topbar__user-meta">
+                            <strong>@currentUser.FullName</strong>
+                            <span>Admin</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </header>
+
+        <main class="sb-admin-main">
+            @if (TempData["Success"] is string okMsg)
+            {
+                <div class="sb-admin-toast sb-admin-toast--ok" data-admin-toast>@okMsg</div>
+            }
+            @if (TempData["Error"] is string errMsg)
+            {
+                <div class="sb-admin-toast sb-admin-toast--err" data-admin-toast>@errMsg</div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

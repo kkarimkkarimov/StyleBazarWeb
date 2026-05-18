@@ -1,0 +1,29 @@
+@model Tuple<int, int, int>
+@{
+    int currentPage = Model.Item1;
+    int totalPages = Model.Item2;
+    int totalCount = Model.Item3;
+    if (totalPages <= 1) return;
+
+    int from = Math.Max(1, currentPage - 2);
+    int to = Math.Min(totalPages, currentPage + 2);
+}
+<nav class="sb-admin-pagination" aria-label="Səhifələr">
+    <span class="sb-admin-pagination__info">@totalCount nəticə · səh. @currentPage / @totalPages</span>
+    <div class="sb-admin-pagination__pages">
+        @if (currentPage > 1)
+        {
+            <a href="?@(Context.Request.QueryString.HasValue ? Context.Request.QueryString.Value!.TrimStart('?') + "&" : "")Page=@(currentPage - 1)" class="sb-admin-pagination__link">‹</a>
+        }
+        @for (int p = from; p <= to; p++)
+        {
+            int pp = p;
+            <a href="?@(Context.Request.QueryString.HasValue ? Context.Request.QueryString.Value!.TrimStart('?') + "&" : "")Page=@pp"
+               class="sb-admin-pagination__link @(pp == currentPage ? "is-current" : "")">@pp</a>
+        }
+        @if (currentPage < totalPages)
+        {
+            <a href="?@(Context.Request.QueryString.HasValue ? Context.Request.QueryString.Value!.TrimStart('?') + "&" : "")Page=@(currentPage + 1)" class="sb-admin-pagination__link">›</a>
+        }
+    </div>
+</nav>

@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.Constants;
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.Exceptions;
@@ -103,6 +104,158 @@ public class AccountManager : IAccountService
         user.ProfileImageUrl = null;
         await _users.UpdateAsync(user);
         await _files.DeleteAsync(previous, ct);
+    }
+
+    // -------- admin --------
+
+    public async Task<Paginate<UserAdminDto>> GetUsersAsync(UserAdminListFilter filter, CancellationToken ct = default)
+    {
+        IQueryable<AppUser> q = _users.Users.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            string s = filter.Search.Trim().ToLowerInvariant();
+            q = q.Where(u =>
+                (u.FullName ?? "").ToLower().Contains(s) ||
+                (u.Email ?? "").ToLower().Contains(s));
+        }
+
+        if (filter.Status == "active")
+            q = q.Where(u => u.LockoutEnd == null || u.LockoutEnd <= DateTime.UtcNow);
+        else if (filter.Status == "suspended")
+            q = q.Where(u => u.LockoutEnd != null && u.LockoutEnd > DateTime.UtcNow);
+
+        int total = await q.CountAsync(ct);
+
+        // Page first, then enrich with role lookup (per-user — UserManager has no batch API).
+        List<AppUser> pageItems = await q
+            .OrderByDescending(u => u.CreatedDate)
+            .Skip((Math.Max(filter.Page, 1) - 1) * Math.Max(filter.PageSize, 1))
+            .Take(filter.PageSize)
+            .ToListAsync(ct);
+
+        var items = new List<UserAdminDto>(pageItems.Count);
+        foreach (AppUser u in pageItems)
+        {
+            IList<string> roles = await _users.GetRolesAsync(u);
+            string role = roles.FirstOrDefault() ?? "Buyer";
+
+            // Role filter is applied AFTER projection because Identity-roles is
+            // an out-of-band join — done here keeps the query simple at the cost
+            // of an over-fetch that's irrelevant at our scale (<10k users).
+            if (!string.IsNullOrWhiteSpace(filter.Role) && !string.Equals(role, filter.Role, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            int storeCount = await _stores.GetListAsync(
+                predicate: s => s.OwnerId == u.Id,
+                orderBy: x => x.OrderBy(s => s.Id),
+                index: 0, size: 1, enableTracking: false, cancellationToken: ct).ContinueWith(t => t.Result.Count, ct);
+
+            bool suspended = u.LockoutEnd != null && u.LockoutEnd > DateTime.UtcNow;
+            items.Add(new UserAdminDto
+            {
+                Id = u.Id,
+                FullName = u.FullName,
+                Email = u.Email ?? string.Empty,
+                PhoneNumber = u.PhoneNumber,
+                ProfileImageUrl = u.ProfileImageUrl,
+                CreatedDate = u.CreatedDate,
+                EmailConfirmed = u.EmailConfirmed,
+                Role = role,
+                IsSuspended = suspended,
+                LockoutEnd = u.LockoutEnd?.UtcDateTime,
+                StoreCount = storeCount
+            });
+        }
+
+        return new Paginate<UserAdminDto>
+        {
+            Index = Math.Max(filter.Page, 1) - 1,
+            Size = filter.PageSize,
+            Count = total,
+            Pages = filter.PageSize > 0 ? (int)Math.Ceiling(total / (double)filter.PageSize) : 0,
+            Items = items
+        };
+    }
+
+    public async Task<UserAdminDto?> GetUserByIdAsync(string userId, CancellationToken ct = default)
+    {
+        AppUser? u = await _users.FindByIdAsync(userId);
+        if (u is null) return null;
+
+        IList<string> roles = await _users.GetRolesAsync(u);
+        Paginate<Store> stores = await _stores.GetListAsync(
+            predicate: s => s.OwnerId == u.Id,
+            orderBy: x => x.OrderBy(s => s.Id),
+            index: 0, size: 1, enableTracking: false, cancellationToken: ct);
+
+        return new UserAdminDto
+        {
+            Id = u.Id,
+            FullName = u.FullName,
+            Email = u.Email ?? string.Empty,
+            PhoneNumber = u.PhoneNumber,
+            ProfileImageUrl = u.ProfileImageUrl,
+            CreatedDate = u.CreatedDate,
+            EmailConfirmed = u.EmailConfirmed,
+            Role = roles.FirstOrDefault() ?? "Buyer",
+            IsSuspended = u.LockoutEnd != null && u.LockoutEnd > DateTime.UtcNow,
+            LockoutEnd = u.LockoutEnd?.UtcDateTime,
+            StoreCount = stores.Count
+        };
+    }
+
+    public async Task SetRoleAsync(string userId, string newRole, CancellationToken ct = default)
+    {
+        AppUser? u = await _users.FindByIdAsync(userId);
+        if (u is null) throw new NotFoundException(Messages.Account.NotFound);
+
+        IList<string> roles = await _users.GetRolesAsync(u);
+        if (roles.Any())
+        {
+            IdentityResult rem = await _users.RemoveFromRolesAsync(u, roles);
+            if (!rem.Succeeded)
+                throw new BusinessException(string.Join(" • ", rem.Errors.Select(e => e.Description)));
+        }
+        IdentityResult add = await _users.AddToRoleAsync(u, newRole);
+        if (!add.Succeeded)
+            throw new BusinessException(string.Join(" • ", add.Errors.Select(e => e.Description)));
+    }
+
+    public async Task<bool> ToggleSuspensionAsync(string userId, CancellationToken ct = default)
+    {
+        AppUser? u = await _users.FindByIdAsync(userId);
+        if (u is null) throw new NotFoundException(Messages.Account.NotFound);
+
+        bool currentlySuspended = u.LockoutEnd != null && u.LockoutEnd > DateTime.UtcNow;
+
+        if (!await _users.GetLockoutEnabledAsync(u))
+            await _users.SetLockoutEnabledAsync(u, true);
+
+        if (currentlySuspended)
+        {
+            await _users.SetLockoutEndDateAsync(u, null);
+            return false;
+        }
+        else
+        {
+            await _users.SetLockoutEndDateAsync(u, DateTimeOffset.MaxValue);
+            return true;
+        }
+    }
+
+    public async Task DeleteUserAsync(string userId, CancellationToken ct = default)
+    {
+        // Guard: admin cannot delete themselves.
+        if (userId == _currentUser.UserId)
+            throw new BusinessException("Öz hesabınızı buradan silə bilməzsiniz.");
+
+        AppUser? u = await _users.FindByIdAsync(userId);
+        if (u is null) throw new NotFoundException(Messages.Account.NotFound);
+
+        IdentityResult res = await _users.DeleteAsync(u);
+        if (!res.Succeeded)
+            throw new BusinessException(string.Join(" • ", res.Errors.Select(e => e.Description)));
     }
 
     // -------- helpers --------

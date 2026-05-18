@@ -151,4 +151,22 @@ public class StoryManager : IStoryService
         await _fileStorage.DeleteAsync(tracked.ImageUrl, ct);
         await _stories.DeleteAsync(tracked, permanent: true, cancellationToken: ct);
     }
+
+    public async Task<List<AdminStoryRowDto>> GetAllForAdminAsync(int take = 100, CancellationToken ct = default)
+    {
+        Paginate<Story> page = await _stories.GetListAsync(
+            predicate: null,
+            orderBy: q => q.OrderByDescending(s => s.CreatedDate),
+            include: q => q.Include(s => s.Store),
+            index: 0, size: take,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        return page.Items.Select(s => new AdminStoryRowDto
+        {
+            Story = _mapper.Map<StoryDto>(s),
+            StoreName = s.Store?.Name ?? string.Empty,
+            StoreSlug = s.Store?.Slug ?? string.Empty
+        }).ToList();
+    }
 }

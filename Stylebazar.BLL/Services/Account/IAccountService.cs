@@ -1,3 +1,4 @@
+using Core.Persistence.Paging;
 using Microsoft.AspNetCore.Http;
 using Stylebazar.BLL.DTOs.Account;
 
@@ -23,4 +24,24 @@ public interface IAccountService
 
     /// <summary>Removes the avatar (sets ProfileImageUrl = null + deletes file).</summary>
     Task RemoveAvatarAsync(CancellationToken ct = default);
+
+    // ---- Admin-scoped operations ----
+
+    /// <summary>Paginated user list with role/status filter + search. Admin only.</summary>
+    Task<Paginate<UserAdminDto>> GetUsersAsync(UserAdminListFilter filter, CancellationToken ct = default);
+
+    /// <summary>Loads a single user by id with admin-level detail.</summary>
+    Task<UserAdminDto?> GetUserByIdAsync(string userId, CancellationToken ct = default);
+
+    /// <summary>Replaces the user's role with the new one (drops all previous roles).</summary>
+    Task SetRoleAsync(string userId, string newRole, CancellationToken ct = default);
+
+    /// <summary>
+    /// Toggle the user's lockout. Suspended → LockoutEnd set to year 9999;
+    /// active → LockoutEnd set to null. Returns the new state.
+    /// </summary>
+    Task<bool> ToggleSuspensionAsync(string userId, CancellationToken ct = default);
+
+    /// <summary>Hard delete a user. Admin-only, cannot delete themselves.</summary>
+    Task DeleteUserAsync(string userId, CancellationToken ct = default);
 }

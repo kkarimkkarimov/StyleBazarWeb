@@ -208,4 +208,26 @@ public class ReviewManager : IReviewService
             "rating-desc" => q => q.OrderByDescending(r => r.Rating).ThenByDescending(r => r.CreatedDate),
             _ => q => q.OrderByDescending(r => r.CreatedDate)
         };
+
+    public async Task<List<AdminReviewRowDto>> GetAllForAdminAsync(int? maxRating = null, string? search = null, int take = 100, CancellationToken ct = default)
+    {
+        // maxRating semantics: "show me reviews with rating ≤ N" — lets admins
+        // surface low-star comments for moderation review.
+        Paginate<Review> page = await _reviews.GetListAsync(
+            predicate: r =>
+                (!maxRating.HasValue || r.Rating <= maxRating.Value) &&
+                (string.IsNullOrEmpty(search) || (r.Comment ?? "").Contains(search)),
+            orderBy: q => q.OrderByDescending(r => r.CreatedDate),
+            include: q => q.Include(r => r.User).Include(r => r.Product).Include(r => r.Images),
+            index: 0, size: take,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        return page.Items.Select(r => new AdminReviewRowDto
+        {
+            Review = _mapper.Map<ReviewDto>(r),
+            ProductId = r.ProductId,
+            ProductName = r.Product?.Name ?? string.Empty
+        }).ToList();
+    }
 }
