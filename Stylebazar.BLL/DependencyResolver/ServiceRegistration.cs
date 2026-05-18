@@ -6,6 +6,7 @@ using Stylebazar.BLL.Mappings;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.Account;
 using Stylebazar.BLL.Services.Addresses;
+using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Contact;
@@ -108,6 +109,9 @@ public static class ServiceRegistration
         services.AddScoped<IAccountService, AccountManager>();
         services.AddScoped<IAddressService, AddressManager>();
         services.AddScoped<IStoreFollowerService, StoreFollowerManager>();
+
+        // Analytics — contact-click tracking + seller stats
+        services.AddScoped<IContactClickService, ContactClickManager>();
 
         return services;
     }

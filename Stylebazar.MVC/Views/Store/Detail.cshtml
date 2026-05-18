@@ -108,7 +108,8 @@
                     @if (!string.IsNullOrEmpty(st.InstagramHandle))
                     {
                         <a class="sb-storepage__chip sb-storepage__chip--ig"
-                           href="https://instagram.com/@st.InstagramHandle" target="_blank" rel="noopener">
+                           href="https://instagram.com/@st.InstagramHandle" target="_blank" rel="noopener"
+                           data-click-track="instagram" data-click-store-id="@st.Id">
                             <span class="sb-storepage__chip-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                             </span>
@@ -118,7 +119,8 @@
                     @if (!string.IsNullOrEmpty(st.WhatsAppNumber))
                     {
                         <a class="sb-storepage__chip sb-storepage__chip--wa"
-                           href="https://wa.me/@st.WhatsAppNumber" target="_blank" rel="noopener">
+                           href="https://wa.me/@st.WhatsAppNumber" target="_blank" rel="noopener"
+                           data-click-track="whatsapp" data-click-store-id="@st.Id">
                             <span class="sb-storepage__chip-icon">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.2 1.2 15.2 0 12 0 5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.3zM12 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7.9.9-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.1 0-5.5 4.5-9.9 9.9-9.9 2.7 0 5.2 1 7 2.9 1.9 1.9 2.9 4.4 2.9 7 .1 5.6-4.4 9.8-9.8 9.8z"/></svg>
                             </span>
@@ -128,7 +130,8 @@
                     @if (!string.IsNullOrEmpty(st.TelegramHandle))
                     {
                         <a class="sb-storepage__chip sb-storepage__chip--tg"
-                           href="https://t.me/@st.TelegramHandle" target="_blank" rel="noopener">
+                           href="https://t.me/@st.TelegramHandle" target="_blank" rel="noopener"
+                           data-click-track="telegram" data-click-store-id="@st.Id">
                             <span class="sb-storepage__chip-icon">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.46l-.36 5.07c.51 0 .73-.22 1-.49l2.4-2.3 4.97 3.64c.91.5 1.55.24 1.8-.84l3.26-15.27c.29-1.35-.49-1.88-1.38-1.55L1.36 9.69c-1.32.51-1.3 1.24-.23 1.57l4.94 1.54 11.46-7.22c.54-.36 1.03-.16.63.2"/></svg>
                             </span>
@@ -138,7 +141,8 @@
                     @if (!string.IsNullOrEmpty(st.FacebookHandle))
                     {
                         <a class="sb-storepage__chip sb-storepage__chip--fb"
-                           href="https://facebook.com/@st.FacebookHandle" target="_blank" rel="noopener">
+                           href="https://facebook.com/@st.FacebookHandle" target="_blank" rel="noopener"
+                           data-click-track="facebook" data-click-store-id="@st.Id">
                             <span class="sb-storepage__chip-icon">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.6 9.9v-7H8v-3h2.4V9.4c0-2.4 1.4-3.7 3.6-3.7 1 0 2.1.2 2.1.2v2.3h-1.2c-1.2 0-1.5.7-1.5 1.5V12H16l-.4 3h-2.2v7A10 10 0 0022 12z"/></svg>
                             </span>
@@ -148,7 +152,8 @@
                     @if (!string.IsNullOrEmpty(st.TikTokHandle))
                     {
                         <a class="sb-storepage__chip sb-storepage__chip--tt"
-                           href="https://tiktok.com/@@@st.TikTokHandle" target="_blank" rel="noopener">
+                           href="https://tiktok.com/@@@st.TikTokHandle" target="_blank" rel="noopener"
+                           data-click-track="tiktok" data-click-store-id="@st.Id">
                             <span class="sb-storepage__chip-icon">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9.5a6.5 6.5 0 01-4-1.37V17a5 5 0 11-5-5 4.7 4.7 0 011 .12V15a2.5 2.5 0 102 2.5V2h2.5a4 4 0 003.5 4z"/></svg>
                             </span>

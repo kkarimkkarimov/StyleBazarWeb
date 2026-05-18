@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Stylebazar.BLL.DTOs.Analytics;
 using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.BLL.Exceptions;
+using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Stories;
 using Stylebazar.BLL.Services.StoreFollowers;
@@ -23,19 +26,22 @@ public class StoreController : Controller
     private readonly IStoryService _stories;
     private readonly IWishlistService _wishlist;
     private readonly IStoreFollowerService _follows;
+    private readonly IContactClickService _contactClicks;
 
     public StoreController(
         IStoreService stores,
         IProductService products,
         IStoryService stories,
         IWishlistService wishlist,
-        IStoreFollowerService follows)
+        IStoreFollowerService follows,
+        IContactClickService contactClicks)
     {
         _stores = stores;
         _products = products;
         _stories = stories;
         _wishlist = wishlist;
         _follows = follows;
+        _contactClicks = contactClicks;
     }
 
     /// <summary>/Store — the "Shops" tab. Grid of stores with live search.</summary>
@@ -125,5 +131,38 @@ public class StoreController : Controller
         catch (UnauthorizedException ex) { return Unauthorized(new { ok = false, error = ex.Message }); }
         catch (NotFoundException ex)     { return NotFound(new { ok = false, error = ex.Message }); }
         catch (BusinessException ex)     { return UnprocessableEntity(new { ok = false, error = ex.Message }); }
+    }
+
+    /// <summary>
+    /// Fire-and-forget telemetry endpoint. The browser POSTs here right before
+    /// it navigates to the WhatsApp / Instagram / phone deep link so we can
+    /// capture a row of analytics for the seller dashboard.
+    ///
+    /// Anonymous OK — anyone can click a contact button. No anti-forgery
+    /// because (a) the JS attempts navigation even if this call fails and
+    /// (b) the endpoint is pure telemetry (no state change to the caller).
+    /// Rate-limited via "write-default" (30 / minute / IP) to keep abuse
+    /// from polluting analytics.
+    /// </summary>
+    [HttpPost]
+    [AllowAnonymous]
+    [EnableRateLimiting("write-default")]
+    public async Task<IActionResult> ClickContact([FromBody] RecordContactClickDto dto, CancellationToken ct)
+    {
+        if (dto is null || dto.StoreId <= 0 || !Enum.IsDefined(typeof(DAL.Entities.Enums.ContactType), dto.ContactType))
+        {
+            return BadRequest();
+        }
+
+        string? userId = User?.Identity?.IsAuthenticated == true
+            ? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            : null;
+
+        string? ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        string? ua = Request.Headers.UserAgent.ToString();
+        string? referer = Request.Headers.Referer.ToString();
+
+        await _contactClicks.RecordAsync(dto, userId, ip, ua, referer, ct);
+        return NoContent();
     }
 }

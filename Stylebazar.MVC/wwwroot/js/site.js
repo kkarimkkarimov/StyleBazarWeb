@@ -77,6 +77,7 @@
         safe('setupPdpDescription',      setupPdpDescription);
         safe('setupColorPicker',         setupColorPicker);
         safe('setupContactCtas',         setupContactCtas);
+        safe('setupContactClickTracking',setupContactClickTracking);
         safe('setupShareRow',            setupShareRow);
         safe('setupPdpTabs',             setupPdpTabs);
         safe('setupTileRails',           setupTileRails);
@@ -1478,6 +1479,57 @@
                 open(ch);
             });
         });
+    }
+
+    /* -----------
+       Contact click tracking — fire-and-forget telemetry.
+       Hooks any element marked with [data-click-track="<channel>"]:
+         data-click-track       = whatsapp | instagram | telegram | phone |
+                                  facebook | tiktok | email
+         data-click-store-id    = (required) numeric store id
+         data-click-product-id  = (optional) numeric product id
+
+       Uses capture-phase delegation + keepalive:true so the request
+       survives navigation (the user is about to leave for wa.me).
+       ----------- */
+    function setupContactClickTracking() {
+        var typeMap = {
+            'whatsapp':  0,
+            'instagram': 1,
+            'telegram':  2,
+            'phone':     3,
+            'facebook':  4,
+            'tiktok':    5,
+            'email':     6
+        };
+
+        document.addEventListener('click', function (e) {
+            var el = e.target && e.target.closest ? e.target.closest('[data-click-track]') : null;
+            if (!el) return;
+            var channel = el.getAttribute('data-click-track');
+            var typeId = typeMap[channel];
+            if (typeId === undefined) return;
+
+            var storeId = parseInt(el.getAttribute('data-click-store-id') || '0', 10);
+            if (!storeId) return;
+            var productIdAttr = el.getAttribute('data-click-product-id');
+            var productId = productIdAttr ? parseInt(productIdAttr, 10) : null;
+
+            var body = { storeId: storeId, contactType: typeId };
+            if (productId && productId > 0) body.productId = productId;
+
+            // keepalive so the POST is not cancelled when the new tab opens
+            // or the page navigates away. Telemetry is best-effort.
+            try {
+                fetch('/Store/ClickContact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                    keepalive: true,
+                    credentials: 'same-origin'
+                }).catch(function () { /* silent — telemetry only */ });
+            } catch (_) { /* old browser without keepalive — silent */ }
+        }, true); // capture so we fire before navigation handlers
     }
 
     /* ----------- PDP: social share row ----------- */
