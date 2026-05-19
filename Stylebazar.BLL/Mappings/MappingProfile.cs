@@ -51,11 +51,17 @@ public class MappingProfile : Profile
                         ?? p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImageUrl).FirstOrDefault()
                         ?? string.Empty)
                     .Where(u => !string.IsNullOrEmpty(u))
-                    .ToList()));
+                    .ToList()))
+            // IsVerified is derived from the owner's denormalized plan
+            // field — VIP gets the ✓. Free/Pro do not.
+            .ForMember(d => d.IsVerified, opt => opt.MapFrom(s =>
+                s.Owner != null && s.Owner.CurrentPlan == Stylebazar.DAL.Entities.Enums.SubscriptionPlan.VIP));
 
         CreateMap<Store, StoreDetailDto>()
             .ForMember(d => d.ProductCount, opt => opt.MapFrom(s => s.Products.Count))
-            .ForMember(d => d.OwnerFullName, opt => opt.MapFrom(s => s.Owner != null ? s.Owner.FullName : string.Empty));
+            .ForMember(d => d.OwnerFullName, opt => opt.MapFrom(s => s.Owner != null ? s.Owner.FullName : string.Empty))
+            .ForMember(d => d.IsVerified, opt => opt.MapFrom(s =>
+                s.Owner != null && s.Owner.CurrentPlan == Stylebazar.DAL.Entities.Enums.SubscriptionPlan.VIP));
 
         // Products
         CreateMap<ProductImage, ProductImageDto>();

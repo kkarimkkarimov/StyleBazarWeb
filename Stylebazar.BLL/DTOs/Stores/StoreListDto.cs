@@ -18,5 +18,8 @@ public class StoreListDto
     /// <summary>Up to 5 thumbnails from this store's most-recent products — drives the side-rail on the Shops page card.</summary>
     public List<string> ThumbnailImageUrls { get; set; } = new();
 
+    /// <summary>True when owner.CurrentPlan == VIP — drives the ✓ badge next to the store name.</summary>
+    public bool IsVerified { get; set; }
+
     public DateTime CreatedDate { get; set; }
 }

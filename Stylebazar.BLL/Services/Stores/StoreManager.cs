@@ -55,10 +55,15 @@ public class StoreManager : IStoreService
                 (!query.IsActive.HasValue || s.IsActive == query.IsActive.Value) &&
                 (string.IsNullOrEmpty(query.OwnerId) || s.OwnerId == query.OwnerId) &&
                 (string.IsNullOrEmpty(query.Search) || s.Name.Contains(query.Search)),
-            orderBy: q => q.OrderByDescending(s => s.CreatedDate),
-            // Products.Images is included so the shop-card side-rail can render
-            // up to 5 thumbnails per store without an N+1 lookup.
-            include: q => q.Include(s => s.Products).ThenInclude(p => p.Images),
+            // VIP stores get catalog priority — desc on Owner.CurrentPlan (2=VIP, 1=Pro, 0=Free)
+            // puts VIP first, then Pro, then Free; CreatedDate breaks the tie inside each tier.
+            orderBy: q => q
+                .OrderByDescending(s => (int)s.Owner.CurrentPlan)
+                .ThenByDescending(s => s.CreatedDate),
+            // Products.Images + Owner included so the shop-card side-rail can render
+            // up to 5 thumbnails per store without an N+1 lookup and IsVerified
+            // derives from owner's CurrentPlan.
+            include: q => q.Include(s => s.Products).ThenInclude(p => p.Images).Include(s => s.Owner),
             index: query.Page - 1,
             size: query.PageSize,
             enableTracking: false,
@@ -82,7 +87,7 @@ public class StoreManager : IStoreService
         Paginate<Store> page = await _repo.GetListAsync(
             predicate: s => s.OwnerId == _currentUser.UserId,
             orderBy: q => q.OrderByDescending(s => s.CreatedDate),
-            include: q => q.Include(s => s.Products),
+            include: q => q.Include(s => s.Products).Include(s => s.Owner),
             index: 0,
             size: int.MaxValue,
             enableTracking: false,

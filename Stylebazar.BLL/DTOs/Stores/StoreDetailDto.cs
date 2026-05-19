@@ -23,6 +23,9 @@ public class StoreDetailDto
     public string OwnerId { get; set; } = string.Empty;
     public string OwnerFullName { get; set; } = string.Empty;
 
+    /// <summary>True when owner.CurrentPlan == VIP — drives the ✓ badge next to the store name.</summary>
+    public bool IsVerified { get; set; }
+
     public DateTime CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
 }

@@ -600,6 +600,15 @@ public class ProductManager : IProductService
     private static string? NullIfBlank(string? s) =>
         string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
+    // Sort strategy:
+    //   - Explicit user-driven sorts (price/name) honor the user choice
+    //     verbatim — they paid for a specific axis, don't reshuffle.
+    //   - The default ("newest"/no filter) applies a SUBTLE catalog
+    //     priority: VIP first, then Pro, then Free, with CreatedDate
+    //     as the tiebreaker inside each tier. This rewards paying
+    //     sellers without burying free listings — a Free product from
+    //     today still beats a VIP product from a month ago because
+    //     freshness wins the secondary sort.
     private static Func<IQueryable<Product>, IOrderedQueryable<Product>> BuildOrder(string? sortBy) =>
         sortBy switch
         {
@@ -607,6 +616,8 @@ public class ProductManager : IProductService
             "price-desc" => q => q.OrderByDescending(p => p.DiscountPrice ?? p.Price),
             "name-asc" => q => q.OrderBy(p => p.Name),
             "name-desc" => q => q.OrderByDescending(p => p.Name),
-            _ => q => q.OrderByDescending(p => p.CreatedDate)
+            _ => q => q
+                .OrderByDescending(p => (int)p.Store.Owner.CurrentPlan)
+                .ThenByDescending(p => p.CreatedDate)
         };
 }
