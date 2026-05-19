@@ -33,6 +33,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<StoreFollower> StoreFollowers => Set<StoreFollower>();
     public DbSet<ContactClick> ContactClicks => Set<ContactClick>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
     public override int SaveChanges()
     {

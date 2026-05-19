@@ -244,6 +244,9 @@ namespace Stylebazar.DAL.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CurrentPlan")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -278,6 +281,9 @@ namespace Stylebazar.DAL.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("PlanExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ProfileImageUrl")
                         .HasMaxLength(500)
@@ -1076,6 +1082,61 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("Stories");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Subscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApprovedByAdminId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Plan")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedByAdminId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 0 AND [DeletedDate] IS NULL");
+
+                    b.HasIndex("UserId", "CreatedDate");
+
+                    b.HasIndex("UserId", "Status");
+
+                    b.ToTable("Subscriptions");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Wishlist", b =>
                 {
                     b.Property<int>("Id")
@@ -1341,6 +1402,24 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("Store");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Subscription", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "ApprovedByAdmin")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByAdminId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApprovedByAdmin");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Wishlist", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
@@ -1369,6 +1448,8 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("StoreFollows");
 
                     b.Navigation("Stores");
+
+                    b.Navigation("Subscriptions");
 
                     b.Navigation("Wishlists");
                 });
