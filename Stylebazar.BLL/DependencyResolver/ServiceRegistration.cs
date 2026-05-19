@@ -21,6 +21,7 @@ using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Services.Stories;
 using Stylebazar.BLL.Services.StoreFollowers;
+using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.BLL.Settings;
 using Stylebazar.BLL.Validators;
@@ -113,6 +114,9 @@ public static class ServiceRegistration
         // Analytics — contact-click tracking + seller stats
         services.AddScoped<IContactClickService, ContactClickManager>();
         services.AddScoped<ISellerAnalyticsService, SellerAnalyticsManager>();
+
+        // Subscriptions — premium seller tier + quota enforcement
+        services.AddScoped<ISubscriptionService, SubscriptionManager>();
 
         return services;
     }
