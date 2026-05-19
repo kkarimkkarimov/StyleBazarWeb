@@ -33,3 +33,15 @@ public class AccountNotificationsPageViewModel : AccountPanelViewModel
 {
     public List<LoginEventDto> Events { get; set; } = new();
 }
+
+/// <summary>
+/// Buyer-facing landing under /Account/Dashboard. Shows a "welcome"
+/// hello, three KPI counters (wishlist, addresses, recent activity),
+/// and a quick-actions tile rail.
+/// </summary>
+public class AccountDashboardPageViewModel : AccountPanelViewModel
+{
+    public int WishlistCount { get; set; }
+    public int AddressCount { get; set; }
+    public List<LoginEventDto> RecentEvents { get; set; } = new();
+}

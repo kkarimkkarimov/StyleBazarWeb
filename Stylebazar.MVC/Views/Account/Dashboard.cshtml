@@ -1,6 +1,137 @@
-@model AccountPanelViewModel
+@model AccountDashboardPageViewModel
 @{
-    ViewData["StubTitle"] = "Dashboard";
-    ViewData["StubSubtitle"] = "İcmal, sürətli keçidlər və xəbərdarlıqlar tezliklə.";
+    ViewData["Title"] = "İcmal";
+    string firstName = (Model.Profile?.FullName?.Split(' ').FirstOrDefault()) ?? "alıcı";
+    bool isSeller = Model.Profile != null && (Model.Profile.Roles.Contains("Seller") || Model.Profile.Roles.Contains("Admin"));
+
+    string Relative(DateTime dtUtc)
+    {
+        var span = DateTime.UtcNow - dtUtc;
+        if (span.TotalMinutes < 1) return "indicə";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dəq əvvəl";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat əvvəl";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} gün əvvəl";
+        return dtUtc.ToLocalTime().ToString("dd.MM.yyyy");
+    }
 }
-@await Html.PartialAsync("_AccountStubPage", Model)
+
+<section class="sb-acc-layout">
+    @await Html.PartialAsync("_AccountSidebar", Model.Profile)
+
+    <main class="sb-acc-main">
+        @* ===== Welcome ===== *@
+        <header class="sb-acc-hello">
+            <div>
+                <span class="sb-acc-section-title__sub">Xoş gəldin</span>
+                <h1>Salam, @firstName!</h1>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Profile?.CustomerCode))
+            {
+                <div class="sb-acc-hello__code">
+                    <span>Müştəri kodu</span>
+                    <strong>@Model.Profile.CustomerCode</strong>
+                </div>
+            }
+        </header>
+
+        @* ===== KPI cards ===== *@
+        <div class="sb-acc-kpi">
+            <a asp-controller="Wishlist" asp-action="Index" class="sb-acc-kpi__card sb-acc-kpi__card--link">
+                <span class="sb-acc-kpi__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </span>
+                <div>
+                    <strong class="sb-acc-kpi__value">@Model.WishlistCount</strong>
+                    <span class="sb-acc-kpi__label">Wishlist</span>
+                </div>
+            </a>
+            <a asp-action="Addresses" class="sb-acc-kpi__card sb-acc-kpi__card--link">
+                <span class="sb-acc-kpi__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <div>
+                    <strong class="sb-acc-kpi__value">@Model.AddressCount</strong>
+                    <span class="sb-acc-kpi__label">Ünvan</span>
+                </div>
+            </a>
+            <a asp-action="Notifications" class="sb-acc-kpi__card sb-acc-kpi__card--link">
+                <span class="sb-acc-kpi__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </span>
+                <div>
+                    <strong class="sb-acc-kpi__value">@Model.RecentEvents.Count</strong>
+                    <span class="sb-acc-kpi__label">Son aktivlik</span>
+                </div>
+            </a>
+        </div>
+
+        @* ===== Quick actions ===== *@
+        <div class="sb-dash-actions">
+            <a asp-controller="Shop" asp-action="Index" class="sb-dash-action">
+                <span class="sb-dash-action__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <div>
+                    <strong>Mağazaya bax</strong>
+                    <span>5K+ məhsul, 100+ mağaza</span>
+                </div>
+            </a>
+            <a asp-action="Profile" class="sb-dash-action">
+                <span class="sb-dash-action__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <div>
+                    <strong>Profil</strong>
+                    <span>Şəxsi məlumat, parol</span>
+                </div>
+            </a>
+            <a asp-controller="Store" asp-action="Index" class="sb-dash-action">
+                <span class="sb-dash-action__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M3 9h18l-1.5 11.5a2 2 0 0 1-2 1.5H6.5a2 2 0 0 1-2-1.5L3 9z"/><path d="M16 9V5a4 4 0 0 0-8 0v4"/></svg>
+                </span>
+                <div>
+                    <strong>Mağazalar</strong>
+                    <span>Yerli satıcıları kəşf et</span>
+                </div>
+            </a>
+            @if (isSeller)
+            {
+                <a asp-controller="Seller" asp-action="Dashboard" class="sb-dash-action">
+                    <span class="sb-dash-action__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                    </span>
+                    <div>
+                        <strong>Satıcı paneli</strong>
+                        <span>Mağaza idarəsi və stats</span>
+                    </div>
+                </a>
+            }
+        </div>
+
+        @* ===== Recent activity feed ===== *@
+        @if (Model.RecentEvents.Any())
+        {
+            <div class="sb-acc-card sb-acc-recent">
+                <header class="sb-acc-section-title">
+                    <h2>Son hesab aktivliyi</h2>
+                    <a asp-action="Notifications" class="sb-dash-reviews__more">Hamısına bax →</a>
+                </header>
+                <ul class="sb-dash-rev-list">
+                    @foreach (var e in Model.RecentEvents)
+                    {
+                        <li class="sb-dash-rev-item">
+                            <span class="sb-dash-rev-item__thumb-fallback" style="background: #DBEAFE; display: grid; place-items: center; color: #1E40AF;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" style="width: 18px; height: 18px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                            </span>
+                            <div class="sb-dash-rev-item__body">
+                                <strong>@e.EventLabel</strong>
+                                <p>@(e.DeviceLabel ?? "—") · @(e.IpAddress ?? "—")</p>
+                            </div>
+                            <time>@Relative(e.CreatedDate)</time>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </main>
+</section>

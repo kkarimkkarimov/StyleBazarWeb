@@ -12,6 +12,7 @@ using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Email;
 using Stylebazar.BLL.Services.LoginEvents;
+using Stylebazar.BLL.Services.Wishlist;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Entities.Enums;
 using Stylebazar.MVC.ViewModels;
@@ -26,6 +27,7 @@ public class AccountController : Controller
     private readonly IAddressService _addresses;
     private readonly ILoginEventService _events;
     private readonly IEmailService _email;
+    private readonly IWishlistService _wishlist;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly UserManager<AppUser> _userManager;
 
@@ -35,6 +37,7 @@ public class AccountController : Controller
         IAddressService addresses,
         ILoginEventService events,
         IEmailService email,
+        IWishlistService wishlist,
         SignInManager<AppUser> signInManager,
         UserManager<AppUser> userManager)
     {
@@ -43,6 +46,7 @@ public class AccountController : Controller
         _addresses = addresses;
         _events = events;
         _email = email;
+        _wishlist = wishlist;
         _signInManager = signInManager;
         _userManager = userManager;
     }
@@ -324,7 +328,16 @@ public class AccountController : Controller
     public async Task<IActionResult> Dashboard(CancellationToken ct)
     {
         var profile = await _account.GetMineAsync(ct);
-        return View(new AccountPanelViewModel { Profile = profile });
+        var wishlistIds = await _wishlist.GetMyProductIdsAsync(ct);
+        var addresses = await _addresses.GetMineAsync(ct);
+        var events = await _events.GetMyHistoryAsync(days: 14, ct);
+        return View(new AccountDashboardPageViewModel
+        {
+            Profile = profile,
+            WishlistCount = wishlistIds.Count,
+            AddressCount = addresses.Count,
+            RecentEvents = events.Take(5).ToList()
+        });
     }
 
     [HttpGet]

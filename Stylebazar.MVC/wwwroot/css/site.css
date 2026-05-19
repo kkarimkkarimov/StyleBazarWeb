@@ -8999,3 +8999,75 @@ body:has(.sb-seller-layout) {
 }
 .sb-dash-rev-item time { color: var(--sb-muted); font-size: .78rem; white-space: nowrap; }
 
+/* -----------------------------------------------------------
+   17aw. Account Dashboard (/Account/Dashboard) — buyer landing
+   ----------------------------------------------------------- */
+.sb-acc-hello {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+.sb-acc-hello h1 {
+    font-family: var(--sb-font-display);
+    font-size: clamp(1.5rem, 2.5vw, 1.9rem);
+    color: var(--sb-ink);
+    margin: 2px 0 0;
+    line-height: 1.15;
+}
+.sb-acc-hello__code {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 18px;
+    background: #F1F5F9;
+    border: 1px solid var(--sb-line);
+    border-radius: 12px;
+    text-align: right;
+}
+.sb-acc-hello__code span { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--sb-muted); font-weight: 600; }
+.sb-acc-hello__code strong { font-family: var(--sb-font-display); font-size: 1.1rem; color: var(--sb-ink); letter-spacing: .02em; }
+
+.sb-acc-kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+.sb-acc-kpi__card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: #fff;
+    border: 1px solid var(--sb-line);
+    border-radius: var(--sb-radius-md);
+    color: var(--sb-ink);
+    text-decoration: none;
+    transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.sb-acc-kpi__card--link:hover {
+    border-color: var(--sb-acc-cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15,23,42,.06);
+}
+.sb-acc-kpi__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--sb-acc-cyan-soft), #ECFEFF);
+    color: var(--sb-acc-cyan);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.sb-acc-kpi__icon svg { width: 22px; height: 22px; }
+.sb-acc-kpi__value { display: block; font-family: var(--sb-font-display); font-size: 1.6rem; color: var(--sb-ink); line-height: 1.1; }
+.sb-acc-kpi__label { font-size: .82rem; color: var(--sb-muted); margin-top: 2px; }
+
+.sb-acc-recent { padding: 20px 22px; }
+
+
+
