@@ -29,4 +29,19 @@ public class StoreDetailPageViewModel
     public string Sort { get; set; } = "newest";
 
     public bool ShowInStockOnly { get; set; }
+
+    // ----- Pagination state (filled from Paginate<ProductListDto>) -----
+
+    /// <summary>1-based current page (defaults to 1).</summary>
+    public int CurrentPage { get; set; } = 1;
+
+    /// <summary>Total number of pages — drives the pagination strip render.</summary>
+    public int TotalPages { get; set; }
+
+    /// <summary>Total matching product count across all pages.</summary>
+    public int TotalCount { get; set; }
+
+    public int PageSize { get; set; } = 24;
+    public bool HasPrevious => CurrentPage > 1;
+    public bool HasNext => CurrentPage < TotalPages;
 }

@@ -188,7 +188,7 @@
 
     @* ============== PRODUCTS HEADER + FILTERS ============== *@
     <header class="sb-storepage__products-head">
-        <h2>@st.Name <span class="sb-storepage__count">(@Model.Products.Count) məhsul</span></h2>
+        <h2>@st.Name <span class="sb-storepage__count">(@Model.TotalCount) məhsul</span></h2>
 
         <form method="get" class="sb-storepage__filter-row">
             <label class="sb-storepage__filter-pill">
@@ -224,6 +224,75 @@
                 @await Html.PartialAsync("_ProductCard", prod)
             }
         </div>
+
+        @* Pagination — reuses .sb-pagination block from Shop/Index *@
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="sb-pagination" aria-label="Səhifələmə">
+                @{
+                    int curr = Model.CurrentPage;
+                    int total = Model.TotalPages;
+                    int from = Math.Max(1, curr - 2);
+                    int to = Math.Min(total, curr + 2);
+                    string? sortQ = Model.Sort;
+                    bool stockQ = Model.ShowInStockOnly;
+                }
+                @if (Model.HasPrevious)
+                {
+                    <a class="sb-pagination__item"
+                       asp-action="Detail" asp-route-slug="@st.Slug"
+                       asp-route-sort="@sortQ" asp-route-inStock="@stockQ"
+                       asp-route-page="@(curr - 1)" aria-label="Əvvəlki">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+                    </a>
+                }
+                else
+                {
+                    <span class="sb-pagination__item is-disabled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg></span>
+                }
+
+                @if (from > 1)
+                {
+                    <a class="sb-pagination__item" asp-action="Detail" asp-route-slug="@st.Slug"
+                       asp-route-sort="@sortQ" asp-route-inStock="@stockQ" asp-route-page="1">1</a>
+                    @if (from > 2) { <span class="sb-pagination__gap">…</span> }
+                }
+
+                @for (int i = from; i <= to; i++)
+                {
+                    if (i == curr)
+                    {
+                        <span class="sb-pagination__item is-active">@i</span>
+                    }
+                    else
+                    {
+                        <a class="sb-pagination__item" asp-action="Detail" asp-route-slug="@st.Slug"
+                           asp-route-sort="@sortQ" asp-route-inStock="@stockQ" asp-route-page="@i">@i</a>
+                    }
+                }
+
+                @if (to < total)
+                {
+                    @if (to < total - 1) { <span class="sb-pagination__gap">…</span> }
+                    <a class="sb-pagination__item" asp-action="Detail" asp-route-slug="@st.Slug"
+                       asp-route-sort="@sortQ" asp-route-inStock="@stockQ" asp-route-page="@total">@total</a>
+                }
+
+                @if (Model.HasNext)
+                {
+                    <a class="sb-pagination__item"
+                       asp-action="Detail" asp-route-slug="@st.Slug"
+                       asp-route-sort="@sortQ" asp-route-inStock="@stockQ"
+                       asp-route-page="@(curr + 1)" aria-label="Növbəti">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                }
+                else
+                {
+                    <span class="sb-pagination__item is-disabled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></span>
+                }
+            </nav>
+        }
     }
 </section>
 

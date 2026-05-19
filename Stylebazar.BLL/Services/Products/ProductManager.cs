@@ -76,6 +76,7 @@ public class ProductManager : IProductService
                         ? p.IsFeatured && (p.FeaturedUntil == null || p.FeaturedUntil > DateTime.UtcNow)
                         : !p.IsFeatured)) &&
                 (!query.IsActive.HasValue || p.IsActive == query.IsActive.Value) &&
+                (!query.InStock.HasValue || (query.InStock.Value ? p.StockQuantity > 0 : true)) &&
                 (!query.Condition.HasValue || p.Condition == query.Condition.Value),
             orderBy: BuildOrder(query.SortBy),
             include: q => q.Include(p => p.Store).Include(p => p.Category).Include(p => p.Images).Include(p => p.Reviews),

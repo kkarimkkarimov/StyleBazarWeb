@@ -22,6 +22,10 @@ public class ProductListQueryDto
     public decimal? MaxPrice { get; set; }
     public bool? IsFeatured { get; set; }
     public bool? IsActive { get; set; }
+
+    /// <summary>True → only products with StockQuantity > 0. False/null → no filter.</summary>
+    public bool? InStock { get; set; }
+
     public ProductCondition? Condition { get; set; }
 
     /// <summary>

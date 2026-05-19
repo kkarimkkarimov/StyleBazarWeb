@@ -1,3 +1,4 @@
+using Core.Persistence.Paging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -66,24 +67,51 @@ public class StoreController : Controller
     /// <summary>
     /// /Store/Detail/{slug} — full public storefront: cover banner, circle
     /// avatar, name + description, Follow CTA, social chips, Stories rail,
-    /// and the store's product grid with sort + in-stock filter.
+    /// and the store's product grid with sort + in-stock filter + pagination.
     /// </summary>
     [Route("Store/Detail/{slug}")]
-    public async Task<IActionResult> Detail(string slug, string? sort, bool inStock = false, CancellationToken ct = default)
+    public async Task<IActionResult> Detail(
+        string slug,
+        string? sort,
+        bool inStock = false,
+        int page = 1,
+        CancellationToken ct = default)
     {
         StoreDetailDto store;
         try { store = await _stores.GetBySlugAsync(slug, ct); }
         catch (NotFoundException) { return NotFound(); }
 
-        // Sequential awaits — single scoped DbContext, no Task.WhenAll.
-        List<ProductListDto> products = await _products.GetByStoreAsync(store.Id, ct);
-        if (inStock) products = products.Where(p => p.StockQuantity > 0).ToList();
-        products = (sort ?? "newest") switch
+        // Clamp page to a safe range — request a paginated slice from the DB
+        // instead of loading the whole catalog and filtering in memory.
+        if (page < 1) page = 1;
+        const int pageSize = 24;
+        string sortKey = sort ?? "newest";
+
+        var query = new ProductListQueryDto
         {
-            "price-asc" => products.OrderBy(p => p.DiscountPrice ?? p.Price).ToList(),
-            "price-desc" => products.OrderByDescending(p => p.DiscountPrice ?? p.Price).ToList(),
-            _ => products.OrderByDescending(p => p.CreatedDate).ToList()
+            StoreId = store.Id,
+            IsActive = true,
+            InStock = inStock ? true : (bool?)null,
+            SortBy = sortKey switch
+            {
+                "price-asc" => "price-asc",
+                "price-desc" => "price-desc",
+                _ => "newest"
+            },
+            Page = page,
+            PageSize = pageSize
         };
+
+        Paginate<ProductListDto> productsPage = await _products.GetListAsync(query, ct);
+
+        // If user requested a page past the end (stale URL after filter change),
+        // fall back to page 1 instead of showing an empty grid with broken nav.
+        if (productsPage.Items.Count == 0 && page > 1 && productsPage.Count > 0)
+        {
+            query.Page = 1;
+            productsPage = await _products.GetListAsync(query, ct);
+            page = 1;
+        }
 
         var stories = await _stories.GetByStoreAsync(store.Id, activeOnly: true, ct);
         int followers = await _follows.GetFollowerCountAsync(store.Id, ct);
@@ -93,13 +121,17 @@ public class StoreController : Controller
         return View(new StoreDetailPageViewModel
         {
             Store = store,
-            Products = products,
+            Products = productsPage.Items.ToList(),
             Stories = stories,
             FollowerCount = followers,
             IsFollowedByCurrentUser = followed,
             WishlistProductIds = wishlistIds,
-            Sort = sort ?? "newest",
-            ShowInStockOnly = inStock
+            Sort = sortKey,
+            ShowInStockOnly = inStock,
+            CurrentPage = page,
+            TotalPages = productsPage.Pages,
+            TotalCount = productsPage.Count,
+            PageSize = pageSize
         });
     }
 
