@@ -99,6 +99,7 @@ var app = builder.Build();
 
 await RoleSeeder.SeedAsync(app.Services);
 await AdminSeeder.SeedAsync(app.Services);
+await SubscriptionSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
