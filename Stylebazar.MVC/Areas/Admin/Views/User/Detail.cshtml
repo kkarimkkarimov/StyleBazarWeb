@@ -1,9 +1,11 @@
 @model AdminUserDetailViewModel
+@using Stylebazar.DAL.Entities.Enums
 @{
     ViewData["Title"] = Model.User.FullName;
     ViewData["PageTitle"] = Model.User.FullName;
     var u = Model.User;
     string CurrentRole = u.Role;
+    var sub = Model.CurrentSubscription;
 }
 
 <nav class="sb-admin-breadcrumb">
@@ -89,4 +91,115 @@
             </ul>
         }
     </div>
+</div>
+
+@* ============== SUBSCRIPTION SECTION ============== *@
+<div class="sb-admin-card sb-admin-sub">
+    <header class="sb-admin-card__head">
+        <h2>Abunəlik</h2>
+        <span class="sb-admin-chip sb-admin-chip--plan-@sub.Plan.ToString().ToLower()">@sub.Plan</span>
+    </header>
+
+    <div class="sb-admin-sub__row">
+        <dl class="sb-admin-sub__dl">
+            <div>
+                <dt>Cari plan</dt>
+                <dd><strong>@sub.Plan</strong></dd>
+            </div>
+            <div>
+                <dt>Vəziyyət</dt>
+                <dd>@sub.Status</dd>
+            </div>
+            <div>
+                <dt>Başlanğıc</dt>
+                <dd>@sub.StartedAt.ToLocalTime().ToString("dd.MM.yyyy")</dd>
+            </div>
+            <div>
+                <dt>Bitmə</dt>
+                <dd>
+                    @if (sub.ExpiresAt.HasValue)
+                    {
+                        var d = sub.DaysRemaining;
+                        <text>@sub.ExpiresAt.Value.ToLocalTime().ToString("dd.MM.yyyy")</text>
+                        if (d.HasValue && d.Value > 0)
+                        {
+                            <small> · @d gün qalıb</small>
+                        }
+                        else if (d == 0)
+                        {
+                            <small class="sb-admin-warn"> · bitib</small>
+                        }
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </dd>
+            </div>
+        </dl>
+    </div>
+
+    <form asp-area="Admin" asp-controller="User" asp-action="ChangeSubscription" method="post" class="sb-admin-sub__form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@u.Id" />
+
+        <div class="sb-admin-sub__grid">
+            <label>
+                <span>Plan</span>
+                <select name="plan" class="sb-admin-select">
+                    <option value="@((int)SubscriptionPlan.Free)" selected="@(sub.Plan == SubscriptionPlan.Free)">Free</option>
+                    <option value="@((int)SubscriptionPlan.Pro)" selected="@(sub.Plan == SubscriptionPlan.Pro)">Pro</option>
+                    <option value="@((int)SubscriptionPlan.VIP)" selected="@(sub.Plan == SubscriptionPlan.VIP)">VIP</option>
+                </select>
+            </label>
+
+            <label>
+                <span>Bitmə tarixi (boş = Free)</span>
+                <input type="date" name="expiresAt" class="sb-admin-input"
+                       value="@(sub.ExpiresAt?.ToLocalTime().ToString("yyyy-MM-dd"))" />
+            </label>
+
+            <label class="sb-admin-sub__notes">
+                <span>Qeyd (ödəniş mənbəyi, müddət)</span>
+                <input type="text" name="notes" class="sb-admin-input" maxlength="1000" placeholder="məs. Kapital Bank, 19.05.2026, 3 ay Pro" />
+            </label>
+        </div>
+
+        <button type="submit" class="sb-admin-btn sb-admin-btn--primary" data-confirm="Bu istifadəçinin planını dəyişməyə əminsən?">Plan dəyiş</button>
+    </form>
+
+    @if (Model.SubscriptionHistory.Any())
+    {
+        <header class="sb-admin-sub__history-head">
+            <h3>Son dəyişikliklər</h3>
+            <span class="sb-admin-meta">@Model.SubscriptionHistory.Count qeyd</span>
+        </header>
+        <div class="sb-admin-table-wrap">
+            <table class="sb-admin-table sb-admin-table--compact">
+                <thead>
+                    <tr>
+                        <th>Tarix</th>
+                        <th>Plan</th>
+                        <th>Vəziyyət</th>
+                        <th>Bitmə</th>
+                        <th>Admin</th>
+                        <th>Qeyd</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model.SubscriptionHistory)
+                    {
+                        <tr>
+                            <td>@h.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td><span class="sb-admin-chip sb-admin-chip--plan-@h.Plan.ToString().ToLower()">@h.Plan</span></td>
+                            <td>@h.Status</td>
+                            <td>@(h.ExpiresAt?.ToLocalTime().ToString("dd.MM.yyyy") ?? "—")</td>
+                            <td>@(h.ApprovedByAdminFullName ?? (string.IsNullOrEmpty(h.ApprovedByAdminId) ? "Sistem" : "—"))</td>
+                            <td>@(h.Notes ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

@@ -8768,3 +8768,54 @@ body:has(.sb-seller-layout) {
 .sb-pkg-modal__channel span { font-size: .85rem; color: var(--sb-muted); }
 .sb-pkg-modal__hint { font-size: .82rem; color: var(--sb-muted); margin: 0; }
 
+/* -----------------------------------------------------------
+   17at. Admin → User Detail → Subscription section
+   ----------------------------------------------------------- */
+.sb-admin-sub { margin-top: 18px; }
+
+.sb-admin-chip--plan-free { background: #F1F5F9; color: var(--sb-ink); }
+.sb-admin-chip--plan-pro  { background: #DBEAFE; color: #1E40AF; }
+.sb-admin-chip--plan-vip  { background: #FEF3C7; color: #B45309; font-weight: 700; }
+
+.sb-admin-sub__row { padding: 12px 0 4px; }
+.sb-admin-sub__dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin: 0;
+}
+.sb-admin-sub__dl > div { display: flex; flex-direction: column; gap: 2px; }
+.sb-admin-sub__dl dt { font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; color: var(--sb-muted); font-weight: 600; }
+.sb-admin-sub__dl dd { margin: 0; font-size: .95rem; color: var(--sb-ink); }
+.sb-admin-sub__dl dd small { color: var(--sb-muted); font-size: .78rem; }
+.sb-admin-sub__dl dd small.sb-admin-warn { color: #DC2626; font-weight: 600; }
+
+.sb-admin-sub__form {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--sb-line);
+}
+.sb-admin-sub__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+@media (max-width: 720px) { .sb-admin-sub__grid { grid-template-columns: 1fr; } }
+.sb-admin-sub__grid label { display: flex; flex-direction: column; gap: 4px; }
+.sb-admin-sub__grid label > span {
+    font-size: .76rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--sb-muted); font-weight: 600;
+}
+
+.sb-admin-sub__history-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 22px 0 10px;
+}
+.sb-admin-sub__history-head h3 { margin: 0; font-size: .95rem; color: var(--sb-ink); }
+
+.sb-admin-table--compact td, .sb-admin-table--compact th {
+    padding: 8px 10px;
+    font-size: .85rem;
+}
+

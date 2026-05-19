@@ -8,6 +8,7 @@ using Stylebazar.BLL.DTOs.Products;
 using Stylebazar.BLL.DTOs.Reviews;
 using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.BLL.DTOs.Stories;
+using Stylebazar.BLL.DTOs.Subscriptions;
 using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.MVC.Areas.Admin.ViewModels;
@@ -40,6 +41,12 @@ public class AdminUserDetailViewModel
     public UserAdminDto User { get; set; } = new();
     public List<LoginEventDto> LoginHistory { get; set; } = new();
     public List<StoreListDto> Stores { get; set; } = new();
+
+    /// <summary>Resolved current subscription (synthesized Free when no history).</summary>
+    public SubscriptionDto CurrentSubscription { get; set; } = new();
+
+    /// <summary>Most-recent 10 subscription change rows for the audit table.</summary>
+    public List<SubscriptionDto> SubscriptionHistory { get; set; } = new();
 }
 
 public class AdminStoresPageViewModel

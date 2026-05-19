@@ -1,10 +1,14 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Stores;
+using Stylebazar.BLL.DTOs.Subscriptions;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Account;
 using Stylebazar.BLL.Services.Stores;
+using Stylebazar.BLL.Services.Subscriptions;
+using Stylebazar.DAL.Entities.Enums;
 using Stylebazar.MVC.Areas.Admin.ViewModels;
 
 namespace Stylebazar.MVC.Areas.Admin.Controllers;
@@ -15,11 +19,13 @@ public class UserController : Controller
 {
     private readonly IAccountService _account;
     private readonly IStoreService _stores;
+    private readonly ISubscriptionService _subscriptions;
 
-    public UserController(IAccountService account, IStoreService stores)
+    public UserController(IAccountService account, IStoreService stores, ISubscriptionService subscriptions)
     {
         _account = account;
         _stores = stores;
+        _subscriptions = subscriptions;
     }
 
     public async Task<IActionResult> Index(UserAdminListFilter filter, CancellationToken ct)
@@ -36,11 +42,50 @@ public class UserController : Controller
         List<StoreListDto> stores = (await _stores.GetListAsync(
             new StoreListQueryDto { Page = 1, PageSize = 50, OwnerId = id }, ct)).Items.ToList();
 
+        var currentSub = await _subscriptions.GetCurrentForUserAsync(id, ct);
+        var history = await _subscriptions.GetHistoryAsync(id, take: 10, ct);
+
         return View(new AdminUserDetailViewModel
         {
             User = user,
-            Stores = stores
+            Stores = stores,
+            CurrentSubscription = currentSub,
+            SubscriptionHistory = history
         });
+    }
+
+    /// <summary>
+    /// Admin upgrades or downgrades a user's plan after manual payment
+    /// review. Writes a Subscription audit row + flips AppUser cached
+    /// fields atomically (see SubscriptionManager.ChangePlanAsync).
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeSubscription(
+        string id,
+        SubscriptionPlan plan,
+        DateTime? expiresAt,
+        string? notes,
+        CancellationToken ct)
+    {
+        try
+        {
+            string adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            var result = await _subscriptions.ChangePlanAsync(new UpgradeSubscriptionDto
+            {
+                UserId = id,
+                Plan = plan,
+                ExpiresAt = expiresAt,
+                Notes = notes
+            }, adminId, ct);
+
+            TempData["Success"] = plan == SubscriptionPlan.Free
+                ? "Plan Free-yə endirildi."
+                : $"{plan} planı aktivləşdirildi.";
+        }
+        catch (NotFoundException ex) { TempData["Error"] = ex.Message; }
+        catch (BusinessException ex)  { TempData["Error"] = ex.Message; }
+        return RedirectToAction(nameof(Detail), new { id });
     }
 
     [HttpPost]
