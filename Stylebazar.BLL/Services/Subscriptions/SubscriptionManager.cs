@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.DTOs.Subscriptions;
 using Stylebazar.BLL.Exceptions;
@@ -5,6 +6,7 @@ using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.DAL.Contexts;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Entities.Enums;
+using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Subscriptions;
 
@@ -12,11 +14,16 @@ public class SubscriptionManager : ISubscriptionService
 {
     private readonly ApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IValidator<UpgradeSubscriptionDto> _upgradeValidator;
 
-    public SubscriptionManager(ApplicationDbContext db, ICurrentUserService currentUser)
+    public SubscriptionManager(
+        ApplicationDbContext db,
+        ICurrentUserService currentUser,
+        IValidator<UpgradeSubscriptionDto> upgradeValidator)
     {
         _db = db;
         _currentUser = currentUser;
+        _upgradeValidator = upgradeValidator;
     }
 
     // ====== Read ======
@@ -105,17 +112,18 @@ public class SubscriptionManager : ISubscriptionService
 
     public async Task<SubscriptionDto> ChangePlanAsync(UpgradeSubscriptionDto dto, string adminId, CancellationToken ct = default)
     {
-        if (string.IsNullOrEmpty(dto.UserId))
-            throw new BusinessException("UserId tələb olunur.");
+        // FluentValidator handles required/enum-range/expiry-future/notes-length;
+        // anything below is business logic that needs DB state to evaluate.
+        var validation = await _upgradeValidator.ValidateAsync(dto, ct);
+        if (!validation.IsValid)
+            throw new ValidationException(validation.Errors);
 
         AppUser? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == dto.UserId, ct);
         if (user is null)
             throw new NotFoundException("İstifadəçi tapılmadı.");
 
-        // ExpiresAt validation: only Paid plans get an expiry; Free downgrades clear it
+        // Free downgrades always clear ExpiresAt regardless of what the form sent.
         DateTime? expiresAt = dto.Plan == SubscriptionPlan.Free ? null : dto.ExpiresAt;
-        if (dto.Plan != SubscriptionPlan.Free && expiresAt != null && expiresAt <= DateTime.UtcNow)
-            throw new BusinessException("Bitmə tarixi gələcəkdə olmalıdır.");
 
         // 1. Flip any prior Active row → Cancelled
         List<Subscription> activeRows = await _db.Subscriptions

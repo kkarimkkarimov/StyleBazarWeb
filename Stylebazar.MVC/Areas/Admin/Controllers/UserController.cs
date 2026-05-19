@@ -10,6 +10,7 @@ using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.DAL.Entities.Enums;
 using Stylebazar.MVC.Areas.Admin.ViewModels;
+using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.MVC.Areas.Admin.Controllers;
 
@@ -82,6 +83,12 @@ public class UserController : Controller
             TempData["Success"] = plan == SubscriptionPlan.Free
                 ? "Plan Free-yə endirildi."
                 : $"{plan} planı aktivləşdirildi.";
+        }
+        catch (ValidationException ex)
+        {
+            // FluentValidation failures from UpgradeSubscriptionValidator
+            // (e.g. past expiry, missing UserId) — surface the first error.
+            TempData["Error"] = ex.Errors.Values.SelectMany(v => v).FirstOrDefault() ?? "Form məlumatı etibarsızdır.";
         }
         catch (NotFoundException ex) { TempData["Error"] = ex.Message; }
         catch (BusinessException ex)  { TempData["Error"] = ex.Message; }

@@ -1,4 +1,5 @@
 using Core.Persistence.Paging;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -28,6 +29,7 @@ public class StoreController : Controller
     private readonly IWishlistService _wishlist;
     private readonly IStoreFollowerService _follows;
     private readonly IContactClickService _contactClicks;
+    private readonly IValidator<RecordContactClickDto> _clickValidator;
 
     public StoreController(
         IStoreService stores,
@@ -35,7 +37,8 @@ public class StoreController : Controller
         IStoryService stories,
         IWishlistService wishlist,
         IStoreFollowerService follows,
-        IContactClickService contactClicks)
+        IContactClickService contactClicks,
+        IValidator<RecordContactClickDto> clickValidator)
     {
         _stores = stores;
         _products = products;
@@ -43,6 +46,7 @@ public class StoreController : Controller
         _wishlist = wishlist;
         _follows = follows;
         _contactClicks = contactClicks;
+        _clickValidator = clickValidator;
     }
 
     /// <summary>/Store — the "Shops" tab. Grid of stores with live search.</summary>
@@ -181,10 +185,10 @@ public class StoreController : Controller
     [EnableRateLimiting("write-default")]
     public async Task<IActionResult> ClickContact([FromBody] RecordContactClickDto dto, CancellationToken ct)
     {
-        if (dto is null || dto.StoreId <= 0 || !Enum.IsDefined(typeof(DAL.Entities.Enums.ContactType), dto.ContactType))
-        {
-            return BadRequest();
-        }
+        if (dto is null) return BadRequest();
+
+        var validation = await _clickValidator.ValidateAsync(dto, ct);
+        if (!validation.IsValid) return BadRequest();
 
         string? userId = User?.Identity?.IsAuthenticated == true
             ? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
