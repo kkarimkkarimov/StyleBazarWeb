@@ -78,6 +78,7 @@
         safe('setupColorPicker',         setupColorPicker);
         safe('setupContactCtas',         setupContactCtas);
         safe('setupContactClickTracking',setupContactClickTracking);
+        safe('setupPackagesModal',       setupPackagesModal);
         safe('setupShareRow',            setupShareRow);
         safe('setupPdpTabs',             setupPdpTabs);
         safe('setupTileRails',           setupTileRails);
@@ -1478,6 +1479,40 @@
                 e.preventDefault();
                 open(ch);
             });
+        });
+    }
+
+    /* ----------- Packages page modal (Pro/VIP upgrade contact info) ----------- */
+    function setupPackagesModal() {
+        var modal = document.getElementById('sbPkgModal');
+        if (!modal) return;
+        var nameOut  = modal.querySelector('[data-pkg-modal-name]');
+        var priceOut = modal.querySelector('[data-pkg-modal-price]');
+
+        function open(name, price) {
+            if (nameOut)  nameOut.textContent  = name  || '—';
+            if (priceOut) priceOut.textContent = price || '—';
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sb-locked');
+        }
+        function close() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('sb-locked');
+        }
+
+        document.querySelectorAll('[data-pkg-upgrade]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                open(btn.getAttribute('data-pkg-name'),
+                     btn.getAttribute('data-pkg-price'));
+            });
+        });
+        modal.querySelectorAll('[data-pkg-close]').forEach(function (el) {
+            el.addEventListener('click', close);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
         });
     }
 

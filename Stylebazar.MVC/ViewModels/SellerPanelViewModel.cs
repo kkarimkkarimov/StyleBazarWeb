@@ -38,3 +38,12 @@ public class SellerAnalyticsPageViewModel : SellerPanelViewModel
 {
     public SellerAnalyticsDto Stats { get; set; } = new();
 }
+
+public class SellerPackagesPageViewModel : SellerPanelViewModel
+{
+    public Stylebazar.BLL.DTOs.Subscriptions.SubscriptionDto CurrentSubscription { get; set; } = new();
+    public IReadOnlyList<Stylebazar.BLL.DTOs.Subscriptions.PlanInfoDto> Tiers { get; set; } = Array.Empty<Stylebazar.BLL.DTOs.Subscriptions.PlanInfoDto>();
+
+    /// <summary>Total products owned across all stores (drives "4 / 5 məhsul" line).</summary>
+    public int CurrentProductCount { get; set; }
+}

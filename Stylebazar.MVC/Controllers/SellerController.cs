@@ -14,6 +14,7 @@ using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
+using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Entities.Enums;
 using Stylebazar.MVC.ViewModels;
@@ -36,6 +37,7 @@ public class SellerController : Controller
     private readonly ILoginEventService _events;
     private readonly IReviewService _reviews;
     private readonly ISellerAnalyticsService _analytics;
+    private readonly ISubscriptionService _subscriptions;
     private readonly UserManager<AppUser> _userManager;
 
     public SellerController(
@@ -47,6 +49,7 @@ public class SellerController : Controller
         ILoginEventService events,
         IReviewService reviews,
         ISellerAnalyticsService analytics,
+        ISubscriptionService subscriptions,
         UserManager<AppUser> userManager)
     {
         _account = account;
@@ -57,6 +60,7 @@ public class SellerController : Controller
         _events = events;
         _reviews = reviews;
         _analytics = analytics;
+        _subscriptions = subscriptions;
         _userManager = userManager;
     }
 
@@ -411,8 +415,25 @@ public class SellerController : Controller
     [HttpGet] public async Task<IActionResult> Messages(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));
 
-    [HttpGet] public async Task<IActionResult> Packages(CancellationToken ct)
-        => View(await BuildPanelVmAsync(ct));
+    [HttpGet]
+    public async Task<IActionResult> Packages(CancellationToken ct)
+    {
+        var basePanel = await BuildPanelVmAsync(ct);
+        var current = await _subscriptions.GetCurrentForMeAsync(ct);
+        // Quota check reuses the same business logic the create gate uses,
+        // so the "4 / 5 məhsul" line is guaranteed to match what
+        // ProductManager will actually allow.
+        var quota = await _subscriptions.CanCurrentUserAddProductAsync(ct);
+
+        return View(new SellerPackagesPageViewModel
+        {
+            Profile = basePanel.Profile,
+            PrimaryStore = basePanel.PrimaryStore,
+            CurrentSubscription = current,
+            Tiers = PlanCatalog.All,
+            CurrentProductCount = quota.CurrentProductCount
+        });
+    }
 
     [HttpGet] public async Task<IActionResult> Integration(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));

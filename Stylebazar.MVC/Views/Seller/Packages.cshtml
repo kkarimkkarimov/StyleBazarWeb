@@ -1,6 +1,165 @@
-@model SellerPanelViewModel
+@model SellerPackagesPageViewModel
+@using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["StubTitle"] = "Packages and Limits";
-    ViewData["StubSubtitle"] = "Premium/VIP listing paketləri Phase 7-də.";
+    ViewData["Title"] = "Paketlər";
+
+    var currentPlan = Model.CurrentSubscription.Plan;
 }
-@await Html.PartialAsync("_SellerStubPage", Model)
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", Model.Profile)
+
+    <main class="sb-seller-main">
+        <header class="sb-acc-section-title">
+            <h1>Plan və paketlər</h1>
+            <p class="sb-acc-section-title__sub">
+                Daha çox məhsul, daha çox alıcı, daha çox güvən — biznesini böyütmək üçün uyğun planı seç.
+            </p>
+        </header>
+
+        @* ===== Cari plan banner ===== *@
+        <div class="sb-pkg-current sb-pkg-current--@currentPlan.ToString().ToLower()">
+            <div class="sb-pkg-current__left">
+                <span class="sb-pkg-current__label">Cari planın</span>
+                <strong class="sb-pkg-current__plan">@currentPlan</strong>
+                @if (Model.CurrentSubscription.ExpiresAt.HasValue)
+                {
+                    var days = Model.CurrentSubscription.DaysRemaining;
+                    <span class="sb-pkg-current__expiry">
+                        @if (days.HasValue && days.Value > 0)
+                        {
+                            <text>@days gün qalıb (@Model.CurrentSubscription.ExpiresAt.Value.ToLocalTime().ToString("dd.MM.yyyy"))</text>
+                        }
+                        else
+                        {
+                            <text>Müddəti bitib</text>
+                        }
+                    </span>
+                }
+            </div>
+            <div class="sb-pkg-current__right">
+                <span class="sb-pkg-current__usage-label">Məhsul</span>
+                <strong class="sb-pkg-current__usage">@Model.CurrentProductCount / @Stylebazar.BLL.Services.Subscriptions.PlanCatalog.MaxProductsFor(currentPlan)</strong>
+            </div>
+        </div>
+
+        @* ===== 3-tier comparison grid ===== *@
+        <div class="sb-pkg-grid">
+            @foreach (var tier in Model.Tiers)
+            {
+                bool isCurrent = tier.Plan == currentPlan;
+                string toneClass = tier.Plan switch
+                {
+                    SubscriptionPlan.Pro => "sb-pkg-card--pro",
+                    SubscriptionPlan.VIP => "sb-pkg-card--vip",
+                    _ => "sb-pkg-card--free"
+                };
+                <article class="sb-pkg-card @toneClass @(isCurrent ? "is-current" : "") @(tier.Plan == SubscriptionPlan.Pro ? "is-popular" : "")">
+                    @if (tier.Plan == SubscriptionPlan.Pro)
+                    {
+                        <span class="sb-pkg-card__badge">Ən populyar</span>
+                    }
+                    <header class="sb-pkg-card__head">
+                        <h2 class="sb-pkg-card__name">@tier.Name</h2>
+                        <p class="sb-pkg-card__tag">@tier.Tagline</p>
+                        <div class="sb-pkg-card__price">
+                            @if (tier.MonthlyPriceAzn == 0)
+                            {
+                                <span class="sb-pkg-card__price-amount">Pulsuz</span>
+                            }
+                            else
+                            {
+                                <span class="sb-pkg-card__price-amount">@tier.MonthlyPriceAzn.ToString("0")<small>₼</small></span>
+                                <span class="sb-pkg-card__price-period">/ay</span>
+                            }
+                        </div>
+                    </header>
+
+                    <ul class="sb-pkg-card__features">
+                        @foreach (var h in tier.Highlights)
+                        {
+                            bool negative = h.Contains("YOX", StringComparison.OrdinalIgnoreCase);
+                            <li class="sb-pkg-card__feature @(negative ? "is-off" : "is-on")">
+                                @if (negative)
+                                {
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                }
+                                <span>@h</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <footer class="sb-pkg-card__footer">
+                        @if (isCurrent)
+                        {
+                            <button type="button" class="sb-btn sb-btn--ghost sb-btn--block" disabled>Cari plan</button>
+                        }
+                        else if (tier.Plan == SubscriptionPlan.Free)
+                        {
+                            <button type="button" class="sb-btn sb-btn--ghost sb-btn--block" disabled>—</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="sb-btn sb-btn--primary sb-btn--block" data-pkg-upgrade data-pkg-name="@tier.Name" data-pkg-price="@tier.MonthlyPriceAzn">
+                                @tier.Name plana keç
+                            </button>
+                        }
+                    </footer>
+                </article>
+            }
+        </div>
+
+        @* ===== FAQ / contact note ===== *@
+        <div class="sb-pkg-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+                <strong>Ödəniş hazırda manualdır.</strong>
+                <span>"Yüksəlt" düyməsini basdıqdan sonra biz səninlə əlaqə saxlayacayıq və ödəniş təsdiqləndikdən sonra planı aktivləşdirəcəyik. Onlayn ödəniş tezliklə.</span>
+            </div>
+        </div>
+    </main>
+</section>
+
+@* ===== Upgrade modal ===== *@
+<div class="sb-pkg-modal" id="sbPkgModal" aria-hidden="true" role="dialog" aria-labelledby="sbPkgModalTitle">
+    <div class="sb-pkg-modal__backdrop" data-pkg-close></div>
+    <div class="sb-pkg-modal__panel">
+        <header class="sb-pkg-modal__head">
+            <h3 id="sbPkgModalTitle">
+                <span data-pkg-modal-name>—</span> plana keç
+            </h3>
+            <button type="button" class="sb-icon-btn" data-pkg-close aria-label="Bağla">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </header>
+        <div class="sb-pkg-modal__body">
+            <p>
+                Aylıq ödəniş: <strong data-pkg-modal-price>—</strong> ₼.
+                Ödənişi aşağıdakı kanallardan biri ilə həyata keçirə bilərsən, sonra biz planı aktivləşdirəcəyik.
+            </p>
+            <div class="sb-pkg-modal__channels">
+                <a class="sb-pkg-modal__channel" href="https://wa.me/994508204111" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.2 1.2 15.2 0 12 0 5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.3z"/></svg>
+                    <div>
+                        <strong>WhatsApp</strong>
+                        <span>+994 50 820 41 11</span>
+                    </div>
+                </a>
+                <a class="sb-pkg-modal__channel" href="mailto:admin@stylebazar.local?subject=Plan%20yüksəltmək%20istəyirəm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <div>
+                        <strong>Email</strong>
+                        <span>admin@stylebazar.local</span>
+                    </div>
+                </a>
+            </div>
+            <p class="sb-pkg-modal__hint">
+                Ödəniş haqqında əlavə suallar üçün hər iki kanaldan birinə yaz — adətən 24 saat ərzində cavablandırırıq.
+            </p>
+        </div>
+    </div>
+</div>
