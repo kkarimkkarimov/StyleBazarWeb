@@ -1,6 +1,89 @@
-@model SellerPanelViewModel
+@model SellerNotificationsPageViewModel
 @{
-    ViewData["StubTitle"] = "Notifications";
-    ViewData["StubSubtitle"] = "Yeni rəy, sual və sistem bildirişləri tezliklə.";
+    ViewData["Title"] = "Bildirişlər";
+
+    string Relative(DateTime dtUtc)
+    {
+        var span = DateTime.UtcNow - dtUtc;
+        if (span.TotalSeconds < 0) return dtUtc.ToLocalTime().ToString("dd.MM.yyyy");
+        if (span.TotalMinutes < 1) return "indicə";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dəq əvvəl";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat əvvəl";
+        if (span.TotalDays < 2) return "dünən";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} gün əvvəl";
+        return dtUtc.ToLocalTime().ToString("dd MMM yyyy", new System.Globalization.CultureInfo("az-Latn-AZ"));
+    }
+
+    DateTime nowUtc = DateTime.UtcNow;
+    DateTime todayUtc = nowUtc.Date;
+    DateTime yesterdayUtc = todayUtc.AddDays(-1);
+    DateTime weekAgoUtc = todayUtc.AddDays(-7);
+
+    string Bucket(DateTime dt) =>
+        dt.Date == todayUtc ? "Bu gün"
+        : dt.Date == yesterdayUtc ? "Dünən"
+        : dt.Date > weekAgoUtc ? "Bu həftə"
+        : "Daha əvvəl";
+
+    var grouped = Model.Items
+        .GroupBy(i => Bucket(i.CreatedDate))
+        .Select(g => new { Title = g.Key, Items = g.ToList() })
+        .ToList();
 }
-@await Html.PartialAsync("_SellerStubPage", Model)
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", Model.Profile)
+
+    <main class="sb-seller-main">
+        <header class="sb-acc-section-title">
+            <h1>Bildirişlər</h1>
+            <p class="sb-acc-section-title__sub">Yeni rəylər, təhlükəsizlik xəbərdarlıqları və plan müddəti</p>
+        </header>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="sb-seller-card sb-acc-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <strong>Hələ bildiriş yoxdur</strong>
+                <p>Müştəri rəyləri, təhlükəsizlik xəbərdarlıqları və plan haqqında bildirişlər burada görünəcək.</p>
+            </div>
+        }
+        else
+        {
+            <div class="sb-notif-timeline">
+                @foreach (var group in grouped)
+                {
+                    <div class="sb-notif-group">
+                        <h2 class="sb-notif-group__title">@group.Title</h2>
+                        <ol class="sb-notif-list">
+                            @foreach (var i in group.Items)
+                            {
+                                <li class="sb-notif-item sb-notif-item--@i.Tone">
+                                    <span class="sb-notif-item__dot" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+                                            <path d="@i.Icon" />
+                                        </svg>
+                                    </span>
+                                    <div class="sb-notif-item__body">
+                                        <div class="sb-notif-item__title">
+                                            @if (!string.IsNullOrEmpty(i.ActionUrl))
+                                            {
+                                                <a href="@i.ActionUrl">@i.Title</a>
+                                            }
+                                            else
+                                            {
+                                                @i.Title
+                                            }
+                                        </div>
+                                        <div class="sb-notif-item__meta">@i.Meta</div>
+                                    </div>
+                                    <time class="sb-notif-item__time" datetime="@i.CreatedDate.ToString("o")">@Relative(i.CreatedDate)</time>
+                                </li>
+                            }
+                        </ol>
+                    </div>
+                }
+            </div>
+        }
+    </main>
+</section>

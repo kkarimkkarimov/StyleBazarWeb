@@ -429,8 +429,92 @@ public class SellerController : Controller
         });
     }
 
-    [HttpGet] public async Task<IActionResult> Notifications(CancellationToken ct)
-        => View(await BuildPanelVmAsync(ct));
+    [HttpGet]
+    public async Task<IActionResult> Notifications(CancellationToken ct)
+    {
+        var basePanel = await BuildPanelVmAsync(ct);
+
+        // Three notification sources merged into one chronological feed:
+        //   1. Reviews left on seller's products (last 30d) — most important
+        //   2. Seller's own auth security events (last 30d, only security-tone)
+        //   3. Plan expiry warning if < 7 days remain
+        var reviews = await _reviews.GetForCurrentSellerAsync(maxRating: null, take: 30, ct);
+        var loginEvents = await _events.GetMyHistoryAsync(days: 30, ct);
+        var current = await _subscriptions.GetCurrentForMeAsync(ct);
+
+        var items = new List<SellerNotificationItem>();
+
+        foreach (var r in reviews)
+        {
+            // Star icon path
+            string starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z";
+            bool isLow = r.Review.Rating <= 2;
+            string author = string.IsNullOrEmpty(r.Review.UserFullName) ? "Anonim" : r.Review.UserFullName;
+            items.Add(new SellerNotificationItem(
+                Tone: isLow ? "warn" : "ok",
+                Icon: starPath,
+                Title: isLow
+                    ? $"Aşağı reytinq ({r.Review.Rating}/5): \"{r.ProductName}\""
+                    : $"Yeni rəy ({r.Review.Rating}/5): \"{r.ProductName}\"",
+                Meta: $"{author} yazdı{(string.IsNullOrWhiteSpace(r.Review.Comment) ? "" : ": " + (r.Review.Comment.Length > 80 ? r.Review.Comment[..80] + "…" : r.Review.Comment))}",
+                CreatedDate: r.Review.CreatedDate,
+                ActionUrl: "/Seller/Reviews"
+            ));
+        }
+
+        // Only security-meaningful login events surface — sign-in is just noise.
+        var securityTypes = new[]
+        {
+            Stylebazar.DAL.Entities.Enums.LoginEventType.FailedSignIn,
+            Stylebazar.DAL.Entities.Enums.LoginEventType.Locked,
+            Stylebazar.DAL.Entities.Enums.LoginEventType.PasswordChanged,
+            Stylebazar.DAL.Entities.Enums.LoginEventType.PasswordReset
+        };
+        foreach (var e in loginEvents.Where(x => securityTypes.Contains(x.EventType)))
+        {
+            string shieldPath = "M12 2l9 4v6c0 5.55-3.84 10.74-9 12-5.16-1.26-9-6.45-9-12V6l9-4z";
+            string tone = e.EventType == Stylebazar.DAL.Entities.Enums.LoginEventType.Locked
+                ? "danger" : (e.EventType == Stylebazar.DAL.Entities.Enums.LoginEventType.FailedSignIn ? "warn" : "info");
+            items.Add(new SellerNotificationItem(
+                Tone: tone,
+                Icon: shieldPath,
+                Title: $"Təhlükəsizlik: {e.EventLabel}",
+                Meta: $"{e.DeviceLabel ?? "—"} · {e.IpAddress ?? "—"}",
+                CreatedDate: e.CreatedDate,
+                ActionUrl: "/Account/Notifications"
+            ));
+        }
+
+        // Plan expiry warning
+        if (current.ExpiresAt.HasValue && current.DaysRemaining.HasValue)
+        {
+            int days = current.DaysRemaining.Value;
+            if (days <= 7 && days >= 0)
+            {
+                string clockPath = "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2";
+                items.Add(new SellerNotificationItem(
+                    Tone: days == 0 ? "danger" : "warn",
+                    Icon: clockPath,
+                    Title: days == 0
+                        ? "Planın bitib"
+                        : $"{current.Plan} planın {days} gün sonra bitir",
+                    Meta: $"Bitmə: {current.ExpiresAt.Value.ToLocalTime():dd.MM.yyyy} — uzatmaq üçün Paketlər səhifəsinə keç",
+                    CreatedDate: current.ExpiresAt.Value.AddDays(-7),
+                    ActionUrl: "/Seller/Packages"
+                ));
+            }
+        }
+
+        // Newest first
+        items = items.OrderByDescending(i => i.CreatedDate).ToList();
+
+        return View(new SellerNotificationsPageViewModel
+        {
+            Profile = basePanel.Profile,
+            PrimaryStore = basePanel.PrimaryStore,
+            Items = items
+        });
+    }
 
     [HttpGet] public async Task<IActionResult> Messages(CancellationToken ct)
         => View(await BuildPanelVmAsync(ct));

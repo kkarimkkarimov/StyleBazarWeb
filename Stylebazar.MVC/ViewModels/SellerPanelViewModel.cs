@@ -63,3 +63,17 @@ public class SellerDashboardPageViewModel : SellerPanelViewModel
     /// <summary>True if the seller hasn't created any store yet — drives the empty-state CTA.</summary>
     public bool HasStore { get; set; }
 }
+
+public class SellerNotificationsPageViewModel : SellerPanelViewModel
+{
+    public List<SellerNotificationItem> Items { get; set; } = new();
+}
+
+public record SellerNotificationItem(
+    string Tone,         // ok / info / warn / danger / muted
+    string Icon,         // svg path data
+    string Title,
+    string Meta,
+    DateTime CreatedDate,
+    string? ActionUrl    // optional deep link
+);
