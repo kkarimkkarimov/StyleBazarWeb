@@ -39,6 +39,14 @@ public interface ISubscriptionService
     /// or (ok=false, ...) with reasonMessage in Az for the rejection UI.
     /// </summary>
     Task<QuotaCheckResult> CanCurrentUserAddProductAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Quota check scoped to an explicit user (the STORE OWNER, not whoever
+    /// is currently signed in). Called by ProductManager.CreateAsync so the
+    /// gate works for both seller self-uploads and admin-on-behalf creates:
+    /// the seller's plan limit is what matters, regardless of who clicked.
+    /// </summary>
+    Task<QuotaCheckResult> CanUserAddProductAsync(string userId, CancellationToken ct = default);
 }
 
 public record QuotaCheckResult(

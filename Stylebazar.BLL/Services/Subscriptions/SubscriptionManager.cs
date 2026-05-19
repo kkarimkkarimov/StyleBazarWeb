@@ -152,19 +152,27 @@ public class SubscriptionManager : ISubscriptionService
 
     public int GetProductLimit(SubscriptionPlan plan) => PlanCatalog.MaxProductsFor(plan);
 
-    public async Task<QuotaCheckResult> CanCurrentUserAddProductAsync(CancellationToken ct = default)
+    public Task<QuotaCheckResult> CanCurrentUserAddProductAsync(CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(_currentUser.UserId))
-            return new QuotaCheckResult(false, SubscriptionPlan.Free, 0, 0, "Sistemə daxil ol.");
+            return Task.FromResult(new QuotaCheckResult(false, SubscriptionPlan.Free, 0, 0, "Sistemə daxil ol."));
 
-        SubscriptionDto current = await GetCurrentForUserAsync(_currentUser.UserId, ct);
+        return CanUserAddProductAsync(_currentUser.UserId, ct);
+    }
+
+    public async Task<QuotaCheckResult> CanUserAddProductAsync(string userId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(userId))
+            return new QuotaCheckResult(false, SubscriptionPlan.Free, 0, 0, "İstifadəçi tapılmadı.");
+
+        SubscriptionDto current = await GetCurrentForUserAsync(userId, ct);
         int max = GetProductLimit(current.Plan);
 
         // Count ALL of the user's products across ALL their stores (active+inactive,
         // soft-delete-excluded by global query filter). Quota applies to total slots,
         // not just active ones, so users can't "save" by archiving.
         int count = await _db.Products
-            .Where(p => p.Store.OwnerId == _currentUser.UserId)
+            .Where(p => p.Store.OwnerId == userId)
             .CountAsync(ct);
 
         if (count < max)

@@ -11,6 +11,7 @@ using Stylebazar.BLL.Helpers;
 using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.BLL.Services.FileStorage;
+using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Repositories.Abstract;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
@@ -28,6 +29,7 @@ public class ProductManager : IProductService
     private readonly ProductBusinessRules _rules;
     private readonly ICurrentUserService _currentUser;
     private readonly IFileStorageService _fileStorage;
+    private readonly ISubscriptionService _subscriptions;
     private readonly IValidator<CreateProductDto> _createValidator;
     private readonly IValidator<UpdateProductDto> _updateValidator;
 
@@ -43,6 +45,7 @@ public class ProductManager : IProductService
         ProductBusinessRules rules,
         ICurrentUserService currentUser,
         IFileStorageService fileStorage,
+        ISubscriptionService subscriptions,
         IValidator<CreateProductDto> createValidator,
         IValidator<UpdateProductDto> updateValidator)
     {
@@ -55,6 +58,7 @@ public class ProductManager : IProductService
         _rules = rules;
         _currentUser = currentUser;
         _fileStorage = fileStorage;
+        _subscriptions = subscriptions;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -169,6 +173,15 @@ public class ProductManager : IProductService
         Store store = await _rules.StoreMustExistAndBeActiveAsync(dto.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
         _rules.MustOwnStore(store, _currentUser.UserId, isAdmin);
+
+        // ---- Plan quota gate ----
+        // Always scoped to the STORE OWNER, not the signed-in user. An
+        // admin creating a product on behalf of a seller still consumes
+        // that seller's quota slot. Admin can lift the cap by upgrading
+        // the seller's plan first (Admin/User/Detail → Plan dəyiş).
+        QuotaCheckResult quota = await _subscriptions.CanUserAddProductAsync(store.OwnerId, ct);
+        if (!quota.Ok)
+            throw new BusinessException(quota.ReasonMessage ?? "Plan limiti aşılıb.");
 
         await _rules.CategoryMustExistAsync(dto.CategoryId, ct);
         _rules.DiscountMustBeLowerThanPrice(dto.Price, dto.DiscountPrice);
