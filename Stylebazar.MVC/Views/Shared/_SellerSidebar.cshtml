@@ -6,60 +6,49 @@
 
 <aside class="sb-seller-sidebar">
     <nav class="sb-seller-sidebar__nav" aria-label="Satıcı paneli naviqasiyası">
+        @* Stub-only links (SmartUpload, Messages, Integration) removed in
+           Phase 11.13 — actions remain reachable by direct URL for future
+           implementation but no longer surface in the nav. *@
         <a class="sb-seller-sidebar__link @Active("Dashboard")" asp-controller="Seller" asp-action="Dashboard">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            Dashboard
+            İcmal
         </a>
         <a class="sb-seller-sidebar__link @Active("Products")" asp-controller="Seller" asp-action="Products">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Products
+            Məhsullar
         </a>
         <a class="sb-seller-sidebar__link @Active("AddProduct")" asp-controller="Seller" asp-action="AddProduct">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            Add Product
-        </a>
-        <a class="sb-seller-sidebar__link @Active("SmartUpload")" asp-controller="Seller" asp-action="SmartUpload">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg>
-            Smart Upload
-            <span class="sb-seller-sidebar__badge">NEW</span>
+            Yeni məhsul
         </a>
         <a class="sb-seller-sidebar__link @Active("Reviews")" asp-controller="Seller" asp-action="Reviews">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-            Reviews and Questions
+            Rəylər
         </a>
         <a class="sb-seller-sidebar__link @Active("Notifications")" asp-controller="Seller" asp-action="Notifications">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            Notifications
-        </a>
-        <a class="sb-seller-sidebar__link @Active("Messages")" asp-controller="Seller" asp-action="Messages">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            Messages
-        </a>
-        <a class="sb-seller-sidebar__link @Active("Packages")" asp-controller="Seller" asp-action="Packages">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
-            Packages and Limits
-        </a>
-        <a class="sb-seller-sidebar__link @Active("Integration")" asp-controller="Seller" asp-action="Integration">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/></svg>
-            Data Integration
+            Bildirişlər
         </a>
         <a class="sb-seller-sidebar__link @Active("Analytics")" asp-controller="Seller" asp-action="Analytics">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
-            Analytics
+            Statistika
+        </a>
+        <a class="sb-seller-sidebar__link @Active("Packages")" asp-controller="Seller" asp-action="Packages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+            Paketlər
         </a>
         <a class="sb-seller-sidebar__link @Active("StoreSettings")" asp-controller="Seller" asp-action="StoreSettings">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-            Store Settings
-            <span class="sb-seller-sidebar__badge sb-seller-sidebar__badge--warn">⚠</span>
+            Mağaza ayarları
         </a>
         <a class="sb-seller-sidebar__link @Active("Profile")" asp-controller="Seller" asp-action="Profile">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-            Profile
+            Profil
         </a>
         <form asp-controller="Account" asp-action="Logout" method="post" class="sb-seller-sidebar__logout-form">
             <button type="submit" class="sb-seller-sidebar__link sb-seller-sidebar__link--danger">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Logout
+                Çıxış
             </button>
         </form>
     </nav>
