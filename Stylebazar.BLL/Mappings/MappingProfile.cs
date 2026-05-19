@@ -63,6 +63,11 @@ public class MappingProfile : Profile
             .ForMember(d => d.IsVerified, opt => opt.MapFrom(s =>
                 s.Owner != null && s.Owner.CurrentPlan == Stylebazar.DAL.Entities.Enums.SubscriptionPlan.VIP));
 
+        // Subscriptions — admin Detail history + /Seller/Packages current card
+        CreateMap<Stylebazar.DAL.Entities.Subscription, Stylebazar.BLL.DTOs.Subscriptions.SubscriptionDto>()
+            .ForMember(d => d.ApprovedByAdminFullName,
+                opt => opt.MapFrom(s => s.ApprovedByAdmin != null ? s.ApprovedByAdmin.FullName : null));
+
         // Products
         CreateMap<ProductImage, ProductImageDto>();
         CreateMap<ProductSize, ProductSizeDto>();

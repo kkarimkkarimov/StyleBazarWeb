@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.DTOs.Subscriptions;
@@ -14,15 +15,18 @@ public class SubscriptionManager : ISubscriptionService
 {
     private readonly ApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IMapper _mapper;
     private readonly IValidator<UpgradeSubscriptionDto> _upgradeValidator;
 
     public SubscriptionManager(
         ApplicationDbContext db,
         ICurrentUserService currentUser,
+        IMapper mapper,
         IValidator<UpgradeSubscriptionDto> upgradeValidator)
     {
         _db = db;
         _currentUser = currentUser;
+        _mapper = mapper;
         _upgradeValidator = upgradeValidator;
     }
 
@@ -93,19 +97,7 @@ public class SubscriptionManager : ISubscriptionService
             .Take(take)
             .ToListAsync(ct);
 
-        return rows.Select(r => new SubscriptionDto
-        {
-            Id = r.Id,
-            UserId = r.UserId,
-            Plan = r.Plan,
-            Status = r.Status,
-            StartedAt = r.StartedAt,
-            ExpiresAt = r.ExpiresAt,
-            ApprovedByAdminId = r.ApprovedByAdminId,
-            ApprovedByAdminFullName = r.ApprovedByAdmin?.FullName,
-            Notes = r.Notes,
-            CreatedDate = r.CreatedDate
-        }).ToList();
+        return _mapper.Map<List<SubscriptionDto>>(rows);
     }
 
     // ====== Write ======
@@ -242,27 +234,17 @@ public class SubscriptionManager : ISubscriptionService
 
     private async Task<SubscriptionDto> MapAsync(Subscription s, CancellationToken ct)
     {
-        string? adminName = null;
-        if (!string.IsNullOrEmpty(s.ApprovedByAdminId))
+        // AutoMapper projects everything except ApprovedByAdminFullName,
+        // which depends on the navigation property being loaded. Load it
+        // here only when the row was added in-memory without Include().
+        SubscriptionDto dto = _mapper.Map<SubscriptionDto>(s);
+        if (string.IsNullOrEmpty(dto.ApprovedByAdminFullName) && !string.IsNullOrEmpty(s.ApprovedByAdminId))
         {
-            adminName = await _db.Users.AsNoTracking()
+            dto.ApprovedByAdminFullName = await _db.Users.AsNoTracking()
                 .Where(u => u.Id == s.ApprovedByAdminId)
                 .Select(u => u.FullName)
                 .FirstOrDefaultAsync(ct);
         }
-
-        return new SubscriptionDto
-        {
-            Id = s.Id,
-            UserId = s.UserId,
-            Plan = s.Plan,
-            Status = s.Status,
-            StartedAt = s.StartedAt,
-            ExpiresAt = s.ExpiresAt,
-            ApprovedByAdminId = s.ApprovedByAdminId,
-            ApprovedByAdminFullName = adminName,
-            Notes = s.Notes,
-            CreatedDate = s.CreatedDate
-        };
+        return dto;
     }
 }
