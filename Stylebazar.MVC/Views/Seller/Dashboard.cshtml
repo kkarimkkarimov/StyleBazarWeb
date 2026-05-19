@@ -1,6 +1,157 @@
-@model SellerPanelViewModel
+@model SellerDashboardPageViewModel
+@using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["StubTitle"] = "Dashboard";
-    ViewData["StubSubtitle"] = "İcmal, stats və sürətli keçidlər tezliklə əlavə olunacaq.";
+    ViewData["Title"] = "İcmal";
+    var sub = Model.CurrentSubscription;
+    bool isPaid = sub.Plan != SubscriptionPlan.Free;
+    string ownerFirstName = (Model.Profile?.FullName?.Split(' ').FirstOrDefault()) ?? "satıcı";
 }
-@await Html.PartialAsync("_SellerStubPage", Model)
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", Model.Profile)
+
+    <main class="sb-seller-main">
+        @* ===== Welcome banner ===== *@
+        <header class="sb-seller-hello">
+            <div>
+                <span class="sb-acc-section-title__sub">Xoş gəldin</span>
+                <h1>@ownerFirstName, mağaza bu gün necə işləyir?</h1>
+            </div>
+            <div class="sb-seller-hello__plan sb-seller-hello__plan--@sub.Plan.ToString().ToLower()">
+                <span>Cari plan</span>
+                <strong>@sub.Plan</strong>
+            </div>
+        </header>
+
+        @* ===== No-store empty state ===== *@
+        @if (!Model.HasStore)
+        {
+            <div class="sb-seller-card sb-acc-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M3 9h18l-1.5 11.5a2 2 0 0 1-2 1.5H6.5a2 2 0 0 1-2-1.5L3 9z"/><path d="M16 9V5a4 4 0 0 0-8 0v4"/></svg>
+                <strong>Hələ mağazan yoxdur</strong>
+                <p>Mağaza yaratmadan məhsul əlavə edə bilməzsən. Bir neçə dəqiqədə tamamla.</p>
+                <a asp-action="StoreSettings" class="sb-btn sb-btn--primary">Mağaza yarat</a>
+            </div>
+        }
+        else
+        {
+            @* ===== Free user — upgrade nudge ===== *@
+            @if (!isPaid)
+            {
+                <div class="sb-seller-card sb-dash-nudge">
+                    <div class="sb-dash-nudge__copy">
+                        <span class="sb-dash-nudge__eyebrow">PRO + VIP planlar açıldı</span>
+                        <h2>Daha çox alıcı, daha çox satış</h2>
+                        <p>
+                            Pro plana keçərək <strong>50 məhsul</strong>, tam <strong>analytics</strong> və limitsiz hekayələrə sahib ol.
+                            VIP-də ✓ <strong>Verified badge</strong> + katalogda öndə görünmək də əlavə olunur.
+                        </p>
+                        <div class="sb-dash-nudge__cta">
+                            <a asp-action="Packages" class="sb-btn sb-btn--primary">Paketləri gör</a>
+                            <span class="sb-dash-nudge__usage">Cari istifadə: <strong>@Model.ProductCount / @Model.ProductLimit məhsul</strong></span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @* ===== KPI mini-grid — visible for all tiers, more useful on Pro/VIP ===== *@
+            <div class="sb-dash-kpi">
+                <div class="sb-dash-kpi__card">
+                    <span class="sb-dash-kpi__label">Ümumi click</span>
+                    <strong class="sb-dash-kpi__value">@Model.Stats.Contacts.TotalClicks</strong>
+                    <span class="sb-dash-kpi__sub">son 7 gün: @Model.Stats.Contacts.ClicksLast7Days</span>
+                </div>
+                <div class="sb-dash-kpi__card">
+                    <span class="sb-dash-kpi__label">Wishlist</span>
+                    <strong class="sb-dash-kpi__value">@Model.Stats.TotalWishlistAdds</strong>
+                    <span class="sb-dash-kpi__sub">əlavə edilib</span>
+                </div>
+                <div class="sb-dash-kpi__card">
+                    <span class="sb-dash-kpi__label">İzləyici</span>
+                    <strong class="sb-dash-kpi__value">@Model.Stats.TotalFollowers</strong>
+                    <span class="sb-dash-kpi__sub">mağazana abunə</span>
+                </div>
+                <div class="sb-dash-kpi__card">
+                    <span class="sb-dash-kpi__label">Məhsul</span>
+                    <strong class="sb-dash-kpi__value">@Model.ProductCount<small> / @Model.ProductLimit</small></strong>
+                    <span class="sb-dash-kpi__sub">aktiv: @Model.Stats.TotalActiveProducts</span>
+                </div>
+            </div>
+
+            @* ===== Quick actions ===== *@
+            <div class="sb-dash-actions">
+                <a asp-action="Products" class="sb-dash-action">
+                    <span class="sb-dash-action__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>
+                    </span>
+                    <div>
+                        <strong>Yeni məhsul</strong>
+                        <span>Şəkillər + qiymət + kontakt</span>
+                    </div>
+                </a>
+                <a asp-action="StoreSettings" class="sb-dash-action">
+                    <span class="sb-dash-action__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </span>
+                    <div>
+                        <strong>Mağaza ayarları</strong>
+                        <span>Logo, kontakt, sosial media</span>
+                    </div>
+                </a>
+                <a asp-action="Packages" class="sb-dash-action">
+                    <span class="sb-dash-action__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </span>
+                    <div>
+                        <strong>Paketlər</strong>
+                        <span>@sub.Plan @(isPaid ? "aktiv" : "→ Pro/VIP")</span>
+                    </div>
+                </a>
+                <a asp-action="Analytics" class="sb-dash-action">
+                    <span class="sb-dash-action__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                    </span>
+                    <div>
+                        <strong>Statistika</strong>
+                        <span>Kanal və top məhsullar</span>
+                    </div>
+                </a>
+            </div>
+
+            @* ===== Recent reviews feed ===== *@
+            @if (Model.RecentReviews.Any())
+            {
+                <div class="sb-seller-card sb-dash-reviews">
+                    <header class="sb-acc-section-title">
+                        <h2>Son rəylər</h2>
+                        <a asp-action="Reviews" class="sb-dash-reviews__more">Hamısına bax →</a>
+                    </header>
+                    <ul class="sb-dash-rev-list">
+                        @foreach (var r in Model.RecentReviews)
+                        {
+                            <li class="sb-dash-rev-item">
+                                @if (!string.IsNullOrEmpty(r.ProductImageUrl))
+                                {
+                                    <img src="@r.ProductImageUrl" alt="@r.ProductName" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <span class="sb-dash-rev-item__thumb-fallback"></span>
+                                }
+                                <div class="sb-dash-rev-item__body">
+                                    <strong>@r.ProductName</strong>
+                                    <span class="sb-dash-rev-item__rating">@(new string('★', r.Review.Rating))<span class="sb-dash-rev-item__rating--off">@(new string('☆', 5 - r.Review.Rating))</span></span>
+                                    @if (!string.IsNullOrWhiteSpace(r.Review.Comment))
+                                    {
+                                        <p>@r.Review.Comment</p>
+                                    }
+                                </div>
+                                <time>@r.Review.CreatedDate.ToLocalTime().ToString("dd.MM")</time>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+    </main>
+</section>

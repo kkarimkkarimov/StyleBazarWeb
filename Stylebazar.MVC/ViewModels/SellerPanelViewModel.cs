@@ -47,3 +47,19 @@ public class SellerPackagesPageViewModel : SellerPanelViewModel
     /// <summary>Total products owned across all stores (drives "4 / 5 məhsul" line).</summary>
     public int CurrentProductCount { get; set; }
 }
+
+public class SellerDashboardPageViewModel : SellerPanelViewModel
+{
+    public Stylebazar.BLL.DTOs.Subscriptions.SubscriptionDto CurrentSubscription { get; set; } = new();
+    public int ProductCount { get; set; }
+    public int ProductLimit { get; set; }
+
+    /// <summary>Aggregated analytics — only meaningful for Pro/VIP, but rendered as zeros for Free too.</summary>
+    public Stylebazar.BLL.DTOs.Analytics.SellerAnalyticsDto Stats { get; set; } = new();
+
+    /// <summary>Last 5 reviews on seller's products — drives the "Yeni rəylər" feed card.</summary>
+    public List<Stylebazar.BLL.Services.Reviews.SellerReviewRowDto> RecentReviews { get; set; } = new();
+
+    /// <summary>True if the seller hasn't created any store yet — drives the empty-state CTA.</summary>
+    public bool HasStore { get; set; }
+}

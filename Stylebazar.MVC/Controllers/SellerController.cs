@@ -64,11 +64,31 @@ public class SellerController : Controller
         _userManager = userManager;
     }
 
-    // Dashboard — overview placeholder for Phase 6c (stats + recent activity).
+    // Dashboard — plan-aware landing for sellers. Free tier gets an
+    // upgrade nudge banner; Pro/VIP get the KPI mini-grid. All tiers get
+    // quick-action tiles for product/store/profile management.
     [HttpGet]
     public async Task<IActionResult> Dashboard(CancellationToken ct)
     {
-        return View(await BuildPanelVmAsync(ct));
+        var basePanel = await BuildPanelVmAsync(ct);
+
+        // Sequential awaits — single scoped DbContext, no Task.WhenAll.
+        var current = await _subscriptions.GetCurrentForMeAsync(ct);
+        var quota = await _subscriptions.CanCurrentUserAddProductAsync(ct);
+        var stats = await _analytics.GetForCurrentSellerAsync(ct);
+        var recentReviews = await _reviews.GetForCurrentSellerAsync(maxRating: null, take: 5, ct);
+
+        return View(new SellerDashboardPageViewModel
+        {
+            Profile = basePanel.Profile,
+            PrimaryStore = basePanel.PrimaryStore,
+            CurrentSubscription = current,
+            ProductCount = quota.CurrentProductCount,
+            ProductLimit = quota.MaxAllowed,
+            Stats = stats,
+            RecentReviews = recentReviews,
+            HasStore = basePanel.PrimaryStore != null
+        });
     }
 
     // ============== PROFILE (image 2) ==============
