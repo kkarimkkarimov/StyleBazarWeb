@@ -27,6 +27,25 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<Stylebazar.DAL.Contexts.ApplicationDbContext>(name: "db");
 
+// Response compression — gzips dynamic HTML / JSON. .NET 10's
+// MapStaticAssets already pre-compresses /css /js /lib at build time so
+// we don't double-compress them; this targets controller responses.
+// HTTPS-enabled by default — BREACH risk is bounded by the JSON-only
+// content we send through compressed paths (no secret-mixed HTML).
+builder.Services.AddResponseCompression(opts =>
+{
+    opts.EnableForHttps = true;
+    opts.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    opts.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    opts.MimeTypes = Microsoft.AspNetCore.ResponseCompression
+        .ResponseCompressionDefaults.MimeTypes
+        .Concat(new[] { "application/json", "text/html; charset=utf-8" });
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(o =>
+    o.Level = System.IO.Compression.CompressionLevel.Fastest);
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(o =>
+    o.Level = System.IO.Compression.CompressionLevel.Fastest);
+
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddIdentityServices();
 builder.Services.AddBusinessServices(builder.Configuration);
@@ -162,6 +181,10 @@ app.Use(async (ctx, next) =>
     }
     await next();
 });
+
+// Compression runs as early as possible so all downstream middleware
+// gets the compressed Response.Body wrapper.
+app.UseResponseCompression();
 
 app.UseRouting();
 
