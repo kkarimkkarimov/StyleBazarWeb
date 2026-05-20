@@ -69,12 +69,24 @@ public static class ServiceRegistration
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
 
         // File storage (local disk impl; swap to CloudinaryFileStorageService later)
         services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
-        // Email (dev: writes to ILogger; production swaps to SMTP/SendGrid)
-        services.AddScoped<IEmailService, LogEmailService>();
+        // Email transport — selected via Email:Provider config:
+        //   "Smtp" → MailKit-backed SmtpEmailService (production)
+        //   anything else (default "Log") → LogEmailService (development)
+        // Switching is a config-only change; controllers depend on IEmailService.
+        string emailProvider = configuration[$"{EmailSettings.SectionName}:Provider"] ?? "Log";
+        if (string.Equals(emailProvider, "Smtp", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddScoped<IEmailService, SmtpEmailService>();
+        }
+        else
+        {
+            services.AddScoped<IEmailService, LogEmailService>();
+        }
 
         // Auth
         services.AddScoped<ITokenService, TokenService>();
