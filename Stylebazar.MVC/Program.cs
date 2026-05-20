@@ -7,6 +7,11 @@ using Stylebazar.DAL.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Fail fast if required secrets are missing. In Development this is
+// resolved by `dotnet user-secrets`; in Production it must come from
+// env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection).
+ValidateRequiredSecrets(builder.Configuration, builder.Environment);
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHealthChecks()
@@ -176,3 +181,46 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+
+// ============================================================
+// Helpers
+// ============================================================
+
+static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
+{
+    // Three secrets are mandatory in every environment. They come from
+    // user-secrets in Development and env vars in Production. If any of
+    // them are missing the app should refuse to start — silent fallbacks
+    // are the classic way to ship dev keys to prod.
+    string?[] required =
+    {
+        cfg["Jwt:Key"],
+        cfg["Admin:Password"],
+        cfg.GetConnectionString("DefaultConnection")
+    };
+    string[] names = { "Jwt:Key", "Admin:Password", "ConnectionStrings:DefaultConnection" };
+
+    var missing = new List<string>();
+    for (int i = 0; i < required.Length; i++)
+    {
+        if (string.IsNullOrWhiteSpace(required[i])) missing.Add(names[i]);
+    }
+    if (missing.Count > 0)
+    {
+        throw new InvalidOperationException(
+            $"Missing required configuration: {string.Join(", ", missing)}. " +
+            (env.IsDevelopment()
+                ? "Run `dotnet user-secrets set <key> <value>` to seed dev values."
+                : "Set the matching env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection)."));
+    }
+
+    // Extra check: minimum JWT key length. Tokens signed with < 256 bits
+    // are rejected by the JwtBearer handler at issue time, so fail earlier
+    // here for a clearer error message.
+    if ((cfg["Jwt:Key"] ?? "").Length < 32)
+    {
+        throw new InvalidOperationException(
+            "Jwt:Key must be at least 32 characters (256 bits). Generate one with: openssl rand -base64 48");
+    }
+}

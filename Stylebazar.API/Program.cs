@@ -10,6 +10,10 @@ using Stylebazar.DAL.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Fail fast if required secrets are missing. Dev: dotnet user-secrets;
+// Prod: env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection).
+ValidateRequiredSecrets(builder.Configuration, builder.Environment);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -88,3 +92,39 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+// ============================================================
+// Helpers
+// ============================================================
+
+static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
+{
+    string?[] required =
+    {
+        cfg["Jwt:Key"],
+        cfg["Admin:Password"],
+        cfg.GetConnectionString("DefaultConnection")
+    };
+    string[] names = { "Jwt:Key", "Admin:Password", "ConnectionStrings:DefaultConnection" };
+
+    var missing = new List<string>();
+    for (int i = 0; i < required.Length; i++)
+    {
+        if (string.IsNullOrWhiteSpace(required[i])) missing.Add(names[i]);
+    }
+    if (missing.Count > 0)
+    {
+        throw new InvalidOperationException(
+            $"Missing required configuration: {string.Join(", ", missing)}. " +
+            (env.IsDevelopment()
+                ? "Run `dotnet user-secrets set <key> <value>` to seed dev values."
+                : "Set the matching env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection)."));
+    }
+
+    if ((cfg["Jwt:Key"] ?? "").Length < 32)
+    {
+        throw new InvalidOperationException(
+            "Jwt:Key must be at least 32 characters (256 bits). Generate one with: openssl rand -base64 48");
+    }
+}
