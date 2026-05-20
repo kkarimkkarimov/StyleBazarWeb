@@ -1,11 +1,21 @@
 using System.Net;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Serilog;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
 using Stylebazar.DAL.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Serilog — replaces the default ILogger pipeline. Config lives in the
+// "Serilog" section of appsettings*.json: console + rolling file sinks,
+// minimum levels, enrichers. ReadFrom.Configuration() means redeploying
+// with a different log level is a JSON edit, not a code change.
+builder.Host.UseSerilog((ctx, services, lc) =>
+    lc.ReadFrom.Configuration(ctx.Configuration)
+      .ReadFrom.Services(services)
+      .Enrich.FromLogContext());
 
 // Fail fast if required secrets are missing. In Development this is
 // resolved by `dotnet user-secrets`; in Production it must come from

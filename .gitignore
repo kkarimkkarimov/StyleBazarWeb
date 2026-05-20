@@ -364,3 +364,7 @@ FodyWeavers.xsd
 # StyleBazar — user-uploaded files (kept on disk, not in repo)
 Stylebazar.API/wwwroot/uploads/
 Stylebazar.MVC/wwwroot/uploads/
+
+# StyleBazar — Serilog rolling log files (Phase 13.3)
+Stylebazar.API/logs/
+Stylebazar.MVC/logs/

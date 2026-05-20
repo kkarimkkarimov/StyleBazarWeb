@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
 using Stylebazar.API.Middlewares;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.BLL.Settings;
@@ -9,6 +10,11 @@ using Stylebazar.DAL.DependencyResolver;
 using Stylebazar.DAL.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, services, lc) =>
+    lc.ReadFrom.Configuration(ctx.Configuration)
+      .ReadFrom.Services(services)
+      .Enrich.FromLogContext());
 
 // Fail fast if required secrets are missing. Dev: dotnet user-secrets;
 // Prod: env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection).
