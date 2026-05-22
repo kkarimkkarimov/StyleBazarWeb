@@ -140,9 +140,7 @@ static void ApplyDevFallbackSecrets(WebApplicationBuilder builder)
     if (defaults.Count == 0) return;
 
     builder.Configuration.AddInMemoryCollection(defaults);
-    Console.Error.WriteLine(
-        $"[dev-fallback] Injected default values for: {string.Join(", ", defaults.Keys)}. " +
-        $"Set proper values with `dotnet user-secrets set <key> <value> --project Stylebazar.API`.");
+    // Silent — see Stylebazar.MVC/Program.cs for the rationale.
 }
 
 static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)

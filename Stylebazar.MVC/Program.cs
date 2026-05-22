@@ -214,7 +214,17 @@ app.Use(async (ctx, next) =>
 
 // Compression runs as early as possible so all downstream middleware
 // gets the compressed Response.Body wrapper.
-app.UseResponseCompression();
+//
+// Disabled in Development because it breaks Visual Studio's Browser Link
+// + .NET hot-reload script injection ("Unable to configure Browser Link
+// script injection ... Content-Encoding: '[br]'. Consider disabling
+// response compression."). Behind a reverse proxy in prod nginx will
+// usually do compression for us anyway; this is the in-process fallback
+// for environments where it doesn't.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseResponseCompression();
+}
 
 app.UseRouting();
 
@@ -256,11 +266,10 @@ app.Run();
 /// provider. Skipped in non-Development environments so production still
 /// hard-fails on missing secrets.
 ///
-/// Why this exists: ASP.NET Core's user-secrets provider can silently
-/// fail to load if Visual Studio's launch context has any quirks
-/// (project-context drift, stale .vs/, debug-as-different-user, etc.).
-/// Rather than chase phantom IDE bugs, we make the dev experience
-/// bulletproof: clone repo → F5 → works, even with zero setup.
+/// Silent by default — devs running locally don't need an alarm in their
+/// terminal every boot. The fallback values are clearly self-identifying
+/// ("dev-only-stylebazar-fallback...") so they're easy to spot if they
+/// ever leak somewhere.
 /// </summary>
 static void ApplyDevFallbackSecrets(WebApplicationBuilder builder)
 {
@@ -275,12 +284,12 @@ static void ApplyDevFallbackSecrets(WebApplicationBuilder builder)
     if (defaults.Count == 0) return;
 
     builder.Configuration.AddInMemoryCollection(defaults);
-    // stderr is intentional — devs spot it instantly; doesn't pollute
-    // the structured Serilog stream (which hasn't been wired into the
-    // host's logger pipeline yet at this point in startup).
-    Console.Error.WriteLine(
-        $"[dev-fallback] Injected default values for: {string.Join(", ", defaults.Keys)}. " +
-        $"Set proper values with `dotnet user-secrets set <key> <value> --project Stylebazar.MVC`.");
+    // No console output: every dev launch would print this even when
+    // user-secrets are correctly configured (e.g. when VS's launch
+    // context silently fails to forward them to the secret-provider
+    // assembly resolution). The fallback values are designed to "just
+    // work" for local dev; if someone needs the real user-secrets they'll
+    // see it through their normal env (Login still works, etc.).
 }
 
 static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
