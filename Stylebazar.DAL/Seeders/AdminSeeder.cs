@@ -34,16 +34,45 @@ public static class AdminSeeder
         AppUser? existing = await userManager.FindByEmailAsync(email);
         if (existing is not null)
         {
-            // Make sure existing user has Admin role
-            if (!await userManager.IsInRoleAsync(existing, UserRole.Admin.ToString()))
+            bool wasAdmin = await userManager.IsInRoleAsync(existing, UserRole.Admin.ToString());
+
+            // Promote to Admin if not already in the role.
+            if (!wasAdmin)
                 await userManager.AddToRoleAsync(existing, UserRole.Admin.ToString());
 
-            // Backfill CreatedDate for admins seeded before that field was set
-            // (pre-fix runs left it at DateTime.MinValue / 0001-01-01).
-            if (existing.CreatedDate == default)
+            // ONE-TIME password reset on promotion only. Without this, taking
+            // an existing user (e.g. a previously-registered Buyer) and making
+            // them admin via Admin__Email config leaves them with their OLD
+            // password — the config password never gets applied. Once they're
+            // already in the Admin role, subsequent restarts skip this so a
+            // self-service password change via /Account/Profile isn't reverted
+            // every time the app boots.
+            if (!wasAdmin)
             {
-                existing.CreatedDate = DateTime.UtcNow;
+                string resetToken = await userManager.GeneratePasswordResetTokenAsync(existing);
+                await userManager.ResetPasswordAsync(existing, resetToken, password);
+
+                // Make sure FullName reflects the configured admin name and
+                // the email is treated as confirmed (Identity uses
+                // EmailConfirmed for token-based flows like password reset).
+                existing.FullName = fullName;
+                existing.EmailConfirmed = true;
+                if (existing.CreatedDate == default) existing.CreatedDate = DateTime.UtcNow;
                 await userManager.UpdateAsync(existing);
+
+                logger.LogInformation(
+                    "Existing user '{Email}' promoted to Admin and password synced to Admin:Password config.",
+                    email);
+            }
+            else
+            {
+                // Backfill CreatedDate for admins seeded before that field was set
+                // (pre-fix runs left it at DateTime.MinValue / 0001-01-01).
+                if (existing.CreatedDate == default)
+                {
+                    existing.CreatedDate = DateTime.UtcNow;
+                    await userManager.UpdateAsync(existing);
+                }
             }
             return;
         }
