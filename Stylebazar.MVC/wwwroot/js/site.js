@@ -89,6 +89,7 @@
         safe('setupChangePasswordModal', setupChangePasswordModal);
         safe('setupAddresses',           setupAddresses);
         safe('setupSellerProducts',      setupSellerProducts);
+        safe('setupProductImageUploader',setupProductImageUploader);
         safe('setupStoreSettings',       setupStoreSettings);
         safe('setupStorePage',           setupStorePage);
         safe('setupAdmin',               setupAdmin);
@@ -2286,6 +2287,213 @@
 
         // Initial sync of empty-state flag in case it drifted server-side.
         refreshEmptyState();
+    }
+
+    /* -----------------------------------------------------------
+       Seller — EditProduct image gallery (was missing entirely — Phase 13.9)
+
+       The View renders the gallery with these hooks but no handler
+       existed, so picking a file did nothing. Wires three AJAX flows:
+
+         data-img-input   change  → POST .../Images/Upload
+         data-img-delete  click   → POST .../Images/{id}/Delete
+         data-img-set-main click  → POST .../Images/{id}/SetMain
+
+       All three reuse the antiforgery token from the form below the
+       gallery — the gallery isn't inside a form (it'd nest with the
+       core EditProduct form). Errors surface in [data-img-error].
+       ----------------------------------------------------------- */
+    function setupProductImageUploader() {
+        var root = document.querySelector('[data-prod-images]');
+        if (!root) return;
+        var productId = root.getAttribute('data-product-id');
+        if (!productId) return;
+        var gallery   = root.querySelector('[data-img-gallery]');
+        var input     = root.querySelector('[data-img-input]');
+        var uploader  = root.querySelector('[data-img-uploader]');
+        var errorBox  = root.querySelector('[data-img-error]');
+        var token     = getAntiForgeryToken();
+
+        function showError(msg) {
+            if (!errorBox) return;
+            errorBox.textContent = msg;
+            errorBox.hidden = false;
+            setTimeout(function () { errorBox.hidden = true; }, 6000);
+        }
+        function clearError() { if (errorBox) errorBox.hidden = true; }
+
+        function buildTile(img) {
+            // Mirrors the Razor _ProductImageTile equivalent so the DOM
+            // looks identical to a fresh page load after the upload.
+            var fig = document.createElement('figure');
+            fig.className = 'sb-img-tile' + (img.isMain ? ' is-main' : '');
+            fig.setAttribute('data-image-id', img.id);
+
+            var imgEl = document.createElement('img');
+            imgEl.src = img.imageUrl;
+            imgEl.alt = '';
+            fig.appendChild(imgEl);
+
+            if (img.isMain) {
+                var badge = document.createElement('span');
+                badge.className = 'sb-img-tile__main-badge';
+                badge.textContent = 'Əsas';
+                fig.appendChild(badge);
+            }
+
+            var actions = document.createElement('div');
+            actions.className = 'sb-img-tile__actions';
+
+            if (!img.isMain) {
+                var starBtn = document.createElement('button');
+                starBtn.type = 'button';
+                starBtn.className = 'sb-img-tile__btn';
+                starBtn.title = 'Əsas et';
+                starBtn.setAttribute('data-img-set-main', '');
+                starBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                actions.appendChild(starBtn);
+            }
+
+            var delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'sb-img-tile__btn sb-img-tile__btn--danger';
+            delBtn.title = 'Sil';
+            delBtn.setAttribute('data-img-delete', '');
+            delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>';
+            actions.appendChild(delBtn);
+
+            fig.appendChild(actions);
+            return fig;
+        }
+
+        // ----- Upload (multi-file) -----
+        if (input) {
+            input.addEventListener('change', async function () {
+                var files = Array.from(input.files || []);
+                if (!files.length) return;
+                clearError();
+                if (uploader) uploader.classList.add('is-loading');
+
+                // First image becomes main when the product has no images yet.
+                var existingTiles = gallery ? gallery.querySelectorAll('[data-image-id]') : [];
+                var noImagesYet = existingTiles.length === 0;
+
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    if (file.size > 10 * 1024 * 1024) {
+                        showError('"' + file.name + '" 10 MB-dan böyükdür.');
+                        continue;
+                    }
+
+                    var fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('isMain', String(noImagesYet && i === 0));
+                    if (token) fd.append('__RequestVerificationToken', token);
+
+                    try {
+                        var resp = await fetch('/Seller/Products/' + productId + '/Images/Upload', {
+                            method: 'POST',
+                            body: fd,
+                            credentials: 'same-origin'
+                        });
+                        if (!resp.ok) {
+                            var errData = null;
+                            try { errData = await resp.json(); } catch (_) { /* non-JSON */ }
+                            showError((errData && errData.error)
+                                || 'Yükləmə uğursuz oldu (HTTP ' + resp.status + ')');
+                            continue;
+                        }
+                        var data = await resp.json();
+                        if (data && data.ok && data.image && gallery && uploader) {
+                            gallery.insertBefore(buildTile(data.image), uploader);
+                        }
+                    } catch (err) {
+                        showError('Şəbəkə xətası — yenidən cəhd et.');
+                    }
+                }
+
+                if (uploader) uploader.classList.remove('is-loading');
+                input.value = ''; // allow re-picking the same file
+            });
+        }
+
+        // ----- Delete -----
+        root.addEventListener('click', async function (e) {
+            var btn = e.target.closest('[data-img-delete]');
+            if (!btn) return;
+            var tile = btn.closest('[data-image-id]');
+            if (!tile) return;
+            if (!confirm('Bu şəkli silmək istəyirsən?')) return;
+            var imageId = tile.getAttribute('data-image-id');
+
+            var fd = new FormData();
+            if (token) fd.append('__RequestVerificationToken', token);
+            try {
+                var resp = await fetch(
+                    '/Seller/Products/' + productId + '/Images/' + imageId + '/Delete',
+                    { method: 'POST', body: fd, credentials: 'same-origin' });
+                if (resp.ok) {
+                    tile.remove();
+                    clearError();
+                } else {
+                    showError('Silmək mümkün olmadı (HTTP ' + resp.status + ')');
+                }
+            } catch (_) {
+                showError('Şəbəkə xətası.');
+            }
+        });
+
+        // ----- Set main -----
+        root.addEventListener('click', async function (e) {
+            var btn = e.target.closest('[data-img-set-main]');
+            if (!btn) return;
+            var tile = btn.closest('[data-image-id]');
+            if (!tile) return;
+            var imageId = tile.getAttribute('data-image-id');
+
+            var fd = new FormData();
+            if (token) fd.append('__RequestVerificationToken', token);
+            try {
+                var resp = await fetch(
+                    '/Seller/Products/' + productId + '/Images/' + imageId + '/SetMain',
+                    { method: 'POST', body: fd, credentials: 'same-origin' });
+                if (!resp.ok) {
+                    showError('Əsas etmək mümkün olmadı (HTTP ' + resp.status + ')');
+                    return;
+                }
+                // Strip is-main + badge from all tiles, then mark this one.
+                root.querySelectorAll('[data-image-id]').forEach(function (t) {
+                    t.classList.remove('is-main');
+                    var b = t.querySelector('.sb-img-tile__main-badge');
+                    if (b) b.remove();
+                    // Re-add the star button to previously-main tiles that
+                    // lost it (they shouldn't have one when not-main).
+                    var actions = t.querySelector('.sb-img-tile__actions');
+                    if (actions && !actions.querySelector('[data-img-set-main]')) {
+                        var star = document.createElement('button');
+                        star.type = 'button';
+                        star.className = 'sb-img-tile__btn';
+                        star.title = 'Əsas et';
+                        star.setAttribute('data-img-set-main', '');
+                        star.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                        actions.insertBefore(star, actions.firstChild);
+                    }
+                });
+                tile.classList.add('is-main');
+                // Remove this tile's star button (it's already main) + add badge.
+                var ownStar = tile.querySelector('[data-img-set-main]');
+                if (ownStar) ownStar.remove();
+                if (!tile.querySelector('.sb-img-tile__main-badge')) {
+                    var badge = document.createElement('span');
+                    badge.className = 'sb-img-tile__main-badge';
+                    badge.textContent = 'Əsas';
+                    tile.insertBefore(badge, tile.querySelector('.sb-img-tile__actions'));
+                }
+                clearError();
+            } catch (_) {
+                showError('Şəbəkə xətası.');
+            }
+        });
     }
 
     /* -----------------------------------------------------------
