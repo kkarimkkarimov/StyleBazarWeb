@@ -245,29 +245,36 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="sb-dropdown" id="sbUserMenu" role="menu">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                @* Admin-i yuxarıda göstəririk — admin əksər vaxt panelə qayıtmaq istəyir.
+                                   Indigo accent rəngi ilə fərqləndirilir ki, normal item-dan seçilsin. *@
+                                <a class="sb-dropdown__item sb-dropdown__item--admin" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    Admin paneli
+                                </a>
+                                <div class="sb-dropdown__sep"></div>
+                            }
                             <a class="sb-dropdown__item" asp-controller="Account" asp-action="Dashboard">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                                Dashboard
+                                İcmal
                             </a>
                             @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
                             {
                                 <a class="sb-dropdown__item" asp-controller="Seller" asp-action="Dashboard">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-                                    Seller Panel
+                                    Satıcı paneli
                                 </a>
                             }
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a class="sb-dropdown__item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                    Admin
-                                </a>
-                            }
+                            <a class="sb-dropdown__item" asp-controller="Account" asp-action="Profile">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                                Profil
+                            </a>
                             <div class="sb-dropdown__sep"></div>
                             <form asp-controller="Account" asp-action="Logout" method="post">
                                 <button type="submit" class="sb-dropdown__item sb-dropdown__item--danger">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                                    Logout
+                                    Çıxış
                                 </button>
                             </form>
                         </div>
@@ -363,7 +370,15 @@
             <li><a asp-controller="Support" asp-action="Index">Dəstək <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             @if (SignInManager.IsSignedIn(User))
             {
-                <li><a asp-controller="Account" asp-action="Profile">Profil <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" style="color:#4338CA;font-weight:600;">Admin paneli <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                }
+                @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
+                {
+                    <li><a asp-controller="Seller" asp-action="Dashboard">Satıcı paneli <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                }
+                <li><a asp-controller="Account" asp-action="Dashboard">Hesabım <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
                 <li><a asp-controller="Wishlist" asp-action="Index">Wishlist <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             }
         </ul>

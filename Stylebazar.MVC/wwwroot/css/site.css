@@ -620,6 +620,13 @@ p { margin: 0 0 1em; }
 .sb-dropdown__item:hover { background: var(--sb-surface); color: var(--sb-ink); }
 .sb-dropdown__item--danger { color: var(--sb-danger); }
 .sb-dropdown__item--danger:hover { background: #FEE2E2; color: var(--sb-danger); }
+.sb-dropdown__item--admin {
+    color: #4338CA;
+    font-weight: 600;
+    background: linear-gradient(90deg, #EEF2FF 0%, transparent 100%);
+}
+.sb-dropdown__item--admin:hover { background: #E0E7FF; color: #3730A3; }
+.sb-dropdown__item--admin svg { color: #4338CA; }
 .sb-dropdown__sep { height: 1px; background: var(--sb-line); margin: 6px 4px; }
 
 .sb-user-wrap { position: relative; }
