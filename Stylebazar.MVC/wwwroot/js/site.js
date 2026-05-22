@@ -865,16 +865,61 @@
             var btn = form.querySelector('[data-submit]');
             var summary = form.querySelector('.sb-form-summary');
 
-            // ---- 1. Submit-loading spinner ----------------------------
+            // ---- 0. Server-rendered error → scroll to it on page load ----
+            // When the form POST comes back with ModelState errors, the server
+            // re-renders the page with .sb-form-summary at the top OR
+            // .is-error / .input-validation-error inputs. Browsers preserve
+            // the user's pre-submit scroll position, so a user at the bottom
+            // of /Seller/AddProduct still sees the bottom after the failed
+            // submit and thinks "nothing happened". Yank them to the first
+            // visible error on next animation frame.
+            requestAnimationFrame(function () {
+                var firstServerError = form.querySelector('.sb-form-summary, .is-error, .input-validation-error');
+                if (!firstServerError) return;
+                // Only scroll if it's off-screen above the fold.
+                var rect = firstServerError.getBoundingClientRect();
+                if (rect.top < 0 || rect.top > window.innerHeight) {
+                    var topOffset = window.scrollY + rect.top - 120;
+                    window.scrollTo({ top: Math.max(0, topOffset), behavior: 'smooth' });
+                }
+            });
+
+            // ---- 1. Submit-loading spinner + scroll-to-first-error -----
             // jQuery Unobtrusive Validation may preventDefault() if a field
             // is invalid. setTimeout(0) lets that run first, so we only paint
             // the spinner when the form is actually navigating — otherwise
             // the button (which has pointer-events: none in is-loading) would
             // be permanently dead until full page reload.
+            //
+            // When validation DID fail, jump the page to the first invalid
+            // field so a user at the bottom of a long form (Seller/AddProduct
+            // is 200+ lines) doesn't think "nothing happened" — the errors
+            // are right there, just off-screen above them.
             if (btn) {
                 form.addEventListener('submit', function (e) {
                     setTimeout(function () {
-                        if (!e.defaultPrevented) btn.classList.add('is-loading');
+                        if (!e.defaultPrevented) {
+                            btn.classList.add('is-loading');
+                            return;
+                        }
+                        // Validation failed silently above the fold.
+                        // Find the first input flagged by jQuery Unobtrusive
+                        // (.input-validation-error) OR by server re-render
+                        // (.is-error). Scroll it into view with a buffer for
+                        // the sticky header + brief button shake for feedback.
+                        var firstError = form.querySelector('.input-validation-error, .is-error');
+                        if (firstError) {
+                            var rect = firstError.getBoundingClientRect();
+                            var topOffset = window.scrollY + rect.top - 120; // 120px breathing room
+                            window.scrollTo({ top: Math.max(0, topOffset), behavior: 'smooth' });
+                            // Focus the field so the user can immediately type.
+                            try { firstError.focus({ preventScroll: true }); } catch (_) { /* old browser */ }
+                        }
+                        // Pulse the submit button so the rejection is felt
+                        // even if the offending field is already in view.
+                        btn.classList.remove('is-loading');
+                        btn.classList.add('is-shake');
+                        setTimeout(function () { btn.classList.remove('is-shake'); }, 500);
                     }, 0);
                 });
             }
@@ -906,21 +951,26 @@
             }
 
             // Inputs / textareas / selects — clear on every keystroke.
-            form.querySelectorAll('.sb-field input, .sb-field textarea, .sb-field select')
+            // Two field-wrapper conventions coexist in the project:
+            //   .sb-field        — auth views (Login, Register, ForgotPassword)
+            //   .sb-acc-field    — account + seller forms (AddProduct, Profile)
+            // Without both selectors the product form's stale errors never
+            // clear when the user starts typing.
+            form.querySelectorAll('.sb-field input, .sb-field textarea, .sb-field select, .sb-acc-field input, .sb-acc-field textarea, .sb-acc-field select')
                 .forEach(function (el) {
                     el.addEventListener('input', function () {
-                        clearError(el.closest('.sb-field'));
+                        clearError(el.closest('.sb-field, .sb-acc-field'));
                         clearSummary();
                         if (btn) btn.classList.remove('is-loading');
                     });
                 });
 
             // Checkboxes / radios — clear on toggle (covers AcceptTerms,
-            // role cards, RememberMe).
+            // role cards, RememberMe, IsActive / HasDelivery toggles).
             form.querySelectorAll('input[type="checkbox"], input[type="radio"]')
                 .forEach(function (el) {
                     el.addEventListener('change', function () {
-                        clearError(el.closest('.sb-field'));
+                        clearError(el.closest('.sb-field, .sb-acc-field'));
                         clearSummary();
                         if (btn) btn.classList.remove('is-loading');
                     });

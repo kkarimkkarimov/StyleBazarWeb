@@ -9069,5 +9069,21 @@ body:has(.sb-seller-layout) {
 
 .sb-acc-recent { padding: 20px 22px; }
 
+/* -----------------------------------------------------------
+   17ax. Submit-rejection shake (Phase 13.7 — form UX)
+   ----------------------------------------------------------- */
+@keyframes sb-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+.is-shake {
+    animation: sb-shake .42s ease;
+    /* Brief red flash on the button to reinforce the rejection. */
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .25) !important;
+}
+
 
 
