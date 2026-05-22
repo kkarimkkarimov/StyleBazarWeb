@@ -1,6 +1,7 @@
 using System.Net;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
@@ -17,9 +18,18 @@ builder.Host.UseSerilog((ctx, services, lc) =>
       .ReadFrom.Services(services)
       .Enrich.FromLogContext());
 
-// Fail fast if required secrets are missing. In Development this is
-// resolved by `dotnet user-secrets`; in Production it must come from
-// env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection).
+// Dev safety net: if a developer clones the repo and hits F5 without
+// first running `dotnet user-secrets set`, fill the gaps with sane
+// hardcoded defaults instead of crashing. Real user-secrets or env vars
+// always win because they were loaded BEFORE this runs. Production
+// (env != Development) skips this fallback entirely and ValidateRequired
+// Secrets below will hard-fail.
+ApplyDevFallbackSecrets(builder);
+
+// Fail fast if required secrets are STILL missing after the dev fallback.
+// In Production this catches forgotten env vars; in Development it's a
+// safety net for the (very rare) case where even the in-memory defaults
+// couldn't be applied.
 ValidateRequiredSecrets(builder.Configuration, builder.Environment);
 
 // Add services to the container.
@@ -131,6 +141,26 @@ builder.Services.PostConfigure<Stylebazar.BLL.Settings.FileStorageSettings>(opts
 
 var app = builder.Build();
 
+// Auto-apply pending migrations on startup. Idempotent — no-op when DB
+// is already at HEAD. Critical for fresh-clone F5 flow: without this,
+// RoleSeeder would crash trying to query the AspNetRoles table because
+// the tables don't exist yet. Wrapped so a migration failure (e.g.
+// permission denied) surfaces with a clear message instead of dying
+// inside a seeder.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Stylebazar.DAL.Contexts.ApplicationDbContext>();
+    try
+    {
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogCritical(ex, "Database migration failed at startup. App cannot boot.");
+        throw;
+    }
+}
+
 await RoleSeeder.SeedAsync(app.Services);
 await AdminSeeder.SeedAsync(app.Services);
 await SubscriptionSeeder.SeedAsync(app.Services);
@@ -220,12 +250,46 @@ app.Run();
 // Helpers
 // ============================================================
 
+/// <summary>
+/// Development-only safety net. If a missing required secret is detected,
+/// inject a hardcoded fallback into the configuration via in-memory
+/// provider. Skipped in non-Development environments so production still
+/// hard-fails on missing secrets.
+///
+/// Why this exists: ASP.NET Core's user-secrets provider can silently
+/// fail to load if Visual Studio's launch context has any quirks
+/// (project-context drift, stale .vs/, debug-as-different-user, etc.).
+/// Rather than chase phantom IDE bugs, we make the dev experience
+/// bulletproof: clone repo → F5 → works, even with zero setup.
+/// </summary>
+static void ApplyDevFallbackSecrets(WebApplicationBuilder builder)
+{
+    if (!builder.Environment.IsDevelopment()) return;
+
+    var defaults = new Dictionary<string, string?>();
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Jwt:Key"]))
+        defaults["Jwt:Key"] = "dev-only-stylebazar-fallback-key-256-bits-for-local-only";
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Admin:Password"]))
+        defaults["Admin:Password"] = "Admin123!";
+
+    if (defaults.Count == 0) return;
+
+    builder.Configuration.AddInMemoryCollection(defaults);
+    // stderr is intentional — devs spot it instantly; doesn't pollute
+    // the structured Serilog stream (which hasn't been wired into the
+    // host's logger pipeline yet at this point in startup).
+    Console.Error.WriteLine(
+        $"[dev-fallback] Injected default values for: {string.Join(", ", defaults.Keys)}. " +
+        $"Set proper values with `dotnet user-secrets set <key> <value> --project Stylebazar.MVC`.");
+}
+
 static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
 {
-    // Three secrets are mandatory in every environment. They come from
-    // user-secrets in Development and env vars in Production. If any of
-    // them are missing the app should refuse to start — silent fallbacks
-    // are the classic way to ship dev keys to prod.
+    // Three secrets are mandatory in every environment. In Development
+    // ApplyDevFallbackSecrets has already filled any gaps. In Production
+    // they must come from env vars (Jwt__Key, Admin__Password,
+    // ConnectionStrings__DefaultConnection) — anything missing here means
+    // an operator forgot a step and we refuse to boot.
     string?[] required =
     {
         cfg["Jwt:Key"],
@@ -244,7 +308,8 @@ static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
         throw new InvalidOperationException(
             $"Missing required configuration: {string.Join(", ", missing)}. " +
             (env.IsDevelopment()
-                ? "Run `dotnet user-secrets set <key> <value>` to seed dev values."
+                ? "This shouldn't happen — ApplyDevFallbackSecrets should have filled it. " +
+                  "Check that the appsettings.json hasn't been edited to set an empty string."
                 : "Set the matching env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection)."));
     }
 

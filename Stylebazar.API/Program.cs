@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
@@ -16,8 +17,13 @@ builder.Host.UseSerilog((ctx, services, lc) =>
       .ReadFrom.Services(services)
       .Enrich.FromLogContext());
 
-// Fail fast if required secrets are missing. Dev: dotnet user-secrets;
-// Prod: env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection).
+// Dev safety net (see MVC/Program.cs for rationale). Injects sane
+// fallback values for missing required secrets ONLY in Development.
+ApplyDevFallbackSecrets(builder);
+
+// Fail fast if required secrets are STILL missing after the fallback.
+// Production hard-fails on missing env vars; Development should now
+// never see this because the fallback covers all required keys.
 ValidateRequiredSecrets(builder.Configuration, builder.Environment);
 
 // Add services to the container.
@@ -70,6 +76,23 @@ builder.Services.PostConfigure<Stylebazar.BLL.Settings.FileStorageSettings>(opts
 
 var app = builder.Build();
 
+// Auto-apply pending migrations on startup (idempotent). Without this,
+// a fresh clone running `dotnet run` would crash inside RoleSeeder when
+// AspNetRoles doesn't exist yet.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Stylebazar.DAL.Contexts.ApplicationDbContext>();
+    try
+    {
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogCritical(ex, "Database migration failed at startup. App cannot boot.");
+        throw;
+    }
+}
+
 await RoleSeeder.SeedAsync(app.Services);
 await AdminSeeder.SeedAsync(app.Services);
 
@@ -104,6 +127,24 @@ app.Run();
 // Helpers
 // ============================================================
 
+static void ApplyDevFallbackSecrets(WebApplicationBuilder builder)
+{
+    if (!builder.Environment.IsDevelopment()) return;
+
+    var defaults = new Dictionary<string, string?>();
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Jwt:Key"]))
+        defaults["Jwt:Key"] = "dev-only-stylebazar-fallback-key-256-bits-for-local-only";
+    if (string.IsNullOrWhiteSpace(builder.Configuration["Admin:Password"]))
+        defaults["Admin:Password"] = "Admin123!";
+
+    if (defaults.Count == 0) return;
+
+    builder.Configuration.AddInMemoryCollection(defaults);
+    Console.Error.WriteLine(
+        $"[dev-fallback] Injected default values for: {string.Join(", ", defaults.Keys)}. " +
+        $"Set proper values with `dotnet user-secrets set <key> <value> --project Stylebazar.API`.");
+}
+
 static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
 {
     string?[] required =
@@ -124,7 +165,8 @@ static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
         throw new InvalidOperationException(
             $"Missing required configuration: {string.Join(", ", missing)}. " +
             (env.IsDevelopment()
-                ? "Run `dotnet user-secrets set <key> <value>` to seed dev values."
+                ? "This shouldn't happen — ApplyDevFallbackSecrets should have filled it. " +
+                  "Check that the appsettings.json hasn't been edited to set an empty string."
                 : "Set the matching env vars (Jwt__Key, Admin__Password, ConnectionStrings__DefaultConnection)."));
     }
 
