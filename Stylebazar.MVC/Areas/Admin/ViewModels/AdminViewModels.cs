@@ -27,7 +27,7 @@ public class AdminDashboardViewModel
 
     public List<UserAdminDto> RecentUsers { get; set; } = new();
     public List<ContactMessageDto> RecentMessages { get; set; } = new();
-    public List<LoginEventDto> RecentLoginEvents { get; set; } = new();
+    public List<AdminLoginEventDto> RecentLoginEvents { get; set; } = new();
 }
 
 public class AdminUsersPageViewModel

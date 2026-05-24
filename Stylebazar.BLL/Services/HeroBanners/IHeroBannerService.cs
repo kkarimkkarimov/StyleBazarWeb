@@ -10,4 +10,10 @@ public interface IHeroBannerService
     Task<HeroBannerDto> CreateAsync(CreateHeroBannerDto dto, CancellationToken ct = default);
     Task<HeroBannerDto> UpdateAsync(int id, UpdateHeroBannerDto dto, CancellationToken ct = default);
     Task DeleteAsync(int id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Flips IsActive on a banner. Quick-toggle for the admin list view so
+    /// the admin doesn't need to open the edit form for a one-click activate.
+    /// </summary>
+    Task<HeroBannerDto> ToggleActiveAsync(int id, CancellationToken ct = default);
 }

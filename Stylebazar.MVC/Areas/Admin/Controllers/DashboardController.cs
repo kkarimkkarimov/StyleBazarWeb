@@ -51,7 +51,10 @@ public class DashboardController : Controller
 
         var recentUsers = await _account.GetUsersAsync(new UserAdminListFilter { Page = 1, PageSize = 8 }, ct);
         var recentMsgs = await _contact.GetListAsync(1, 8, null, ct);
-        var recentLogins = await _events.GetMyHistoryAsync(7, ct);
+        // Platform-wide last 10 auth events (sign-in, sign-up, locked, password
+        // changed, etc.) — gives the admin a passive security feed without
+        // opening an individual user's detail page.
+        var recentLogins = await _events.GetRecentForAdminAsync(10, ct);
 
         return View(new AdminDashboardViewModel
         {

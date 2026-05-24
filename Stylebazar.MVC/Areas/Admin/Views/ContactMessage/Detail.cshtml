@@ -1,0 +1,74 @@
+@model Stylebazar.BLL.DTOs.Contact.ContactMessageDto
+@using Stylebazar.DAL.Entities.Enums
+@{
+    ViewData["Title"] = "Mesaj #" + Model.Id;
+    ViewData["PageTitle"] = "Mesaj #" + Model.Id;
+    string mailto = $"mailto:{Model.Email}?subject={Uri.EscapeDataString("Re: " + (Model.Subject ?? "StyleBazar"))}";
+}
+
+<nav class="sb-admin-breadcrumb">
+    <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index">Mesajlar</a>
+    <span>/</span>
+    <span>Mesaj #@Model.Id</span>
+</nav>
+
+<div class="sb-admin-grid-2col">
+    <div class="sb-admin-card">
+        <header class="sb-admin-card__head">
+            <h2>@(string.IsNullOrEmpty(Model.Subject) ? "(başlıqsız)" : Model.Subject)</h2>
+            <span class="sb-admin-chip sb-admin-chip--@Model.Status.ToString().ToLower()">@Model.Status</span>
+        </header>
+
+        <dl class="sb-admin-sub__dl">
+            <div><dt>Göndərən</dt><dd><strong>@Model.FullName</strong></dd></div>
+            <div><dt>Email</dt><dd><a href="@mailto">@Model.Email</a></dd></div>
+            <div><dt>Tarix</dt><dd>@Model.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd></div>
+        </dl>
+
+        <article class="sb-admin-msg-body">
+            <h3>Mesaj</h3>
+            <p>@Model.Message</p>
+        </article>
+
+        <a href="@mailto" class="sb-admin-btn sb-admin-btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" style="width:18px;height:18px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span>Email ilə cavab yaz</span>
+        </a>
+    </div>
+
+    <div class="sb-admin-card">
+        <header class="sb-admin-card__head"><h2>Status + admin qeydi</h2></header>
+
+        <form asp-area="Admin" asp-controller="ContactMessage" asp-action="SetStatus" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="returnTo" value="detail" />
+
+            <div class="sb-admin-field">
+                <label>Status</label>
+                <select name="status" class="sb-admin-select">
+                    <option value="@ContactStatus.New" selected="@(Model.Status == ContactStatus.New)">Yeni</option>
+                    <option value="@ContactStatus.InProgress" selected="@(Model.Status == ContactStatus.InProgress)">Baxılır</option>
+                    <option value="@ContactStatus.Resolved" selected="@(Model.Status == ContactStatus.Resolved)">Həll olunub</option>
+                    <option value="@ContactStatus.Closed" selected="@(Model.Status == ContactStatus.Closed)">Bağlı</option>
+                </select>
+            </div>
+
+            <div class="sb-admin-field">
+                <label>Admin qeydi (yalnız admin görür)</label>
+                <textarea name="adminNote" rows="5" maxlength="2000" placeholder="məs. cavab göndərildi, telefonla əlaqə saxlandı...">@Model.AdminNote</textarea>
+            </div>
+
+            <div class="sb-admin-field-actions">
+                <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" class="sb-admin-btn sb-admin-btn--ghost">Geri</a>
+                <button type="submit" class="sb-admin-btn sb-admin-btn--primary">Yadda saxla</button>
+            </div>
+        </form>
+
+        <form asp-area="Admin" asp-controller="ContactMessage" asp-action="Delete" method="post" class="sb-admin-msg-detail__delete">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Bu mesajı silməyə əminsən?">Sil</button>
+        </form>
+    </div>
+</div>

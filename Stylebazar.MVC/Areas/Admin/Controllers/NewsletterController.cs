@@ -23,13 +23,25 @@ public class NewsletterController : Controller
         });
     }
 
-    public async Task<IActionResult> ExportCsv(CancellationToken ct)
+    public async Task<IActionResult> ExportCsv(bool? isActive, CancellationToken ct)
     {
-        var result = await _service.GetListAsync(1, 10_000, true, ct);
+        // Respect whatever filter the user has applied (or "all" if none); used
+        // to default to active-only which was confusing because the page shows
+        // unfiltered by default. Export reflects what the user is looking at.
+        var result = await _service.GetListAsync(1, 10_000, isActive, ct);
         StringBuilder sb = new();
+        // UTF-8 BOM so Excel renders Azerbaijani diacritics correctly.
         sb.AppendLine("Email,SubscribedAt,IsActive");
         foreach (var s in result.Items)
             sb.AppendLine($"{s.Email},{s.CreatedDate:O},{s.IsActive}");
-        return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "stylebazar-newsletter.csv");
+
+        byte[] bom = new byte[] { 0xEF, 0xBB, 0xBF };
+        byte[] body = Encoding.UTF8.GetBytes(sb.ToString());
+        byte[] full = new byte[bom.Length + body.Length];
+        Buffer.BlockCopy(bom, 0, full, 0, bom.Length);
+        Buffer.BlockCopy(body, 0, full, bom.Length, body.Length);
+
+        string suffix = isActive switch { true => "-active", false => "-inactive", _ => "-all" };
+        return File(full, "text/csv", $"stylebazar-newsletter{suffix}.csv");
     }
 }

@@ -14,7 +14,8 @@
     </select>
 </form>
 
-<form asp-area="Admin" asp-controller="ContactMessage" asp-action="BulkAction" method="post" data-admin-bulk-form>
+@* Bulk-action form is an empty sibling; checkboxes use form="adm-msg-bulk". *@
+<form id="adm-msg-bulk" asp-area="Admin" asp-controller="ContactMessage" asp-action="BulkAction" method="post" data-admin-bulk-form>
     @Html.AntiForgeryToken()
     <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
         <span><strong data-admin-bulk-count>0</strong> seçildi</span>
@@ -22,62 +23,57 @@
         <button type="submit" name="action" value="close" class="sb-admin-btn sb-admin-btn--ok">Həll edildi</button>
         <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Silməyə əminsən?">Sil</button>
     </div>
-
-    <div class="sb-admin-card sb-admin-table-card">
-        @if (!Model.Messages.Items.Any())
-        {
-            <div class="sb-admin-empty"><strong>Mesaj yoxdur</strong></div>
-        }
-        else
-        {
-            <table class="sb-admin-table">
-                <thead>
-                    <tr>
-                        <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle /></th>
-                        <th>Göndərən</th>
-                        <th>Mövzu</th>
-                        <th>Mesaj</th>
-                        <th>Status</th>
-                        <th>Tarix</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in Model.Messages.Items)
-                    {
-                        <tr>
-                            <td><input type="checkbox" name="ids" value="@m.Id" data-admin-bulk-item /></td>
-                            <td>
-                                <strong>@m.FullName</strong>
-                                <div class="sb-admin-meta-small">@m.Email</div>
-                            </td>
-                            <td>@(string.IsNullOrEmpty(m.Subject) ? "—" : m.Subject)</td>
-                            <td><span class="sb-admin-clamp-2">@m.Message</span></td>
-                            <td><span class="sb-admin-chip sb-admin-chip--@m.Status.ToString().ToLower()">@m.Status</span></td>
-                            <td><span class="sb-admin-date">@m.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span></td>
-                            <td class="sb-admin-table__actions">
-                                <form asp-area="Admin" asp-controller="ContactMessage" asp-action="SetStatus" method="post" class="sb-admin-inline-form">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@m.Id" />
-                                    <input type="hidden" name="status" value="@ContactStatus.Resolved" />
-                                    <button type="submit" class="sb-admin-icon-btn" title="Həll edildi">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="20 6 9 17 4 12"/></svg>
-                                    </button>
-                                </form>
-                                <form asp-area="Admin" asp-controller="ContactMessage" asp-action="Delete" method="post" class="sb-admin-inline-form">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@m.Id" />
-                                    <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-    </div>
 </form>
+
+<div class="sb-admin-card sb-admin-table-card">
+    @if (!Model.Messages.Items.Any())
+    {
+        <div class="sb-admin-empty"><strong>Mesaj yoxdur</strong></div>
+    }
+    else
+    {
+        <table class="sb-admin-table">
+            <thead>
+                <tr>
+                    <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle form="adm-msg-bulk" /></th>
+                    <th>Göndərən</th>
+                    <th>Mövzu</th>
+                    <th>Mesaj</th>
+                    <th>Status</th>
+                    <th>Tarix</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.Messages.Items)
+                {
+                    <tr>
+                        <td><input type="checkbox" name="ids" value="@m.Id" data-admin-bulk-item form="adm-msg-bulk" /></td>
+                        <td>
+                            <strong>@m.FullName</strong>
+                            <div class="sb-admin-meta-small">@m.Email</div>
+                        </td>
+                        <td>@(string.IsNullOrEmpty(m.Subject) ? "—" : m.Subject)</td>
+                        <td><span class="sb-admin-clamp-2">@m.Message</span></td>
+                        <td><span class="sb-admin-chip sb-admin-chip--@m.Status.ToString().ToLower()">@m.Status</span></td>
+                        <td><span class="sb-admin-date">@m.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span></td>
+                        <td class="sb-admin-table__actions">
+                            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Detail" asp-route-id="@m.Id" class="sb-admin-icon-btn" title="Aç">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <form asp-area="Admin" asp-controller="ContactMessage" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@m.Id" />
+                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
 
 @await Html.PartialAsync("_AdminPagination", new Tuple<int,int,int>(Model.Messages.Index + 1, Model.Messages.Pages, Model.Messages.Count))

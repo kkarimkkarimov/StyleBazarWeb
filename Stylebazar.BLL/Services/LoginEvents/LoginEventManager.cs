@@ -1,4 +1,5 @@
 using Core.Persistence.Paging;
+using Microsoft.AspNetCore.Identity;
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.DAL.Entities;
@@ -11,11 +12,13 @@ public class LoginEventManager : ILoginEventService
 {
     private readonly ILoginEventRepository _events;
     private readonly ICurrentUserService _currentUser;
+    private readonly UserManager<AppUser> _users;
 
-    public LoginEventManager(ILoginEventRepository events, ICurrentUserService currentUser)
+    public LoginEventManager(ILoginEventRepository events, ICurrentUserService currentUser, UserManager<AppUser> users)
     {
         _events = events;
         _currentUser = currentUser;
+        _users = users;
     }
 
     public async Task TrackAsync(string userId, LoginEventType type, string? ip, string? userAgent, CancellationToken ct = default)
@@ -89,6 +92,40 @@ public class LoginEventManager : ILoginEventService
                 IsCurrent = true
             }
         };
+    }
+
+    public async Task<List<AdminLoginEventDto>> GetRecentForAdminAsync(int take = 10, CancellationToken ct = default)
+    {
+        take = Math.Clamp(take, 1, 100);
+
+        // Fetch the most-recent N events, then resolve each user with a per-row
+        // lookup. N is small (default 10) so the extra roundtrips are
+        // immaterial and we don't need to expose the Identity DbSet here.
+        Paginate<LoginEvent> page = await _events.GetListAsync(
+            orderBy: q => q.OrderByDescending(e => e.CreatedDate),
+            index: 0,
+            size: take,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        var list = new List<AdminLoginEventDto>(page.Items.Count);
+        foreach (LoginEvent e in page.Items)
+        {
+            AppUser? u = await _users.FindByIdAsync(e.UserId);
+            list.Add(new AdminLoginEventDto
+            {
+                Id = e.Id,
+                EventType = e.EventType,
+                EventLabel = ToDto(e).EventLabel,
+                IpAddress = e.IpAddress,
+                DeviceLabel = DeriveDeviceLabel(e.UserAgent),
+                CreatedDate = e.CreatedDate,
+                UserId = e.UserId,
+                UserFullName = u?.FullName ?? "(silinmiş istifadəçi)",
+                UserEmail = u?.Email ?? string.Empty
+            });
+        }
+        return list;
     }
 
     // -------- helpers --------

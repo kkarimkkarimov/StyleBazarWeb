@@ -29,6 +29,13 @@
                             </div>
                         </div>
                         <div class="sb-admin-banner-row__actions">
+                            <form asp-area="Admin" asp-controller="HeroBanner" asp-action="ToggleActive" method="post" class="sb-admin-inline-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="sb-admin-icon-btn @(b.IsActive ? "sb-admin-icon-btn--active" : "")" title="@(b.IsActive ? "Deaktiv et" : "Aktivləşdir")">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                </button>
+                            </form>
                             <button type="button" class="sb-admin-icon-btn" data-admin-banner-edit
                                     data-id="@b.Id"
                                     data-title="@b.Title"

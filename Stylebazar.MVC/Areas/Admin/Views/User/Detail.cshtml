@@ -1,11 +1,20 @@
 @model AdminUserDetailViewModel
+@using Microsoft.AspNetCore.Identity
+@using Stylebazar.DAL.Entities
 @using Stylebazar.DAL.Entities.Enums
+@inject UserManager<AppUser> UserManager
 @{
     ViewData["Title"] = Model.User.FullName;
     ViewData["PageTitle"] = Model.User.FullName;
     var u = Model.User;
     string CurrentRole = u.Role;
     var sub = Model.CurrentSubscription;
+    // Self-protection: the controller refuses destructive actions on the current
+    // admin anyway, but hide the UI too so the buttons aren't tempting.
+    // GetUserAsync round-trips through the user store and works regardless of
+    // claim-layout quirks (raw FindFirstValue returned null intermittently here).
+    AppUser? me = await UserManager.GetUserAsync(User);
+    bool isSelf = me is not null && string.Equals(me.Id, u.Id, StringComparison.OrdinalIgnoreCase);
 }
 
 <nav class="sb-admin-breadcrumb">
@@ -29,36 +38,46 @@
         </div>
 
         <div class="sb-admin-detail-actions">
-            <form asp-area="Admin" asp-controller="User" asp-action="SetRole" method="post" class="sb-admin-inline-form">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@u.Id" />
-                <label class="sb-admin-field-label">Rol dəyiş</label>
-                <select name="role" class="sb-admin-select">
-                    <option value="Buyer" selected="@(CurrentRole == "Buyer")">Alıcı</option>
-                    <option value="Seller" selected="@(CurrentRole == "Seller")">Satıcı</option>
-                    <option value="Admin" selected="@(CurrentRole == "Admin")">Admin</option>
-                </select>
-                <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Yenilə</button>
-            </form>
+            @if (isSelf)
+            {
+                <p class="sb-admin-self-notice">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Bu sənin hesabındır. Rol/blok/silmə əməliyyatları üçün başqa admin lazımdır.
+                </p>
+            }
+            else
+            {
+                <form asp-area="Admin" asp-controller="User" asp-action="SetRole" method="post" class="sb-admin-inline-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <label class="sb-admin-field-label">Rol dəyiş</label>
+                    <select name="role" class="sb-admin-select">
+                        <option value="Buyer" selected="@(CurrentRole == "Buyer")">Alıcı</option>
+                        <option value="Seller" selected="@(CurrentRole == "Seller")">Satıcı</option>
+                        <option value="Admin" selected="@(CurrentRole == "Admin")">Admin</option>
+                    </select>
+                    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Yenilə</button>
+                </form>
 
-            <form asp-area="Admin" asp-controller="User" asp-action="ToggleSuspension" method="post" class="sb-admin-inline-form">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@u.Id" />
-                @if (u.IsSuspended)
-                {
-                    <button type="submit" class="sb-admin-btn sb-admin-btn--ok" data-confirm="Blokunu açmağa əminsən?">Bloku aç</button>
-                }
-                else
-                {
-                    <button type="submit" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Bu istifadəçini blok etməyə əminsən?">Blok et</button>
-                }
-            </form>
+                <form asp-area="Admin" asp-controller="User" asp-action="ToggleSuspension" method="post" class="sb-admin-inline-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@u.Id" />
+                    @if (u.IsSuspended)
+                    {
+                        <button type="submit" class="sb-admin-btn sb-admin-btn--ok" data-confirm="Blokunu açmağa əminsən?">Bloku aç</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Bu istifadəçini blok etməyə əminsən?">Blok et</button>
+                    }
+                </form>
 
-            <form asp-area="Admin" asp-controller="User" asp-action="Delete" method="post" class="sb-admin-inline-form">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@u.Id" />
-                <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Bu istifadəçini həmişəlik silməyə əminsən?">Sil</button>
-            </form>
+                <form asp-area="Admin" asp-controller="User" asp-action="Delete" method="post" class="sb-admin-inline-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Bu istifadəçini həmişəlik silməyə əminsən?">Sil</button>
+                </form>
+            }
         </div>
     </div>
 

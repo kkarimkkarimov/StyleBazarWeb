@@ -12,9 +12,11 @@
             <option value="false" selected="@(Model.ActiveFilter == false)">İmtina edənlər</option>
         </select>
     </form>
-    <a asp-area="Admin" asp-controller="Newsletter" asp-action="ExportCsv" class="sb-admin-btn sb-admin-btn--ghost" style="margin-left:auto">
+    <a asp-area="Admin" asp-controller="Newsletter" asp-action="ExportCsv"
+       asp-route-isActive="@(Model.ActiveFilter?.ToString().ToLower())"
+       class="sb-admin-btn sb-admin-btn--ghost" style="margin-left:auto">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>CSV yüklə</span>
+        <span>CSV yüklə (@(Model.ActiveFilter == true ? "yalnız aktiv" : Model.ActiveFilter == false ? "yalnız imtina" : "hamısı"))</span>
     </a>
 </div>
 

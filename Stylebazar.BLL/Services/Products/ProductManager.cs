@@ -438,6 +438,24 @@ public class ProductManager : IProductService
         return await GetByIdAsync(productId, ct);
     }
 
+    public async Task<ProductDetailDto> ClearFeaturedAsync(int productId, CancellationToken ct = default)
+    {
+        // EnsureOwnedProductAsync also runs admin-bypass through MustOwnStore, so
+        // admins can clear flags on any store's product — sellers can't reach this
+        // because the admin route is the only caller wired up today.
+        _ = await EnsureOwnedProductAsync(productId, ct);
+
+        Product? tracked = await _products.GetAsync(p => p.Id == productId, cancellationToken: ct);
+        if (tracked is null)
+            throw new NotFoundException(Messages.Product.NotFound);
+
+        tracked.IsFeatured = false;
+        tracked.FeaturedUntil = null;
+        await _products.UpdateAsync(tracked, ct);
+
+        return await GetByIdAsync(productId, ct);
+    }
+
     // ---------- Helpers ----------
 
     private async Task<Product> EnsureOwnedProductAsync(int productId, CancellationToken ct)

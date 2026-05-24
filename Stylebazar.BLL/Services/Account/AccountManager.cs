@@ -21,6 +21,7 @@ public class AccountManager : IAccountService
 
     private readonly UserManager<AppUser> _users;
     private readonly IStoreRepository _stores;
+    private readonly ISubscriptionRepository _subs;
     private readonly ICurrentUserService _currentUser;
     private readonly IFileStorageService _files;
     private readonly IValidator<UpdateProfileDto> _profileValidator;
@@ -29,6 +30,7 @@ public class AccountManager : IAccountService
     public AccountManager(
         UserManager<AppUser> users,
         IStoreRepository stores,
+        ISubscriptionRepository subs,
         ICurrentUserService currentUser,
         IFileStorageService files,
         IValidator<UpdateProfileDto> profileValidator,
@@ -36,6 +38,7 @@ public class AccountManager : IAccountService
     {
         _users = users;
         _stores = stores;
+        _subs = subs;
         _currentUser = currentUser;
         _files = files;
         _profileValidator = profileValidator;
@@ -252,6 +255,38 @@ public class AccountManager : IAccountService
 
         AppUser? u = await _users.FindByIdAsync(userId);
         if (u is null) throw new NotFoundException(Messages.Account.NotFound);
+
+        // Subscription FK is Restrict (we keep history). Before deleting the user
+        // we soft-delete (or, for ApprovedByAdminId rows pointing at us, null out)
+        // the rows so SQL Server doesn't reject the user delete with a 547.
+        Paginate<Subscription> owned = await _subs.GetListAsync(
+            predicate: s => s.UserId == userId,
+            orderBy: q => q.OrderBy(s => s.Id),
+            index: 0, size: 1000,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (Subscription s in owned.Items)
+        {
+            // permanent: true → bypass the soft-delete query filter so the FK
+            // actually releases. Subscription history is implicit in admin audit
+            // logs; keeping orphaned rows would be confusing.
+            await _subs.DeleteAsync(s, permanent: true, cancellationToken: ct);
+        }
+
+        // Same problem in reverse: rows where this user APPROVED someone else's
+        // plan have ApprovedByAdminId pointing at us. Null those out so deletion
+        // doesn't cascade-orphan history rows we want to keep.
+        Paginate<Subscription> approved = await _subs.GetListAsync(
+            predicate: s => s.ApprovedByAdminId == userId,
+            orderBy: q => q.OrderBy(s => s.Id),
+            index: 0, size: 1000,
+            enableTracking: true,
+            cancellationToken: ct);
+        foreach (Subscription s in approved.Items)
+        {
+            s.ApprovedByAdminId = null;
+            await _subs.UpdateAsync(s, ct);
+        }
 
         IdentityResult res = await _users.DeleteAsync(u);
         if (!res.Succeeded)

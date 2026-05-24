@@ -25,4 +25,11 @@ public interface ILoginEventService
     /// remote-logout granularity.
     /// </summary>
     Task<List<ActiveSessionDto>> GetMyActiveSessionsAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Platform-wide recent auth activity for the admin dashboard. Joins each
+    /// event to its user so the view can show "kim, nə vaxt, hansı cihazdan".
+    /// Newest first, capped at <paramref name="take"/> rows.
+    /// </summary>
+    Task<List<AdminLoginEventDto>> GetRecentForAdminAsync(int take = 10, CancellationToken ct = default);
 }

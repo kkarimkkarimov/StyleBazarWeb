@@ -7908,8 +7908,56 @@ body:has(.sb-seller-layout) {
 }
 .sb-admin-icon-btn:hover { background: var(--sb-admin-accent-soft); color: var(--sb-admin-accent); border-color: var(--sb-admin-accent); }
 .sb-admin-icon-btn--danger:hover { background: var(--sb-admin-danger-soft); color: var(--sb-admin-danger); border-color: var(--sb-admin-danger); }
+/* Filled-star variant for "already featured" so the toggle visually communicates current state. */
+.sb-admin-icon-btn--active { background: #FEF3C7; color: #B45309; border-color: #F59E0B; }
+.sb-admin-icon-btn--active:hover { background: #FDE68A; color: #92400E; border-color: #D97706; }
 .sb-admin-icon-btn svg { width: 14px; height: 14px; }
 .sb-admin-inline-form { display: inline; margin: 0; }
+
+/* ----- Contact message Detail view ----- */
+.sb-admin-msg-body {
+    margin: 20px 0;
+    padding: 16px 18px;
+    background: var(--sb-admin-surface, #F8FAFC);
+    border: 1px solid var(--sb-admin-line);
+    border-radius: 10px;
+}
+.sb-admin-msg-body h3 {
+    margin: 0 0 8px;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--sb-admin-muted);
+    font-weight: 600;
+}
+.sb-admin-msg-body p {
+    margin: 0;
+    color: var(--sb-admin-ink);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.sb-admin-msg-detail__delete {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--sb-admin-line);
+}
+
+/* ----- Admin self-protection notice on User Detail ----- */
+.sb-admin-self-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 14px;
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+    border-radius: 10px;
+    font-size: .9rem;
+    line-height: 1.5;
+}
+.sb-admin-self-notice svg { flex-shrink: 0; margin-top: 1px; color: #B45309; }
 
 /* ----- Empty + pagination ----- */
 .sb-admin-empty {

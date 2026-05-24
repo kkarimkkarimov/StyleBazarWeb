@@ -58,7 +58,25 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleFeatured(int id, int? days, CancellationToken ct)
     {
-        try { await _products.SetFeaturedAsync(id, days, ct); TempData["Success"] = "Məhsul featured edildi."; }
+        try
+        {
+            // Real toggle: if the product is already featured, clear; otherwise
+            // apply (with `days` honored — view passes 14 by default).
+            var current = await _products.GetByIdAsync(id, ct);
+            bool active = current.IsFeatured && (current.FeaturedUntil == null || current.FeaturedUntil > DateTime.UtcNow);
+            if (active)
+            {
+                await _products.ClearFeaturedAsync(id, ct);
+                TempData["Success"] = "Featured ləğv edildi.";
+            }
+            else
+            {
+                await _products.SetFeaturedAsync(id, days, ct);
+                TempData["Success"] = days.HasValue
+                    ? $"Məhsul {days} gün üçün featured edildi."
+                    : "Məhsul featured edildi.";
+            }
+        }
         catch (NotFoundException ex) { TempData["Error"] = ex.Message; }
         catch (BusinessException ex) { TempData["Error"] = ex.Message; }
         return RedirectToAction(nameof(Index));

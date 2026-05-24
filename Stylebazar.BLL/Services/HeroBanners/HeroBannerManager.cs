@@ -104,4 +104,14 @@ public class HeroBannerManager : IHeroBannerService
         if (tracked is null) throw new NotFoundException(Messages.HeroBanner.NotFound);
         await _repo.DeleteAsync(tracked, permanent: false, cancellationToken: ct);
     }
+
+    public async Task<HeroBannerDto> ToggleActiveAsync(int id, CancellationToken ct = default)
+    {
+        HeroBanner? tracked = await _repo.GetAsync(x => x.Id == id, cancellationToken: ct);
+        if (tracked is null) throw new NotFoundException(Messages.HeroBanner.NotFound);
+
+        tracked.IsActive = !tracked.IsActive;
+        await _repo.UpdateAsync(tracked, ct);
+        return _mapper.Map<HeroBannerDto>(tracked);
+    }
 }

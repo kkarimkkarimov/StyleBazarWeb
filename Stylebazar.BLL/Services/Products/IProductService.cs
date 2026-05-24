@@ -30,4 +30,12 @@ public interface IProductService
     Task<ProductImageDto> SetMainImageAsync(int productId, int imageId, CancellationToken ct = default);
 
     Task<ProductDetailDto> SetFeaturedAsync(int productId, int? days, CancellationToken ct = default);
+
+    /// <summary>
+    /// Clears IsFeatured + FeaturedUntil on a product. Admin-only — used by the
+    /// per-row "ləğv et" toggle on the Admin products page when a product is
+    /// already featured (SetFeaturedAsync can't represent "remove" because its
+    /// null-days branch means "feature forever").
+    /// </summary>
+    Task<ProductDetailDto> ClearFeaturedAsync(int productId, CancellationToken ct = default);
 }

@@ -114,6 +114,16 @@ public class HeroBannerController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleActive(int id, CancellationToken ct)
+    {
+        try { await _service.ToggleActiveAsync(id, ct); TempData["Success"] = "Banner statusu dəyişdi."; }
+        catch (NotFoundException nex) { TempData["Error"] = nex.Message; }
+        catch (BusinessException bex) { TempData["Error"] = bex.Message; }
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
         try

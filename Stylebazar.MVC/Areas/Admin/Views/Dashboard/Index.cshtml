@@ -120,7 +120,7 @@
                 @foreach (var m in Model.RecentMessages)
                 {
                     <li>
-                        <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index">
+                        <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Detail" asp-route-id="@m.Id">
                             <div class="sb-admin-feed__body">
                                 <strong>@m.FullName <span class="sb-admin-feed__status sb-admin-feed__status--@m.Status.ToString().ToLower()">@m.Status</span></strong>
                                 <span>@(string.IsNullOrEmpty(m.Subject) ? "(başlıqsız)" : m.Subject)</span>
@@ -132,4 +132,53 @@
             </ul>
         }
     </div>
+</div>
+
+<div class="sb-admin-card">
+    <header class="sb-admin-card__head">
+        <h2>Son auth hadisələri</h2>
+        <span class="sb-admin-meta">Sondan son 10</span>
+    </header>
+    @if (!Model.RecentLoginEvents.Any())
+    {
+        <p class="sb-admin-empty-line">Hələ qeydiyyat/giriş hadisəsi yoxdur.</p>
+    }
+    else
+    {
+        <div class="sb-admin-table-wrap">
+            <table class="sb-admin-table sb-admin-table--compact">
+                <thead>
+                    <tr>
+                        <th>Vaxt</th>
+                        <th>Hadisə</th>
+                        <th>İstifadəçi</th>
+                        <th>Cihaz</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.RecentLoginEvents)
+                    {
+                        <tr>
+                            <td><span class="sb-admin-date">@e.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span></td>
+                            <td><span class="sb-admin-chip sb-admin-chip--@e.EventType.ToString().ToLower()">@e.EventLabel</span></td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(e.UserId))
+                                {
+                                    <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@e.UserId">@e.UserFullName</a>
+                                    <div class="sb-admin-meta-small">@e.UserEmail</div>
+                                }
+                                else
+                                {
+                                    <span>@e.UserFullName</span>
+                                }
+                            </td>
+                            <td>@e.DeviceLabel</td>
+                            <td><code>@(e.IpAddress ?? "—")</code></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

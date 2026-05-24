@@ -25,9 +25,23 @@ public class ContactMessageController : Controller
         });
     }
 
+    public async Task<IActionResult> Detail(int id, CancellationToken ct)
+    {
+        try
+        {
+            var msg = await _service.GetByIdAsync(id, ct);
+            return View(msg);
+        }
+        catch (NotFoundException)
+        {
+            TempData["Error"] = "Mesaj tapılmadı.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SetStatus(int id, ContactStatus status, string? adminNote, CancellationToken ct)
+    public async Task<IActionResult> SetStatus(int id, ContactStatus status, string? adminNote, string? returnTo, CancellationToken ct)
     {
         try
         {
@@ -39,7 +53,9 @@ public class ContactMessageController : Controller
         }
         catch (NotFoundException ex) { TempData["Error"] = ex.Message; }
         catch (BusinessException ex) { TempData["Error"] = ex.Message; }
-        return RedirectToAction(nameof(Index));
+        return returnTo == "detail"
+            ? RedirectToAction(nameof(Detail), new { id })
+            : RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
