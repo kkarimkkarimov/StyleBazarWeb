@@ -56,14 +56,21 @@ else
         {
             <article class="sb-shop-card sb-reveal" data-shop-card data-shop-name="@s.Name.ToLowerInvariant()">
                 <a class="sb-shop-card__cover" asp-controller="Store" asp-action="Detail" asp-route-slug="@s.Slug" aria-label="@s.Name">
-                    @if (!string.IsNullOrEmpty(s.CoverImageUrl))
-                    {
-                        <img src="@s.CoverImageUrl" alt="@s.Name kover" loading="lazy" />
-                    }
-                    else
-                    {
-                        <div class="sb-shop-card__cover-fallback" style="background: linear-gradient(135deg, var(--sb-soft), #fff)"></div>
-                    }
+                    @* The media wrapper carries overflow:hidden + the aspect ratio
+                       so the cover image can hover-zoom without leaking. The cover
+                       anchor itself is overflow:visible so the avatar below can
+                       hang past the cover bottom into the card body. *@
+                    <div class="sb-shop-card__cover-media">
+                        @if (!string.IsNullOrEmpty(s.CoverImageUrl))
+                        {
+                            <img src="@s.CoverImageUrl" alt="@s.Name kover" loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="sb-shop-card__cover-fallback" style="background: linear-gradient(135deg, var(--sb-soft), #fff)"></div>
+                        }
+                        <span class="sb-shop-card__count">@s.ProductCount məhsul</span>
+                    </div>
                     <div class="sb-shop-card__avatar">
                         @if (!string.IsNullOrEmpty(s.ProfileImageUrl))
                         {
@@ -74,7 +81,6 @@ else
                             <span class="sb-shop-card__avatar-initial">@(s.Name.Length > 0 ? s.Name[0].ToString().ToUpper() : "S")</span>
                         }
                     </div>
-                    <span class="sb-shop-card__count">@s.ProductCount məhsul</span>
                 </a>
 
                 <div class="sb-shop-card__body">
