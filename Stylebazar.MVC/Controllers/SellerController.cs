@@ -261,9 +261,7 @@ public class SellerController : Controller
         }
         catch (ValidationException vex)
         {
-            foreach (var (field, msgs) in vex.Errors)
-                foreach (var m in msgs)
-                    ModelState.AddModelError(field, m);
+            AddValidationErrorsToModelState(vex);
             return View(await BuildProductFormVmAsync(panel, product: null, ct, form));
         }
         catch (BusinessException bex)
@@ -315,9 +313,7 @@ public class SellerController : Controller
         }
         catch (ValidationException vex)
         {
-            foreach (var (field, msgs) in vex.Errors)
-                foreach (var m in msgs)
-                    ModelState.AddModelError(field, m);
+            AddValidationErrorsToModelState(vex);
             return View(await BuildProductFormVmAsync(panel, existing, ct, form));
         }
         catch (BusinessException bex)
@@ -611,9 +607,7 @@ public class SellerController : Controller
         }
         catch (ValidationException vex)
         {
-            foreach (var (field, msgs) in vex.Errors)
-                foreach (var m in msgs)
-                    ModelState.AddModelError(field, m);
+            AddValidationErrorsToModelState(vex);
             return View(BuildStoreSettingsVm(panel, populateFromStore: false, overrideForm: form));
         }
         catch (BusinessException bex)
@@ -782,6 +776,31 @@ public class SellerController : Controller
             Store = panel.PrimaryStore,
             Form = form
         };
+    }
+
+    /// <summary>
+    /// Maps a BLL ValidationException to ModelState so that:
+    /// (1) field-level errors land at <c>Form.{Field}</c> keys — view inputs
+    ///     bind with <c>asp-for="Form.X"</c>, so the asp-validation-for span
+    ///     needs the prefixed key to render. Without this prefix the error
+    ///     silently disappears (the form looked unresponsive).
+    /// (2) anything else (or whole-form errors with empty key) also bubbles
+    ///     to the summary div at the top of the form so it's never lost.
+    /// </summary>
+    private void AddValidationErrorsToModelState(ValidationException vex)
+    {
+        foreach (var (field, msgs) in vex.Errors)
+        {
+            string key = string.IsNullOrEmpty(field) ? string.Empty : "Form." + field;
+            foreach (var m in msgs)
+            {
+                ModelState.AddModelError(key, m);
+                // Also push to the empty-key bucket so the summary renders it —
+                // safety net in case the view doesn't have a span for this field.
+                if (!string.IsNullOrEmpty(key))
+                    ModelState.AddModelError(string.Empty, m);
+            }
+        }
     }
 
     private static CreateProductDto MapFormToCreate(ProductFormInput f, int storeId) => new()
