@@ -53,7 +53,11 @@ public class StoreController : Controller
     public async Task<IActionResult> BulkAction(int[] ids, string action, CancellationToken ct)
     {
         if (ids is null || ids.Length == 0) { TempData["Error"] = "Heç bir mağaza seçilməyib."; return RedirectToAction(nameof(Index)); }
-        int ok = 0, fail = 0;
+        int ok = 0;
+        // Collect distinct failure reasons (e.g. "Mağazada məhsullar var...") so
+        // admin sees WHY some deletes were rejected, not just a count. Grouped by
+        // message because typically several stores fail for the same reason.
+        var failures = new List<(int Id, string Reason)>();
         foreach (int id in ids)
         {
             try
@@ -62,9 +66,21 @@ public class StoreController : Controller
                 else if (action == "delete") await _stores.DeleteAsync(id, ct);
                 ok++;
             }
-            catch { fail++; }
+            catch (NotFoundException ex) { failures.Add((id, ex.Message)); }
+            catch (BusinessException ex) { failures.Add((id, ex.Message)); }
+            catch (Exception ex) { failures.Add((id, "Sistem xətası: " + ex.GetType().Name)); }
         }
-        TempData[fail == 0 ? "Success" : "Error"] = $"{ok} icra olundu, {fail} uğursuz.";
+        if (failures.Count == 0)
+        {
+            TempData["Success"] = $"{ok} mağaza icra olundu.";
+        }
+        else
+        {
+            var grouped = failures
+                .GroupBy(f => f.Reason)
+                .Select(g => $"{g.Count()}× {g.Key}");
+            TempData["Error"] = $"{ok} icra olundu, {failures.Count} uğursuz: " + string.Join(" • ", grouped);
+        }
         return RedirectToAction(nameof(Index));
     }
 }

@@ -73,7 +73,8 @@ public class ContactMessageController : Controller
     public async Task<IActionResult> BulkAction(int[] ids, string action, CancellationToken ct)
     {
         if (ids is null || ids.Length == 0) { TempData["Error"] = "Heç bir mesaj seçilməyib."; return RedirectToAction(nameof(Index)); }
-        int ok = 0, fail = 0;
+        int ok = 0;
+        var failures = new List<string>();
         foreach (int id in ids)
         {
             try
@@ -86,9 +87,17 @@ public class ContactMessageController : Controller
                     await _service.DeleteAsync(id, ct);
                 ok++;
             }
-            catch { fail++; }
+            catch (NotFoundException ex) { failures.Add(ex.Message); }
+            catch (BusinessException ex) { failures.Add(ex.Message); }
+            catch (Exception ex) { failures.Add("Sistem xətası: " + ex.GetType().Name); }
         }
-        TempData[fail == 0 ? "Success" : "Error"] = $"{ok} icra olundu, {fail} uğursuz.";
+        if (failures.Count == 0)
+            TempData["Success"] = $"{ok} mesaj icra olundu.";
+        else
+        {
+            var grouped = failures.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}");
+            TempData["Error"] = $"{ok} icra olundu, {failures.Count} uğursuz: " + string.Join(" • ", grouped);
+        }
         return RedirectToAction(nameof(Index));
     }
 }

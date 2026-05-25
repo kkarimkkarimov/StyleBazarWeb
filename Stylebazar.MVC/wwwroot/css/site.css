@@ -7635,6 +7635,10 @@ body:has(.sb-seller-layout) {
     font-size: .9rem;
     border: 1px solid;
     animation: sbAdminToastIn .35s cubic-bezier(.32,.72,.0,1);
+    /* Bulk actions emit multi-clause messages joined with " • " — let them
+       wrap on long messages instead of overflowing the right edge. */
+    line-height: 1.5;
+    word-break: break-word;
 }
 .sb-admin-toast--ok  { background: var(--sb-admin-ok-soft); color: #065F46; border-color: rgba(16,185,129,.4); }
 .sb-admin-toast--err { background: var(--sb-admin-danger-soft); color: #991B1B; border-color: rgba(220,38,38,.4); }

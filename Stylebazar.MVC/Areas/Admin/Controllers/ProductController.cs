@@ -97,7 +97,8 @@ public class ProductController : Controller
     public async Task<IActionResult> BulkAction(int[] ids, string action, CancellationToken ct)
     {
         if (ids is null || ids.Length == 0) { TempData["Error"] = "Heç bir məhsul seçilməyib."; return RedirectToAction(nameof(Index)); }
-        int ok = 0, fail = 0;
+        int ok = 0;
+        var failures = new List<(int Id, string Reason)>();
         foreach (int id in ids)
         {
             try
@@ -107,9 +108,19 @@ public class ProductController : Controller
                 else if (action == "delete") await _products.DeleteAsync(id, ct);
                 ok++;
             }
-            catch { fail++; }
+            catch (NotFoundException ex) { failures.Add((id, ex.Message)); }
+            catch (BusinessException ex) { failures.Add((id, ex.Message)); }
+            catch (Exception ex) { failures.Add((id, "Sistem xətası: " + ex.GetType().Name)); }
         }
-        TempData[fail == 0 ? "Success" : "Error"] = $"{ok} icra olundu, {fail} uğursuz.";
+        if (failures.Count == 0)
+        {
+            TempData["Success"] = $"{ok} məhsul icra olundu.";
+        }
+        else
+        {
+            var grouped = failures.GroupBy(f => f.Reason).Select(g => $"{g.Count()}× {g.Key}");
+            TempData["Error"] = $"{ok} icra olundu, {failures.Count} uğursuz: " + string.Join(" • ", grouped);
+        }
         return RedirectToAction(nameof(Index));
     }
 }

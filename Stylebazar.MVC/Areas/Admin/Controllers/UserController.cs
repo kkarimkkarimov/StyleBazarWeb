@@ -164,7 +164,8 @@ public class UserController : Controller
         string[] targets = ids.Where(i => !string.Equals(i, me, StringComparison.OrdinalIgnoreCase)).ToArray();
         int skippedSelf = ids.Length - targets.Length;
 
-        int ok = 0, fail = 0;
+        int ok = 0;
+        var failures = new List<(string Id, string Reason)>();
         foreach (string id in targets)
         {
             try
@@ -173,10 +174,20 @@ public class UserController : Controller
                 else if (action == "delete") await _account.DeleteUserAsync(id, ct);
                 ok++;
             }
-            catch { fail++; }
+            catch (NotFoundException ex) { failures.Add((id, ex.Message)); }
+            catch (BusinessException ex) { failures.Add((id, ex.Message)); }
+            catch (Exception ex) { failures.Add((id, "Sistem xətası: " + ex.GetType().Name)); }
         }
-        string selfMsg = skippedSelf > 0 ? $" (öz hesabın atlandı)" : string.Empty;
-        TempData[fail == 0 ? "Success" : "Error"] = $"{ok} icra olundu, {fail} uğursuz{selfMsg}.";
+        string selfMsg = skippedSelf > 0 ? " (öz hesabın atlandı)" : string.Empty;
+        if (failures.Count == 0)
+        {
+            TempData["Success"] = $"{ok} istifadəçi icra olundu{selfMsg}.";
+        }
+        else
+        {
+            var grouped = failures.GroupBy(f => f.Reason).Select(g => $"{g.Count()}× {g.Key}");
+            TempData["Error"] = $"{ok} icra olundu, {failures.Count} uğursuz{selfMsg}: " + string.Join(" • ", grouped);
+        }
         return RedirectToAction(nameof(Index));
     }
 

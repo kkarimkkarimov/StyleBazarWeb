@@ -41,13 +41,22 @@ public class StoryController : Controller
     public async Task<IActionResult> BulkDelete(int[] ids, CancellationToken ct)
     {
         if (ids is null || ids.Length == 0) { TempData["Error"] = "Heç bir hekayə seçilməyib."; return RedirectToAction(nameof(Index)); }
-        int ok = 0, fail = 0;
+        int ok = 0;
+        var failures = new List<string>();
         foreach (int id in ids)
         {
             try { await _stories.DeleteAsync(id, ct); ok++; }
-            catch { fail++; }
+            catch (NotFoundException ex) { failures.Add(ex.Message); }
+            catch (BusinessException ex) { failures.Add(ex.Message); }
+            catch (Exception ex) { failures.Add("Sistem xətası: " + ex.GetType().Name); }
         }
-        TempData[fail == 0 ? "Success" : "Error"] = $"{ok} silindi, {fail} uğursuz.";
+        if (failures.Count == 0)
+            TempData["Success"] = $"{ok} hekayə silindi.";
+        else
+        {
+            var grouped = failures.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}");
+            TempData["Error"] = $"{ok} silindi, {failures.Count} uğursuz: " + string.Join(" • ", grouped);
+        }
         return RedirectToAction(nameof(Index));
     }
 }

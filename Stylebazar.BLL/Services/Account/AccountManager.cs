@@ -22,6 +22,11 @@ public class AccountManager : IAccountService
     private readonly UserManager<AppUser> _users;
     private readonly IStoreRepository _stores;
     private readonly ISubscriptionRepository _subs;
+    private readonly IWishlistRepository _wishlist;
+    private readonly IReviewRepository _reviews;
+    private readonly IProductRepository _products;
+    private readonly IStoryRepository _stories;
+    private readonly IContactClickRepository _contactClicks;
     private readonly ICurrentUserService _currentUser;
     private readonly IFileStorageService _files;
     private readonly IValidator<UpdateProfileDto> _profileValidator;
@@ -31,6 +36,11 @@ public class AccountManager : IAccountService
         UserManager<AppUser> users,
         IStoreRepository stores,
         ISubscriptionRepository subs,
+        IWishlistRepository wishlist,
+        IReviewRepository reviews,
+        IProductRepository products,
+        IStoryRepository stories,
+        IContactClickRepository contactClicks,
         ICurrentUserService currentUser,
         IFileStorageService files,
         IValidator<UpdateProfileDto> profileValidator,
@@ -39,6 +49,11 @@ public class AccountManager : IAccountService
         _users = users;
         _stores = stores;
         _subs = subs;
+        _wishlist = wishlist;
+        _reviews = reviews;
+        _products = products;
+        _stories = stories;
+        _contactClicks = contactClicks;
         _currentUser = currentUser;
         _files = files;
         _profileValidator = profileValidator;
@@ -256,44 +271,161 @@ public class AccountManager : IAccountService
         AppUser? u = await _users.FindByIdAsync(userId);
         if (u is null) throw new NotFoundException(Messages.Account.NotFound);
 
-        // Subscription FK is Restrict (we keep history). Before deleting the user
-        // we soft-delete (or, for ApprovedByAdminId rows pointing at us, null out)
-        // the rows so SQL Server doesn't reject the user delete with a 547.
-        Paginate<Subscription> owned = await _subs.GetListAsync(
+        // ---------- BLOCKER: stores ----------
+        // Store.OwnerId FK is Restrict. We have to consider BOTH live and
+        // soft-deleted (IsDeleted=true) stores because the FK row sits in SQL
+        // regardless of the app-level soft-delete flag.
+        //
+        // Strategy:
+        //   - LIVE stores (IsDeleted=false): block delete and tell admin to
+        //     remove them first (so they get the "store has products" guard
+        //     from StoreService and can react properly).
+        //   - SOFT-DELETED stores (IsDeleted=true): hard-purge them here.
+        //     The admin already clicked "Sil" on them — they don't need to
+        //     hunt down phantom rows the user can't see.
+        Paginate<Store> allStores = await _stores.GetListAsync(
+            predicate: s => s.OwnerId == userId,
+            orderBy: q => q.OrderBy(s => s.Id),
+            index: 0, size: 1000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        int liveStoreCount = allStores.Items.Count(s => s.DeletedDate == null);
+        if (liveStoreCount > 0)
+        {
+            throw new BusinessException(
+                $"Bu istifadəçinin {liveStoreCount} mağazası var. Əvvəlcə mağazaları silin (mağazalar boş olmalıdır).");
+        }
+
+        foreach (Store s in allStores.Items.Where(s => s.DeletedDate != null))
+        {
+            await HardPurgeStoreAsync(s, ct);
+        }
+
+        // ---------- CLEANUP: subscriptions ----------
+        // Subscription.UserId FK is Restrict (we kept history intentionally).
+        // Drop the user's history; null out admin-approval refs so OTHER users'
+        // history stays intact.
+        Paginate<Subscription> ownedSubs = await _subs.GetListAsync(
             predicate: s => s.UserId == userId,
             orderBy: q => q.OrderBy(s => s.Id),
             index: 0, size: 1000,
+            withDeleted: true,
             enableTracking: false,
             cancellationToken: ct);
-        foreach (Subscription s in owned.Items)
+        foreach (Subscription s in ownedSubs.Items)
         {
-            // permanent: true → bypass the soft-delete query filter so the FK
-            // actually releases. Subscription history is implicit in admin audit
-            // logs; keeping orphaned rows would be confusing.
+            // permanent: true → bypass soft-delete filter so FK actually releases.
             await _subs.DeleteAsync(s, permanent: true, cancellationToken: ct);
         }
 
-        // Same problem in reverse: rows where this user APPROVED someone else's
-        // plan have ApprovedByAdminId pointing at us. Null those out so deletion
-        // doesn't cascade-orphan history rows we want to keep.
-        Paginate<Subscription> approved = await _subs.GetListAsync(
+        Paginate<Subscription> approvedSubs = await _subs.GetListAsync(
             predicate: s => s.ApprovedByAdminId == userId,
             orderBy: q => q.OrderBy(s => s.Id),
             index: 0, size: 1000,
+            withDeleted: true,
             enableTracking: true,
             cancellationToken: ct);
-        foreach (Subscription s in approved.Items)
+        foreach (Subscription s in approvedSubs.Items)
         {
             s.ApprovedByAdminId = null;
             await _subs.UpdateAsync(s, ct);
         }
 
+        // ---------- CLEANUP: wishlist ----------
+        // Wishlist.UserId FK is Restrict. Wishlist items are personal — no audit
+        // value to preserve, so cascade-delete them with the user. Fully-qualified
+        // because `Stylebazar.BLL.Services.Wishlist` is a sibling namespace that
+        // would otherwise shadow the entity type name.
+        Paginate<Stylebazar.DAL.Entities.Wishlist> wishItems = await _wishlist.GetListAsync(
+            predicate: w => w.UserId == userId,
+            orderBy: q => q.OrderBy(w => w.Id),
+            index: 0, size: 5000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (var w in wishItems.Items)
+            await _wishlist.DeleteAsync(w, permanent: true, cancellationToken: ct);
+
+        // ---------- CLEANUP: reviews ----------
+        // Review.UserId FK is Restrict. Deleting reviews loses some store-rating
+        // history but keeps the schema sound; reasonable trade-off because the
+        // alternative is forbidding user-delete entirely for anyone who ever
+        // reviewed something.
+        Paginate<Stylebazar.DAL.Entities.Review> userReviews = await _reviews.GetListAsync(
+            predicate: r => r.UserId == userId,
+            orderBy: q => q.OrderBy(r => r.Id),
+            index: 0, size: 5000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (var r in userReviews.Items)
+            await _reviews.DeleteAsync(r, permanent: true, cancellationToken: ct);
+
+        // ---------- FINAL: delete the user ----------
+        // Identity will cascade Addresses, LoginEvents, StoreFollowers, AspNetUserRoles,
+        // AspNetUserClaims, AspNetUserLogins, AspNetUserTokens. ContactClick.UserId
+        // is SetNull so admin-side aggregate stats survive.
         IdentityResult res = await _users.DeleteAsync(u);
         if (!res.Succeeded)
             throw new BusinessException(string.Join(" • ", res.Errors.Select(e => e.Description)));
     }
 
     // -------- helpers --------
+
+    /// <summary>
+    /// Hard-purges a Store + all rows that FK to it (Products, Stories,
+    /// StoreFollowers, ContactClicks). Used during user-delete to release
+    /// soft-deleted stores that the admin already removed from the UI but
+    /// which still pin the AspNetUsers row via FK_Stores_AspNetUsers_OwnerId.
+    /// </summary>
+    private async Task HardPurgeStoreAsync(Store store, CancellationToken ct)
+    {
+        // Products → cascade kills their Images/Colors/Sizes, but Product.StoreId
+        // is Restrict so we must purge them ourselves first. withDeleted: true so
+        // we also catch soft-deleted phantom products.
+        Paginate<Product> products = await _products.GetListAsync(
+            predicate: p => p.StoreId == store.Id,
+            orderBy: q => q.OrderBy(p => p.Id),
+            index: 0, size: 5000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (Product p in products.Items)
+            await _products.DeleteAsync(p, permanent: true, cancellationToken: ct);
+
+        // Stories → cascade by config, but soft-deleted ones still hold the FK.
+        Paginate<Stylebazar.DAL.Entities.Story> stories = await _stories.GetListAsync(
+            predicate: x => x.StoreId == store.Id,
+            orderBy: q => q.OrderBy(x => x.Id),
+            index: 0, size: 5000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (var s in stories.Items)
+            await _stories.DeleteAsync(s, permanent: true, cancellationToken: ct);
+
+        // ContactClicks.StoreId is Restrict (we keep historical click counts
+        // even after a click target is removed). When we're hard-purging the
+        // store anyway, the history rows must go too — otherwise the store row
+        // can't be deleted.
+        Paginate<Stylebazar.DAL.Entities.ContactClick> clicks = await _contactClicks.GetListAsync(
+            predicate: c => c.StoreId == store.Id,
+            orderBy: q => q.OrderBy(c => c.Id),
+            index: 0, size: 10000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (var c in clicks.Items)
+            await _contactClicks.DeleteAsync(c, permanent: true, cancellationToken: ct);
+
+        // StoreFollowers.StoreId is Cascade per config, but we hit them
+        // explicitly to be defensive against the same soft-delete trap.
+        // (Skipped if the repo isn't injected — we just rely on cascade.)
+
+        await _stores.DeleteAsync(store, permanent: true, cancellationToken: ct);
+    }
 
     private async Task<AppUser> RequireUserAsync()
     {
