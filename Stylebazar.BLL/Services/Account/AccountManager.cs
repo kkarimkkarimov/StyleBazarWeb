@@ -375,16 +375,26 @@ public class AccountManager : IAccountService
     // -------- helpers --------
 
     /// <summary>
-    /// Hard-purges a Store + all rows that FK to it (Products, Stories,
-    /// StoreFollowers, ContactClicks). Used during user-delete to release
-    /// soft-deleted stores that the admin already removed from the UI but
-    /// which still pin the AspNetUsers row via FK_Stores_AspNetUsers_OwnerId.
+    /// Hard-purges a Store + every row that FK to it. Order matters because
+    /// SQL won't release a parent row while any child still references it:
+    ///
+    ///   1. ContactClicks — both StoreId AND ProductId are Restrict, so we
+    ///      delete clicks for the store AND for each of the store's products
+    ///      FIRST (before we touch products).
+    ///   2. Products — Product.StoreId is Restrict. Cascade kills child
+    ///      ProductImages / ProductColors / ProductSizes automatically.
+    ///   3. Stories — StoreId is Cascade per config but we hit them
+    ///      explicitly to defuse the soft-delete-phantom trap too.
+    ///   4. Finally, the Store itself.
+    ///
+    /// withDeleted: true everywhere because the query filter hides soft-deleted
+    /// rows from app code, but SQL still sees their FK to the parent.
     /// </summary>
     private async Task HardPurgeStoreAsync(Store store, CancellationToken ct)
     {
-        // Products → cascade kills their Images/Colors/Sizes, but Product.StoreId
-        // is Restrict so we must purge them ourselves first. withDeleted: true so
-        // we also catch soft-deleted phantom products.
+        // Find all products owned by this store first — we need their IDs
+        // both to delete the products and to drop any ContactClicks that
+        // FK to them via ProductId.
         Paginate<Product> products = await _products.GetListAsync(
             predicate: p => p.StoreId == store.Id,
             orderBy: q => q.OrderBy(p => p.Id),
@@ -392,10 +402,27 @@ public class AccountManager : IAccountService
             withDeleted: true,
             enableTracking: false,
             cancellationToken: ct);
+        var productIds = products.Items.Select(p => (int?)p.Id).ToList();
+
+        // ---- ContactClicks ----
+        // ProductId can be null (clicks on the store itself), so we use the
+        // explicit-list predicate. EF Core supports Contains over a List<int?>.
+        Paginate<Stylebazar.DAL.Entities.ContactClick> clicks = await _contactClicks.GetListAsync(
+            predicate: c => c.StoreId == store.Id
+                            || (c.ProductId.HasValue && productIds.Contains(c.ProductId)),
+            orderBy: q => q.OrderBy(c => c.Id),
+            index: 0, size: 50000,
+            withDeleted: true,
+            enableTracking: false,
+            cancellationToken: ct);
+        foreach (var c in clicks.Items)
+            await _contactClicks.DeleteAsync(c, permanent: true, cancellationToken: ct);
+
+        // ---- Products ----
         foreach (Product p in products.Items)
             await _products.DeleteAsync(p, permanent: true, cancellationToken: ct);
 
-        // Stories → cascade by config, but soft-deleted ones still hold the FK.
+        // ---- Stories ----
         Paginate<Stylebazar.DAL.Entities.Story> stories = await _stories.GetListAsync(
             predicate: x => x.StoreId == store.Id,
             orderBy: q => q.OrderBy(x => x.Id),
@@ -406,24 +433,7 @@ public class AccountManager : IAccountService
         foreach (var s in stories.Items)
             await _stories.DeleteAsync(s, permanent: true, cancellationToken: ct);
 
-        // ContactClicks.StoreId is Restrict (we keep historical click counts
-        // even after a click target is removed). When we're hard-purging the
-        // store anyway, the history rows must go too — otherwise the store row
-        // can't be deleted.
-        Paginate<Stylebazar.DAL.Entities.ContactClick> clicks = await _contactClicks.GetListAsync(
-            predicate: c => c.StoreId == store.Id,
-            orderBy: q => q.OrderBy(c => c.Id),
-            index: 0, size: 10000,
-            withDeleted: true,
-            enableTracking: false,
-            cancellationToken: ct);
-        foreach (var c in clicks.Items)
-            await _contactClicks.DeleteAsync(c, permanent: true, cancellationToken: ct);
-
-        // StoreFollowers.StoreId is Cascade per config, but we hit them
-        // explicitly to be defensive against the same soft-delete trap.
-        // (Skipped if the repo isn't injected — we just rely on cascade.)
-
+        // ---- Finally, the Store row itself ----
         await _stores.DeleteAsync(store, permanent: true, cancellationToken: ct);
     }
 
