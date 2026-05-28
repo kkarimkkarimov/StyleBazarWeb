@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Stylebazar.BLL.DTOs.Chat;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Chat;
 using Stylebazar.BLL.Services.FileStorage;
+using Stylebazar.DAL.Entities;
+using Stylebazar.MVC.Hubs;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.MVC.Controllers;
@@ -28,11 +32,36 @@ public class ChatController : ControllerBase
 
     private readonly IChatService _chat;
     private readonly IFileStorageService _files;
+    private readonly IHubContext<ChatHub> _hubContext;
+    private readonly UserManager<AppUser> _users;
 
-    public ChatController(IChatService chat, IFileStorageService files)
+    public ChatController(
+        IChatService chat,
+        IFileStorageService files,
+        IHubContext<ChatHub> hubContext,
+        UserManager<AppUser> users)
     {
         _chat = chat;
         _files = files;
+        _hubContext = hubContext;
+        _users = users;
+    }
+
+    /// <summary>
+    /// Pushes the saved message to BOTH the sender's group (other tabs) AND
+    /// the recipient's group via SignalR. Mirrors what ChatHub.SendMessage
+    /// does — so a REST-sent message still arrives live on the peer's screen.
+    /// </summary>
+    private async Task BroadcastAsync(MessageDto saved, string? recipientUserId)
+    {
+        string me = _users.GetUserId(User) ?? string.Empty;
+        if (!string.IsNullOrEmpty(me))
+            await _hubContext.Clients.Group("user-" + me).SendAsync("MessageReceived", saved);
+        if (!string.IsNullOrEmpty(recipientUserId) &&
+            !string.Equals(recipientUserId, me, StringComparison.OrdinalIgnoreCase))
+        {
+            await _hubContext.Clients.Group("user-" + recipientUserId).SendAsync("MessageReceived", saved);
+        }
     }
 
     /// <summary>Current user's inbox (paginated).</summary>
@@ -77,6 +106,11 @@ public class ChatController : ControllerBase
         try
         {
             var msg = await _chat.SendMessageAsync(dto, ct);
+            // CRITICAL: REST-sent message must also fan out via SignalR so the
+            // recipient's connected widget receives the live MessageReceived
+            // event. Without this, REST send saves to DB but the peer only
+            // sees it on next page-refresh / unread-count poll.
+            await BroadcastAsync(msg, dto.RecipientUserId);
             return Ok(msg);
         }
         catch (ValidationException vex)
@@ -120,6 +154,7 @@ public class ChatController : ControllerBase
                 Body = body,
                 AttachmentUrl = url
             }, ct);
+            await BroadcastAsync(msg, recipientUserId);
             return Ok(msg);
         }
         catch (ValidationException vex) { return UnprocessableEntity(new { errors = vex.Errors }); }
@@ -132,6 +167,13 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> MarkRead(int conversationId, CancellationToken ct)
     {
         await _chat.MarkConversationReadAsync(conversationId, ct);
+        // Tell the OTHER side (sender) their messages were seen — drives the
+        // "Görüldü" indicator live without a refresh.
+        string me = _users.GetUserId(User) ?? string.Empty;
+        if (!string.IsNullOrEmpty(me))
+        {
+            await _hubContext.Clients.All.SendAsync("MessagesRead", new { conversationId, readerUserId = me });
+        }
         return NoContent();
     }
 

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mvc",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--no-build", "--project", "Stylebazar.MVC", "--urls", "http://localhost:5500"],
+      "port": 5500
+    }
+  ]
+}

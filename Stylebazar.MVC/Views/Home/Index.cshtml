@@ -5,7 +5,25 @@
 @{
     ViewData["Title"] = "Ana səhifə";
     ViewData["WishlistIds"] = Model.WishlistProductIds;
-    var storiesJson = System.Text.Json.JsonSerializer.Serialize(Model.Stories);
+    // Inline-shape the JSON so the JS doesn't depend on JsonSerializer defaults
+    // (PascalCase + integer enums). Match the property names the viewer JS reads,
+    // and emit MediaType as a string ("Image" / "Video") for the type switch.
+    var storiesJson = System.Text.Json.JsonSerializer.Serialize(Model.Stories.Select(g => new {
+        storeId = g.StoreId,
+        storeName = g.StoreName,
+        storeSlug = g.StoreSlug,
+        storeProfileImageUrl = g.StoreProfileImageUrl,
+        storeOwnerId = g.StoreOwnerId,
+        stories = g.Stories.Select(s => new {
+            id = s.Id,
+            mediaUrl = s.MediaUrl,
+            mediaType = s.MediaType.ToString(),
+            durationSeconds = s.DurationSeconds,
+            thumbnailUrl = s.ThumbnailUrl,
+            caption = s.Caption,
+            linkUrl = s.LinkUrl
+        })
+    }));
 }
 
 @* ============== HERO BANNER RAIL — admin-curated, auto-rotating ============== *@

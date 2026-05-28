@@ -558,9 +558,11 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @if (SignInManager.IsSignedIn(User))
     {
-        @* SignalR client from CDN — falls back to LongPolling automatically if
-           WebSockets are blocked. Pinned to a known-good version. *@
-        <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@@9.0.0/dist/browser/signalr.min.js"></script>
+        @* SignalR client self-hosted under wwwroot/lib so we don't depend on
+           CDN reachability (deploys behind corporate firewalls / locked-down
+           networks would silently fail otherwise). v8.0.7 client is wire-
+           compatible with the ASP.NET Core 10 server hub. *@
+        <script src="~/lib/signalr/signalr.min.js" asp-append-version="true"></script>
     }
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

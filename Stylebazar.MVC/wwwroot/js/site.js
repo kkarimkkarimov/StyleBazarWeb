@@ -617,7 +617,12 @@
             elapsedAtPause = 0;
             paused = false;
 
-            var type = (s.mediaType || 'Image').toLowerCase();
+            // Accept either enum name ("Image"/"Video") or integer (0/1). The
+            // legacy `(x || 'Image').toLowerCase()` shortcut crashed when x was
+            // the integer 1 because Number has no toLowerCase().
+            var rawType = s.mediaType;
+            var type = (rawType === 1 || rawType === '1' ||
+                        (typeof rawType === 'string' && rawType.toLowerCase() === 'video')) ? 'video' : 'image';
             // Fire-and-forget view tracking (anonymous endpoint).
             fetch('/Stories/View/' + s.id, { method: 'POST' }).catch(function () {});
 
