@@ -65,6 +65,7 @@
         safe('setupProductRails',        setupProductRails);
         safe('setupStoryViewer',         setupStoryViewer);
         safe('setupStoryCreate',         setupStoryCreate);
+        safe('setupChatWidget',          setupChatWidget);
         safe('setupNewsletterForm',      setupNewsletterForm);
         safe('setupRevealOnScroll',      setupRevealOnScroll);
         safe('setupShopFilter',          setupShopFilter);
@@ -818,6 +819,410 @@
             e.preventDefault();
             reset();
         });
+    }
+
+    /* -----------------------------------------------------------
+       Chat widget + fullpage messages (Phase 14.6)
+       ----------------------------------------------------------- */
+    function setupChatWidget() {
+        // Both the floating widget (data-chat-widget) and the fullpage Messages
+        // view (data-chat-fullpage) share this handler. They reuse selectors
+        // (data-chat-*) inside their root so the same logic drives both.
+        var widget = document.querySelector('[data-chat-widget]');
+        var fullpage = document.querySelector('[data-chat-fullpage]');
+        if (!widget && !fullpage) return;
+        if (typeof signalR === 'undefined') {
+            // SignalR client isn't loaded — likely anonymous page. Bail.
+            return;
+        }
+
+        // ---- Shared connection (one per tab) ----
+        if (!window.__sbChat) {
+            window.__sbChat = {
+                conn: null,
+                connected: false,
+                conversations: [],
+                openConvId: null,
+                typingPeers: {},
+                presence: {},
+                handlers: { onMessage: [], onPresence: [], onTyping: [], onMessagesRead: [] }
+            };
+        }
+        var hub = window.__sbChat;
+
+        function connectIfNeeded() {
+            if (hub.conn) return Promise.resolve();
+            hub.conn = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/chat')
+                .withAutomaticReconnect()
+                .build();
+            hub.conn.on('MessageReceived', function (msg) {
+                hub.handlers.onMessage.forEach(function (fn) { try { fn(msg); } catch (_) {} });
+            });
+            hub.conn.on('UserPresence', function (e) {
+                hub.presence[e.userId] = !!e.online;
+                hub.handlers.onPresence.forEach(function (fn) { try { fn(e); } catch (_) {} });
+            });
+            hub.conn.on('PeerTyping', function (e) {
+                hub.handlers.onTyping.forEach(function (fn) { try { fn(e); } catch (_) {} });
+            });
+            hub.conn.on('MessagesRead', function (e) {
+                hub.handlers.onMessagesRead.forEach(function (fn) { try { fn(e); } catch (_) {} });
+            });
+            return hub.conn.start().then(function () {
+                hub.connected = true;
+            }).catch(function () { hub.connected = false; });
+        }
+
+        // ---- REST helpers (Json fetch with anti-forgery header where needed) ----
+        function getCsrf() {
+            var el = document.querySelector('input[name="__RequestVerificationToken"]');
+            return el ? el.value : '';
+        }
+        function jget(url) {
+            return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : Promise.reject(r); });
+        }
+        function jpost(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null
+            }).then(function (r) { return r.ok ? (r.status === 204 ? null : r.json()) : Promise.reject(r); });
+        }
+        function jpostForm(url, formData) {
+            return fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            }).then(function (r) { return r.ok ? r.json() : Promise.reject(r); });
+        }
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+        function fmtTime(iso) {
+            try {
+                var d = new Date(iso);
+                var h = d.getHours(), m = d.getMinutes();
+                return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+            } catch (_) { return ''; }
+        }
+
+        // ---- Per-root binding (widget AND/OR fullpage can both be present) ----
+        function bind(root, options) {
+            var isWidget = !!options.isWidget;
+            var convListEl = root.querySelector('[data-chat-conversations]');
+            var emptyEl = root.querySelector('[data-chat-empty]');
+            var messagesEl = root.querySelector('[data-chat-messages]');
+            var composerEl = root.querySelector('[data-chat-composer]');
+            var inputEl = root.querySelector('[data-chat-input]');
+            var attachEl = root.querySelector('[data-chat-attach]');
+            var typingEl = root.querySelector('[data-chat-typing]');
+            var backBtn = root.querySelector('[data-chat-back]');
+            var listView = root.querySelector('[data-chat-list]');
+            var threadView = root.querySelector('[data-chat-thread]');
+            var titleEl = root.querySelector('[data-chat-title]');
+            var placeholderEl = root.querySelector('[data-chat-placeholder]');
+            var threadHeadEl = root.querySelector('[data-chat-thread-head]');
+            var peerNameEl = root.querySelector('[data-chat-peer-name]');
+            var peerAvatarEl = root.querySelector('[data-chat-peer-avatar]');
+            var peerStatusEl = root.querySelector('[data-chat-peer-status]');
+
+            var currentConv = null;
+
+            function showList() {
+                if (isWidget) {
+                    if (listView) listView.hidden = false;
+                    if (threadView) threadView.hidden = true;
+                    if (backBtn) backBtn.hidden = true;
+                    if (titleEl) titleEl.textContent = 'Mesajlar';
+                }
+                // fullpage: thread stays visible (right pane), no toggle needed
+            }
+            function showThread(conv) {
+                currentConv = conv;
+                if (isWidget) {
+                    if (listView) listView.hidden = true;
+                    if (threadView) threadView.hidden = false;
+                    if (backBtn) backBtn.hidden = false;
+                    if (titleEl) titleEl.textContent = conv.peerFullName;
+                } else {
+                    if (placeholderEl) placeholderEl.hidden = true;
+                    if (threadHeadEl) threadHeadEl.hidden = false;
+                    if (messagesEl) messagesEl.hidden = false;
+                    if (composerEl) composerEl.hidden = false;
+                    if (peerNameEl) peerNameEl.textContent = conv.peerFullName;
+                    if (peerAvatarEl) {
+                        peerAvatarEl.innerHTML = '';
+                        if (conv.peerAvatarUrl) {
+                            var im = document.createElement('img');
+                            im.src = conv.peerAvatarUrl;
+                            peerAvatarEl.appendChild(im);
+                        } else {
+                            peerAvatarEl.textContent = (conv.peerFullName || '?').substring(0, 1).toUpperCase();
+                        }
+                    }
+                    if (peerStatusEl) peerStatusEl.textContent = hub.presence[conv.peerUserId] ? 'Online' : 'Offline';
+                }
+            }
+
+            function renderConversations() {
+                if (!convListEl) return;
+                convListEl.innerHTML = '';
+                if (!hub.conversations.length) {
+                    if (emptyEl) emptyEl.hidden = false;
+                    return;
+                }
+                if (emptyEl) emptyEl.hidden = true;
+                hub.conversations.forEach(function (c) {
+                    var li = document.createElement('button');
+                    li.type = 'button';
+                    li.className = 'sb-chat-conv' + (currentConv && currentConv.id === c.id ? ' is-active' : '');
+                    li.setAttribute('data-conv-id', String(c.id));
+                    var avatar = c.peerAvatarUrl
+                        ? '<img src="' + escapeHtml(c.peerAvatarUrl) + '" alt="" />'
+                        : '<span>' + escapeHtml((c.peerFullName || '?').substring(0, 1).toUpperCase()) + '</span>';
+                    var onlineDot = hub.presence[c.peerUserId]
+                        ? '<span class="sb-chat-conv__dot" title="Online"></span>' : '';
+                    var unread = c.unreadCount > 0
+                        ? '<span class="sb-chat-conv__badge">' + c.unreadCount + '</span>' : '';
+                    li.innerHTML =
+                        '<span class="sb-chat-conv__avatar">' + avatar + onlineDot + '</span>' +
+                        '<span class="sb-chat-conv__body">' +
+                            '<strong>' + escapeHtml(c.peerFullName) + '</strong>' +
+                            '<span>' + escapeHtml(c.lastMessagePreview || '(yeni söhbət)') + '</span>' +
+                        '</span>' +
+                        '<span class="sb-chat-conv__meta">' +
+                            '<small>' + fmtTime(c.lastMessageAt) + '</small>' +
+                            unread +
+                        '</span>';
+                    li.addEventListener('click', function () { openConversation(c); });
+                    convListEl.appendChild(li);
+                });
+            }
+
+            function renderMessage(msg, prepend) {
+                if (!messagesEl) return;
+                var bubble = document.createElement('div');
+                var mine = (msg.senderId === (root.getAttribute('data-me-id') || ''));
+                // Resolve "mine" by sender vs. open conversation peer.
+                if (currentConv) {
+                    mine = msg.senderId !== currentConv.peerUserId;
+                }
+                bubble.className = 'sb-chat-msg ' + (mine ? 'is-mine' : 'is-peer');
+                bubble.setAttribute('data-msg-id', String(msg.id));
+
+                var body = '';
+                if (msg.messageType === 1 || msg.messageType === 'Image') {
+                    body = '<img class="sb-chat-msg__img" src="' + escapeHtml(msg.attachmentUrl || '') + '" alt="" />';
+                    if (msg.body) body += '<div class="sb-chat-msg__text">' + escapeHtml(msg.body) + '</div>';
+                } else if (msg.messageType === 2 || msg.messageType === 'StoryReply') {
+                    var sp = msg.storyPreview || {};
+                    var thumb = sp.thumbnailUrl || sp.mediaUrl || '';
+                    body = '<div class="sb-chat-msg__story">' +
+                        (thumb ? '<img src="' + escapeHtml(thumb) + '" alt="" />' : '<span>↩</span>') +
+                        '<span>' + escapeHtml(sp.caption || 'Hekayə') + '</span>' +
+                        '</div>' +
+                        '<div class="sb-chat-msg__text">' + escapeHtml(msg.body || '') + '</div>';
+                } else if (msg.messageType === 3 || msg.messageType === 'ProductShare') {
+                    var pp = msg.productPreview || {};
+                    body = '<div class="sb-chat-msg__product">' +
+                        (pp.imageUrl ? '<img src="' + escapeHtml(pp.imageUrl) + '" alt="" />' : '') +
+                        '<span>' + escapeHtml(pp.name || 'Məhsul') + '</span>' +
+                        '</div>' +
+                        (msg.body ? '<div class="sb-chat-msg__text">' + escapeHtml(msg.body) + '</div>' : '');
+                } else {
+                    body = '<div class="sb-chat-msg__text">' + escapeHtml(msg.body || '') + '</div>';
+                }
+                bubble.innerHTML = body +
+                    '<span class="sb-chat-msg__time">' + fmtTime(msg.createdDate) +
+                    (mine && msg.isReadByRecipient ? ' · <span class="sb-chat-msg__seen">Görüldü</span>' : '') +
+                    '</span>';
+
+                if (prepend) messagesEl.insertBefore(bubble, messagesEl.firstChild);
+                else messagesEl.appendChild(bubble);
+            }
+
+            function loadConversations() {
+                jget('/api/chat/conversations?pageSize=50').then(function (page) {
+                    hub.conversations = (page && page.items) || [];
+                    renderConversations();
+                    refreshUnreadBadge();
+                }).catch(function () {});
+            }
+
+            function openConversation(conv) {
+                showThread(conv);
+                hub.openConvId = conv.id;
+                if (messagesEl) messagesEl.innerHTML = '';
+                jget('/api/chat/conversations/' + conv.id + '/messages?pageSize=50').then(function (page) {
+                    var items = (page && page.items) || [];
+                    // API returns newest-first; render oldest at top.
+                    items.slice().reverse().forEach(function (m) { renderMessage(m, false); });
+                    if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+                });
+                // Mark as read
+                jpost('/api/chat/conversations/' + conv.id + '/read', null).catch(function () {});
+                conv.unreadCount = 0;
+                renderConversations();
+                refreshUnreadBadge();
+            }
+
+            // ---- Hub event hookups (one per bind) ----
+            hub.handlers.onMessage.push(function (msg) {
+                var convId = msg.conversationId;
+                // Update conversation preview + bump to top.
+                var conv = hub.conversations.find(function (c) { return c.id === convId; });
+                if (conv) {
+                    conv.lastMessageAt = msg.createdDate;
+                    conv.lastMessagePreview = (msg.body || '').substring(0, 120);
+                    if (!currentConv || currentConv.id !== convId) {
+                        conv.unreadCount = (conv.unreadCount || 0) + (msg.senderId === conv.peerUserId ? 1 : 0);
+                    }
+                    hub.conversations = [conv].concat(hub.conversations.filter(function (c) { return c.id !== convId; }));
+                    renderConversations();
+                    refreshUnreadBadge();
+                } else {
+                    // New conversation we haven't loaded yet — refresh inbox.
+                    loadConversations();
+                }
+                if (currentConv && currentConv.id === convId) {
+                    renderMessage(msg, false);
+                    if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+                    // Auto-mark read since the thread is visible.
+                    jpost('/api/chat/conversations/' + convId + '/read', null).catch(function () {});
+                }
+            });
+            hub.handlers.onPresence.push(function () { renderConversations(); });
+            hub.handlers.onTyping.push(function (e) {
+                if (!currentConv || e.userId !== currentConv.peerUserId) return;
+                if (typingEl) typingEl.hidden = !e.isTyping;
+            });
+
+            // ---- Composer ----
+            if (composerEl) {
+                composerEl.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (!currentConv) return;
+                    var text = (inputEl.value || '').trim();
+                    if (!text) return;
+                    var dto = { recipientUserId: currentConv.peerUserId, messageType: 0, body: text };
+                    if (hub.connected && hub.conn) {
+                        hub.conn.invoke('SendMessage', dto).catch(function () {
+                            jpost('/api/chat/send', dto).catch(function () {});
+                        });
+                    } else {
+                        jpost('/api/chat/send', dto).catch(function () {});
+                    }
+                    inputEl.value = '';
+                });
+                inputEl && inputEl.addEventListener('input', function () {
+                    if (!currentConv || !hub.connected) return;
+                    hub.conn.invoke('Typing', currentConv.peerUserId, true).catch(function () {});
+                    clearTimeout(inputEl.__sbTypingTimeout);
+                    inputEl.__sbTypingTimeout = setTimeout(function () {
+                        hub.conn.invoke('Typing', currentConv.peerUserId, false).catch(function () {});
+                    }, 1500);
+                });
+            }
+            if (attachEl) {
+                attachEl.addEventListener('change', function () {
+                    if (!currentConv) return;
+                    var file = attachEl.files && attachEl.files[0];
+                    if (!file) return;
+                    var fd = new FormData();
+                    fd.append('recipientUserId', currentConv.peerUserId);
+                    if (inputEl && inputEl.value) fd.append('body', inputEl.value);
+                    fd.append('file', file);
+                    jpostForm('/api/chat/send-image', fd).then(function (msg) {
+                        if (msg && currentConv && msg.conversationId === currentConv.id) {
+                            renderMessage(msg, false);
+                            if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+                        }
+                        attachEl.value = '';
+                        if (inputEl) inputEl.value = '';
+                    }).catch(function () { alert('Şəkil göndərilə bilmədi.'); });
+                });
+            }
+            if (backBtn) backBtn.addEventListener('click', function () { showList(); currentConv = null; });
+
+            // Public hook so Phase 14.7 (story-reply) can request a conversation
+            // open by user-id without going through the inbox.
+            root.__sbOpenWithUser = function (peerUserId) {
+                jpost('/api/chat/conversations/with/' + encodeURIComponent(peerUserId), null).then(function (conv) {
+                    if (!conv) return;
+                    var existing = hub.conversations.find(function (c) { return c.id === conv.id; });
+                    if (!existing) {
+                        hub.conversations.unshift(conv);
+                        renderConversations();
+                    }
+                    openConversation(conv);
+                }).catch(function () {});
+            };
+
+            loadConversations();
+            return { renderConversations: renderConversations, showList: showList };
+        }
+
+        // ---- Wire each present root ----
+        var widgetApi = null, fullpageApi = null;
+        if (widget) {
+            widgetApi = bind(widget, { isWidget: true });
+            var toggleBtn = widget.querySelector('[data-chat-toggle]');
+            var closeBtn = widget.querySelector('[data-chat-close]');
+            var panel = widget.querySelector('[data-chat-panel]');
+            if (toggleBtn) toggleBtn.addEventListener('click', function () {
+                if (!panel) return;
+                panel.hidden = !panel.hidden;
+                if (!panel.hidden && widgetApi) widgetApi.showList();
+            });
+            if (closeBtn) closeBtn.addEventListener('click', function () { if (panel) panel.hidden = true; });
+        }
+        if (fullpage) {
+            fullpageApi = bind(fullpage, { isWidget: false });
+        }
+
+        // ---- Unread badge ----
+        function refreshUnreadBadge() {
+            var total = hub.conversations.reduce(function (a, c) { return a + (c.unreadCount || 0); }, 0);
+            var badge = document.querySelector('[data-chat-badge]');
+            if (badge) {
+                badge.textContent = total > 99 ? '99+' : String(total);
+                badge.hidden = total === 0;
+            }
+        }
+        // Initial fetch — covers anonymous tabs that signed in after page load.
+        jget('/api/chat/unread-count').then(function (r) {
+            if (r && typeof r.count === 'number') {
+                var badge = document.querySelector('[data-chat-badge]');
+                if (badge) { badge.textContent = r.count > 99 ? '99+' : String(r.count); badge.hidden = r.count === 0; }
+            }
+        }).catch(function () {});
+
+        // ---- "Mesaj yaz" buttons across the site (Store detail, Story reply
+        // in Phase 14.7, etc.) — single delegated listener. ----
+        document.addEventListener('click', function (e) {
+            var trigger = e.target.closest('[data-chat-open-with]');
+            if (!trigger) return;
+            e.preventDefault();
+            var peerId = trigger.getAttribute('data-chat-open-with');
+            if (!peerId) return;
+            // Prefer the floating widget on every page; fall back to fullpage if open.
+            var w = document.querySelector('[data-chat-widget]');
+            var fp = document.querySelector('[data-chat-fullpage]');
+            if (w && w.__sbOpenWithUser) {
+                var panel = w.querySelector('[data-chat-panel]');
+                if (panel) panel.hidden = false;
+                w.__sbOpenWithUser(peerId);
+            } else if (fp && fp.__sbOpenWithUser) {
+                fp.__sbOpenWithUser(peerId);
+            }
+        });
+
+        connectIfNeeded();
     }
 
     /* ----------- Newsletter AJAX form ----------- */
