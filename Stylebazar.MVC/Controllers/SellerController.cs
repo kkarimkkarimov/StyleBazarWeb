@@ -13,6 +13,7 @@ using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
+using Stylebazar.BLL.Services.Stories;
 using Stylebazar.BLL.Services.Stores;
 using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.DAL.Entities;
@@ -38,6 +39,7 @@ public class SellerController : Controller
     private readonly IReviewService _reviews;
     private readonly ISellerAnalyticsService _analytics;
     private readonly ISubscriptionService _subscriptions;
+    private readonly IStoryService _storyService;
     private readonly UserManager<AppUser> _userManager;
 
     public SellerController(
@@ -50,6 +52,7 @@ public class SellerController : Controller
         IReviewService reviews,
         ISellerAnalyticsService analytics,
         ISubscriptionService subscriptions,
+        IStoryService storyService,
         UserManager<AppUser> userManager)
     {
         _account = account;
@@ -61,6 +64,7 @@ public class SellerController : Controller
         _reviews = reviews;
         _analytics = analytics;
         _subscriptions = subscriptions;
+        _storyService = storyService;
         _userManager = userManager;
     }
 
@@ -549,6 +553,88 @@ public class SellerController : Controller
             PrimaryStore = basePanel.PrimaryStore,
             Stats = stats
         });
+    }
+
+    // ============== STORE SETTINGS (Phase 6e) ==============
+
+    // ============== STORIES (Phase 14.1) ==============
+
+    [HttpGet]
+    public async Task<IActionResult> Stories(CancellationToken ct)
+    {
+        var panel = await BuildPanelVmAsync(ct);
+        if (panel.PrimaryStore is null)
+        {
+            TempData["Error"] = "Hekayə yaratmaq üçün əvvəlcə mağaza yaratmalısınız.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        // active + expired views in one page so seller sees what's "expired
+        // but in DB" without leaving the screen.
+        var active = await _storyService.GetByStoreAsync(panel.PrimaryStore.Id, activeOnly: true, ct);
+        var all = await _storyService.GetByStoreAsync(panel.PrimaryStore.Id, activeOnly: false, ct);
+        var expired = all.Where(s => s.ExpiresAt <= DateTime.UtcNow).ToList();
+
+        return View(new SellerStoriesPageViewModel
+        {
+            Profile = panel.Profile,
+            PrimaryStore = panel.PrimaryStore,
+            Active = active.OrderByDescending(s => s.CreatedDate).ToList(),
+            Expired = expired.OrderByDescending(s => s.CreatedDate).Take(20).ToList(),
+            Limit = 10
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(40 * 1024 * 1024)]
+    public async Task<IActionResult> CreateStory(
+        IFormFile file,
+        string? caption,
+        string? linkUrl,
+        int? durationSeconds,
+        CancellationToken ct)
+    {
+        var panel = await BuildPanelVmAsync(ct);
+        if (panel.PrimaryStore is null)
+        {
+            TempData["Error"] = "Əvvəlcə mağaza yarat.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        try
+        {
+            await _storyService.CreateAsync(panel.PrimaryStore.Id, new Stylebazar.BLL.DTOs.Stories.CreateStoryDto
+            {
+                Caption = caption,
+                LinkUrl = linkUrl,
+                DurationSeconds = durationSeconds
+            }, file, ct);
+            TempData["Success"] = "Hekayə yayımlandı.";
+        }
+        catch (ValidationException vex)
+        {
+            TempData["Error"] = string.Join(" • ", vex.Errors.SelectMany(kv => kv.Value));
+        }
+        catch (BusinessException bex)
+        {
+            TempData["Error"] = bex.Message;
+        }
+        return RedirectToAction(nameof(Stories));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteStory(int id, CancellationToken ct)
+    {
+        try
+        {
+            await _storyService.DeleteAsync(id, ct);
+            TempData["Success"] = "Hekayə silindi.";
+        }
+        catch (NotFoundException nex) { TempData["Error"] = nex.Message; }
+        catch (BusinessException bex) { TempData["Error"] = bex.Message; }
+        return RedirectToAction(nameof(Stories));
     }
 
     // ============== STORE SETTINGS (Phase 6e) ==============

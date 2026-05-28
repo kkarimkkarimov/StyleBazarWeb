@@ -1,0 +1,182 @@
+@model SellerStoriesPageViewModel
+@using Stylebazar.DAL.Entities.Enums
+@{
+    ViewData["Title"] = "Hekayələr";
+    var st = Model.PrimaryStore;
+}
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", Model.Profile)
+
+    <main class="sb-seller-main">
+        <header class="sb-seller-pagehead">
+            <div>
+                <h1>Hekayələr</h1>
+                <p>24 saatlıq Instagram-tipli hekayələr. Şəkil (10 MB) və ya video (30 MB, max 30 saniyə).</p>
+            </div>
+            <div class="sb-seller-pagehead__meta">
+                <span class="sb-chip sb-chip--ok">@Model.Active.Count aktiv</span>
+                <span class="sb-chip sb-chip--muted">Limit: @Model.Limit</span>
+            </div>
+        </header>
+
+        @if (TempData["Success"] is string okMsg)
+        {
+            <div class="sb-seller-alert sb-seller-alert--ok">@okMsg</div>
+        }
+        @if (TempData["Error"] is string errMsg)
+        {
+            <div class="sb-seller-alert sb-seller-alert--err">@errMsg</div>
+        }
+
+        @* ============== UPLOAD CARD ============== *@
+        <div class="sb-seller-card sb-story-create">
+            <header class="sb-seller-card__head">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="6" x2="12" y2="14"/></svg>
+                <h2>Yeni hekayə</h2>
+            </header>
+
+            <form asp-action="CreateStory" method="post" enctype="multipart/form-data" class="sb-story-create__form" data-story-create>
+                @Html.AntiForgeryToken()
+
+                <div class="sb-story-create__row">
+                    <label class="sb-story-create__dropzone" data-story-dropzone>
+                        <input type="file" name="file" accept="image/*,video/mp4,video/webm,video/quicktime" required data-story-file hidden />
+                        <div class="sb-story-create__dropzone-empty" data-story-empty>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <strong>Şəkil və ya video seç</strong>
+                            <span>JPG, PNG, MP4, WEBM</span>
+                            <span class="sb-story-create__hint">Video: maksimum 30 saniyə / 30 MB</span>
+                        </div>
+                        <div class="sb-story-create__preview" data-story-preview hidden>
+                            <img data-story-preview-img alt="" hidden />
+                            <video data-story-preview-vid playsinline muted hidden></video>
+                            <button type="button" class="sb-story-create__clear" data-story-clear aria-label="Sil">×</button>
+                        </div>
+                    </label>
+
+                    <div class="sb-story-create__fields">
+                        <div class="sb-acc-field">
+                            <label for="storyCaption">Mətn (caption)</label>
+                            <textarea id="storyCaption" name="caption" rows="3" maxlength="500" placeholder="Hekayə üçün qısa mətn..."></textarea>
+                        </div>
+                        <div class="sb-acc-field">
+                            <label for="storyLink">Link (məhsul URL-i, opsional)</label>
+                            <input id="storyLink" name="linkUrl" type="url" maxlength="500" placeholder="https://..." />
+                        </div>
+                        <input type="hidden" name="durationSeconds" data-story-duration />
+
+                        <div class="sb-story-create__actions">
+                            <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" data-story-submit disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                <span>Yayımla</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        @* ============== ACTIVE STORIES GRID ============== *@
+        <div class="sb-seller-card">
+            <header class="sb-seller-card__head">
+                <h2>Aktiv hekayələr (@Model.Active.Count)</h2>
+            </header>
+
+            @if (!Model.Active.Any())
+            {
+                <div class="sb-seller-empty">
+                    <strong>Hələ aktiv hekayə yoxdur</strong>
+                    <span>Yuxarıdakı formadan birinci hekayəni yarat.</span>
+                </div>
+            }
+            else
+            {
+                <div class="sb-story-grid">
+                    @foreach (var s in Model.Active)
+                    {
+                        bool isVideo = s.MediaType == StoryMediaType.Video;
+                        var remainingHours = (int)Math.Max(0, Math.Ceiling((s.ExpiresAt - DateTime.UtcNow).TotalHours));
+                        <article class="sb-story-tile @(isVideo ? "is-video" : "")">
+                            <div class="sb-story-tile__media">
+                                @if (isVideo)
+                                {
+                                    <video src="@s.MediaUrl" muted playsinline preload="metadata" poster="@s.ThumbnailUrl"></video>
+                                    <span class="sb-story-tile__badge">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+                                        @(s.DurationSeconds.HasValue ? $"{s.DurationSeconds}s" : "video")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <img src="@s.MediaUrl" alt="" loading="lazy" />
+                                }
+                            </div>
+                            <div class="sb-story-tile__meta">
+                                <span class="sb-story-tile__caption">@(string.IsNullOrEmpty(s.Caption) ? "(başlıqsız)" : s.Caption)</span>
+                                <span class="sb-story-tile__row">
+                                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> @s.ViewCount</span>
+                                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> @remainingHours saat qalıb</span>
+                                </span>
+                            </div>
+                            <form asp-action="DeleteStory" method="post" class="sb-story-tile__delete">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@s.Id" />
+                                <button type="submit" data-confirm="Bu hekayəni silməyə əminsən?" aria-label="Sil">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                </button>
+                            </form>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+
+        @* ============== EXPIRED HISTORY ============== *@
+        @if (Model.Expired.Any())
+        {
+            <div class="sb-seller-card">
+                <header class="sb-seller-card__head">
+                    <h2>Bitmiş hekayələr (@Model.Expired.Count)</h2>
+                    <span class="sb-seller-card__meta">Yalnız tarixçə üçün — silmək olar.</span>
+                </header>
+                <div class="sb-story-grid sb-story-grid--muted">
+                    @foreach (var s in Model.Expired)
+                    {
+                        bool isVideo = s.MediaType == StoryMediaType.Video;
+                        <article class="sb-story-tile sb-story-tile--expired @(isVideo ? "is-video" : "")">
+                            <div class="sb-story-tile__media">
+                                @if (isVideo && !string.IsNullOrEmpty(s.ThumbnailUrl))
+                                {
+                                    <img src="@s.ThumbnailUrl" alt="" loading="lazy" />
+                                }
+                                else if (isVideo)
+                                {
+                                    <video src="@s.MediaUrl" muted playsinline preload="metadata"></video>
+                                }
+                                else
+                                {
+                                    <img src="@s.MediaUrl" alt="" loading="lazy" />
+                                }
+                            </div>
+                            <div class="sb-story-tile__meta">
+                                <span class="sb-story-tile__caption">@(string.IsNullOrEmpty(s.Caption) ? "(başlıqsız)" : s.Caption)</span>
+                                <span class="sb-story-tile__row">
+                                    <span>@s.ViewCount baxış</span>
+                                    <span>@s.ExpiresAt.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                                </span>
+                            </div>
+                            <form asp-action="DeleteStory" method="post" class="sb-story-tile__delete">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@s.Id" />
+                                <button type="submit" data-confirm="Sil?" aria-label="Sil">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                                </button>
+                            </form>
+                        </article>
+                    }
+                </div>
+            </div>
+        }
+    </main>
+</section>

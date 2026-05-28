@@ -10,7 +10,10 @@
         id = s.Id,
         storeName = st.Name,
         storeLogoUrl = st.ProfileImageUrl,
-        imageUrl = s.ImageUrl,
+        mediaUrl = s.MediaUrl,
+        mediaType = s.MediaType.ToString(),
+        durationSeconds = s.DurationSeconds,
+        thumbnailUrl = s.ThumbnailUrl,
         caption = s.Caption,
         linkUrl = s.LinkUrl
     }));
@@ -182,10 +185,24 @@
                 @for (int i = 0; i < Model.Stories.Count; i++)
                 {
                     var s = Model.Stories[i];
+                    // Videos use thumbnail if available, otherwise placeholder
+                    // gradient fills the ring (a black video poster looks bad).
+                    string previewSrc = s.MediaType == Stylebazar.DAL.Entities.Enums.StoryMediaType.Video
+                        ? (s.ThumbnailUrl ?? string.Empty)
+                        : s.MediaUrl;
                     <button type="button" class="sb-storepage__story-bubble" data-story-open data-story-index="@i">
                         <span class="sb-storepage__story-ring">
                             <span class="sb-storepage__story-img">
-                                <img src="@s.ImageUrl" alt="@(s.Caption ?? st.Name)" loading="lazy" />
+                                @if (!string.IsNullOrEmpty(previewSrc))
+                                {
+                                    <img src="@previewSrc" alt="@(s.Caption ?? st.Name)" loading="lazy" />
+                                }
+                                @if (s.MediaType == Stylebazar.DAL.Entities.Enums.StoryMediaType.Video)
+                                {
+                                    <span class="sb-storepage__story-vid-badge" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+                                    </span>
+                                }
                             </span>
                         </span>
                     </button>

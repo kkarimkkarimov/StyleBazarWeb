@@ -40,8 +40,19 @@
                     <tr class="@(expired ? "is-expired" : "")">
                         <td><input type="checkbox" name="ids" value="@s.Id" data-admin-bulk-item form="adm-story-bulk" /></td>
                         <td>
-                            <a href="@s.ImageUrl" target="_blank" class="sb-admin-story-thumb">
-                                <img src="@s.ImageUrl" alt="" />
+                            @{
+                                bool isVid = s.MediaType == Stylebazar.DAL.Entities.Enums.StoryMediaType.Video;
+                                string previewSrc = isVid ? (s.ThumbnailUrl ?? string.Empty) : s.MediaUrl;
+                            }
+                            <a href="@s.MediaUrl" target="_blank" class="sb-admin-story-thumb @(isVid ? "is-video" : "")" title="@(isVid ? $"Video · {s.DurationSeconds}s" : "Şəkil")">
+                                @if (!string.IsNullOrEmpty(previewSrc))
+                                {
+                                    <img src="@previewSrc" alt="" />
+                                }
+                                else if (isVid)
+                                {
+                                    <span class="sb-admin-story-thumb__vid-placeholder">▶</span>
+                                }
                             </a>
                         </td>
                         <td>

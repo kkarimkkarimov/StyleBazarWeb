@@ -8,7 +8,10 @@ public class StoryConfiguration : IEntityTypeConfiguration<Story>
 {
     public void Configure(EntityTypeBuilder<Story> builder)
     {
-        builder.Property(s => s.ImageUrl).IsRequired().HasMaxLength(500);
+        builder.Property(s => s.MediaUrl).IsRequired().HasMaxLength(500);
+        builder.Property(s => s.ThumbnailUrl).HasMaxLength(500);
+        // Stored as int (the enum's underlying type) — EF default for enums.
+        builder.Property(s => s.MediaType).HasConversion<int>();
         builder.Property(s => s.Caption).HasMaxLength(500);
         builder.Property(s => s.LinkUrl).HasMaxLength(500);
 

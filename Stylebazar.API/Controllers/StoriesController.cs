@@ -40,7 +40,7 @@ public class StoriesController : ControllerBase
     [HttpPost("api/stores/{storeId:int}/stories")]
     [Authorize(Roles = "Seller,Admin")]
     [Consumes("multipart/form-data")]
-    [RequestSizeLimit(10 * 1024 * 1024)]
+    [RequestSizeLimit(40 * 1024 * 1024)]  // 30MB video + headroom for form fields
     [ProducesResponseType(typeof(StoryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

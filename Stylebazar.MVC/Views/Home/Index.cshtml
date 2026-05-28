@@ -108,7 +108,7 @@
             @foreach (var storeGroup in Model.Stories)
             {
                 <button type="button" class="sb-story-item"
-                        data-store-id="@storeGroup.StoreId"
+                        data-story-store-id="@storeGroup.StoreId"
                         data-store-name="@storeGroup.StoreName">
                     <span class="sb-story-item__ring">
                         <span class="sb-story-item__avatar">
@@ -171,19 +171,33 @@
 
 @* ============== STORY VIEWER MODAL ============== *@
 <div class="sb-story-viewer" id="sbStoryViewer" aria-hidden="true">
-    <button type="button" class="sb-story-viewer__close" data-story-close aria-label="Bağla">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <button type="button" class="sb-story-viewer__close" id="sbStoryClose" aria-label="Bağla">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="sb-story-viewer__frame">
-        <div class="sb-story-viewer__progress" data-story-progress></div>
+        <div class="sb-story-viewer__progress" id="sbStoryProgress"></div>
         <header class="sb-story-viewer__head">
-            <span class="sb-story-viewer__avatar" data-story-avatar></span>
-            <span class="sb-story-viewer__store" data-story-store></span>
+            <span class="sb-story-viewer__avatar" id="sbStoryAvatar"></span>
+            <span class="sb-story-viewer__store" id="sbStoryStoreName"></span>
+            <button type="button" class="sb-story-viewer__mute" id="sbStoryMute" hidden aria-label="Səssiz / səsli">
+                <svg class="sb-story-viewer__mute-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                <svg class="sb-story-viewer__mute-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" hidden><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+            </button>
         </header>
-        <img class="sb-story-viewer__img" data-story-img alt="" />
-        <span class="sb-story-viewer__caption" data-story-caption></span>
-        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--prev" data-story-prev aria-label="Əvvəlki"></button>
-        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--next" data-story-next aria-label="Növbəti"></button>
+        <div class="sb-story-viewer__media">
+            <img class="sb-story-viewer__img" id="sbStoryImage" alt="" hidden />
+            <video class="sb-story-viewer__vid" id="sbStoryVideo" playsinline muted hidden></video>
+        </div>
+        <span class="sb-story-viewer__caption" id="sbStoryCaption"></span>
+        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--prev" id="sbStoryTapPrev" aria-label="Əvvəlki"></button>
+        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--next" id="sbStoryTapNext" aria-label="Növbəti"></button>
+        @* Reply input — wires up in Phase 14.7. Disabled placeholder for now. *@
+        <form class="sb-story-viewer__reply" id="sbStoryReply" hidden>
+            <input type="text" placeholder="Hekayəyə cavab yaz..." maxlength="500" autocomplete="off" />
+            <button type="submit" aria-label="Göndər">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </form>
     </div>
 </div>
 

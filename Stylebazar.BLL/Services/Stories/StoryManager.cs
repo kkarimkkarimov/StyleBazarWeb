@@ -11,6 +11,7 @@ using Stylebazar.BLL.Rules;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.DAL.Entities;
+using Stylebazar.DAL.Entities.Enums;
 using Stylebazar.DAL.Repositories.Abstract;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
@@ -99,6 +100,9 @@ public class StoryManager : IStoryService
         if (string.IsNullOrEmpty(_currentUser.UserId))
             throw new UnauthorizedException(Messages.Story.NotAuthenticated);
 
+        if (file is null || file.Length == 0)
+            throw new BusinessException("Hekayə üçün şəkil və ya video fayl seçməlisən.");
+
         ValidationResult validation = await _createValidator.ValidateAsync(dto, ct);
         if (!validation.IsValid)
             throw new ValidationException(validation.Errors);
@@ -109,13 +113,33 @@ public class StoryManager : IStoryService
 
         await _rules.EnsureUnderActiveLimitAsync(storeId, ct);
 
+        // Detect image vs. video from the MIME type the browser sent. Defensive
+        // fallback to extension because some clients omit content-type.
+        StoryMediaType mediaType = DetectMediaType(file);
+
+        // Size cap — images 10MB, videos 30MB. The validator already capped
+        // duration; this protects the disk regardless.
+        long maxBytes = mediaType == StoryMediaType.Video ? 30L * 1024 * 1024 : 10L * 1024 * 1024;
+        if (file.Length > maxBytes)
+            throw new BusinessException(mediaType == StoryMediaType.Video
+                ? "Video maksimum 30 MB ola bilər."
+                : "Şəkil maksimum 10 MB ola bilər.");
+
+        // For video uploads, DurationSeconds is required (client reads it from
+        // the <video> element before posting). Reject otherwise — without it we
+        // can't drive the viewer's progress bar correctly.
+        if (mediaType == StoryMediaType.Video && (!dto.DurationSeconds.HasValue || dto.DurationSeconds <= 0))
+            throw new BusinessException("Video üçün uzunluq (saniyə) göndərilməlidir.");
+
         string url = await _fileStorage.SaveAsync(file, Subfolder, ct);
 
         int hours = dto.HoursToExpire ?? DefaultHoursToExpire;
         Story entity = new()
         {
             StoreId = storeId,
-            ImageUrl = url,
+            MediaUrl = url,
+            MediaType = mediaType,
+            DurationSeconds = mediaType == StoryMediaType.Video ? dto.DurationSeconds : null,
             Caption = dto.Caption?.Trim(),
             LinkUrl = dto.LinkUrl?.Trim(),
             ExpiresAt = DateTime.UtcNow.AddHours(hours),
@@ -125,6 +149,26 @@ public class StoryManager : IStoryService
 
         Story created = await _stories.AddAsync(entity, ct);
         return _mapper.Map<StoryDto>(created);
+    }
+
+    /// <summary>
+    /// MIME-based image-vs-video detection with a defensive file-extension fallback.
+    /// Whitelist (image/*, video/mp4, video/webm) — anything else falls back to
+    /// extension; truly unknown → image so the upload doesn't 500 (the size cap +
+    /// browser content-type are the real gates).
+    /// </summary>
+    private static StoryMediaType DetectMediaType(IFormFile file)
+    {
+        string ct = (file.ContentType ?? string.Empty).ToLowerInvariant();
+        if (ct.StartsWith("video/")) return StoryMediaType.Video;
+        if (ct.StartsWith("image/")) return StoryMediaType.Image;
+
+        string ext = System.IO.Path.GetExtension(file.FileName ?? string.Empty).ToLowerInvariant();
+        return ext switch
+        {
+            ".mp4" or ".webm" or ".mov" or ".m4v" => StoryMediaType.Video,
+            _ => StoryMediaType.Image
+        };
     }
 
     public async Task<StoryDto> RecordViewAsync(int id, CancellationToken ct = default)
@@ -148,7 +192,9 @@ public class StoryManager : IStoryService
         Story? tracked = await _stories.GetAsync(s => s.Id == id, cancellationToken: ct);
         if (tracked is null) return;
 
-        await _fileStorage.DeleteAsync(tracked.ImageUrl, ct);
+        await _fileStorage.DeleteAsync(tracked.MediaUrl, ct);
+        if (!string.IsNullOrEmpty(tracked.ThumbnailUrl))
+            await _fileStorage.DeleteAsync(tracked.ThumbnailUrl, ct);
         await _stories.DeleteAsync(tracked, permanent: true, cancellationToken: ct);
     }
 

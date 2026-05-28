@@ -64,6 +64,7 @@
         safe('setupHeroCarousel',        setupHeroCarousel);
         safe('setupProductRails',        setupProductRails);
         safe('setupStoryViewer',         setupStoryViewer);
+        safe('setupStoryCreate',         setupStoryCreate);
         safe('setupNewsletterForm',      setupNewsletterForm);
         safe('setupRevealOnScroll',      setupRevealOnScroll);
         safe('setupShopFilter',          setupShopFilter);
@@ -521,6 +522,16 @@
     }
 
     /* ----------- Story viewer ----------- */
+    /* ----------- Story viewer (Phase 14.1 — image + video) -----------
+       Handles the home-page "Hekayələr" rail click → opens fullscreen
+       modal, plays each story (image: fixed 5s timer, video: real duration
+       from <video>), advances on tap/arrow, closes on Esc.
+
+       Data is read from a JSON <script id="sbStoriesData"> block emitted
+       by the view. Each entry: { storeId, storeName, storeProfileImageUrl,
+       stories: [{ id, mediaUrl, mediaType, durationSeconds, thumbnailUrl,
+       caption, linkUrl }] }. mediaType matches the server enum: "Image" |
+       "Video". */
     function setupStoryViewer() {
         var rail = document.getElementById('sbStoriesRail');
         var viewer = document.getElementById('sbStoryViewer');
@@ -534,21 +545,25 @@
 
         var progressEl = document.getElementById('sbStoryProgress');
         var imgEl      = document.getElementById('sbStoryImage');
+        var vidEl      = document.getElementById('sbStoryVideo');
         var captionEl  = document.getElementById('sbStoryCaption');
         var avatarEl   = document.getElementById('sbStoryAvatar');
         var nameEl     = document.getElementById('sbStoryStoreName');
         var closeBtn   = document.getElementById('sbStoryClose');
+        var muteBtn    = document.getElementById('sbStoryMute');
         var tapPrev    = document.getElementById('sbStoryTapPrev');
         var tapNext    = document.getElementById('sbStoryTapNext');
 
         var storeIdx = 0;
         var storyIdx = 0;
-        var timer = null;
         var startTs = 0;
-        var elapsed = 0;
+        var elapsedAtPause = 0;
         var paused = false;
-        var DURATION_MS = 5000;
+        var IMAGE_MS = 5000;
+        var currentDurationMs = IMAGE_MS;
         var rafId = null;
+        var currentMode = 'image'; // or 'video'
+        var muted = true;          // start muted (autoplay policy)
 
         function renderHeader() {
             var store = data[storeIdx];
@@ -579,28 +594,80 @@
             var bars = progressEl.querySelectorAll('.sb-story-viewer__progress-bar');
             if (!bars[storyIdx]) return;
             var fill = bars[storyIdx].querySelector('i');
-            if (fill) fill.style.right = (100 - percent) + '%';
+            if (fill) fill.style.right = (100 - Math.max(0, Math.min(100, percent))) + '%';
+        }
+        function stopMedia() {
+            cancelAnimationFrame(rafId);
+            // Pause + reset video so it doesn't bleed audio into next story.
+            try { vidEl.pause(); } catch (_) {}
+            vidEl.removeAttribute('src');
+            vidEl.load();
+            vidEl.hidden = true;
+            imgEl.hidden = true;
+            imgEl.removeAttribute('src');
+            if (muteBtn) muteBtn.hidden = true;
         }
         function play() {
+            stopMedia();
             var s = data[storeIdx].stories[storyIdx];
-            imgEl.src = s.imageUrl;
             captionEl.textContent = s.caption || '';
             renderProgressBars();
-            elapsed = 0;
-            startTs = performance.now();
+            elapsedAtPause = 0;
             paused = false;
-            // Fire-and-forget view tracking
+
+            var type = (s.mediaType || 'Image').toLowerCase();
+            // Fire-and-forget view tracking (anonymous endpoint).
             fetch('/Stories/View/' + s.id, { method: 'POST' }).catch(function () {});
-            cancelAnimationFrame(rafId);
-            tick();
+
+            if (type === 'video') {
+                currentMode = 'video';
+                // Duration from server if known; fall back to 5s placeholder
+                // until video metadata loads (then re-set from videoDuration).
+                currentDurationMs = (s.durationSeconds && s.durationSeconds > 0)
+                    ? s.durationSeconds * 1000
+                    : IMAGE_MS;
+                vidEl.hidden = false;
+                vidEl.muted = muted;
+                vidEl.src = s.mediaUrl;
+                if (muteBtn) muteBtn.hidden = false;
+                reflectMuteBtn();
+                // playsinline + muted ensures autoplay survives browser policies.
+                vidEl.play().catch(function () { /* autoplay blocked — user tap will retry */ });
+                vidEl.onloadedmetadata = function () {
+                    if (isFinite(vidEl.duration) && vidEl.duration > 0) {
+                        currentDurationMs = vidEl.duration * 1000;
+                    }
+                };
+                vidEl.onended = function () { advance(1); };
+                startTs = performance.now();
+                rafId = requestAnimationFrame(tick);
+            } else {
+                currentMode = 'image';
+                currentDurationMs = IMAGE_MS;
+                imgEl.hidden = false;
+                imgEl.src = s.mediaUrl;
+                startTs = performance.now();
+                rafId = requestAnimationFrame(tick);
+            }
         }
         function tick() {
-            if (paused) { return; }
-            var now = performance.now();
-            elapsed = now - startTs;
-            var pct = Math.min(100, (elapsed / DURATION_MS) * 100);
+            if (paused) return;
+            // For videos, prefer the real currentTime over wall-clock so the
+            // bar matches buffering hiccups. For images, use wall-clock.
+            var elapsed;
+            if (currentMode === 'video' && isFinite(vidEl.duration) && vidEl.duration > 0) {
+                elapsed = vidEl.currentTime * 1000;
+            } else {
+                elapsed = performance.now() - startTs + elapsedAtPause;
+            }
+            var pct = currentDurationMs > 0 ? (elapsed / currentDurationMs) * 100 : 0;
             setFill(pct);
-            if (elapsed >= DURATION_MS) { advance(1); return; }
+            if (elapsed >= currentDurationMs && currentMode !== 'video') {
+                // Video advance is handled by its `onended` handler so a slow
+                // network doesn't cause a double-advance.
+                advance(1);
+                return;
+            }
             rafId = requestAnimationFrame(tick);
         }
         function advance(delta) {
@@ -608,13 +675,12 @@
             var stories = data[storeIdx].stories;
             var ni = storyIdx + delta;
             if (ni >= stories.length) {
-                // Next store
                 if (storeIdx + 1 >= data.length) { close(); return; }
                 storeIdx += 1;
                 storyIdx = 0;
                 renderHeader();
             } else if (ni < 0) {
-                if (storeIdx === 0) { storyIdx = 0; } // clamp
+                if (storeIdx === 0) { storyIdx = 0; }
                 else { storeIdx -= 1; storyIdx = data[storeIdx].stories.length - 1; renderHeader(); }
             } else {
                 storyIdx = ni;
@@ -631,13 +697,19 @@
             play();
         }
         function close() {
-            cancelAnimationFrame(rafId);
+            stopMedia();
             viewer.classList.remove('is-open');
             viewer.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('sb-locked');
-            // Mark this rail item as viewed
             var item = rail.querySelector('[data-story-store-id="' + data[storeIdx].storeId + '"] .sb-story-item__ring');
             if (item) item.classList.add('is-viewed');
+        }
+        function reflectMuteBtn() {
+            if (!muteBtn) return;
+            var on = muteBtn.querySelector('.sb-story-viewer__mute-on');
+            var off = muteBtn.querySelector('.sb-story-viewer__mute-off');
+            if (on) on.hidden = !muted;
+            if (off) off.hidden = muted;
         }
 
         rail.querySelectorAll('[data-story-store-id]').forEach(function (btn) {
@@ -648,14 +720,103 @@
             });
         });
 
-        closeBtn.addEventListener('click', close);
-        tapNext.addEventListener('click', function () { advance(1); });
-        tapPrev.addEventListener('click', function () { advance(-1); });
+        if (closeBtn) closeBtn.addEventListener('click', close);
+        if (tapNext) tapNext.addEventListener('click', function () { advance(1); });
+        if (tapPrev) tapPrev.addEventListener('click', function () { advance(-1); });
+        if (muteBtn) muteBtn.addEventListener('click', function () {
+            muted = !muted;
+            vidEl.muted = muted;
+            reflectMuteBtn();
+        });
         document.addEventListener('keydown', function (e) {
             if (!viewer.classList.contains('is-open')) return;
             if (e.key === 'Escape') close();
             else if (e.key === 'ArrowRight') advance(1);
             else if (e.key === 'ArrowLeft') advance(-1);
+            else if (e.key === ' ' || e.key === 'Spacebar') {
+                // Pause/resume on space.
+                paused = !paused;
+                if (currentMode === 'video') { if (paused) vidEl.pause(); else vidEl.play(); }
+                if (!paused) { startTs = performance.now(); rafId = requestAnimationFrame(tick); }
+                e.preventDefault();
+            }
+        });
+    }
+
+    /* ----------- Seller story upload preview (Phase 14.1) ----------- */
+    function setupStoryCreate() {
+        var form = document.querySelector('[data-story-create]');
+        if (!form) return;
+        var input = form.querySelector('[data-story-file]');
+        var empty = form.querySelector('[data-story-empty]');
+        var preview = form.querySelector('[data-story-preview]');
+        var previewImg = form.querySelector('[data-story-preview-img]');
+        var previewVid = form.querySelector('[data-story-preview-vid]');
+        var clearBtn = form.querySelector('[data-story-clear]');
+        var durationField = form.querySelector('[data-story-duration]');
+        var submitBtn = form.querySelector('[data-story-submit]');
+
+        function reset() {
+            input.value = '';
+            previewImg.removeAttribute('src');
+            previewImg.hidden = true;
+            previewVid.removeAttribute('src');
+            previewVid.hidden = true;
+            preview.hidden = true;
+            empty.hidden = false;
+            if (durationField) durationField.value = '';
+            if (submitBtn) submitBtn.disabled = true;
+        }
+        function showError(msg) {
+            // Cheap inline error — replace with proper toast once chat lands.
+            alert(msg);
+            reset();
+        }
+
+        input.addEventListener('change', function () {
+            var f = input.files && input.files[0];
+            if (!f) { reset(); return; }
+            var isVideo = (f.type || '').indexOf('video/') === 0
+                || /\.(mp4|webm|mov|m4v)$/i.test(f.name || '');
+            var maxBytes = isVideo ? 30 * 1024 * 1024 : 10 * 1024 * 1024;
+            if (f.size > maxBytes) {
+                showError(isVideo ? 'Video maksimum 30 MB ola bilər.' : 'Şəkil maksimum 10 MB ola bilər.');
+                return;
+            }
+            var url = URL.createObjectURL(f);
+            empty.hidden = true;
+            preview.hidden = false;
+
+            if (isVideo) {
+                previewImg.hidden = true;
+                previewImg.removeAttribute('src');
+                previewVid.hidden = false;
+                previewVid.src = url;
+                previewVid.onloadedmetadata = function () {
+                    var dur = Math.round(previewVid.duration || 0);
+                    if (!isFinite(dur) || dur <= 0) {
+                        showError('Video uzunluğu oxuna bilmədi.');
+                        return;
+                    }
+                    if (dur > 30) {
+                        showError('Video maksimum 30 saniyə ola bilər.');
+                        return;
+                    }
+                    if (durationField) durationField.value = String(dur);
+                    if (submitBtn) submitBtn.disabled = false;
+                };
+            } else {
+                previewVid.hidden = true;
+                previewVid.removeAttribute('src');
+                previewImg.hidden = false;
+                previewImg.src = url;
+                if (durationField) durationField.value = '';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+        if (clearBtn) clearBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            reset();
         });
     }
 

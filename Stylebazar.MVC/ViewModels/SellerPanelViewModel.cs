@@ -69,6 +69,13 @@ public class SellerNotificationsPageViewModel : SellerPanelViewModel
     public List<SellerNotificationItem> Items { get; set; } = new();
 }
 
+public class SellerStoriesPageViewModel : SellerPanelViewModel
+{
+    public List<Stylebazar.BLL.DTOs.Stories.StoryDto> Active { get; set; } = new();
+    public List<Stylebazar.BLL.DTOs.Stories.StoryDto> Expired { get; set; } = new();
+    public int Limit { get; set; } = 10;
+}
+
 public record SellerNotificationItem(
     string Tone,         // ok / info / warn / danger / muted
     string Icon,         // svg path data
