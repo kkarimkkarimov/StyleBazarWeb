@@ -10,5 +10,12 @@ public class StoreStoriesDto
     public string StoreName { get; set; } = string.Empty;
     public string StoreSlug { get; set; } = string.Empty;
     public string? StoreProfileImageUrl { get; set; }
+
+    /// <summary>
+    /// The store owner's user-id — the recipient when a viewer replies to a
+    /// story via the chat composer (Phase 14.7).
+    /// </summary>
+    public string StoreOwnerId { get; set; } = string.Empty;
+
     public List<StoryDto> Stories { get; set; } = new();
 }

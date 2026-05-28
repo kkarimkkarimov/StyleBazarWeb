@@ -73,6 +73,8 @@ public class StoryManager : IStoryService
                     StoreName = first.Store?.Name ?? string.Empty,
                     StoreSlug = first.Store?.Slug ?? string.Empty,
                     StoreProfileImageUrl = first.Store?.ProfileImageUrl,
+                    // Owner is the user the story-reply chat message goes to.
+                    StoreOwnerId = first.Store?.OwnerId ?? string.Empty,
                     Stories = g.OrderBy(s => s.CreatedDate).Select(s => _mapper.Map<StoryDto>(s)).ToList()
                 };
             })

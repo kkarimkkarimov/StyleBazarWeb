@@ -1,4 +1,7 @@
 @model HomeIndexViewModel
+@using Microsoft.AspNetCore.Identity
+@using Stylebazar.DAL.Entities
+@inject SignInManager<AppUser> SignInManager
 @{
     ViewData["Title"] = "Ana səhifə";
     ViewData["WishlistIds"] = Model.WishlistProductIds;
@@ -191,13 +194,17 @@
         <span class="sb-story-viewer__caption" id="sbStoryCaption"></span>
         <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--prev" id="sbStoryTapPrev" aria-label="Əvvəlki"></button>
         <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--next" id="sbStoryTapNext" aria-label="Növbəti"></button>
-        @* Reply input — wires up in Phase 14.7. Disabled placeholder for now. *@
-        <form class="sb-story-viewer__reply" id="sbStoryReply" hidden>
-            <input type="text" placeholder="Hekayəyə cavab yaz..." maxlength="500" autocomplete="off" />
-            <button type="submit" aria-label="Göndər">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
-        </form>
+        @* Reply input — wired up in Phase 14.7. Rendered only for signed-in
+           users (anonymous viewers can still watch, just can't reply). *@
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <form class="sb-story-viewer__reply" id="sbStoryReply" hidden>
+                <input type="text" placeholder="Hekayəyə cavab yaz..." maxlength="500" autocomplete="off" />
+                <button type="submit" aria-label="Göndər">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </form>
+        }
     </div>
 </div>
 

@@ -554,6 +554,7 @@
         var muteBtn    = document.getElementById('sbStoryMute');
         var tapPrev    = document.getElementById('sbStoryTapPrev');
         var tapNext    = document.getElementById('sbStoryTapNext');
+        var replyForm  = document.getElementById('sbStoryReply');
 
         var storeIdx = 0;
         var storyIdx = 0;
@@ -694,6 +695,8 @@
             viewer.classList.add('is-open');
             viewer.setAttribute('aria-hidden', 'false');
             document.body.classList.add('sb-locked');
+            // Reply input visible only when we know the owner — wired in Phase 14.7.
+            if (replyForm) replyForm.hidden = !data[storeIdx] || !data[storeIdx].storeOwnerId;
             renderHeader();
             play();
         }
@@ -729,6 +732,73 @@
             vidEl.muted = muted;
             reflectMuteBtn();
         });
+
+        // ---- Story-reply submit (Phase 14.7) ----
+        // Sends a StoryReply-typed chat message to the store owner, then
+        // closes the viewer and opens the chat widget on that conversation
+        // so the user sees their reply land.
+        if (replyForm) {
+            var replyInput = replyForm.querySelector('input[type="text"]');
+            replyForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!replyInput) return;
+                var text = (replyInput.value || '').trim();
+                if (!text) return;
+                var store = data[storeIdx];
+                var story = store && store.stories && store.stories[storyIdx];
+                if (!store || !story || !store.storeOwnerId) return;
+
+                // Pause playback while we send.
+                paused = true; cancelAnimationFrame(rafId);
+                try { vidEl.pause(); } catch (_) {}
+
+                // Use SignalR hub when available (snappier), REST as fallback.
+                var dto = {
+                    recipientUserId: store.storeOwnerId,
+                    messageType: 2,           // StoryReply (DAL enum int)
+                    body: text,
+                    storyId: story.id
+                };
+                var done = function () {
+                    replyInput.value = '';
+                    close();
+                    // Open the widget on this conversation so the buyer sees
+                    // their message + can keep chatting.
+                    var w = document.querySelector('[data-chat-widget]');
+                    if (w && w.__sbOpenWithUser) {
+                        var panel = w.querySelector('[data-chat-panel]');
+                        if (panel) panel.hidden = false;
+                        w.__sbOpenWithUser(store.storeOwnerId);
+                    }
+                };
+                var fail = function () {
+                    alert('Cavab göndərilə bilmədi. Qoşulduğunuzu yoxlayın.');
+                    paused = false;
+                    if (currentMode === 'video') { try { vidEl.play(); } catch (_) {} }
+                    startTs = performance.now();
+                    rafId = requestAnimationFrame(tick);
+                };
+                if (window.__sbChat && window.__sbChat.connected && window.__sbChat.conn) {
+                    window.__sbChat.conn.invoke('SendMessage', dto).then(done).catch(function () {
+                        // Fall through to REST.
+                        fetch('/api/chat/send', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(dto)
+                        }).then(function (r) { return r.ok ? done() : fail(); }).catch(fail);
+                    });
+                } else {
+                    fetch('/api/chat/send', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dto)
+                    }).then(function (r) { return r.ok ? done() : fail(); }).catch(fail);
+                }
+            });
+        }
+
         document.addEventListener('keydown', function (e) {
             if (!viewer.classList.contains('is-open')) return;
             if (e.key === 'Escape') close();
