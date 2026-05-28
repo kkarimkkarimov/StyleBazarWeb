@@ -9,6 +9,7 @@ using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.Authentication;
 using Stylebazar.BLL.Services.Categories;
+using Stylebazar.BLL.Services.Chat;
 using Stylebazar.BLL.Services.Contact;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.BLL.Services.Email;
@@ -129,6 +130,9 @@ public static class ServiceRegistration
 
         // Subscriptions — premium seller tier + quota enforcement
         services.AddScoped<ISubscriptionService, SubscriptionManager>();
+
+        // Chat — real-time messaging between any two users (Phase 14.3+)
+        services.AddScoped<IChatService, ChatManager>();
 
         return services;
     }
