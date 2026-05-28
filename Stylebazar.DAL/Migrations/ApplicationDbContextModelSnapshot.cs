@@ -462,6 +462,58 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("ContactMessages");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Conversation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastMessagePreview")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("Unread1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Unread2")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("User1Id")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("User2Id")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User1Id", "LastMessageAt");
+
+                    b.HasIndex("User1Id", "User2Id")
+                        .IsUnique();
+
+                    b.HasIndex("User2Id", "LastMessageAt");
+
+                    b.ToTable("Conversations");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.HeroBanner", b =>
                 {
                     b.Property<int>("Id")
@@ -560,6 +612,67 @@ namespace Stylebazar.DAL.Migrations
                     b.HasIndex("UserId", "CreatedDate");
 
                     b.ToTable("LoginEvents");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AttachmentUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Body")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeletedForAll")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsReadByRecipient")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MessageType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("StoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("StoryId");
+
+                    b.HasIndex("ConversationId", "CreatedDate");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.NewsletterSubscriber", b =>
@@ -1278,6 +1391,25 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Conversation", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.LoginEvent", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
@@ -1287,6 +1419,39 @@ namespace Stylebazar.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Message", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.Story", "Story")
+                        .WithMany()
+                        .HasForeignKey("StoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Sender");
+
+                    b.Navigation("Story");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>
@@ -1469,6 +1634,11 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("ChildCategories");
 
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Conversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Product", b =>

@@ -34,6 +34,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<StoreFollower> StoreFollowers => Set<StoreFollower>();
     public DbSet<ContactClick> ContactClicks => Set<ContactClick>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<Message> Messages => Set<Message>();
 
     public override int SaveChanges()
     {
