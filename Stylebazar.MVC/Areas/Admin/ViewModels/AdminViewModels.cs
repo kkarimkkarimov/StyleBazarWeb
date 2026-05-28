@@ -1,6 +1,7 @@
 using Core.Persistence.Paging;
 using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.DTOs.Categories;
+using Stylebazar.BLL.DTOs.Chat;
 using Stylebazar.BLL.DTOs.Contact;
 using Stylebazar.BLL.DTOs.HeroBanners;
 using Stylebazar.BLL.DTOs.Newsletter;
@@ -9,6 +10,7 @@ using Stylebazar.BLL.DTOs.Reviews;
 using Stylebazar.BLL.DTOs.Stores;
 using Stylebazar.BLL.DTOs.Stories;
 using Stylebazar.BLL.DTOs.Subscriptions;
+using Stylebazar.BLL.Services.Chat;
 using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.MVC.Areas.Admin.ViewModels;
@@ -113,4 +115,17 @@ public class StoryAdminRow
     public StoryDto Story { get; set; } = new();
     public string StoreName { get; set; } = string.Empty;
     public string StoreSlug { get; set; } = string.Empty;
+}
+
+public class AdminConversationsPageViewModel
+{
+    public Paginate<AdminConversationRowDto> Conversations { get; set; } = new();
+    public int Page { get; set; } = 1;
+}
+
+public class AdminConversationDetailViewModel
+{
+    public AdminConversationRowDto Conversation { get; set; } = new();
+    public Paginate<MessageDto> Messages { get; set; } = new();
+    public int Page { get; set; } = 1;
 }

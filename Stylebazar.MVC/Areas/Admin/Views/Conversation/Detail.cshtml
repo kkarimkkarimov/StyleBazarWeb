@@ -1,0 +1,76 @@
+@model AdminConversationDetailViewModel
+@using Stylebazar.DAL.Entities.Enums
+@{
+    ViewData["Title"] = "Söhbət #" + Model.Conversation.Id;
+    ViewData["PageTitle"] = "Söhbət #" + Model.Conversation.Id;
+}
+
+<nav class="sb-admin-breadcrumb">
+    <a asp-area="Admin" asp-controller="Conversation" asp-action="Index">Söhbətlər</a>
+    <span>/</span>
+    <span>#@Model.Conversation.Id</span>
+</nav>
+
+<div class="sb-admin-card">
+    <header class="sb-admin-card__head">
+        <h2>
+            @Model.Conversation.User1FullName <small>(@Model.Conversation.User1Role)</small>
+            <span style="opacity:.5">↔</span>
+            @Model.Conversation.User2FullName <small>(@Model.Conversation.User2Role)</small>
+        </h2>
+        <span class="sb-admin-meta">@Model.Conversation.MessageCount mesaj</span>
+    </header>
+
+    <div class="sb-admin-convo-msgs">
+        @* Render oldest-first (API returns newest-first, so reverse). *@
+        @foreach (var m in Model.Messages.Items.Reverse())
+        {
+            string roleClass = (m.SenderId == Model.Conversation.User1Id) ? "is-u1" : "is-u2";
+            <article class="sb-admin-convo-msg @roleClass">
+                <header>
+                    <strong>@m.SenderFullName</strong>
+                    <span>@m.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span>
+                    @if (m.MessageType != MessageType.Text)
+                    {
+                        <em class="sb-admin-chip sb-admin-chip--muted">@m.MessageType</em>
+                    }
+                </header>
+                @if (m.MessageType == MessageType.Image && !string.IsNullOrEmpty(m.AttachmentUrl))
+                {
+                    <a href="@m.AttachmentUrl" target="_blank"><img src="@m.AttachmentUrl" alt="" class="sb-admin-convo-msg__img" /></a>
+                }
+                @if (m.StoryPreview is not null)
+                {
+                    <div class="sb-admin-convo-msg__ref">
+                        ↩ Hekayə: @(m.StoryPreview.Caption ?? "(başlıqsız)")
+                        @if (m.StoryPreview.IsExpired) { <em>(bitib)</em> }
+                    </div>
+                }
+                @if (m.ProductPreview is not null)
+                {
+                    <div class="sb-admin-convo-msg__ref">
+                        🛍 Məhsul: @m.ProductPreview.Name (@m.ProductPreview.Price ₼)
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(m.Body))
+                {
+                    <p>@m.Body</p>
+                }
+                @if (m.AttachmentUrl is null && m.StoryPreview is null && m.ProductPreview is null && string.IsNullOrEmpty(m.Body))
+                {
+                    <p class="sb-admin-meta-small">(boş mesaj)</p>
+                }
+                <form asp-area="Admin" asp-controller="Conversation" asp-action="DeleteMessage" method="post" class="sb-admin-convo-msg__delete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@m.Id" />
+                    <input type="hidden" name="conversationId" value="@Model.Conversation.Id" />
+                    <button type="submit" data-confirm="Bu mesajı moderasiya üçün gizlət?" aria-label="Sil">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                    </button>
+                </form>
+            </article>
+        }
+    </div>
+</div>
+
+@await Html.PartialAsync("_AdminPagination", new Tuple<int,int,int>(Model.Messages.Index + 1, Model.Messages.Pages, Model.Messages.Count))

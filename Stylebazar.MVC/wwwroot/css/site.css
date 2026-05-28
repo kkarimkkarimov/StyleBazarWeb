@@ -9915,6 +9915,87 @@ body:has(.sb-seller-layout) {
 .sb-chat-fullpage__placeholder svg { width: 56px; height: 56px; color: #D1D5DB; }
 .sb-chat-composer--fullpage { border-top: 1px solid #E5E7EB; }
 
+/* ---- Admin conversation views (Phase 14.8) ---- */
+.sb-admin-convo-peers {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: .9rem;
+}
+.sb-admin-convo-peers em {
+    font-style: normal;
+    text-transform: uppercase;
+    font-size: .68rem;
+    margin-left: 4px;
+}
+.sb-admin-convo-peers__arrow { color: #9CA3AF; font-size: .9rem; }
+
+.sb-admin-convo-msgs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 0;
+}
+.sb-admin-convo-msg {
+    position: relative;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    background: #F9FAFB;
+    max-width: 600px;
+}
+.sb-admin-convo-msg.is-u1 { align-self: flex-start; }
+.sb-admin-convo-msg.is-u2 { align-self: flex-end; background: #EFF6FF; border-color: #DBEAFE; }
+.sb-admin-convo-msg header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .78rem;
+    color: #6B7280;
+    margin-bottom: 6px;
+}
+.sb-admin-convo-msg header strong { color: #111827; }
+.sb-admin-convo-msg p {
+    margin: 4px 0 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: .92rem;
+    color: #111827;
+}
+.sb-admin-convo-msg__img {
+    max-width: 260px;
+    max-height: 260px;
+    border-radius: 8px;
+    margin: 4px 0;
+    display: block;
+}
+.sb-admin-convo-msg__ref {
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, .04);
+    border-left: 2px solid #9CA3AF;
+    border-radius: 4px;
+    font-size: .82rem;
+    margin: 4px 0;
+}
+.sb-admin-convo-msg__delete {
+    position: absolute;
+    top: 8px; right: 8px;
+}
+.sb-admin-convo-msg__delete button {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: #9CA3AF;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.sb-admin-convo-msg__delete button:hover { background: #FEE2E2; color: #DC2626; }
+.sb-admin-convo-msg__delete button svg { width: 12px; height: 12px; }
+
 /* "Mesaj yaz" button on Store detail page — sits in cta-row next to Follow. */
 .sb-storepage__msg {
     display: inline-flex;
