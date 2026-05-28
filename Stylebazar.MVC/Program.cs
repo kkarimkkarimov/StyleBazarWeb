@@ -34,6 +34,9 @@ ValidateRequiredSecrets(builder.Configuration, builder.Environment);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// Real-time chat hub (Phase 14.5). Default JSON serializer; auth comes from
+// the cookie scheme since MapHub doesn't get its own scheme.
+builder.Services.AddSignalR();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<Stylebazar.DAL.Contexts.ApplicationDbContext>(name: "db");
 
@@ -252,6 +255,8 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+// Real-time chat (Phase 14.5). [Authorize] on the hub class itself.
+app.MapHub<Stylebazar.MVC.Hubs.ChatHub>("/hubs/chat");
 
 app.Run();
 
