@@ -166,13 +166,14 @@ public class ChatController : ControllerBase
     [HttpPost("conversations/{conversationId:int}/read")]
     public async Task<IActionResult> MarkRead(int conversationId, CancellationToken ct)
     {
-        await _chat.MarkConversationReadAsync(conversationId, ct);
-        // Tell the OTHER side (sender) their messages were seen — drives the
-        // "Görüldü" indicator live without a refresh.
+        string? peerId = await _chat.MarkConversationReadAsync(conversationId, ct);
+        // Tell ONLY the peer (sender) their messages were seen — drives the
+        // "Görüldü" indicator live without a refresh. Targeting the peer's group
+        // avoids broadcasting read receipts to every connected client.
         string me = _users.GetUserId(User) ?? string.Empty;
-        if (!string.IsNullOrEmpty(me))
+        if (!string.IsNullOrEmpty(peerId) && !string.IsNullOrEmpty(me))
         {
-            await _hubContext.Clients.All.SendAsync("MessagesRead", new { conversationId, readerUserId = me });
+            await _hubContext.Clients.Group("user-" + peerId).SendAsync("MessagesRead", new { conversationId, readerUserId = me });
         }
         return NoContent();
     }

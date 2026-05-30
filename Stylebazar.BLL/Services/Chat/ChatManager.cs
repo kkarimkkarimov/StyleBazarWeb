@@ -249,19 +249,21 @@ public class ChatManager : IChatService
 
     // ============== READ / UNREAD ==============
 
-    public async Task MarkConversationReadAsync(int conversationId, CancellationToken ct = default)
+    public async Task<string?> MarkConversationReadAsync(int conversationId, CancellationToken ct = default)
     {
         string me = RequireUserId();
         Conversation? conv = await _conversations.GetAsync(
             predicate: c => c.Id == conversationId,
             enableTracking: true,
             cancellationToken: ct);
-        if (conv is null) return;
-        if (conv.User1Id != me && conv.User2Id != me) return;
+        if (conv is null) return null;
+        if (conv.User1Id != me && conv.User2Id != me) return null;
 
         bool meIs1 = conv.User1Id == me;
-        if (meIs1 && conv.Unread1 == 0) return;
-        if (!meIs1 && conv.Unread2 == 0) return;
+        if (meIs1 && conv.Unread1 == 0) return null;
+        if (!meIs1 && conv.Unread2 == 0) return null;
+
+        string peerId = meIs1 ? conv.User2Id : conv.User1Id;
 
         if (meIs1) conv.Unread1 = 0; else conv.Unread2 = 0;
         await _conversations.UpdateAsync(conv, ct);
@@ -279,6 +281,8 @@ public class ChatManager : IChatService
             m.IsReadByRecipient = true;
             await _messages.UpdateAsync(m, ct);
         }
+
+        return peerId;
     }
 
     public async Task<int> GetMyUnreadTotalAsync(CancellationToken ct = default)

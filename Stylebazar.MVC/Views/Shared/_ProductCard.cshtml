@@ -13,6 +13,11 @@
     var fullStars = (int)Math.Floor(avg);
     var hasHalf = avg - fullStars >= 0.5;
     bool hasDiscount = Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < Model.Price;
+    // Round the discount % once; the badge only shows for a real (>=1%) cut so a
+    // negligible markdown never renders a meaningless "-0%" pill.
+    int discountPct = hasDiscount && Model.Price > 0
+        ? (int)Math.Round(((double)(Model.Price - Model.DiscountPrice!.Value) / (double)Model.Price) * 100)
+        : 0;
 }
 
 <article class="sb-product @(isRich ? "sb-product--rich" : "sb-product--compact")">
@@ -49,17 +54,16 @@
         </div>
 
         @* Featured / discount accent badge — top-left *@
-        @if (Model.IsFeatured || hasDiscount)
+        @if (Model.IsFeatured || discountPct >= 1)
         {
             <div class="sb-product__accent">
                 @if (Model.IsFeatured)
                 {
                     <span class="sb-product-pill sb-product-pill--accent">Featured</span>
                 }
-                else if (hasDiscount)
+                else if (discountPct >= 1)
                 {
-                    var pct = (int)Math.Round(((double)(Model.Price - Model.DiscountPrice!.Value) / (double)Model.Price) * 100);
-                    <span class="sb-product-pill sb-product-pill--dark">-@pct%</span>
+                    <span class="sb-product-pill sb-product-pill--dark">-@discountPct%</span>
                 }
             </div>
         }

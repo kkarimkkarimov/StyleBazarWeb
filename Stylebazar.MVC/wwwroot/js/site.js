@@ -1176,6 +1176,18 @@
                 if (!currentConv || e.userId !== currentConv.peerUserId) return;
                 if (typingEl) typingEl.hidden = !e.isTyping;
             });
+            hub.handlers.onMessagesRead.push(function (e) {
+                // Peer just read my messages in the open thread — flip every one
+                // of my bubbles to "Görüldü" without waiting for a refresh.
+                if (!currentConv || !messagesEl || e.conversationId !== currentConv.id) return;
+                if (e.readerUserId && e.readerUserId !== currentConv.peerUserId) return;
+                var times = messagesEl.querySelectorAll('.sb-chat-msg.is-mine .sb-chat-msg__time');
+                for (var i = 0; i < times.length; i++) {
+                    if (!times[i].querySelector('.sb-chat-msg__seen')) {
+                        times[i].innerHTML += ' · <span class="sb-chat-msg__seen">Görüldü</span>';
+                    }
+                }
+            });
 
             // ---- Composer ----
             if (composerEl) {

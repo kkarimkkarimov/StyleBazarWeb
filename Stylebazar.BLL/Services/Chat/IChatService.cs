@@ -38,8 +38,10 @@ public interface IChatService
     /// <summary>
     /// Marks all messages in the conversation as read by the current viewer.
     /// Clears their Unread counter. No-op if they aren't a participant.
+    /// Returns the peer's userId (whose messages were just seen) so callers can
+    /// push a targeted "MessagesRead" notification, or null when nothing changed.
     /// </summary>
-    Task MarkConversationReadAsync(int conversationId, CancellationToken ct = default);
+    Task<string?> MarkConversationReadAsync(int conversationId, CancellationToken ct = default);
 
     /// <summary>
     /// Total unread count across all conversations — drives the header badge.

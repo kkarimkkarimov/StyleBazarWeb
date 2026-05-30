@@ -7,7 +7,7 @@
     bool isAuth = User.Identity?.IsAuthenticated == true;
     var mainImg = p.Images.OrderByDescending(i => i.IsMain).ThenBy(i => i.DisplayOrder).FirstOrDefault();
     var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < p.Price;
-    var savePct = hasDiscount ? (int)Math.Round(((double)(p.Price - p.DiscountPrice!.Value) / (double)p.Price) * 100) : 0;
+    var savePct = hasDiscount && p.Price > 0 ? (int)Math.Round(((double)(p.Price - p.DiscountPrice!.Value) / (double)p.Price) * 100) : 0;
     var displayPrice = hasDiscount ? p.DiscountPrice!.Value : p.Price;
     var avg = p.AverageRating;
     var fullStars = (int)Math.Floor(avg);
@@ -132,7 +132,10 @@
             @if (hasDiscount)
             {
                 <span class="sb-pdp__price-old">@p.Price.ToString("N2") ₼</span>
-                <span class="sb-pdp__price-save">-@savePct%</span>
+                @if (savePct >= 1)
+                {
+                    <span class="sb-pdp__price-save">-@savePct%</span>
+                }
             }
         </div>
 

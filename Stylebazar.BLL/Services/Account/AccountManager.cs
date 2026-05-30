@@ -164,10 +164,11 @@ public class AccountManager : IAccountService
             if (!string.IsNullOrWhiteSpace(filter.Role) && !string.Equals(role, filter.Role, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            int storeCount = await _stores.GetListAsync(
+            Paginate<Store> storePage = await _stores.GetListAsync(
                 predicate: s => s.OwnerId == u.Id,
                 orderBy: x => x.OrderBy(s => s.Id),
-                index: 0, size: 1, enableTracking: false, cancellationToken: ct).ContinueWith(t => t.Result.Count, ct);
+                index: 0, size: 1, enableTracking: false, cancellationToken: ct);
+            int storeCount = storePage.Count;
 
             bool suspended = u.LockoutEnd != null && u.LockoutEnd > DateTime.UtcNow;
             items.Add(new UserAdminDto

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.Stories;
 
@@ -14,8 +15,13 @@ public class StoriesController : Controller
         _service = service;
     }
 
-    /// <summary>Anonymous view tracking — called by the story viewer JS.</summary>
+    /// <summary>
+    /// Anonymous view tracking — called by the story viewer JS. Rate-limited
+    /// (same policy as contact-click telemetry) so the view counter can't be
+    /// inflated by hammering the endpoint.
+    /// </summary>
     [HttpPost("View/{id:int}")]
+    [EnableRateLimiting("write-default")]
     public async Task<IActionResult> View(int id, CancellationToken ct)
     {
         try

@@ -93,14 +93,14 @@ public class ChatHub : Hub
     /// <summary>Marks all messages in the conversation as read on behalf of the caller.</summary>
     public async Task MarkRead(int conversationId)
     {
-        await _chat.MarkConversationReadAsync(conversationId, Context.ConnectionAborted);
+        string? peerId = await _chat.MarkConversationReadAsync(conversationId, Context.ConnectionAborted);
         string? me = _users.GetUserId(Context.User!);
-        if (!string.IsNullOrEmpty(me))
+        if (!string.IsNullOrEmpty(peerId) && !string.IsNullOrEmpty(me))
         {
-            // Tell the OTHER participant their messages were seen — drives the
-            // "Görüldü" indicator on the sender side. JS resolves the peer via
-            // the local conversation list, so we just broadcast the event.
-            await Clients.Others.SendAsync("MessagesRead", new { conversationId, readerUserId = me });
+            // Notify ONLY the peer (the original sender) that their messages were
+            // seen — drives the "Görüldü" indicator on their side. Targeting the
+            // peer's group avoids leaking read receipts to unrelated clients.
+            await Clients.Group(GroupName(peerId)).SendAsync("MessagesRead", new { conversationId, readerUserId = me });
         }
     }
 

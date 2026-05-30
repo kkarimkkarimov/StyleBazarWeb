@@ -32,7 +32,11 @@ public class ShopController : Controller
 
     public async Task<IActionResult> Index([FromQuery] ProductListQueryDto query, CancellationToken ct)
     {
-        if (!User.IsInRole("Admin") && !User.IsInRole("Seller") && !query.IsActive.HasValue)
+        // Buyers and anonymous visitors may only ever see active products — force
+        // it regardless of any IsActive supplied in the query string. Without this
+        // a crafted ?IsActive=false would expose hidden/inactive listings across
+        // every store. Admin/Seller keep the ability to query inactive items.
+        if (!User.IsInRole("Admin") && !User.IsInRole("Seller"))
             query.IsActive = true;
 
         var products = await _products.GetListAsync(query, ct);
