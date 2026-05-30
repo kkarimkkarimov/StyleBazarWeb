@@ -296,7 +296,10 @@ public class ProductManager : IProductService
         if (tracked is null)
             throw new NotFoundException(Messages.Product.NotFound);
 
-        Store store = await _rules.StoreMustExistAndBeActiveAsync(tracked.StoreId, ct);
+        // Teardown must work even if the store is deactivated — existence check
+        // only (not active), otherwise products in a suspended store can never be
+        // removed and the store becomes undeletable. Ownership still enforced.
+        Store store = await _rules.StoreMustExistAsync(tracked.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
         _rules.MustOwnStore(store, _currentUser.UserId, isAdmin);
 
@@ -310,7 +313,10 @@ public class ProductManager : IProductService
         Product? tracked = await _products.GetAsync(p => p.Id == id, cancellationToken: ct);
         if (tracked is null) throw new NotFoundException(Messages.Product.NotFound);
 
-        Store store = await _rules.StoreMustExistAndBeActiveAsync(tracked.StoreId, ct);
+        // Activation toggle is a management action — allowed regardless of the
+        // store's active state (admins must be able to manage products inside a
+        // deactivated store). Existence + ownership only.
+        Store store = await _rules.StoreMustExistAsync(tracked.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
         _rules.MustOwnStore(store, _currentUser.UserId, isAdmin);
 

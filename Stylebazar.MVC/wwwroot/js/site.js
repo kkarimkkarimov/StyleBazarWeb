@@ -275,20 +275,10 @@
             var open = menu.classList.toggle('is-open');
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
-        menu.querySelectorAll('button[data-lang]').forEach(function (b) {
-            b.addEventListener('click', function () {
-                menu.querySelectorAll('button').forEach(function (x) { x.classList.remove('is-active'); });
-                b.classList.add('is-active');
-                var lang = b.getAttribute('data-lang') || 'az';
-                var flag = toggle.querySelector('.sb-lang__flag');
-                if (flag) flag.className = 'sb-lang__flag sb-lang__flag--' + lang;
-                var label = toggle.querySelector('span:nth-of-type(1)');
-                // The label span comes after the flag; locate by text role.
-                var labelSpan = toggle.querySelectorAll('span')[1];
-                if (labelSpan) labelSpan.textContent = lang.toUpperCase();
-                close();
-            });
-        });
+        // Each option is now a real <form> POST to /Culture/Set (see _Layout).
+        // We don't preventDefault — letting the form submit performs the actual
+        // culture switch + cookie set + redirect back to the current page. No
+        // cosmetic-only swap here; the server re-renders with the chosen language.
         document.addEventListener('click', function (e) {
             if (!menu.contains(e.target) && !toggle.contains(e.target)) close();
         });
@@ -314,8 +304,11 @@
         // and the big detail-page button (sb-btn-wish-lg). Both opt-in via
         // [data-wish-toggle] so seller/admin UIs can re-use the same icon
         // without firing the wishlist endpoint.
+        // NOTE: do not early-return when there are no [data-wish-toggle] hearts.
+        // The wishlist page (/Wishlist) has only [data-wishlist-remove] buttons
+        // and no toggle hearts — an early return here would leave its remove
+        // buttons unwired. forEach over an empty NodeList is a harmless no-op.
         var buttons = document.querySelectorAll('[data-wish-toggle]');
-        if (!buttons.length) return;
 
         buttons.forEach(function (btn) {
             btn.addEventListener('click', function (e) {
@@ -546,6 +539,7 @@
 
         var progressEl = document.getElementById('sbStoryProgress');
         var imgEl      = document.getElementById('sbStoryImage');
+        var backdropEl = document.getElementById('sbStoryBackdrop');
         var vidEl      = document.getElementById('sbStoryVideo');
         var captionEl  = document.getElementById('sbStoryCaption');
         var avatarEl   = document.getElementById('sbStoryAvatar');
@@ -636,6 +630,8 @@
                 vidEl.hidden = false;
                 vidEl.muted = muted;
                 vidEl.src = s.mediaUrl;
+                // Portrait video fills the frame (cover) — no blurred backdrop.
+                if (backdropEl) backdropEl.classList.remove('is-on');
                 if (muteBtn) muteBtn.hidden = false;
                 reflectMuteBtn();
                 // playsinline + muted ensures autoplay survives browser policies.
@@ -653,6 +649,12 @@
                 currentDurationMs = IMAGE_MS;
                 imgEl.hidden = false;
                 imgEl.src = s.mediaUrl;
+                // Blurred fill from the same photo so a non-9:16 image never
+                // shows black bars (the photo stays crisp + un-cropped on top).
+                if (backdropEl) {
+                    backdropEl.style.backgroundImage = "url('" + s.mediaUrl + "')";
+                    backdropEl.classList.add('is-on');
+                }
                 startTs = performance.now();
                 rafId = requestAnimationFrame(tick);
             }
@@ -1081,6 +1083,12 @@
 
             function renderMessage(msg, prepend) {
                 if (!messagesEl) return;
+                // Dedup guard: a message can arrive twice — once from a REST
+                // .then() and once from the SignalR echo (both fire for the same
+                // saved row). Skip if we already have a bubble with this id. This
+                // also lets optimistic reconcile (below) call renderMessage safely
+                // when the echo may already have rendered the row.
+                if (msg.id != null && messagesEl.querySelector('[data-msg-id="' + msg.id + '"]')) return;
                 var bubble = document.createElement('div');
                 var mine = (msg.senderId === (root.getAttribute('data-me-id') || ''));
                 // Resolve "mine" by sender vs. open conversation peer.
@@ -1189,22 +1197,69 @@
                 }
             });
 
-            // ---- Composer ----
+            // ---- Composer (optimistic send) ----
+            // Render the bubble instantly in a "sending" state, then reconcile
+            // when the server confirms (replace temp row with the saved one) or
+            // mark it "failed · retry" if both SignalR and the REST fallback fail.
+            function renderOptimistic(clientId, text) {
+                if (!messagesEl) return;
+                var b = document.createElement('div');
+                b.className = 'sb-chat-msg is-mine is-sending';
+                b.setAttribute('data-client-id', clientId);
+                b.setAttribute('data-msg-id', 'tmp-' + clientId);
+                b.innerHTML =
+                    '<div class="sb-chat-msg__text">' + escapeHtml(text) + '</div>' +
+                    '<span class="sb-chat-msg__time">' + fmtTime(new Date().toISOString()) +
+                    ' · <span class="sb-chat-msg__status">Göndərilir…</span></span>';
+                messagesEl.appendChild(b);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+            function reconcileOptimistic(clientId, saved) {
+                var temp = messagesEl && messagesEl.querySelector('[data-client-id="' + clientId + '"]');
+                if (temp) temp.remove();
+                // renderMessage's dedup guard no-ops if the echo already rendered it.
+                if (saved) { renderMessage(saved, false); if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight; }
+            }
+            function markOptimisticFailed(clientId, retryFn) {
+                var temp = messagesEl && messagesEl.querySelector('[data-client-id="' + clientId + '"]');
+                if (!temp) return;
+                temp.classList.remove('is-sending');
+                temp.classList.add('is-failed');
+                var status = temp.querySelector('.sb-chat-msg__status');
+                if (status) {
+                    status.textContent = 'Göndərilmədi · ';
+                    var retry = document.createElement('button');
+                    retry.type = 'button';
+                    retry.className = 'sb-chat-msg__retry';
+                    retry.textContent = 'Yenidən';
+                    retry.addEventListener('click', function () { temp.remove(); retryFn(); });
+                    status.appendChild(retry);
+                }
+            }
+            function sendText(text) {
+                if (!currentConv) return;
+                var clientId = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+                var dto = { recipientUserId: currentConv.peerUserId, messageType: 0, body: text };
+                renderOptimistic(clientId, text);
+                var ok = function (saved) { reconcileOptimistic(clientId, saved); };
+                var fail = function () { markOptimisticFailed(clientId, function () { sendText(text); }); };
+                if (hub.connected && hub.conn) {
+                    hub.conn.invoke('SendMessage', dto).then(ok).catch(function () {
+                        // SignalR path failed — try the REST fallback before giving up.
+                        jpost('/api/chat/send', dto).then(ok).catch(fail);
+                    });
+                } else {
+                    jpost('/api/chat/send', dto).then(ok).catch(fail);
+                }
+            }
             if (composerEl) {
                 composerEl.addEventListener('submit', function (e) {
                     e.preventDefault();
                     if (!currentConv) return;
                     var text = (inputEl.value || '').trim();
                     if (!text) return;
-                    var dto = { recipientUserId: currentConv.peerUserId, messageType: 0, body: text };
-                    if (hub.connected && hub.conn) {
-                        hub.conn.invoke('SendMessage', dto).catch(function () {
-                            jpost('/api/chat/send', dto).catch(function () {});
-                        });
-                    } else {
-                        jpost('/api/chat/send', dto).catch(function () {});
-                    }
                     inputEl.value = '';
+                    sendText(text);
                 });
                 inputEl && inputEl.addEventListener('input', function () {
                     if (!currentConv || !hub.connected) return;

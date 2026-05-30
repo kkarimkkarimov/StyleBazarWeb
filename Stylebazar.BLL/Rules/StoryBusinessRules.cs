@@ -42,6 +42,22 @@ public class StoryBusinessRules
         return store;
     }
 
+    /// <summary>
+    /// Verifies the store exists without requiring it to be active. Used by
+    /// story deletion so a story can still be removed after its store has been
+    /// deactivated. Ownership is enforced separately (admin bypasses).
+    /// </summary>
+    public async Task<Store> StoreMustExistAsync(int storeId, CancellationToken ct = default)
+    {
+        Store? store = await _stores.GetAsync(
+            s => s.Id == storeId,
+            enableTracking: false,
+            cancellationToken: ct);
+        if (store is null)
+            throw new NotFoundException(nameof(Store), storeId);
+        return store;
+    }
+
     public void MustBeOwner(Store store, string? currentUserId, bool isAdmin)
     {
         if (isAdmin) return;

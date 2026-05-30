@@ -244,6 +244,9 @@ p { margin: 0 0 1em; }
     z-index: 60;
 }
 .sb-lang__menu.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+/* Each option is wrapped in a <form> (POST to /Culture/Set). Keep the form
+   transparent to layout so the buttons stack full-width exactly as before. */
+.sb-lang__menu form { margin: 0; display: block; width: 100%; }
 .sb-lang__menu button {
     background: transparent;
     border: 0;
@@ -2067,8 +2070,10 @@ body.sb-locked { overflow: hidden; }
 
 .sb-story-viewer__frame {
     position: relative;
-    width: 100%;
-    max-width: 440px;
+    /* Fit the 9:16 frame to the smaller of design width / viewport width /
+       viewport height (52dvh keeps the 16:9-tall frame ≈ 92dvh) so it never
+       overflows a short desktop window or a narrow phone. */
+    width: min(440px, 94vw, 52dvh);
     aspect-ratio: 9 / 16;
     background: #111;
     border-radius: var(--sb-radius);
@@ -2168,14 +2173,52 @@ body.sb-locked { overflow: hidden; }
     position: absolute;
     inset: 0;
     background: #000;
+    overflow: hidden;
 }
+/* Blurred fill behind the photo: the same image, scaled up + blurred, covers
+   the frame so a non-9:16 photo never shows dead black bars (WhatsApp / Shorts
+   look). The real photo sits crisp and un-cropped on top. Images only — set by
+   JS; portrait video uses cover instead. */
+.sb-story-viewer__backdrop {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(34px) brightness(.5) saturate(1.25);
+    transform: scale(1.2);
+    opacity: 0;
+    transition: opacity .45s var(--sb-ease);
+    z-index: 0;
+}
+.sb-story-viewer__backdrop.is-on { opacity: 1; }
 .sb-story-viewer__media img,
 .sb-story-viewer__media video {
+    position: absolute;
+    inset: 0;
     width: 100%; height: 100%;
-    object-fit: contain;  /* preserves portrait videos without crop */
-    background: #000;
     display: block;
+    z-index: 1;
 }
+/* Photo: show the WHOLE image (no crop), centered over the blurred fill. */
+.sb-story-viewer__media img { object-fit: contain; }
+/* Video: fill the 9:16 frame edge-to-edge. Story video is portrait-first, so
+   cover reads as full-bleed; a tiny crop beats letterbox bars. */
+.sb-story-viewer__media video { object-fit: cover; background: #000; }
+/* Top + bottom scrims so the white chrome (progress bar, store name, caption,
+   reply box) stays legible over ANY media colour — sits above the media but
+   below the interactive chrome, and never intercepts taps. */
+.sb-story-viewer__media::before,
+.sb-story-viewer__media::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 92px;
+    z-index: 2;
+    pointer-events: none;
+}
+.sb-story-viewer__media::before { top: 0; background: linear-gradient(to bottom, rgba(0,0,0,.5), transparent); }
+.sb-story-viewer__media::after { bottom: 0; background: linear-gradient(to top, rgba(0,0,0,.5), transparent); }
 
 .sb-story-viewer__caption {
     position: absolute;
@@ -9749,6 +9792,27 @@ body:has(.sb-seller-layout) {
 .sb-chat-msg.is-mine .sb-chat-msg__time { color: rgba(255, 255, 255, .8); }
 .sb-chat-msg__seen { color: #93C5FD; font-weight: 600; }
 .sb-chat-msg.is-mine .sb-chat-msg__seen { color: #BBF7D0; }
+
+/* Optimistic send states: a message renders instantly, dimmed, while in flight;
+   reverts to full opacity on confirm; shows a red "failed · retry" affordance
+   if both SignalR and the REST fallback fail. */
+.sb-chat-msg.is-sending { opacity: .6; }
+.sb-chat-msg__status { font-weight: 600; opacity: .9; }
+.sb-chat-msg.is-failed { background: #DC2626; }
+.sb-chat-msg.is-failed .sb-chat-msg__time,
+.sb-chat-msg.is-failed .sb-chat-msg__status { color: #fff; opacity: 1; }
+.sb-chat-msg__retry {
+    background: rgba(255, 255, 255, .25);
+    border: 0;
+    color: #fff;
+    font: inherit;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.sb-chat-msg__retry:hover { background: rgba(255, 255, 255, .4); }
 
 .sb-chat-msg__story,
 .sb-chat-msg__product {

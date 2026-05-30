@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Utility.BecomeSeller" xml:space="preserve"><value>Стать продавцом</value></data>
+  <data name="Utility.Support" xml:space="preserve"><value>Поддержка</value></data>
+  <data name="Nav.Home" xml:space="preserve"><value>Главная</value></data>
+  <data name="Nav.Stores" xml:space="preserve"><value>Магазины</value></data>
+  <data name="Nav.Categories" xml:space="preserve"><value>Категории</value></data>
+  <data name="Nav.Blog" xml:space="preserve"><value>Блог</value></data>
+  <data name="Nav.About" xml:space="preserve"><value>О нас</value></data>
+  <data name="Auth.Login" xml:space="preserve"><value>Вход</value></data>
+  <data name="Auth.Register" xml:space="preserve"><value>Регистрация</value></data>
+  <data name="Auth.RegisterFull" xml:space="preserve"><value>Зарегистрироваться</value></data>
+  <data name="Auth.LoginFull" xml:space="preserve"><value>Войти</value></data>
+  <data name="Auth.Logout" xml:space="preserve"><value>Выход</value></data>
+  <data name="User.Account" xml:space="preserve"><value>Аккаунт</value></data>
+  <data name="User.AdminPanel" xml:space="preserve"><value>Панель администратора</value></data>
+  <data name="User.Overview" xml:space="preserve"><value>Обзор</value></data>
+  <data name="User.SellerPanel" xml:space="preserve"><value>Панель продавца</value></data>
+  <data name="User.Messages" xml:space="preserve"><value>Сообщения</value></data>
+  <data name="User.Profile" xml:space="preserve"><value>Профиль</value></data>
+  <data name="User.MyAccount" xml:space="preserve"><value>Мой аккаунт</value></data>
+  <data name="User.Wishlist" xml:space="preserve"><value>Избранное</value></data>
+  <data name="Marquee.1" xml:space="preserve"><value>Первый месяц без комиссии для новых продавцов</value></data>
+  <data name="Marquee.2" xml:space="preserve"><value>Все товары от местных магазинов</value></data>
+  <data name="Marquee.3" xml:space="preserve"><value>Покупайте уверенно с отзывами с фото</value></data>
+  <data name="Marquee.4" xml:space="preserve"><value>Сохраняйте любимое в Избранном</value></data>
+  <data name="Footer.Tagline" xml:space="preserve"><value>Платформа, где вы находите брендовую одежду от местных продавцов и храните любимое в одном месте.</value></data>
+  <data name="Footer.Shop" xml:space="preserve"><value>Магазин</value></data>
+  <data name="Footer.AllProducts" xml:space="preserve"><value>Все товары</value></data>
+  <data name="Footer.NewArrivals" xml:space="preserve"><value>Новинки</value></data>
+  <data name="Footer.Company" xml:space="preserve"><value>Компания</value></data>
+  <data name="Footer.Contact" xml:space="preserve"><value>Контакты</value></data>
+  <data name="Footer.BecomeSeller" xml:space="preserve"><value>Стать продавцом</value></data>
+  <data name="Footer.Privacy" xml:space="preserve"><value>Конфиденциальность</value></data>
+  <data name="Footer.City" xml:space="preserve"><value>Баку, Азербайджан</value></data>
+  <data name="Footer.Rights" xml:space="preserve"><value>Все права защищены.</value></data>
+  <data name="Footer.MadeIn" xml:space="preserve"><value>Сделано с ♡ в Баку</value></data>
+  <data name="Chat.Title" xml:space="preserve"><value>Сообщения</value></data>
+  <data name="Chat.EmptyTitle" xml:space="preserve"><value>Пока нет переписок</value></data>
+  <data name="Chat.EmptySub" xml:space="preserve"><value>Начните, ответив со страницы магазина или из истории.</value></data>
+  <data name="Chat.Typing" xml:space="preserve"><value>печатает...</value></data>
+  <data name="Chat.MessagePlaceholder" xml:space="preserve"><value>Напишите сообщение...</value></data>
+  <data name="Chat.AddImage" xml:space="preserve"><value>Добавить фото</value></data>
+  <data name="Chat.Send" xml:space="preserve"><value>Отправить</value></data>
+  <data name="Chat.FullView" xml:space="preserve"><value>Полный вид</value></data>
+  <data name="Bottom.Home" xml:space="preserve"><value>Главная</value></data>
+  <data name="Bottom.Account" xml:space="preserve"><value>Аккаунт</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Что вы ищете?</value></data>
+  <data name="Search.Popular" xml:space="preserve"><value>Популярные запросы</value></data>
+  <data name="Search.QuickLinks" xml:space="preserve"><value>Быстрые ссылки</value></data>
+  <data name="Search.PriceLowHigh" xml:space="preserve"><value>Цена: по возрастанию</value></data>
+  <data name="Search.AllSellers" xml:space="preserve"><value>Все продавцы</value></data>
+  <data name="Search.ChipShirt" xml:space="preserve"><value>Рубашка</value></data>
+  <data name="Search.ChipShoes" xml:space="preserve"><value>Обувь</value></data>
+  <data name="Search.ChipBag" xml:space="preserve"><value>Сумка</value></data>
+  <data name="Search.ChipCoat" xml:space="preserve"><value>Пальто</value></data>
+  <data name="Search.ChipPants" xml:space="preserve"><value>Брюки</value></data>
+  <data name="Aria.Search" xml:space="preserve"><value>Поиск</value></data>
+  <data name="Aria.Menu" xml:space="preserve"><value>Меню</value></data>
+  <data name="Aria.Close" xml:space="preserve"><value>Закрыть</value></data>
+  <data name="Aria.Back" xml:space="preserve"><value>Назад</value></data>
+  <data name="Lang.AZ" xml:space="preserve"><value>Azərbaycan</value></data>
+  <data name="Lang.EN" xml:space="preserve"><value>English</value></data>
+  <data name="Lang.RU" xml:space="preserve"><value>Русский</value></data>
+</root>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Utility.BecomeSeller" xml:space="preserve"><value>Satıcı kimi qoşul</value></data>
+  <data name="Utility.Support" xml:space="preserve"><value>Dəstək</value></data>
+  <data name="Nav.Home" xml:space="preserve"><value>Ana səhifə</value></data>
+  <data name="Nav.Stores" xml:space="preserve"><value>Mağazalar</value></data>
+  <data name="Nav.Categories" xml:space="preserve"><value>Kateqoriyalar</value></data>
+  <data name="Nav.Blog" xml:space="preserve"><value>Blog</value></data>
+  <data name="Nav.About" xml:space="preserve"><value>Haqqımızda</value></data>
+  <data name="Auth.Login" xml:space="preserve"><value>Giriş</value></data>
+  <data name="Auth.Register" xml:space="preserve"><value>Qeydiyyat</value></data>
+  <data name="Auth.RegisterFull" xml:space="preserve"><value>Qeydiyyatdan keç</value></data>
+  <data name="Auth.LoginFull" xml:space="preserve"><value>Giriş et</value></data>
+  <data name="Auth.Logout" xml:space="preserve"><value>Çıxış</value></data>
+  <data name="User.Account" xml:space="preserve"><value>Hesab</value></data>
+  <data name="User.AdminPanel" xml:space="preserve"><value>Admin paneli</value></data>
+  <data name="User.Overview" xml:space="preserve"><value>İcmal</value></data>
+  <data name="User.SellerPanel" xml:space="preserve"><value>Satıcı paneli</value></data>
+  <data name="User.Messages" xml:space="preserve"><value>Mesajlar</value></data>
+  <data name="User.Profile" xml:space="preserve"><value>Profil</value></data>
+  <data name="User.MyAccount" xml:space="preserve"><value>Hesabım</value></data>
+  <data name="User.Wishlist" xml:space="preserve"><value>Wishlist</value></data>
+  <data name="Marquee.1" xml:space="preserve"><value>Yeni satıcılar üçün ilk ay komissiyasız</value></data>
+  <data name="Marquee.2" xml:space="preserve"><value>Bütün məhsullar yerli mağazalardan</value></data>
+  <data name="Marquee.3" xml:space="preserve"><value>Şəkilli rəylər ilə inamla seç</value></data>
+  <data name="Marquee.4" xml:space="preserve"><value>Wishlist ilə sevimlilərini saxla</value></data>
+  <data name="Footer.Tagline" xml:space="preserve"><value>Yerli satıcılardan brend geyimləri tapdığın və sevimlilərini bir yerdə saxladığın platforma.</value></data>
+  <data name="Footer.Shop" xml:space="preserve"><value>Mağaza</value></data>
+  <data name="Footer.AllProducts" xml:space="preserve"><value>Bütün məhsullar</value></data>
+  <data name="Footer.NewArrivals" xml:space="preserve"><value>Yeni gələnlər</value></data>
+  <data name="Footer.Company" xml:space="preserve"><value>Şirkət</value></data>
+  <data name="Footer.Contact" xml:space="preserve"><value>Əlaqə</value></data>
+  <data name="Footer.BecomeSeller" xml:space="preserve"><value>Satıcı ol</value></data>
+  <data name="Footer.Privacy" xml:space="preserve"><value>Gizlilik</value></data>
+  <data name="Footer.City" xml:space="preserve"><value>Bakı, Azərbaycan</value></data>
+  <data name="Footer.Rights" xml:space="preserve"><value>Bütün hüquqlar qorunur.</value></data>
+  <data name="Footer.MadeIn" xml:space="preserve"><value>Made with ♡ in Baku</value></data>
+  <data name="Chat.Title" xml:space="preserve"><value>Mesajlar</value></data>
+  <data name="Chat.EmptyTitle" xml:space="preserve"><value>Hələ söhbət yoxdur</value></data>
+  <data name="Chat.EmptySub" xml:space="preserve"><value>Mağaza səhifəsindən və ya hekayədən cavab yazaraq başla.</value></data>
+  <data name="Chat.Typing" xml:space="preserve"><value>yazır...</value></data>
+  <data name="Chat.MessagePlaceholder" xml:space="preserve"><value>Mesaj yaz...</value></data>
+  <data name="Chat.AddImage" xml:space="preserve"><value>Şəkil əlavə et</value></data>
+  <data name="Chat.Send" xml:space="preserve"><value>Göndər</value></data>
+  <data name="Chat.FullView" xml:space="preserve"><value>Tam görünüş</value></data>
+  <data name="Bottom.Home" xml:space="preserve"><value>Ana</value></data>
+  <data name="Bottom.Account" xml:space="preserve"><value>Hesab</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Nə axtarırsan?</value></data>
+  <data name="Search.Popular" xml:space="preserve"><value>Populyar axtarışlar</value></data>
+  <data name="Search.QuickLinks" xml:space="preserve"><value>Tez keçidlər</value></data>
+  <data name="Search.PriceLowHigh" xml:space="preserve"><value>Ucuzdan bahaya</value></data>
+  <data name="Search.AllSellers" xml:space="preserve"><value>Bütün satıcılar</value></data>
+  <data name="Search.ChipShirt" xml:space="preserve"><value>Köynək</value></data>
+  <data name="Search.ChipShoes" xml:space="preserve"><value>Ayaqqabı</value></data>
+  <data name="Search.ChipBag" xml:space="preserve"><value>Çanta</value></data>
+  <data name="Search.ChipCoat" xml:space="preserve"><value>Palto</value></data>
+  <data name="Search.ChipPants" xml:space="preserve"><value>Şalvar</value></data>
+  <data name="Aria.Search" xml:space="preserve"><value>Axtarış</value></data>
+  <data name="Aria.Menu" xml:space="preserve"><value>Menyu</value></data>
+  <data name="Aria.Close" xml:space="preserve"><value>Bağla</value></data>
+  <data name="Aria.Back" xml:space="preserve"><value>Geri</value></data>
+  <data name="Lang.AZ" xml:space="preserve"><value>Azərbaycan</value></data>
+  <data name="Lang.EN" xml:space="preserve"><value>English</value></data>
+  <data name="Lang.RU" xml:space="preserve"><value>Русский</value></data>
+</root>

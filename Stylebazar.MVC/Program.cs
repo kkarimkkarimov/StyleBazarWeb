@@ -32,8 +32,40 @@ ApplyDevFallbackSecrets(builder);
 // couldn't be applied.
 ValidateRequiredSecrets(builder.Configuration, builder.Environment);
 
+// ---- Localization (AZ / RU / EN) ----
+// Resources live in /Resources/SharedResource.{culture}.resx. The neutral
+// (suffix-less) file holds Azerbaijani — the default + fallback culture — so a
+// missing translation degrades to proper AZ, never to a raw resource key.
+builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
+
+var supportedCultures = new[]
+{
+    new System.Globalization.CultureInfo("az"),
+    new System.Globalization.CultureInfo("ru"),
+    new System.Globalization.CultureInfo("en")
+};
+
+builder.Services.Configure<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>(opts =>
+{
+    opts.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("az");
+    opts.SupportedCultures = supportedCultures;
+    opts.SupportedUICultures = supportedCultures;
+    // Cookie first (explicit user choice from the header switcher), then the
+    // browser's Accept-Language, then the "az" default. Query-string provider
+    // is dropped — culture is a deliberate cookie-backed choice, not a URL param.
+    opts.RequestCultureProviders = new List<Microsoft.AspNetCore.Localization.IRequestCultureProvider>
+    {
+        new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider(),
+        new Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider()
+    };
+});
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+// AddViewLocalization wires @inject IViewLocalizer / IHtmlLocalizer<T> in Razor;
+// AddDataAnnotationsLocalization localizes [Display]/[Required] messages too.
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 // Real-time chat hub (Phase 14.5). Default JSON serializer; auth comes from
 // the cookie scheme since MapHub doesn't get its own scheme.
 builder.Services.AddSignalR();
@@ -228,6 +260,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseResponseCompression();
 }
+
+// Apply the per-request culture (cookie → Accept-Language → "az") before
+// routing so controllers, views and DataAnnotations all see the right culture.
+app.UseRequestLocalization(
+    app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>>().Value);
 
 app.UseRouting();
 

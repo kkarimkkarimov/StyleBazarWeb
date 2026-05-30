@@ -61,6 +61,27 @@ public class ProductBusinessRules
         return store;
     }
 
+    /// <summary>
+    /// Verifies the store exists but does NOT require it to be active. Used by
+    /// teardown/management operations (product delete, activation toggle): these
+    /// must succeed even after a store is deactivated, otherwise a suspended
+    /// store and its products become permanently undeletable (the store-delete
+    /// guard blocks while products exist, and product-delete would block while
+    /// the store is inactive). Ownership is still enforced separately.
+    /// </summary>
+    public async Task<Store> StoreMustExistAsync(int storeId, CancellationToken ct = default)
+    {
+        Store? store = await _stores.GetAsync(
+            s => s.Id == storeId,
+            enableTracking: false,
+            cancellationToken: ct);
+
+        if (store is null)
+            throw new NotFoundException(nameof(Store), storeId);
+
+        return store;
+    }
+
     public async Task CategoryMustExistAsync(int categoryId, CancellationToken ct = default)
     {
         bool exists = await _categories.AnyAsync(

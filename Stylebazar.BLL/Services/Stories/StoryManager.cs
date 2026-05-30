@@ -187,7 +187,9 @@ public class StoryManager : IStoryService
     public async Task DeleteAsync(int id, CancellationToken ct = default)
     {
         Story existing = await _rules.StoryMustExistAsync(id, ct);
-        Store store = await _rules.StoreMustExistAndBeActiveAsync(existing.StoreId, ct);
+        // Deleting a story must work even if its store was deactivated — existence
+        // (not active) + ownership (admin bypass) is the correct teardown gate.
+        Store store = await _rules.StoreMustExistAsync(existing.StoreId, ct);
         bool isAdmin = _currentUser.IsInRole("Admin");
         _rules.MustBeOwner(store, _currentUser.UserId, isAdmin);
 

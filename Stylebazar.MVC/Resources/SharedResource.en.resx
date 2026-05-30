@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Utility.BecomeSeller" xml:space="preserve"><value>Become a seller</value></data>
+  <data name="Utility.Support" xml:space="preserve"><value>Support</value></data>
+  <data name="Nav.Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Nav.Stores" xml:space="preserve"><value>Stores</value></data>
+  <data name="Nav.Categories" xml:space="preserve"><value>Categories</value></data>
+  <data name="Nav.Blog" xml:space="preserve"><value>Blog</value></data>
+  <data name="Nav.About" xml:space="preserve"><value>About us</value></data>
+  <data name="Auth.Login" xml:space="preserve"><value>Log in</value></data>
+  <data name="Auth.Register" xml:space="preserve"><value>Sign up</value></data>
+  <data name="Auth.RegisterFull" xml:space="preserve"><value>Create account</value></data>
+  <data name="Auth.LoginFull" xml:space="preserve"><value>Log in</value></data>
+  <data name="Auth.Logout" xml:space="preserve"><value>Log out</value></data>
+  <data name="User.Account" xml:space="preserve"><value>Account</value></data>
+  <data name="User.AdminPanel" xml:space="preserve"><value>Admin panel</value></data>
+  <data name="User.Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="User.SellerPanel" xml:space="preserve"><value>Seller panel</value></data>
+  <data name="User.Messages" xml:space="preserve"><value>Messages</value></data>
+  <data name="User.Profile" xml:space="preserve"><value>Profile</value></data>
+  <data name="User.MyAccount" xml:space="preserve"><value>My account</value></data>
+  <data name="User.Wishlist" xml:space="preserve"><value>Wishlist</value></data>
+  <data name="Marquee.1" xml:space="preserve"><value>First month commission-free for new sellers</value></data>
+  <data name="Marquee.2" xml:space="preserve"><value>All products from local stores</value></data>
+  <data name="Marquee.3" xml:space="preserve"><value>Shop with confidence using photo reviews</value></data>
+  <data name="Marquee.4" xml:space="preserve"><value>Save your favorites with Wishlist</value></data>
+  <data name="Footer.Tagline" xml:space="preserve"><value>The platform where you find branded clothing from local sellers and keep your favorites in one place.</value></data>
+  <data name="Footer.Shop" xml:space="preserve"><value>Shop</value></data>
+  <data name="Footer.AllProducts" xml:space="preserve"><value>All products</value></data>
+  <data name="Footer.NewArrivals" xml:space="preserve"><value>New arrivals</value></data>
+  <data name="Footer.Company" xml:space="preserve"><value>Company</value></data>
+  <data name="Footer.Contact" xml:space="preserve"><value>Contact</value></data>
+  <data name="Footer.BecomeSeller" xml:space="preserve"><value>Become a seller</value></data>
+  <data name="Footer.Privacy" xml:space="preserve"><value>Privacy</value></data>
+  <data name="Footer.City" xml:space="preserve"><value>Baku, Azerbaijan</value></data>
+  <data name="Footer.Rights" xml:space="preserve"><value>All rights reserved.</value></data>
+  <data name="Footer.MadeIn" xml:space="preserve"><value>Made with ♡ in Baku</value></data>
+  <data name="Chat.Title" xml:space="preserve"><value>Messages</value></data>
+  <data name="Chat.EmptyTitle" xml:space="preserve"><value>No conversations yet</value></data>
+  <data name="Chat.EmptySub" xml:space="preserve"><value>Start by replying from a store page or a story.</value></data>
+  <data name="Chat.Typing" xml:space="preserve"><value>typing...</value></data>
+  <data name="Chat.MessagePlaceholder" xml:space="preserve"><value>Write a message...</value></data>
+  <data name="Chat.AddImage" xml:space="preserve"><value>Add image</value></data>
+  <data name="Chat.Send" xml:space="preserve"><value>Send</value></data>
+  <data name="Chat.FullView" xml:space="preserve"><value>Full view</value></data>
+  <data name="Bottom.Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Bottom.Account" xml:space="preserve"><value>Account</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>What are you looking for?</value></data>
+  <data name="Search.Popular" xml:space="preserve"><value>Popular searches</value></data>
+  <data name="Search.QuickLinks" xml:space="preserve"><value>Quick links</value></data>
+  <data name="Search.PriceLowHigh" xml:space="preserve"><value>Price: low to high</value></data>
+  <data name="Search.AllSellers" xml:space="preserve"><value>All sellers</value></data>
+  <data name="Search.ChipShirt" xml:space="preserve"><value>Shirt</value></data>
+  <data name="Search.ChipShoes" xml:space="preserve"><value>Shoes</value></data>
+  <data name="Search.ChipBag" xml:space="preserve"><value>Bag</value></data>
+  <data name="Search.ChipCoat" xml:space="preserve"><value>Coat</value></data>
+  <data name="Search.ChipPants" xml:space="preserve"><value>Pants</value></data>
+  <data name="Aria.Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Aria.Menu" xml:space="preserve"><value>Menu</value></data>
+  <data name="Aria.Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Aria.Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Lang.AZ" xml:space="preserve"><value>Azərbaycan</value></data>
+  <data name="Lang.EN" xml:space="preserve"><value>English</value></data>
+  <data name="Lang.RU" xml:space="preserve"><value>Русский</value></data>
+</root>

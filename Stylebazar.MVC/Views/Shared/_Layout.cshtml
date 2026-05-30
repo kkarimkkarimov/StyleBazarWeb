@@ -1,6 +1,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Stylebazar.BLL.Services.Wishlist
 @using Stylebazar.DAL.Entities
+@using System.Globalization
 @inject SignInManager<AppUser> SignInManager
 @inject IWishlistService WishlistService
 @{
@@ -11,9 +12,16 @@
     {
         wishlistCount = await WishlistService.GetMyCountAsync(Context.RequestAborted);
     }
+
+    // Current culture drives the <html lang>, the switcher's active state, and
+    // the return URL the switcher posts back to (so language change keeps you
+    // on the same page).
+    string curCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLowerInvariant();
+    if (curCulture != "ru" && curCulture != "en") { curCulture = "az"; }
+    string langReturnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
 <!DOCTYPE html>
-<html lang="az">
+<html lang="@curCulture">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -34,20 +42,35 @@
     @* ============== TOP UTILITY BAR (desktop only) ============== *@
     <div class="sb-utility">
         <div class="sb-container sb-utility__bar">
-            <a asp-controller="Account" asp-action="Register">Satıcı kimi qoşul</a>
+            <a asp-controller="Account" asp-action="Register">@L["Utility.BecomeSeller"]</a>
             <span class="sb-utility__divider"></span>
-            <a asp-controller="Support" asp-action="Index">Dəstək</a>
+            <a asp-controller="Support" asp-action="Index">@L["Utility.Support"]</a>
             <span class="sb-utility__divider"></span>
+            @* Language switcher — real culture switch via POST to /Culture/Set
+               (anti-forgery protected, open-redirect safe). Each option submits
+               its own hidden form so the choice persists in a cookie. *@
             <div class="sb-lang">
                 <button class="sb-lang__toggle" type="button" id="sbLangToggle" aria-haspopup="true" aria-expanded="false">
-                    <span class="sb-lang__flag sb-lang__flag--az" aria-hidden="true"></span>
-                    <span>AZ</span>
+                    <span class="sb-lang__flag sb-lang__flag--@curCulture" aria-hidden="true"></span>
+                    <span>@curCulture.ToUpperInvariant()</span>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="sb-lang__menu" id="sbLangMenu" role="menu">
-                    <button type="button" class="is-active" data-lang="az"><span class="sb-lang__flag sb-lang__flag--az"></span>Azərbaycan</button>
-                    <button type="button" data-lang="en"><span class="sb-lang__flag sb-lang__flag--en"></span>English</button>
-                    <button type="button" data-lang="ru"><span class="sb-lang__flag sb-lang__flag--ru"></span>Русский</button>
+                    <form asp-controller="Culture" asp-action="Set" method="post">
+                        <input type="hidden" name="culture" value="az" />
+                        <input type="hidden" name="returnUrl" value="@langReturnUrl" />
+                        <button type="submit" class="@(curCulture == "az" ? "is-active" : "")"><span class="sb-lang__flag sb-lang__flag--az"></span>@L["Lang.AZ"]</button>
+                    </form>
+                    <form asp-controller="Culture" asp-action="Set" method="post">
+                        <input type="hidden" name="culture" value="en" />
+                        <input type="hidden" name="returnUrl" value="@langReturnUrl" />
+                        <button type="submit" class="@(curCulture == "en" ? "is-active" : "")"><span class="sb-lang__flag sb-lang__flag--en"></span>@L["Lang.EN"]</button>
+                    </form>
+                    <form asp-controller="Culture" asp-action="Set" method="post">
+                        <input type="hidden" name="culture" value="ru" />
+                        <input type="hidden" name="returnUrl" value="@langReturnUrl" />
+                        <button type="submit" class="@(curCulture == "ru" ? "is-active" : "")"><span class="sb-lang__flag sb-lang__flag--ru"></span>@L["Lang.RU"]</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -62,14 +85,14 @@
 
             <ul class="sb-nav">
                 <li class="sb-nav__item">
-                    <a class="sb-nav__link" asp-controller="Home" asp-action="Index">Ana səhifə</a>
+                    <a class="sb-nav__link" asp-controller="Home" asp-action="Index">@L["Nav.Home"]</a>
                 </li>
                 <li class="sb-nav__item">
-                    <a class="sb-nav__link" asp-controller="Store" asp-action="Index">Mağazalar</a>
+                    <a class="sb-nav__link" asp-controller="Store" asp-action="Index">@L["Nav.Stores"]</a>
                 </li>
                 <li class="sb-nav__item" data-mega="categories">
                     <button class="sb-nav__link" type="button" aria-haspopup="true" aria-expanded="false">
-                        Kateqoriyalar
+                        @L["Nav.Categories"]
                         <svg class="sb-nav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="sb-mega" role="menu" aria-label="Kateqoriyalar">
@@ -156,10 +179,10 @@
                 </li>
                 <li class="sb-nav__item" data-mega="blog">
                     <button class="sb-nav__link" type="button" aria-haspopup="true" aria-expanded="false">
-                        Blog
+                        @L["Nav.Blog"]
                         <svg class="sb-nav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
-                    <div class="sb-mega sb-mega--blog" role="menu" aria-label="Blog">
+                    <div class="sb-mega sb-mega--blog" role="menu" aria-label="@L["Nav.Blog"]">
                         <div class="sb-mega__grid">
                             <div class="sb-mega__col">
                                 <h5>Yeni</h5>
@@ -221,27 +244,27 @@
                     </div>
                 </li>
                 <li class="sb-nav__item">
-                    <a class="sb-nav__link" asp-controller="About" asp-action="Index">Haqqımızda</a>
+                    <a class="sb-nav__link" asp-controller="About" asp-action="Index">@L["Nav.About"]</a>
                 </li>
             </ul>
 
             <div class="sb-header__spacer"></div>
 
             <div class="sb-header__actions">
-                <button class="sb-icon-btn" type="button" id="sbSearchOpen" aria-label="Axtarış">
+                <button class="sb-icon-btn" type="button" id="sbSearchOpen" aria-label="@L["Aria.Search"]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
 
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <a class="sb-icon-btn sb-icon-btn--counter" asp-controller="Wishlist" asp-action="Index" aria-label="Wishlist" data-wishlist-link>
+                    <a class="sb-icon-btn sb-icon-btn--counter" asp-controller="Wishlist" asp-action="Index" aria-label="@L["User.Wishlist"]" data-wishlist-link>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                         <span class="sb-icon-btn__count @(wishlistCount > 0 ? "is-visible" : "")" data-wishlist-count>@wishlistCount</span>
                     </a>
                     <div class="sb-user-wrap">
                         <button class="sb-user" type="button" id="sbUserToggle" aria-haspopup="true" aria-expanded="false">
                             <span class="sb-user__avatar">@(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")</span>
-                            <span>@(User.Identity?.Name?.Split('@')[0] ?? "Hesab")</span>
+                            <span>@(User.Identity?.Name?.Split('@')[0] ?? L["User.Account"].Value)</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="sb-dropdown" id="sbUserMenu" role="menu">
@@ -251,34 +274,34 @@
                                    Indigo accent rəngi ilə fərqləndirilir ki, normal item-dan seçilsin. *@
                                 <a class="sb-dropdown__item sb-dropdown__item--admin" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                    Admin paneli
+                                    @L["User.AdminPanel"]
                                 </a>
                                 <div class="sb-dropdown__sep"></div>
                             }
                             <a class="sb-dropdown__item" asp-controller="Account" asp-action="Dashboard">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                                İcmal
+                                @L["User.Overview"]
                             </a>
                             @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
                             {
                                 <a class="sb-dropdown__item" asp-controller="Seller" asp-action="Dashboard">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-                                    Satıcı paneli
+                                    @L["User.SellerPanel"]
                                 </a>
                             }
                             <a class="sb-dropdown__item" asp-controller="Account" asp-action="Messages">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                                Mesajlar
+                                @L["User.Messages"]
                             </a>
                             <a class="sb-dropdown__item" asp-controller="Account" asp-action="Profile">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-                                Profil
+                                @L["User.Profile"]
                             </a>
                             <div class="sb-dropdown__sep"></div>
                             <form asp-controller="Account" asp-action="Logout" method="post">
                                 <button type="submit" class="sb-dropdown__item sb-dropdown__item--danger">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                                    Çıxış
+                                    @L["Auth.Logout"]
                                 </button>
                             </form>
                         </div>
@@ -287,12 +310,12 @@
                 else
                 {
                     <div class="sb-auth-actions">
-                        <a class="sb-btn sb-btn--ghost sb-btn--sm" asp-controller="Account" asp-action="Login">Giriş</a>
-                        <a class="sb-btn sb-btn--primary sb-btn--sm" asp-controller="Account" asp-action="Register">Qeydiyyat</a>
+                        <a class="sb-btn sb-btn--ghost sb-btn--sm" asp-controller="Account" asp-action="Login">@L["Auth.Login"]</a>
+                        <a class="sb-btn sb-btn--primary sb-btn--sm" asp-controller="Account" asp-action="Register">@L["Auth.Register"]</a>
                     </div>
                 }
 
-                <button class="sb-icon-btn sb-burger" type="button" id="sbBurger" aria-label="Menyu">
+                <button class="sb-icon-btn sb-burger" type="button" id="sbBurger" aria-label="@L["Aria.Menu"]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
             </div>
@@ -308,30 +331,30 @@
             <div class="sb-search-overlay__head">
                 <form class="sb-search-overlay__form" asp-controller="Shop" asp-action="Index" method="get" role="search">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input class="sb-search-overlay__input" type="search" name="search" placeholder="Nə axtarırsan?" id="sbSearchInput" autocomplete="off" />
+                    <input class="sb-search-overlay__input" type="search" name="search" placeholder="@L["Search.Placeholder"]" id="sbSearchInput" autocomplete="off" />
                 </form>
-                <button class="sb-icon-btn" type="button" id="sbSearchClose" aria-label="Bağla">
+                <button class="sb-icon-btn" type="button" id="sbSearchClose" aria-label="@L["Aria.Close"]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
 
             <div class="sb-search-overlay__suggestions">
                 <div>
-                    <div class="sb-search-overlay__suggestion-label">Populyar axtarışlar</div>
+                    <div class="sb-search-overlay__suggestion-label">@L["Search.Popular"]</div>
                     <div class="sb-search-overlay__chips">
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="köynək">Köynək</a>
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="ayaqqabı">Ayaqqabı</a>
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="çanta">Çanta</a>
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="palto">Palto</a>
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="şalvar">Şalvar</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="köynək">@L["Search.ChipShirt"]</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="ayaqqabı">@L["Search.ChipShoes"]</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="çanta">@L["Search.ChipBag"]</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="palto">@L["Search.ChipCoat"]</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-search="şalvar">@L["Search.ChipPants"]</a>
                     </div>
                 </div>
                 <div style="margin-top: 24px;">
-                    <div class="sb-search-overlay__suggestion-label">Tez keçidlər</div>
+                    <div class="sb-search-overlay__suggestion-label">@L["Search.QuickLinks"]</div>
                     <div class="sb-search-overlay__chips">
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər</a>
-                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-sortBy="price-asc">Ucuzdan bahaya</a>
-                        <a class="sb-search-overlay__chip" asp-controller="Store" asp-action="Index">Bütün satıcılar</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">@L["Footer.NewArrivals"]</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Shop" asp-action="Index" asp-route-sortBy="price-asc">@L["Search.PriceLowHigh"]</a>
+                        <a class="sb-search-overlay__chip" asp-controller="Store" asp-action="Index">@L["Search.AllSellers"]</a>
                     </div>
                 </div>
             </div>
@@ -344,17 +367,17 @@
             <a class="sb-brand" asp-controller="Home" asp-action="Index">
                 StyleBazar<span class="sb-brand__dot">.</span>
             </a>
-            <button class="sb-icon-btn" type="button" id="sbMenuClose" aria-label="Bağla">
+            <button class="sb-icon-btn" type="button" id="sbMenuClose" aria-label="@L["Aria.Close"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <ul class="sb-mobile-menu__list">
-            <li><a asp-controller="Home" asp-action="Index">Ana səhifə <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
-            <li><a asp-controller="Store" asp-action="Index">Mağazalar <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Home" asp-action="Index">@L["Nav.Home"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Store" asp-action="Index">@L["Nav.Stores"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             <li>
                 <div class="sb-mobile-acc">
                     <button class="sb-mobile-acc__trigger" type="button">
-                        Kateqoriyalar
+                        @L["Nav.Categories"]
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="sb-mobile-acc__panel">
@@ -369,34 +392,34 @@
                     </div>
                 </div>
             </li>
-            <li><a asp-controller="Blog" asp-action="Index">Blog <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
-            <li><a asp-controller="About" asp-action="Index">Haqqımızda <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
-            <li><a asp-controller="Support" asp-action="Index">Dəstək <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Blog" asp-action="Index">@L["Nav.Blog"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="About" asp-action="Index">@L["Nav.About"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+            <li><a asp-controller="Support" asp-action="Index">@L["Utility.Support"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             @if (SignInManager.IsSignedIn(User))
             {
                 @if (User.IsInRole("Admin"))
                 {
-                    <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" style="color:#4338CA;font-weight:600;">Admin paneli <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                    <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" style="color:#4338CA;font-weight:600;">@L["User.AdminPanel"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
                 }
                 @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
                 {
-                    <li><a asp-controller="Seller" asp-action="Dashboard">Satıcı paneli <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                    <li><a asp-controller="Seller" asp-action="Dashboard">@L["User.SellerPanel"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
                 }
-                <li><a asp-controller="Account" asp-action="Dashboard">Hesabım <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
-                <li><a asp-controller="Wishlist" asp-action="Index">Wishlist <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                <li><a asp-controller="Account" asp-action="Dashboard">@L["User.MyAccount"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
+                <li><a asp-controller="Wishlist" asp-action="Index">@L["User.Wishlist"] <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a></li>
             }
         </ul>
         @if (!SignInManager.IsSignedIn(User))
         {
             <div class="sb-mobile-menu__cta">
-                <a class="sb-btn sb-btn--primary sb-btn--block" asp-controller="Account" asp-action="Register">Qeydiyyatdan keç</a>
-                <a class="sb-btn sb-btn--ghost sb-btn--block" asp-controller="Account" asp-action="Login">Giriş et</a>
+                <a class="sb-btn sb-btn--primary sb-btn--block" asp-controller="Account" asp-action="Register">@L["Auth.RegisterFull"]</a>
+                <a class="sb-btn sb-btn--ghost sb-btn--block" asp-controller="Account" asp-action="Login">@L["Auth.LoginFull"]</a>
             </div>
         }
         else
         {
             <form asp-controller="Account" asp-action="Logout" method="post" class="sb-mobile-menu__cta">
-                <button type="submit" class="sb-btn sb-btn--ghost sb-btn--block">Çıxış</button>
+                <button type="submit" class="sb-btn sb-btn--ghost sb-btn--block">@L["Auth.Logout"]</button>
             </form>
         }
     </div>
@@ -404,12 +427,12 @@
     @* ============== MARQUEE STRIP ============== *@
     <div class="sb-marquee">
         <div class="sb-marquee__track">
-            <span>Yeni satıcılar üçün ilk ay komissiyasız</span>
-            <span>Bütün məhsullar yerli mağazalardan</span>
-            <span>Şəkilli rəylər ilə inamla seç</span>
-            <span>Wishlist ilə sevimlilərini saxla</span>
-            <span>Yeni satıcılar üçün ilk ay komissiyasız</span>
-            <span>Bütün məhsullar yerli mağazalardan</span>
+            <span>@L["Marquee.1"]</span>
+            <span>@L["Marquee.2"]</span>
+            <span>@L["Marquee.3"]</span>
+            <span>@L["Marquee.4"]</span>
+            <span>@L["Marquee.1"]</span>
+            <span>@L["Marquee.2"]</span>
         </div>
     </div>
 
@@ -430,68 +453,68 @@
                         StyleBazar<span class="sb-brand__dot">.</span>
                     </a>
                     <p class="sb-muted" style="margin-top: 12px; max-width: 320px;">
-                        Yerli satıcılardan brend geyimləri tapdığın və sevimlilərini bir yerdə saxladığın platforma.
+                        @L["Footer.Tagline"]
                     </p>
                 </div>
                 <div>
-                    <h4>Mağaza</h4>
+                    <h4>@L["Footer.Shop"]</h4>
                     <ul>
-                        <li><a asp-controller="Shop" asp-action="Index">Bütün məhsullar</a></li>
-                        <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">Yeni gələnlər</a></li>
-                        <li><a asp-controller="Store" asp-action="Index">Mağazalar</a></li>
-                        <li><a asp-controller="Blog" asp-action="Index">Blog</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index">@L["Footer.AllProducts"]</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true">@L["Footer.NewArrivals"]</a></li>
+                        <li><a asp-controller="Store" asp-action="Index">@L["Nav.Stores"]</a></li>
+                        <li><a asp-controller="Blog" asp-action="Index">@L["Nav.Blog"]</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4>Şirkət</h4>
+                    <h4>@L["Footer.Company"]</h4>
                     <ul>
-                        <li><a asp-controller="About" asp-action="Index">Haqqımızda</a></li>
-                        <li><a asp-controller="Support" asp-action="Index">Dəstək</a></li>
-                        <li><a asp-controller="Account" asp-action="Register">Satıcı ol</a></li>
-                        <li><a asp-controller="Home" asp-action="Privacy">Gizlilik</a></li>
+                        <li><a asp-controller="About" asp-action="Index">@L["Nav.About"]</a></li>
+                        <li><a asp-controller="Support" asp-action="Index">@L["Utility.Support"]</a></li>
+                        <li><a asp-controller="Account" asp-action="Register">@L["Footer.BecomeSeller"]</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">@L["Footer.Privacy"]</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4>Əlaqə</h4>
+                    <h4>@L["Footer.Contact"]</h4>
                     <ul>
                         <li>support@@stylebazar.az</li>
-                        <li>Bakı, Azərbaycan</li>
+                        <li>@L["Footer.City"]</li>
                     </ul>
                 </div>
             </div>
             <div class="sb-footer__bottom">
-                <span>&copy; @DateTime.Now.Year StyleBazar. Bütün hüquqlar qorunur.</span>
-                <span>Made with ♡ in Baku</span>
+                <span>&copy; @DateTime.Now.Year StyleBazar. @L["Footer.Rights"]</span>
+                <span>@L["Footer.MadeIn"]</span>
             </div>
         </div>
     </footer>
 
     @* ============== MOBILE BOTTOM TAB BAR ============== *@
-    <nav class="sb-bottombar" aria-label="Əsas naviqasiya">
+    <nav class="sb-bottombar" aria-label="@L["Nav.Home"]">
         <a asp-controller="Home" asp-action="Index">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V21H3z"/><path d="M9 21V12h6v9"/></svg>
-            <span>Ana</span>
+            <span>@L["Bottom.Home"]</span>
         </a>
         <a asp-controller="Store" asp-action="Index">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-            <span>Mağazalar</span>
+            <span>@L["Nav.Stores"]</span>
         </a>
         <a asp-controller="Wishlist" asp-action="Index">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            <span>Wishlist</span>
+            <span>@L["User.Wishlist"]</span>
         </a>
         @if (SignInManager.IsSignedIn(User))
         {
             <a asp-controller="Account" asp-action="Profile">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>Hesab</span>
+                <span>@L["Bottom.Account"]</span>
             </a>
         }
         else
         {
             <a asp-controller="Account" asp-action="Login">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                <span>Giriş</span>
+                <span>@L["Auth.Login"]</span>
             </a>
         }
     </nav>
@@ -502,23 +525,23 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <div class="sb-chat-widget" data-chat-widget aria-live="polite">
-            <button type="button" class="sb-chat-fab" data-chat-toggle aria-label="Mesajlar">
+            <button type="button" class="sb-chat-fab" data-chat-toggle aria-label="@L["Chat.Title"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">
                     <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
                 </svg>
                 <span class="sb-chat-fab__badge" data-chat-badge hidden>0</span>
             </button>
 
-            <div class="sb-chat-panel" data-chat-panel hidden role="dialog" aria-label="Mesajlar">
+            <div class="sb-chat-panel" data-chat-panel hidden role="dialog" aria-label="@L["Chat.Title"]">
                 <header class="sb-chat-panel__head">
-                    <button type="button" class="sb-chat-panel__back" data-chat-back hidden aria-label="Geri">
+                    <button type="button" class="sb-chat-panel__back" data-chat-back hidden aria-label="@L["Aria.Back"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
-                    <h3 data-chat-title>Mesajlar</h3>
-                    <a asp-controller="Account" asp-action="Messages" class="sb-chat-panel__expand" title="Tam görünüş" aria-label="Tam ekran">
+                    <h3 data-chat-title>@L["Chat.Title"]</h3>
+                    <a asp-controller="Account" asp-action="Messages" class="sb-chat-panel__expand" title="@L["Chat.FullView"]" aria-label="@L["Chat.FullView"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                     </a>
-                    <button type="button" class="sb-chat-panel__close" data-chat-close aria-label="Bağla">
+                    <button type="button" class="sb-chat-panel__close" data-chat-close aria-label="@L["Aria.Close"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </header>
@@ -528,8 +551,8 @@
                     <div class="sb-chat-list" data-chat-conversations></div>
                     <div class="sb-chat-empty" data-chat-empty hidden>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                        <strong>Hələ söhbət yoxdur</strong>
-                        <span>Mağaza səhifəsindən və ya hekayədən cavab yazaraq başla.</span>
+                        <strong>@L["Chat.EmptyTitle"]</strong>
+                        <span>@L["Chat.EmptySub"]</span>
                     </div>
                 </div>
 
@@ -537,15 +560,15 @@
                 <div class="sb-chat-panel__thread" data-chat-thread hidden>
                     <div class="sb-chat-thread__messages" data-chat-messages></div>
                     <div class="sb-chat-thread__typing" data-chat-typing hidden>
-                        <span></span><span></span><span></span> yazır...
+                        <span></span><span></span><span></span> @L["Chat.Typing"]
                     </div>
                     <form class="sb-chat-composer" data-chat-composer>
-                        <label class="sb-chat-composer__attach" title="Şəkil əlavə et">
+                        <label class="sb-chat-composer__attach" title="@L["Chat.AddImage"]">
                             <input type="file" accept="image/*" hidden data-chat-attach />
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                         </label>
-                        <input type="text" placeholder="Mesaj yaz..." maxlength="2000" data-chat-input autocomplete="off" />
-                        <button type="submit" aria-label="Göndər">
+                        <input type="text" placeholder="@L["Chat.MessagePlaceholder"]" maxlength="2000" data-chat-input autocomplete="off" />
+                        <button type="submit" aria-label="@L["Chat.Send"]">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                         </button>
                     </form>

@@ -226,15 +226,13 @@ public class ChatManager : IChatService
         msg = await _messages.AddAsync(msg, ct);
 
         // Update denormalised fields + flip the OTHER user's unread counter.
-        Conversation? convTracked = await _conversations.GetAsync(c => c.Id == conv.Id, cancellationToken: ct);
-        if (convTracked is not null)
-        {
-            convTracked.LastMessageAt = DateTime.UtcNow;
-            convTracked.LastMessagePreview = BuildPreview(msg);
-            if (convTracked.User1Id == me) convTracked.Unread2 += 1;
-            else convTracked.Unread1 += 1;
-            await _conversations.UpdateAsync(convTracked, ct);
-        }
+        // `conv` is already tracked (fetched with tracking above, or just added),
+        // so we mutate it directly — no redundant re-fetch round-trip.
+        conv.LastMessageAt = DateTime.UtcNow;
+        conv.LastMessagePreview = BuildPreview(msg);
+        if (conv.User1Id == me) conv.Unread2 += 1;
+        else conv.Unread1 += 1;
+        await _conversations.UpdateAsync(conv, ct);
 
         // Re-load the saved row with the relations the DTO needs.
         Message? hydrated = await _messages.GetAsync(
@@ -268,19 +266,10 @@ public class ChatManager : IChatService
         if (meIs1) conv.Unread1 = 0; else conv.Unread2 = 0;
         await _conversations.UpdateAsync(conv, ct);
 
-        // Flip IsReadByRecipient on the OTHER user's messages — drives the
-        // "Görüldü" indicator the sender sees in their view.
-        Paginate<Message> unread = await _messages.GetListAsync(
-            predicate: m => m.ConversationId == conversationId && m.SenderId != me && !m.IsReadByRecipient,
-            orderBy: q => q.OrderBy(m => m.Id),
-            index: 0, size: 500,
-            enableTracking: true,
-            cancellationToken: ct);
-        foreach (Message m in unread.Items)
-        {
-            m.IsReadByRecipient = true;
-            await _messages.UpdateAsync(m, ct);
-        }
+        // Flip IsReadByRecipient on the OTHER user's messages in ONE set-based
+        // UPDATE — drives the "Görüldü" indicator the sender sees. Replaces the
+        // old load-up-to-500-then-SaveChanges-per-row loop (N round-trips → 1).
+        await _messages.MarkConversationReadAsync(conversationId, me, ct);
 
         return peerId;
     }
