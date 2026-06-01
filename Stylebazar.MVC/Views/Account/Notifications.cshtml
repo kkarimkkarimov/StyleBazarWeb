@@ -1,7 +1,7 @@
 @model AccountNotificationsPageViewModel
 @using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["Title"] = "Bildirişlər";
+    ViewData["Title"] = L["Bildirişlər"].Value;
 
     string EventIcon(LoginEventType t) => t switch
     {
@@ -30,26 +30,26 @@
 
     string EventTitle(LoginEventType t) => t switch
     {
-        LoginEventType.SignIn => "Hesaba giriş",
-        LoginEventType.SignUp => "Hesab yaradıldı",
-        LoginEventType.SignOut => "Hesabdan çıxış",
-        LoginEventType.FailedSignIn => "Uğursuz giriş cəhdi",
-        LoginEventType.PasswordChanged => "Parol dəyişdirildi",
-        LoginEventType.PasswordReset => "Parol bərpa edildi",
-        LoginEventType.EmailVerified => "Email təsdiqləndi",
-        LoginEventType.TwoFactorChallenge => "İki addımlı doğrulama",
-        LoginEventType.Locked => "Hesab müvəqqəti bloklandı",
-        _ => "Hadisə"
+        LoginEventType.SignIn => L["Hesaba giriş"].Value,
+        LoginEventType.SignUp => L["Hesab yaradıldı"].Value,
+        LoginEventType.SignOut => L["Hesabdan çıxış"].Value,
+        LoginEventType.FailedSignIn => L["Uğursuz giriş cəhdi"].Value,
+        LoginEventType.PasswordChanged => L["Parol dəyişdirildi"].Value,
+        LoginEventType.PasswordReset => L["Parol bərpa edildi"].Value,
+        LoginEventType.EmailVerified => L["Email təsdiqləndi"].Value,
+        LoginEventType.TwoFactorChallenge => L["İki addımlı doğrulama"].Value,
+        LoginEventType.Locked => L["Hesab müvəqqəti bloklandı"].Value,
+        _ => L["Hadisə"].Value
     };
 
     string EventBody(LoginEventDto e) => e.EventType switch
     {
-        LoginEventType.SignIn => $"{e.DeviceLabel} cihazından, {e.IpAddress ?? "—"}",
-        LoginEventType.SignOut => $"{e.DeviceLabel} cihazından",
-        LoginEventType.FailedSignIn => $"{e.IpAddress ?? "—"} ünvanından yanlış parol",
-        LoginEventType.Locked => "5 ardıcıl uğursuz giriş — 15 dəqiqəlik blok",
-        LoginEventType.PasswordReset => "Email vasitəsilə bərpa linki istifadə olundu",
-        LoginEventType.PasswordChanged => "Hesabın parolu yeniləndi",
+        LoginEventType.SignIn => $"{e.DeviceLabel} {L["cihazından,"].Value} {e.IpAddress ?? "—"}",
+        LoginEventType.SignOut => $"{e.DeviceLabel} {L["cihazından"].Value}",
+        LoginEventType.FailedSignIn => $"{e.IpAddress ?? "—"} {L["ünvanından yanlış parol"].Value}",
+        LoginEventType.Locked => L["5 ardıcıl uğursuz giriş — 15 dəqiqəlik blok"].Value,
+        LoginEventType.PasswordReset => L["Email vasitəsilə bərpa linki istifadə olundu"].Value,
+        LoginEventType.PasswordChanged => L["Hesabın parolu yeniləndi"].Value,
         _ => e.DeviceLabel ?? string.Empty
     };
 
@@ -57,12 +57,12 @@
     {
         var now = DateTime.UtcNow;
         var span = now - dtUtc;
-        if (span.TotalMinutes < 1) return "indicə";
-        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dəq əvvəl";
-        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat əvvəl";
-        if (span.TotalDays < 2) return "dünən";
-        if (span.TotalDays < 7) return $"{(int)span.TotalDays} gün əvvəl";
-        return dtUtc.ToLocalTime().ToString("dd MMM yyyy", new System.Globalization.CultureInfo("az-Latn-AZ"));
+        if (span.TotalMinutes < 1) return L["indicə"].Value;
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} {L["dəq əvvəl"].Value}";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} {L["saat əvvəl"].Value}";
+        if (span.TotalDays < 2) return L["Dünən"].Value;
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} {L["gün əvvəl"].Value}";
+        return dtUtc.ToLocalTime().ToString("dd MMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
     }
 
     // Group events by day bucket
@@ -72,10 +72,10 @@
     DateTime weekAgoUtc = todayUtc.AddDays(-7);
 
     string Bucket(DateTime dt) =>
-        dt.Date == todayUtc ? "Bu gün"
-        : dt.Date == yesterdayUtc ? "Dünən"
-        : dt.Date > weekAgoUtc ? "Bu həftə"
-        : "Daha əvvəl";
+        dt.Date == todayUtc ? L["Bu gün"].Value
+        : dt.Date == yesterdayUtc ? L["Dünən"].Value
+        : dt.Date > weekAgoUtc ? L["Bu həftə"].Value
+        : L["Daha əvvəl"].Value;
 
     var grouped = Model.Events
         .GroupBy(e => Bucket(e.CreatedDate))
@@ -88,16 +88,16 @@
 
     <main class="sb-acc-main">
         <header class="sb-acc-section-title">
-            <h1>Bildirişlər</h1>
-            <p class="sb-acc-section-title__sub">Son 30 günün hesab aktivliyi</p>
+            <h1>@L["Bildirişlər"]</h1>
+            <p class="sb-acc-section-title__sub">@L["Son 30 günün hesab aktivliyi"]</p>
         </header>
 
         @if (!Model.Events.Any())
         {
             <div class="sb-acc-card sb-acc-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <strong>Hələ bildiriş yoxdur</strong>
-                <p>Sənə yeni bildiriş gəldikdə burada görünəcək.</p>
+                <strong>@L["Hələ bildiriş yoxdur"]</strong>
+                <p>@L["Sənə yeni bildiriş gəldikdə burada görünəcək."]</p>
             </div>
         }
         else

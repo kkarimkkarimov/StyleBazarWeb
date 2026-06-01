@@ -1,6 +1,6 @@
 @model RegisterViewModel
 @{
-    ViewData["Title"] = "Qeydiyyat";
+    ViewData["Title"] = L["Qeydiyyat"].Value;
 }
 
 <div class="sb-auth">
@@ -8,8 +8,8 @@
         <form class="sb-auth__form" asp-action="Register" method="post" novalidate data-auth-form>
             @Html.AntiForgeryToken()
 
-            <h1>Bir <em>hesab,</em> sonsuz stil.</h1>
-            <p class="sb-auth__form-sub">5 dəqiqədən az çəkir. Alıcı və ya satıcı kimi başla.</p>
+            <h1>@L["Bir"] <em>@L["hesab,"]</em> @L["sonsuz stil."]</h1>
+            <p class="sb-auth__form-sub">@L["5 dəqiqədən az çəkir. Alıcı və ya satıcı kimi başla."]</p>
 
             @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
             {
@@ -19,30 +19,30 @@
             }
 
             <div class="sb-field">
-                <label class="sb-field__label">Rol</label>
+                <label class="sb-field__label">@L["Rol"]</label>
                 <div class="sb-roles" data-role-group>
                     <label class="sb-role-card @(Model.Role == UserRole.Buyer ? "is-active" : "")" data-role-card>
                         <input asp-for="Role" type="radio" value="Buyer" />
                         <span class="sb-role-card__icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg>
                         </span>
-                        <span class="sb-role-card__title">Alıcı</span>
-                        <span class="sb-role-card__sub">Yerli mağazalardan al, wishlist saxla.</span>
+                        <span class="sb-role-card__title">@L["Alıcı"]</span>
+                        <span class="sb-role-card__sub">@L["Yerli mağazalardan al, wishlist saxla."]</span>
                     </label>
                     <label class="sb-role-card @(Model.Role == UserRole.Seller ? "is-active" : "")" data-role-card>
                         <input asp-for="Role" type="radio" value="Seller" />
                         <span class="sb-role-card__icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/><path d="M9 22V14h6v8"/></svg>
                         </span>
-                        <span class="sb-role-card__title">Satıcı</span>
-                        <span class="sb-role-card__sub">Mağaza yarat, məhsul sat. İlk ay komissiyasız.</span>
+                        <span class="sb-role-card__title">@L["Satıcı"]</span>
+                        <span class="sb-role-card__sub">@L["Mağaza yarat, məhsul sat. İlk ay komissiyasız."]</span>
                     </label>
                 </div>
                 <span class="sb-field__error" asp-validation-for="Role"></span>
             </div>
 
             <div class="sb-field">
-                <label class="sb-field__label" asp-for="FullName">Ad-soyad</label>
+                <label class="sb-field__label" asp-for="FullName">@L["Ad-soyad"]</label>
                 <input class="sb-field__input @(ViewData.ModelState["FullName"]?.Errors.Count > 0 ? "is-error" : "")"
                        asp-for="FullName"
                        type="text"
@@ -52,7 +52,7 @@
             </div>
 
             <div class="sb-field">
-                <label class="sb-field__label" asp-for="Email">Email</label>
+                <label class="sb-field__label" asp-for="Email">@L["Email"]</label>
                 <input class="sb-field__input @(ViewData.ModelState["Email"]?.Errors.Count > 0 ? "is-error" : "")"
                        asp-for="Email"
                        type="email"
@@ -62,15 +62,15 @@
             </div>
 
             <div class="sb-field">
-                <label class="sb-field__label" asp-for="Password">Parol</label>
+                <label class="sb-field__label" asp-for="Password">@L["Parol"]</label>
                 <div class="sb-field__input-wrap">
                     <input class="sb-field__input sb-field__input--has-icon @(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "is-error" : "")"
                            asp-for="Password"
                            type="password"
-                           placeholder="Minimum 6 simvol"
+                           placeholder="@L["Minimum 6 simvol"]"
                            autocomplete="new-password"
                            data-pwd data-pwd-meter />
-                    <button type="button" class="sb-field__icon-btn" data-pwd-toggle aria-label="Parolu göstər">
+                    <button type="button" class="sb-field__icon-btn" data-pwd-toggle aria-label="@L["Parolu göstər"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" data-eye>
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
@@ -87,12 +87,12 @@
                     <span class="sb-pwd-meter__bar"></span>
                     <span class="sb-pwd-meter__bar"></span>
                 </div>
-                <div class="sb-pwd-meter__label" data-meter-label>Parol gücü</div>
+                <div class="sb-pwd-meter__label" data-meter-label>@L["Parol gücü"]</div>
                 <span class="sb-field__error" asp-validation-for="Password"></span>
             </div>
 
             <div class="sb-field">
-                <label class="sb-field__label" asp-for="ConfirmPassword">Parolu təkrarla</label>
+                <label class="sb-field__label" asp-for="ConfirmPassword">@L["Parolu təkrarla"]</label>
                 <input class="sb-field__input @(ViewData.ModelState["ConfirmPassword"]?.Errors.Count > 0 ? "is-error" : "")"
                        asp-for="ConfirmPassword"
                        type="password"
@@ -112,47 +112,47 @@
                            value="true"
                            @(Model.AcceptTerms ? "checked=\"checked\"" : null)
                            data-val="true"
-                           data-val-mustbetrue="Davam etmək üçün şərtləri qəbul et." />
+                           data-val-mustbetrue="@L["Davam etmək üçün şərtləri qəbul et."]" />
                     <span class="sb-check__box">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </span>
                     <span>
-                        <a asp-controller="Home" asp-action="Privacy">İstifadə şərtlərini</a> qəbul edirəm
+                        <a asp-controller="Home" asp-action="Privacy">@L["İstifadə şərtlərini"]</a> @L["qəbul edirəm"]
                     </span>
                 </label>
                 <span class="sb-field__error" asp-validation-for="AcceptTerms"></span>
             </div>
 
             <button type="submit" class="sb-btn sb-btn--primary sb-btn--block sb-btn--lg" data-submit>
-                Hesab yarat
+                @L["Hesab yarat"]
             </button>
 
             <div class="sb-auth__alt">
-                Artıq hesabın var? <a asp-action="Login">Daxil ol</a>
+                @L["Artıq hesabın var?"] <a asp-action="Login">@L["Daxil ol"]</a>
             </div>
         </form>
     </div>
 
     <aside class="sb-auth__panel">
         <div class="sb-auth__panel-top">
-            <span class="sb-auth__panel-eyebrow">StyleBazar — biz</span>
+            <span class="sb-auth__panel-eyebrow">@L["StyleBazar — biz"]</span>
             <h2 class="sb-auth__panel-quote">
-                "Yerli brendlərə <em style="color: var(--sb-accent);">öz auditoriyasını</em> verən platforma."
+                "@L["Yerli brendlərə"] <em style="color: var(--sb-accent);">@L["öz auditoriyasını"]</em> @L["verən platforma."]"
             </h2>
-            <p class="sb-auth__panel-attr">Bakıdan dünyaya.</p>
+            <p class="sb-auth__panel-attr">@L["Bakıdan dünyaya."]</p>
         </div>
         <div class="sb-auth__panel-bottom">
             <div>
                 <div class="sb-auth__stat-num">∞</div>
-                <div class="sb-auth__stat-label">Stil variantı</div>
+                <div class="sb-auth__stat-label">@L["Stil variantı"]</div>
             </div>
             <div>
                 <div class="sb-auth__stat-num">0₼</div>
-                <div class="sb-auth__stat-label">İlk ay komissiya</div>
+                <div class="sb-auth__stat-label">@L["İlk ay komissiya"]</div>
             </div>
             <div>
                 <div class="sb-auth__stat-num">24/7</div>
-                <div class="sb-auth__stat-label">Dəstək</div>
+                <div class="sb-auth__stat-label">@L["Dəstək"]</div>
             </div>
         </div>
     </aside>

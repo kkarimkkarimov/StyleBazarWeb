@@ -17,50 +17,50 @@
             }
         </div>
         <strong class="sb-acc-sidebar__name">@Model.FullName</strong>
-        <span class="sb-acc-sidebar__code">Müştəri kodu: #@Model.CustomerCode</span>
+        <span class="sb-acc-sidebar__code">@L["Müştəri kodu:"] #@Model.CustomerCode</span>
     </div>
 
-    <nav class="sb-acc-sidebar__nav" aria-label="Hesab naviqasiyası">
+    <nav class="sb-acc-sidebar__nav" aria-label="@L["Hesab naviqasiyası"]">
         @* Messages link removed in Phase 11.13 — view stays for direct
            URL access but no longer surfaces in the buyer nav. *@
         @if (User.IsInRole("Admin"))
         {
             <a class="sb-acc-sidebar__link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                Admin paneli
+                @L["Admin paneli"]
             </a>
         }
         @if (Model.VendorCode != null)
         {
             <a class="sb-acc-sidebar__link" asp-controller="Seller" asp-action="Dashboard">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-                Mağazalarım
+                @L["Mağazalarım"]
             </a>
         }
         <a class="sb-acc-sidebar__link @Active("Dashboard")" asp-controller="Account" asp-action="Dashboard">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            İcmal
+            @L["İcmal"]
         </a>
         <a class="sb-acc-sidebar__link @Active("Wishlist")" asp-controller="Wishlist" asp-action="Index">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            Sevimlilərim
+            @L["Sevimlilərim"]
         </a>
         <a class="sb-acc-sidebar__link @Active("Notifications")" asp-controller="Account" asp-action="Notifications">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            Bildirişlər
+            @L["Bildirişlər"]
         </a>
         <a class="sb-acc-sidebar__link @Active("Addresses")" asp-controller="Account" asp-action="Addresses">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Ünvanlar
+            @L["Ünvanlar"]
         </a>
         <a class="sb-acc-sidebar__link @Active("Profile")" asp-controller="Account" asp-action="Profile">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-            Profil
+            @L["Profil"]
         </a>
         <form asp-controller="Account" asp-action="Logout" method="post" class="sb-acc-sidebar__logout-form">
             <button type="submit" class="sb-acc-sidebar__link sb-acc-sidebar__link--danger">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Çıxış
+                @L["Çıxış"]
             </button>
         </form>
     </nav>

@@ -127,4 +127,6 @@
   <data name="Stat.Products" xml:space="preserve"><value>Məhsul</value></data>
   <data name="MoreFrom.Prefix" xml:space="preserve"><value>Daha çox</value></data>
   <data name="MoreFrom.Suffix" xml:space="preserve"><value>mağazasından</value></data>
+  <data name="Retry.Again" xml:space="preserve"><value>yenidən</value></data>
+  <data name="ResetPwd.New" xml:space="preserve"><value>Yeni</value></data>
 </root>

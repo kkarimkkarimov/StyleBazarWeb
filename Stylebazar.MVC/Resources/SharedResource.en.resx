@@ -298,4 +298,114 @@
   <data name="Bahadan ucuza" xml:space="preserve"><value>Price: high to low</value></data>
   <data name="Bu mağazada hələ məhsul yoxdur" xml:space="preserve"><value>This store has no products yet</value></data>
   <data name="Satıcı tezliklə yeni məhsullar əlavə edəcək — geri qayıt və yeniləri kəşf et." xml:space="preserve"><value>The seller will add new products soon — come back and discover what's new.</value></data>
+  <!-- ===== Auth flows (Login / Register / Forgot / Reset) ===== -->
+  <data name="Giriş" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Yenidən" xml:space="preserve"><value>Welcome</value></data>
+  <data name="xoş gəldin." xml:space="preserve"><value>back.</value></data>
+  <data name="Hesabına daxil ol, sevimlilərini və alış-verişini davam et." xml:space="preserve"><value>Sign in to your account and continue your favorites and shopping.</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Parol" xml:space="preserve"><value>Password</value></data>
+  <data name="Parolu göstər" xml:space="preserve"><value>Show password</value></data>
+  <data name="Məni xatırla" xml:space="preserve"><value>Remember me</value></data>
+  <data name="Parolu unutmusan?" xml:space="preserve"><value>Forgot your password?</value></data>
+  <data name="Hesabın yoxdur?" xml:space="preserve"><value>Don't have an account?</value></data>
+  <data name="Qeydiyyatdan keç" xml:space="preserve"><value>Sign up</value></data>
+  <data name="Stil sənin" xml:space="preserve"><value>Style is your</value></data>
+  <data name="imzandır." xml:space="preserve"><value>signature.</value></data>
+  <data name="Onu Bakının ən yaxşı mağazalarından tap." xml:space="preserve"><value>Find it in Baku's best stores.</value></data>
+  <data name="— StyleBazar redaksiyası" xml:space="preserve"><value>— The StyleBazar editorial</value></data>
+  <data name="Yerli satıcı" xml:space="preserve"><value>Local sellers</value></data>
+  <data name="Qeydiyyat" xml:space="preserve"><value>Sign up</value></data>
+  <data name="Bir" xml:space="preserve"><value>One</value></data>
+  <data name="hesab," xml:space="preserve"><value>account,</value></data>
+  <data name="sonsuz stil." xml:space="preserve"><value>endless style.</value></data>
+  <data name="5 dəqiqədən az çəkir. Alıcı və ya satıcı kimi başla." xml:space="preserve"><value>Takes less than 5 minutes. Start as a buyer or a seller.</value></data>
+  <data name="Rol" xml:space="preserve"><value>Role</value></data>
+  <data name="Alıcı" xml:space="preserve"><value>Buyer</value></data>
+  <data name="Yerli mağazalardan al, wishlist saxla." xml:space="preserve"><value>Buy from local stores, save a wishlist.</value></data>
+  <data name="Mağaza yarat, məhsul sat. İlk ay komissiyasız." xml:space="preserve"><value>Create a store, sell products. First month commission-free.</value></data>
+  <data name="Ad-soyad" xml:space="preserve"><value>Full name</value></data>
+  <data name="Minimum 6 simvol" xml:space="preserve"><value>Minimum 6 characters</value></data>
+  <data name="Parol gücü" xml:space="preserve"><value>Password strength</value></data>
+  <data name="Parolu təkrarla" xml:space="preserve"><value>Repeat password</value></data>
+  <data name="Davam etmək üçün şərtləri qəbul et." xml:space="preserve"><value>Accept the terms to continue.</value></data>
+  <data name="İstifadə şərtlərini" xml:space="preserve"><value>the terms of use</value></data>
+  <data name="qəbul edirəm" xml:space="preserve"><value>I accept</value></data>
+  <data name="Hesab yarat" xml:space="preserve"><value>Create account</value></data>
+  <data name="Artıq hesabın var?" xml:space="preserve"><value>Already have an account?</value></data>
+  <data name="StyleBazar — biz" xml:space="preserve"><value>StyleBazar — us</value></data>
+  <data name="Yerli brendlərə" xml:space="preserve"><value>The platform that gives local brands</value></data>
+  <data name="öz auditoriyasını" xml:space="preserve"><value>their own audience</value></data>
+  <data name="verən platforma." xml:space="preserve"><value>.</value></data>
+  <data name="Bakıdan dünyaya." xml:space="preserve"><value>From Baku to the world.</value></data>
+  <data name="Stil variantı" xml:space="preserve"><value>Style options</value></data>
+  <data name="İlk ay komissiya" xml:space="preserve"><value>First-month commission</value></data>
+  <data name="Parolu bərpa et" xml:space="preserve"><value>Reset password</value></data>
+  <data name="Parolu" xml:space="preserve"><value>Reset your</value></data>
+  <data name="bərpa et." xml:space="preserve"><value>password.</value></data>
+  <data name="Email ünvanını yaz — bərpa linkini sənə göndəririk." xml:space="preserve"><value>Enter your email — we'll send you a reset link.</value></data>
+  <data name="Bərpa linkini göndər" xml:space="preserve"><value>Send reset link</value></data>
+  <data name="Yadına düşdü?" xml:space="preserve"><value>Remembered it?</value></data>
+  <data name="StyleBazar — təhlükəsizlik" xml:space="preserve"><value>StyleBazar — security</value></data>
+  <data name="Hesabın" xml:space="preserve"><value>Your account</value></data>
+  <data name="təhlükəsizdir." xml:space="preserve"><value>is secure.</value></data>
+  <data name="Yeni parol istənildiyin anda bir kliklə." xml:space="preserve"><value>A new password whenever you want, in one click.</value></data>
+  <data name="Linki email-də yoxla" xml:space="preserve"><value>Check the link in your email</value></data>
+  <data name="Email-i" xml:space="preserve"><value>Check your</value></data>
+  <data name="yoxla." xml:space="preserve"><value>email.</value></data>
+  <data name="Əgər" xml:space="preserve"><value>If</value></data>
+  <data name="yazdığın" xml:space="preserve"><value>the entered</value></data>
+  <data name="ünvanı hesabımıza bağlıdırsa, bərpa linkini göndərdik. Linkə klikləyib yeni parolunu təyin et — link 24 saatlıqdır." xml:space="preserve"><value>address is linked to an account, we've sent a reset link. Click it to set a new password — the link is valid for 24 hours.</value></data>
+  <data name="Girişə qayıt" xml:space="preserve"><value>Back to sign in</value></data>
+  <data name="Email gəlmədi? Spam qovluğunu yoxla və ya bir neçə dəqiqə sonra" xml:space="preserve"><value>Email didn't arrive? Check your spam folder or try</value></data>
+  <data name="Retry.Again" xml:space="preserve"><value>again</value></data>
+  <data name="cəhd et." xml:space="preserve"><value>in a few minutes.</value></data>
+  <data name="Bir az gözlə — yeni paroluna sahib olmağa az qaldı." xml:space="preserve"><value>Hang on — you're almost there with your new password.</value></data>
+  <data name="Yeni parol təyin et" xml:space="preserve"><value>Set a new password</value></data>
+  <data name="ResetPwd.New" xml:space="preserve"><value>New</value></data>
+  <data name="parol." xml:space="preserve"><value>password.</value></data>
+  <data name="yeni parolu təyin et və daxil ol." xml:space="preserve"><value>— set a new password and sign in.</value></data>
+  <data name="Yeni parol" xml:space="preserve"><value>New password</value></data>
+  <data name="Parolu yenilə" xml:space="preserve"><value>Update password</value></data>
+  <data name="Güclü parol —" xml:space="preserve"><value>A strong password —</value></data>
+  <data name="təhlükəsiz hesab." xml:space="preserve"><value>a secure account.</value></data>
+  <!-- ===== Account sidebar ===== -->
+  <data name="Müştəri kodu:" xml:space="preserve"><value>Customer code:</value></data>
+  <data name="Hesab naviqasiyası" xml:space="preserve"><value>Account navigation</value></data>
+  <data name="Admin paneli" xml:space="preserve"><value>Admin panel</value></data>
+  <data name="Mağazalarım" xml:space="preserve"><value>My stores</value></data>
+  <data name="İcmal" xml:space="preserve"><value>Overview</value></data>
+  <data name="Sevimlilərim" xml:space="preserve"><value>My favorites</value></data>
+  <data name="Bildirişlər" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Ünvanlar" xml:space="preserve"><value>Addresses</value></data>
+  <data name="Profil" xml:space="preserve"><value>Profile</value></data>
+  <data name="Çıxış" xml:space="preserve"><value>Log out</value></data>
+  <!-- ===== Account: Notifications ===== -->
+  <data name="Son 30 günün hesab aktivliyi" xml:space="preserve"><value>Account activity over the last 30 days</value></data>
+  <data name="Hələ bildiriş yoxdur" xml:space="preserve"><value>No notifications yet</value></data>
+  <data name="Sənə yeni bildiriş gəldikdə burada görünəcək." xml:space="preserve"><value>New notifications will appear here.</value></data>
+  <data name="Hesaba giriş" xml:space="preserve"><value>Signed in</value></data>
+  <data name="Hesab yaradıldı" xml:space="preserve"><value>Account created</value></data>
+  <data name="Hesabdan çıxış" xml:space="preserve"><value>Signed out</value></data>
+  <data name="Uğursuz giriş cəhdi" xml:space="preserve"><value>Failed sign-in attempt</value></data>
+  <data name="Parol dəyişdirildi" xml:space="preserve"><value>Password changed</value></data>
+  <data name="Parol bərpa edildi" xml:space="preserve"><value>Password reset</value></data>
+  <data name="Email təsdiqləndi" xml:space="preserve"><value>Email verified</value></data>
+  <data name="İki addımlı doğrulama" xml:space="preserve"><value>Two-factor verification</value></data>
+  <data name="Hesab müvəqqəti bloklandı" xml:space="preserve"><value>Account temporarily locked</value></data>
+  <data name="Hadisə" xml:space="preserve"><value>Event</value></data>
+  <data name="cihazından," xml:space="preserve"><value>from device,</value></data>
+  <data name="cihazından" xml:space="preserve"><value>from device</value></data>
+  <data name="ünvanından yanlış parol" xml:space="preserve"><value>wrong password from this address</value></data>
+  <data name="5 ardıcıl uğursuz giriş — 15 dəqiqəlik blok" xml:space="preserve"><value>5 consecutive failed sign-ins — 15-minute lock</value></data>
+  <data name="Email vasitəsilə bərpa linki istifadə olundu" xml:space="preserve"><value>A reset link was used via email</value></data>
+  <data name="Hesabın parolu yeniləndi" xml:space="preserve"><value>Your account password was updated</value></data>
+  <data name="indicə" xml:space="preserve"><value>just now</value></data>
+  <data name="dəq əvvəl" xml:space="preserve"><value>min ago</value></data>
+  <data name="saat əvvəl" xml:space="preserve"><value>h ago</value></data>
+  <data name="gün əvvəl" xml:space="preserve"><value>days ago</value></data>
+  <data name="Bu gün" xml:space="preserve"><value>Today</value></data>
+  <data name="Dünən" xml:space="preserve"><value>Yesterday</value></data>
+  <data name="Bu həftə" xml:space="preserve"><value>This week</value></data>
+  <data name="Daha əvvəl" xml:space="preserve"><value>Earlier</value></data>
 </root>

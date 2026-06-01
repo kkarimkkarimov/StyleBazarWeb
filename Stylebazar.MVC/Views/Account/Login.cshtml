@@ -1,6 +1,6 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Giriş";
+    ViewData["Title"] = L["Giriş"].Value;
     var returnUrl = ViewData["ReturnUrl"] as string;
 }
 
@@ -9,8 +9,8 @@
         <form class="sb-auth__form" asp-action="Login" asp-route-returnUrl="@returnUrl" method="post" novalidate data-auth-form>
             @Html.AntiForgeryToken()
 
-            <h1>Yenidən <em>xoş gəldin.</em></h1>
-            <p class="sb-auth__form-sub">Hesabına daxil ol, sevimlilərini və alış-verişini davam et.</p>
+            <h1>@L["Yenidən"] <em>@L["xoş gəldin."]</em></h1>
+            <p class="sb-auth__form-sub">@L["Hesabına daxil ol, sevimlilərini və alış-verişini davam et."]</p>
 
             @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
             {
@@ -20,7 +20,7 @@
             }
 
             <div class="sb-field">
-                <label class="sb-field__label" asp-for="Email">Email</label>
+                <label class="sb-field__label" asp-for="Email">@L["Email"]</label>
                 <div class="sb-field__input-wrap">
                     <input class="sb-field__input @(ViewData.ModelState["Email"]?.Errors.Count > 0 ? "is-error" : "")"
                            asp-for="Email"
@@ -33,7 +33,7 @@
             </div>
 
             <div class="sb-field">
-                <label class="sb-field__label" asp-for="Password">Parol</label>
+                <label class="sb-field__label" asp-for="Password">@L["Parol"]</label>
                 <div class="sb-field__input-wrap">
                     <input class="sb-field__input sb-field__input--has-icon @(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "is-error" : "")"
                            asp-for="Password"
@@ -41,7 +41,7 @@
                            placeholder="••••••••"
                            autocomplete="current-password"
                            data-pwd />
-                    <button type="button" class="sb-field__icon-btn" data-pwd-toggle aria-label="Parolu göstər">
+                    <button type="button" class="sb-field__icon-btn" data-pwd-toggle aria-label="@L["Parolu göstər"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" data-eye>
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
@@ -62,17 +62,17 @@
                     <span class="sb-check__box">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </span>
-                    <span>Məni xatırla</span>
+                    <span>@L["Məni xatırla"]</span>
                 </label>
-                <a asp-action="ForgotPassword">Parolu unutmusan?</a>
+                <a asp-action="ForgotPassword">@L["Parolu unutmusan?"]</a>
             </div>
 
             <button type="submit" class="sb-btn sb-btn--primary sb-btn--block sb-btn--lg" data-submit>
-                Daxil ol
+                @L["Daxil ol"]
             </button>
 
             <div class="sb-auth__alt">
-                Hesabın yoxdur? <a asp-action="Register">Qeydiyyatdan keç</a>
+                @L["Hesabın yoxdur?"] <a asp-action="Register">@L["Qeydiyyatdan keç"]</a>
             </div>
         </form>
     </div>
@@ -81,22 +81,22 @@
         <div class="sb-auth__panel-top">
             <span class="sb-auth__panel-eyebrow">StyleBazar</span>
             <h2 class="sb-auth__panel-quote">
-                "Stil sənin <em style="color: var(--sb-accent);">imzandır.</em> Onu Bakının ən yaxşı mağazalarından tap."
+                "@L["Stil sənin"] <em style="color: var(--sb-accent);">@L["imzandır."]</em> @L["Onu Bakının ən yaxşı mağazalarından tap."]"
             </h2>
-            <p class="sb-auth__panel-attr">— StyleBazar redaksiyası</p>
+            <p class="sb-auth__panel-attr">@L["— StyleBazar redaksiyası"]</p>
         </div>
         <div class="sb-auth__panel-bottom">
             <div>
                 <div class="sb-auth__stat-num">100+</div>
-                <div class="sb-auth__stat-label">Yerli satıcı</div>
+                <div class="sb-auth__stat-label">@L["Yerli satıcı"]</div>
             </div>
             <div>
                 <div class="sb-auth__stat-num">5K+</div>
-                <div class="sb-auth__stat-label">Məhsul</div>
+                <div class="sb-auth__stat-label">@L["Stat.Products"]</div>
             </div>
             <div>
                 <div class="sb-auth__stat-num">98%</div>
-                <div class="sb-auth__stat-label">Məmnun alıcı</div>
+                <div class="sb-auth__stat-label">@L["Məmnun alıcı"]</div>
             </div>
         </div>
     </aside>
