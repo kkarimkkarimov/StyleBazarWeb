@@ -1,6 +1,6 @@
 @model SellerProductsPageViewModel
 @{
-    ViewData["Title"] = "Məhsullarım";
+    ViewData["Title"] = L["Məhsullarım"].Value;
     var p = Model.Profile;
 
     string TabClass(bool? v) => Model.IsActive == v ? "is-active" : "";
@@ -12,14 +12,14 @@
     <main class="sb-seller-main">
         <header class="sb-prod-page-head">
             <div>
-                <h1>Məhsullar</h1>
-                <p>Mağazandakı bütün məhsulları idarə et — aktivləşdir, redaktə et, yenisini əlavə et.</p>
+                <h1>@L["Məhsullar"]</h1>
+                <p>@L["Mağazandakı bütün məhsulları idarə et — aktivləşdir, redaktə et, yenisini əlavə et."]</p>
             </div>
             @if (Model.HasAnyStore)
             {
                 <a asp-action="AddProduct" class="sb-btn-primary sb-btn-primary--cyan">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span>Yeni məhsul</span>
+                    <span>@L["Yeni məhsul"]</span>
                 </a>
             }
         </header>
@@ -37,14 +37,14 @@
         {
             <div class="sb-seller-card sb-prod-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
-                <h2>Mağazan hələ yoxdur</h2>
-                <p>Məhsul əlavə etmək üçün əvvəlcə mağaza adı seç. Sonra Store Settings-də logo, təsvir və əlaqə kanalları əlavə edə bilərsən.</p>
+                <h2>@L["Mağazan hələ yoxdur"]</h2>
+                <p>@L["Məhsul əlavə etmək üçün əvvəlcə mağaza adı seç. Sonra Store Settings-də logo, təsvir və əlaqə kanalları əlavə edə bilərsən."]</p>
                 <form asp-action="CreateMyStore" method="post" class="sb-prod-store-quick">
                     @Html.AntiForgeryToken()
-                    <input type="text" name="name" required minlength="2" maxlength="120" placeholder="Mağaza adı" autocomplete="off" />
+                    <input type="text" name="name" required minlength="2" maxlength="120" placeholder="@L["Mağaza adı"]" autocomplete="off" />
                     <button type="submit" class="sb-btn-primary sb-btn-primary--cyan">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span>Mağaza yarat</span>
+                        <span>@L["Mağaza yarat"]</span>
                     </button>
                 </form>
             </div>
@@ -53,13 +53,13 @@
         {
             <div class="sb-prod-tabs" role="tablist">
                 <a asp-action="Products" class="sb-prod-tab @TabClass(null)">
-                    Hamısı <span>@Model.TotalCount</span>
+                    @L["Hamısı"] <span>@Model.TotalCount</span>
                 </a>
                 <a asp-action="Products" asp-route-isActive="true" class="sb-prod-tab @TabClass(true)">
-                    Aktiv <span>@Model.ActiveCount</span>
+                    @L["Aktiv"] <span>@Model.ActiveCount</span>
                 </a>
                 <a asp-action="Products" asp-route-isActive="false" class="sb-prod-tab @TabClass(false)">
-                    Deaktiv <span>@Model.InactiveCount</span>
+                    @L["Deaktiv"] <span>@Model.InactiveCount</span>
                 </a>
             </div>
 
@@ -67,11 +67,11 @@
             {
                 <div class="sb-seller-card sb-prod-empty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                    <h2>@(Model.IsActive switch { true => "Aktiv məhsul yoxdur", false => "Deaktiv məhsul yoxdur", _ => "Hələ məhsul əlavə etməmisən" })</h2>
-                    <p>İlk məhsulunu əlavə et — alıcılar mağazanı yalnız aktiv məhsullarla görəcəklər.</p>
+                    <h2>@(Model.IsActive switch { true => L["Aktiv məhsul yoxdur"].Value, false => L["Deaktiv məhsul yoxdur"].Value, _ => L["Hələ məhsul əlavə etməmisən"].Value })</h2>
+                    <p>@L["İlk məhsulunu əlavə et — alıcılar mağazanı yalnız aktiv məhsullarla görəcəklər."]</p>
                     <a asp-action="AddProduct" class="sb-btn-primary sb-btn-primary--cyan">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span>Yeni məhsul</span>
+                        <span>@L["Yeni məhsul"]</span>
                     </a>
                 </div>
             }
@@ -94,7 +94,7 @@
                                 }
                                 @if (!prod.IsActive)
                                 {
-                                    <span class="sb-prod-card__badge sb-prod-card__badge--off">Deaktiv</span>
+                                    <span class="sb-prod-card__badge sb-prod-card__badge--off">@L["Deaktiv"]</span>
                                 }
                             </a>
 
@@ -106,11 +106,11 @@
                                     <span class="sb-prod-card__cat">@prod.CategoryName</span>
                                     @if (prod.StockQuantity > 0)
                                     {
-                                        <span class="sb-prod-card__stock">Stok: @prod.StockQuantity</span>
+                                        <span class="sb-prod-card__stock">@L["Stok:"] @prod.StockQuantity</span>
                                     }
                                     else
                                     {
-                                        <span class="sb-prod-card__stock sb-prod-card__stock--zero">Stok: 0</span>
+                                        <span class="sb-prod-card__stock sb-prod-card__stock--zero">@L["Stok:"] 0</span>
                                     }
                                 </div>
                                 <div class="sb-prod-card__price">
@@ -127,16 +127,16 @@
                             </div>
 
                             <footer class="sb-prod-card__actions">
-                                <label class="sb-prod-card__toggle" title="@(prod.IsActive ? "Deaktiv et" : "Aktiv et")">
+                                <label class="sb-prod-card__toggle" title="@(prod.IsActive ? L["Deaktiv et"].Value : L["Aktiv et"].Value)">
                                     <input type="checkbox" data-prod-toggle data-prod-id="@prod.Id" @(prod.IsActive ? "checked" : "") />
                                     <span class="sb-prod-card__toggle-slider"></span>
                                 </label>
-                                <a asp-action="EditProduct" asp-route-id="@prod.Id" class="sb-prod-card__btn" title="Redaktə et">
+                                <a asp-action="EditProduct" asp-route-id="@prod.Id" class="sb-prod-card__btn" title="@L["Redaktə et"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 </a>
                                 <form asp-action="DeleteProduct" asp-route-id="@prod.Id" method="post" class="sb-prod-card__del-form" data-prod-delete-form>
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="sb-prod-card__btn sb-prod-card__btn--danger" title="Sil">
+                                    <button type="submit" class="sb-prod-card__btn sb-prod-card__btn--danger" title="@L["Sil"]">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                                     </button>
                                 </form>

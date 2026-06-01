@@ -1,17 +1,17 @@
 @model SellerNotificationsPageViewModel
 @{
-    ViewData["Title"] = "Bildirişlər";
+    ViewData["Title"] = L["Bildirişlər"].Value;
 
     string Relative(DateTime dtUtc)
     {
         var span = DateTime.UtcNow - dtUtc;
         if (span.TotalSeconds < 0) return dtUtc.ToLocalTime().ToString("dd.MM.yyyy");
-        if (span.TotalMinutes < 1) return "indicə";
-        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dəq əvvəl";
-        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat əvvəl";
-        if (span.TotalDays < 2) return "dünən";
-        if (span.TotalDays < 7) return $"{(int)span.TotalDays} gün əvvəl";
-        return dtUtc.ToLocalTime().ToString("dd MMM yyyy", new System.Globalization.CultureInfo("az-Latn-AZ"));
+        if (span.TotalMinutes < 1) return L["indicə"].Value;
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} {L["dəq əvvəl"].Value}";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} {L["saat əvvəl"].Value}";
+        if (span.TotalDays < 2) return L["Dünən"].Value;
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} {L["gün əvvəl"].Value}";
+        return dtUtc.ToLocalTime().ToString("dd MMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
     }
 
     DateTime nowUtc = DateTime.UtcNow;
@@ -20,10 +20,10 @@
     DateTime weekAgoUtc = todayUtc.AddDays(-7);
 
     string Bucket(DateTime dt) =>
-        dt.Date == todayUtc ? "Bu gün"
-        : dt.Date == yesterdayUtc ? "Dünən"
-        : dt.Date > weekAgoUtc ? "Bu həftə"
-        : "Daha əvvəl";
+        dt.Date == todayUtc ? L["Bu gün"].Value
+        : dt.Date == yesterdayUtc ? L["Dünən"].Value
+        : dt.Date > weekAgoUtc ? L["Bu həftə"].Value
+        : L["Daha əvvəl"].Value;
 
     var grouped = Model.Items
         .GroupBy(i => Bucket(i.CreatedDate))
@@ -36,16 +36,16 @@
 
     <main class="sb-seller-main">
         <header class="sb-acc-section-title">
-            <h1>Bildirişlər</h1>
-            <p class="sb-acc-section-title__sub">Yeni rəylər, təhlükəsizlik xəbərdarlıqları və plan müddəti</p>
+            <h1>@L["Bildirişlər"]</h1>
+            <p class="sb-acc-section-title__sub">@L["Yeni rəylər, təhlükəsizlik xəbərdarlıqları və plan müddəti"]</p>
         </header>
 
         @if (!Model.Items.Any())
         {
             <div class="sb-seller-card sb-acc-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                <strong>Hələ bildiriş yoxdur</strong>
-                <p>Müştəri rəyləri, təhlükəsizlik xəbərdarlıqları və plan haqqında bildirişlər burada görünəcək.</p>
+                <strong>@L["Hələ bildiriş yoxdur"]</strong>
+                <p>@L["Müştəri rəyləri, təhlükəsizlik xəbərdarlıqları və plan haqqında bildirişlər burada görünəcək."]</p>
             </div>
         }
         else

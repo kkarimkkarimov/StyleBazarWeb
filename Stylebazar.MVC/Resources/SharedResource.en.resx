@@ -471,4 +471,71 @@
   <data name="yazır..." xml:space="preserve"><value>typing...</value></data>
   <data name="Şəkil əlavə et" xml:space="preserve"><value>Add image</value></data>
   <data name="Mesaj yaz..." xml:space="preserve"><value>Write a message...</value></data>
+  <!-- ===== Seller panel ===== -->
+  <data name="Satıcı paneli naviqasiyası" xml:space="preserve"><value>Seller panel navigation</value></data>
+  <data name="Yeni məhsul" xml:space="preserve"><value>New product</value></data>
+  <data name="Statistika" xml:space="preserve"><value>Statistics</value></data>
+  <data name="Paketlər" xml:space="preserve"><value>Packages</value></data>
+  <data name="Mağaza ayarları" xml:space="preserve"><value>Store settings</value></data>
+  <data name="mağaza bu gün necə işləyir?" xml:space="preserve"><value>how is the store doing today?</value></data>
+  <data name="Cari plan" xml:space="preserve"><value>Current plan</value></data>
+  <data name="Hələ mağazan yoxdur" xml:space="preserve"><value>You don't have a store yet</value></data>
+  <data name="Mağaza yaratmadan məhsul əlavə edə bilməzsən. Bir neçə dəqiqədə tamamla." xml:space="preserve"><value>You can't add products without creating a store. Finish it in a few minutes.</value></data>
+  <data name="Mağaza yarat" xml:space="preserve"><value>Create store</value></data>
+  <data name="PRO + VIP planlar açıldı" xml:space="preserve"><value>PRO + VIP plans unlocked</value></data>
+  <data name="Daha çox alıcı, daha çox satış" xml:space="preserve"><value>More buyers, more sales</value></data>
+  <data name="Pro plana keçərək" xml:space="preserve"><value>Upgrade to Pro and get</value></data>
+  <data name="50 məhsul" xml:space="preserve"><value>50 products</value></data>
+  <data name="tam" xml:space="preserve"><value>, full</value></data>
+  <data name="analytics" xml:space="preserve"><value>analytics</value></data>
+  <data name="və limitsiz hekayələrə sahib ol." xml:space="preserve"><value>and unlimited stories.</value></data>
+  <data name="VIP-də ✓" xml:space="preserve"><value>VIP adds ✓</value></data>
+  <data name="Verified badge" xml:space="preserve"><value>Verified badge</value></data>
+  <data name="+ katalogda öndə görünmək də əlavə olunur." xml:space="preserve"><value>+ priority placement in the catalog.</value></data>
+  <data name="Paketləri gör" xml:space="preserve"><value>View packages</value></data>
+  <data name="Cari istifadə:" xml:space="preserve"><value>Current usage:</value></data>
+  <data name="Ümumi click" xml:space="preserve"><value>Total clicks</value></data>
+  <data name="son 7 gün:" xml:space="preserve"><value>last 7 days:</value></data>
+  <data name="əlavə edilib" xml:space="preserve"><value>added</value></data>
+  <data name="İzləyici" xml:space="preserve"><value>Followers</value></data>
+  <data name="mağazana abunə" xml:space="preserve"><value>subscribed to your store</value></data>
+  <data name="aktiv:" xml:space="preserve"><value>active:</value></data>
+  <data name="Şəkillər + qiymət + kontakt" xml:space="preserve"><value>Images + price + contact</value></data>
+  <data name="Logo, kontakt, sosial media" xml:space="preserve"><value>Logo, contact, social media</value></data>
+  <data name="Plan.Active" xml:space="preserve"><value>active</value></data>
+  <data name="Kanal və top məhsullar" xml:space="preserve"><value>Channels and top products</value></data>
+  <data name="Son rəylər" xml:space="preserve"><value>Recent reviews</value></data>
+  <data name="Yeni rəylər, təhlükəsizlik xəbərdarlıqları və plan müddəti" xml:space="preserve"><value>New reviews, security alerts and plan expiry</value></data>
+  <data name="Müştəri rəyləri, təhlükəsizlik xəbərdarlıqları və plan haqqında bildirişlər burada görünəcək." xml:space="preserve"><value>Notifications about customer reviews, security alerts and your plan will appear here.</value></data>
+  <data name="Müştəri rəyləri" xml:space="preserve"><value>Customer reviews</value></data>
+  <data name="Mağazalarındakı məhsullara yazılan ən son" xml:space="preserve"><value>The latest</value></data>
+  <data name="Ortalama reytinq" xml:space="preserve"><value>Average rating</value></data>
+  <data name="Ümumi rəy" xml:space="preserve"><value>Total reviews</value></data>
+  <data name="5 ulduzlu" xml:space="preserve"><value>5-star</value></data>
+  <data name="Aşağı reytinq (1–2)" xml:space="preserve"><value>Low rating (1–2)</value></data>
+  <data name="Filtr:" xml:space="preserve"><value>Filter:</value></data>
+  <data name="Bütün rəylər" xml:space="preserve"><value>All reviews</value></data>
+  <data name="≤ 2 ulduz (problemli)" xml:space="preserve"><value>≤ 2 stars (problematic)</value></data>
+  <data name="≤ 3 ulduz" xml:space="preserve"><value>≤ 3 stars</value></data>
+  <data name="≤ 4 ulduz" xml:space="preserve"><value>≤ 4 stars</value></data>
+  <data name="Müştərilər məhsullarına rəy yazdıqda burada görünəcək." xml:space="preserve"><value>This appears when customers review your products.</value></data>
+  <data name="Reytinq" xml:space="preserve"><value>Rating</value></data>
+  <data name="Müştəri" xml:space="preserve"><value>Customer</value></data>
+  <data name="Tarix" xml:space="preserve"><value>Date</value></data>
+  <data name="— şərh yoxdur —" xml:space="preserve"><value>— no comment —</value></data>
+  <data name="Anonim" xml:space="preserve"><value>Anonymous</value></data>
+  <data name="Məhsullarım" xml:space="preserve"><value>My products</value></data>
+  <data name="Mağazandakı bütün məhsulları idarə et — aktivləşdir, redaktə et, yenisini əlavə et." xml:space="preserve"><value>Manage all products in your store — activate, edit, add new ones.</value></data>
+  <data name="Mağazan hələ yoxdur" xml:space="preserve"><value>You don't have a store yet</value></data>
+  <data name="Məhsul əlavə etmək üçün əvvəlcə mağaza adı seç. Sonra Store Settings-də logo, təsvir və əlaqə kanalları əlavə edə bilərsən." xml:space="preserve"><value>To add products, first choose a store name. Then add logo, description and contact channels in Store Settings.</value></data>
+  <data name="Mağaza adı" xml:space="preserve"><value>Store name</value></data>
+  <data name="Aktiv" xml:space="preserve"><value>Active</value></data>
+  <data name="Deaktiv" xml:space="preserve"><value>Inactive</value></data>
+  <data name="Aktiv məhsul yoxdur" xml:space="preserve"><value>No active products</value></data>
+  <data name="Deaktiv məhsul yoxdur" xml:space="preserve"><value>No inactive products</value></data>
+  <data name="Hələ məhsul əlavə etməmisən" xml:space="preserve"><value>You haven't added any products yet</value></data>
+  <data name="İlk məhsulunu əlavə et — alıcılar mağazanı yalnız aktiv məhsullarla görəcəklər." xml:space="preserve"><value>Add your first product — buyers see your store only with active products.</value></data>
+  <data name="Stok:" xml:space="preserve"><value>Stock:</value></data>
+  <data name="Deaktiv et" xml:space="preserve"><value>Deactivate</value></data>
+  <data name="Aktiv et" xml:space="preserve"><value>Activate</value></data>
 </root>

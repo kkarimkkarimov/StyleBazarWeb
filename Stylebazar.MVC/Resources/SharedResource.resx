@@ -129,4 +129,5 @@
   <data name="MoreFrom.Suffix" xml:space="preserve"><value>mağazasından</value></data>
   <data name="Retry.Again" xml:space="preserve"><value>yenidən</value></data>
   <data name="ResetPwd.New" xml:space="preserve"><value>Yeni</value></data>
+  <data name="Plan.Active" xml:space="preserve"><value>aktiv</value></data>
 </root>
