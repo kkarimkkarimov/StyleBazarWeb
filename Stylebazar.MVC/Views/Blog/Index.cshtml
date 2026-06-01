@@ -1,24 +1,24 @@
 @model string
 @{
-    ViewData["Title"] = "Blog";
+    ViewData["Title"] = L["Blog"].Value;
     var cat = Model;
 }
 
 <section class="sb-page-hero">
     <span class="sb-eyebrow">StyleBazar Journal</span>
-    <h1>Moda hekayələri, <em style="font-style: italic; color: var(--sb-accent);">birbaşa Bakıdan.</em></h1>
-    <p>Trend, üslub bələdçiləri, yerli brand hekayələri və satıcılar üçün e-ticarət məsləhətləri.</p>
+    <h1>@L["Moda hekayələri,"] <em style="font-style: italic; color: var(--sb-accent);">@L["birbaşa Bakıdan."]</em></h1>
+    <p>@L["Trend, üslub bələdçiləri, yerli brand hekayələri və satıcılar üçün e-ticarət məsləhətləri."]</p>
 </section>
 
 <section class="sb-section">
     @{
         var cats = new[] {
-            new { Slug = (string?)null, Name = "Hamısı" },
-            new { Slug = (string?)"moda", Name = "Moda" },
-            new { Slug = (string?)"rehberler", Name = "Geyim rəhbərləri" },
-            new { Slug = (string?)"meslehetler", Name = "Alış məsləhətləri" },
-            new { Slug = (string?)"eticaret", Name = "E-Ticarət" },
-            new { Slug = (string?)"brendler", Name = "Brand hekayələri" }
+            new { Slug = (string?)null, Name = L["Hamısı"].Value },
+            new { Slug = (string?)"moda", Name = L["Moda"].Value },
+            new { Slug = (string?)"rehberler", Name = L["Geyim rəhbərləri"].Value },
+            new { Slug = (string?)"meslehetler", Name = L["Alış məsləhətləri"].Value },
+            new { Slug = (string?)"eticaret", Name = L["E-Ticarət"].Value },
+            new { Slug = (string?)"brendler", Name = L["Brand hekayələri"].Value }
         };
     }
     <div class="sb-search-overlay__chips" style="justify-content: center; margin-bottom: 32px;">
@@ -31,8 +31,8 @@
 
     <div class="sb-empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <h3>Tezliklə içəri</h3>
-        <p>İlk yazılarımız hazırlanır. Newsletter-ə abunə ol — hazır olanda ilk sən xəbər tut.</p>
-        <a class="sb-btn sb-btn--primary" asp-controller="Home" asp-action="Index">Ana səhifə</a>
+        <h3>@L["Tezliklə içəri"]</h3>
+        <p>@L["İlk yazılarımız hazırlanır. Newsletter-ə abunə ol — hazır olanda ilk sən xəbər tut."]</p>
+        <a class="sb-btn sb-btn--primary" asp-controller="Home" asp-action="Index">@L["Ana səhifə"]</a>
     </div>
 </section>

@@ -3,18 +3,18 @@
     int? code = ViewData["StatusCode"] as int?;
     string headline = code switch
     {
-        404 => "Səhifə tapılmadı",
-        403 => "Giriş qadağandır",
-        401 => "Giriş tələb olunur",
-        _   => "Bir səhv baş verdi"
+        404 => L["Səhifə tapılmadı"].Value,
+        403 => L["Giriş qadağandır"].Value,
+        401 => L["Giriş tələb olunur"].Value,
+        _   => L["Bir səhv baş verdi"].Value
     };
     string badge = code?.ToString() ?? "5×0";
     string subtitle = code switch
     {
-        404 => "Axtardığın səhifə köçürülmüş, silinmiş və ya heç vaxt mövcud olmamış ola bilər.",
-        403 => "Bu səhifəyə icazən yoxdur. Hesabını dəyişməyə cəhd et və ya ana səhifəyə qayıt.",
-        401 => "Bu səhifəyə baxmaq üçün hesabına daxil olmalısan.",
-        _   => "Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyə və ya ana səhifəyə qayıda bilərsən."
+        404 => L["Axtardığın səhifə köçürülmüş, silinmiş və ya heç vaxt mövcud olmamış ola bilər."].Value,
+        403 => L["Bu səhifəyə icazən yoxdur. Hesabını dəyişməyə cəhd et və ya ana səhifəyə qayıt."].Value,
+        401 => L["Bu səhifəyə baxmaq üçün hesabına daxil olmalısan."].Value,
+        _   => L["Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyə və ya ana səhifəyə qayıda bilərsən."].Value
     };
     ViewData["Title"] = headline;
 }
@@ -32,7 +32,7 @@
         </p>
     }
     <div style="margin-top: 32px; display: flex; gap: 12px; justify-content: center;">
-        <a class="sb-btn sb-btn--primary" asp-controller="Home" asp-action="Index">Ana səhifə</a>
-        <a class="sb-btn sb-btn--ghost" asp-controller="Shop" asp-action="Index">Mağazaya bax</a>
+        <a class="sb-btn sb-btn--primary" asp-controller="Home" asp-action="Index">@L["Ana səhifə"]</a>
+        <a class="sb-btn sb-btn--ghost" asp-controller="Shop" asp-action="Index">@L["Mağazaya bax"]</a>
     </div>
 </section>

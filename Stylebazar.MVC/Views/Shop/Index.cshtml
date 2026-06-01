@@ -1,27 +1,16 @@
 @using Stylebazar.DAL.Entities.Enums
 @model ShopIndexViewModel
 @{
-    ViewData["Title"] = "Mağaza";
+    ViewData["Title"] = L["Mağaza"].Value;
     var q = Model.Query;
     // Published for _ProductCard so each card can paint its initial heart state.
     ViewData["WishlistIds"] = Model.WishlistProductIds;
 }
 
-@functions {
-    string SortLabel(string? key) => key switch
-    {
-        "price-asc" => "Qiymət: ucuz → baha",
-        "price-desc" => "Qiymət: baha → ucuz",
-        "name-asc" => "Ad: A → Z",
-        "name-desc" => "Ad: Z → A",
-        _ => "Ən yeni"
-    };
-}
-
 <header class="sb-shop__header">
     <span class="sb-eyebrow">StyleBazar</span>
-    <h1>Mağaza</h1>
-    <p>Yerli satıcılardan brend geyimləri kəşf et.</p>
+    <h1>@L["Mağaza"]</h1>
+    <p>@L["Yerli satıcılardan brend geyimləri kəşf et."]</p>
 </header>
 
 <div class="sb-shop">
@@ -30,8 +19,8 @@
     <aside class="sb-filter" id="sbShopFilter">
         <form method="get" asp-action="Index" id="sbShopFilterForm">
             <div class="sb-filter__head">
-                <h3>Filtrlər</h3>
-                <button type="button" class="sb-filter__close" id="sbFilterClose" aria-label="Bağla">
+                <h3>@L["Filtrlər"]</h3>
+                <button type="button" class="sb-filter__close" id="sbFilterClose" aria-label="@L["Bağla"]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -39,19 +28,19 @@
             <input type="hidden" name="sortBy" value="@q.SortBy" />
 
             <div class="sb-filter-group">
-                <h4>Axtarış</h4>
-                <input type="search" class="sb-filter-search" name="search" value="@q.Search" placeholder="Məhsul axtar..." />
+                <h4>@L["Axtarış"]</h4>
+                <input type="search" class="sb-filter-search" name="search" value="@q.Search" placeholder="@L["Məhsul axtar..."]" />
             </div>
 
             @if (Model.Categories.Any())
             {
                 <div class="sb-filter-group">
-                    <h4>Kateqoriya</h4>
+                    <h4>@L["Kateqoriya"]</h4>
                     <label class="sb-filter-option">
                         <input type="radio" name="categoryId" value=""
                                checked="@(!q.CategoryId.HasValue)" />
                         <span class="sb-filter-option__box"></span>
-                        <span>Hamısı</span>
+                        <span>@L["Hamısı"]</span>
                     </label>
                     @foreach (var cat in Model.Categories.Take(15))
                     {
@@ -66,50 +55,50 @@
             }
 
             <div class="sb-filter-group">
-                <h4>Qiymət (₼)</h4>
+                <h4>@L["Qiymət (₼)"]</h4>
                 <div class="sb-filter-price">
-                    <input type="number" min="0" step="1" name="minPrice" value="@(q.MinPrice?.ToString("F0") ?? "")" placeholder="Min" />
-                    <input type="number" min="0" step="1" name="maxPrice" value="@(q.MaxPrice?.ToString("F0") ?? "")" placeholder="Max" />
+                    <input type="number" min="0" step="1" name="minPrice" value="@(q.MinPrice?.ToString("F0") ?? "")" placeholder="@L["Min"]" />
+                    <input type="number" min="0" step="1" name="maxPrice" value="@(q.MaxPrice?.ToString("F0") ?? "")" placeholder="@L["Max"]" />
                 </div>
             </div>
 
             <div class="sb-filter-group">
-                <h4>Vəziyyət</h4>
+                <h4>@L["Vəziyyət"]</h4>
                 <label class="sb-filter-option">
                     <input type="radio" name="condition" value=""
                            checked="@(!q.Condition.HasValue)" />
                     <span class="sb-filter-option__box"></span>
-                    <span>Hamısı</span>
+                    <span>@L["Hamısı"]</span>
                 </label>
                 <label class="sb-filter-option">
                     <input type="radio" name="condition" value="New"
                            checked="@(q.Condition == ProductCondition.New)" />
                     <span class="sb-filter-option__box"></span>
-                    <span>Yeni</span>
+                    <span>@L["Yeni"]</span>
                 </label>
                 <label class="sb-filter-option">
                     <input type="radio" name="condition" value="SecondHand"
                            checked="@(q.Condition == ProductCondition.SecondHand)" />
                     <span class="sb-filter-option__box"></span>
-                    <span>İkinci əl</span>
+                    <span>@L["İkinci əl"]</span>
                 </label>
                 <label class="sb-filter-option">
                     <input type="radio" name="condition" value="Vintage"
                            checked="@(q.Condition == ProductCondition.Vintage)" />
                     <span class="sb-filter-option__box"></span>
-                    <span>Vintage</span>
+                    <span>@L["Vintage"]</span>
                 </label>
             </div>
 
             @if (Model.Brands.Any())
             {
                 <div class="sb-filter-group">
-                    <h4>Brend</h4>
+                    <h4>@L["Brend"]</h4>
                     <label class="sb-filter-option">
                         <input type="radio" name="brand" value=""
                                checked="@(string.IsNullOrEmpty(q.Brand))" />
                         <span class="sb-filter-option__box"></span>
-                        <span>Hamısı</span>
+                        <span>@L["Hamısı"]</span>
                     </label>
                     @foreach (var b in Model.Brands.Take(10))
                     {
@@ -124,20 +113,20 @@
             }
 
             <div class="sb-filter-group">
-                <h4>Featured</h4>
+                <h4>@L["Featured"]</h4>
                 <label class="sb-filter-option">
                     <input type="checkbox" name="isFeatured" value="true"
                            checked="@(q.IsFeatured == true)" />
                     <span class="sb-filter-option__box">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </span>
-                    <span>Yalnız önə çıxanlar</span>
+                    <span>@L["Yalnız önə çıxanlar"]</span>
                 </label>
             </div>
 
             <div class="sb-filter__actions">
-                <button type="submit" class="sb-btn sb-btn--primary sb-btn--sm">Tətbiq et</button>
-                <a class="sb-btn sb-btn--ghost sb-btn--sm" asp-action="Index">Sıfırla</a>
+                <button type="submit" class="sb-btn sb-btn--primary sb-btn--sm">@L["Tətbiq et"]</button>
+                <a class="sb-btn sb-btn--ghost sb-btn--sm" asp-action="Index">@L["Sıfırla"]</a>
             </div>
         </form>
     </aside>
@@ -150,20 +139,20 @@
         @* Top toolbar *@
         <div class="sb-toolbar">
             <span class="sb-toolbar__count">
-                <strong>@Model.Products.Count</strong> nəticə
-                @if (!string.IsNullOrEmpty(q.Search)) { <text>— "<strong>@q.Search</strong>" üçün</text> }
+                <strong>@Model.Products.Count</strong> @L["nəticə"]
+                @if (!string.IsNullOrEmpty(q.Search)) { <text>— "<strong>@q.Search</strong>" @L["üçün"]</text> }
             </span>
             <div class="sb-toolbar__right">
                 <button type="button" class="sb-mobile-filter-btn" id="sbFilterOpen">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
-                    Filtr
+                    @L["Filtr"]
                 </button>
                 <select class="sb-sort-select" id="sbShopSort">
-                    <option value="" selected="@(string.IsNullOrEmpty(q.SortBy))">Ən yeni</option>
-                    <option value="price-asc" selected="@(q.SortBy == "price-asc")">Qiymət ↑</option>
-                    <option value="price-desc" selected="@(q.SortBy == "price-desc")">Qiymət ↓</option>
-                    <option value="name-asc" selected="@(q.SortBy == "name-asc")">Ad: A → Z</option>
-                    <option value="name-desc" selected="@(q.SortBy == "name-desc")">Ad: Z → A</option>
+                    <option value="" selected="@(string.IsNullOrEmpty(q.SortBy))">@L["Ən yeni"]</option>
+                    <option value="price-asc" selected="@(q.SortBy == "price-asc")">@L["Qiymət ↑"]</option>
+                    <option value="price-desc" selected="@(q.SortBy == "price-desc")">@L["Qiymət ↓"]</option>
+                    <option value="name-asc" selected="@(q.SortBy == "name-asc")">@L["Ad: A → Z"]</option>
+                    <option value="name-desc" selected="@(q.SortBy == "name-desc")">@L["Ad: Z → A"]</option>
                 </select>
             </div>
         </div>
@@ -217,7 +206,7 @@
                 }
                 @if (q.Condition.HasValue)
                 {
-                    var cLabel = q.Condition.Value switch { ProductCondition.SecondHand => "İkinci əl", ProductCondition.Vintage => "Vintage", _ => "Yeni" };
+                    var cLabel = q.Condition.Value switch { ProductCondition.SecondHand => L["İkinci əl"].Value, ProductCondition.Vintage => L["Vintage"].Value, _ => L["Yeni"].Value };
                     <span class="sb-chip">@cLabel
                         <a asp-action="Index" asp-route-search="@q.Search" asp-route-categoryId="@q.CategoryId" asp-route-brand="@q.Brand" asp-route-minPrice="@q.MinPrice" asp-route-maxPrice="@q.MaxPrice" asp-route-sortBy="@q.SortBy">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -226,13 +215,13 @@
                 }
                 @if (q.IsFeatured == true)
                 {
-                    <span class="sb-chip">Önə çıxan
+                    <span class="sb-chip">@L["Önə çıxan"]
                         <a asp-action="Index" asp-route-search="@q.Search" asp-route-categoryId="@q.CategoryId" asp-route-brand="@q.Brand" asp-route-minPrice="@q.MinPrice" asp-route-maxPrice="@q.MaxPrice" asp-route-condition="@q.Condition" asp-route-sortBy="@q.SortBy">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </a>
                     </span>
                 }
-                <a class="sb-chip sb-chip--clear" asp-action="Index">Hamısını sıfırla</a>
+                <a class="sb-chip sb-chip--clear" asp-action="Index">@L["Hamısını sıfırla"]</a>
             </div>
         }
 
@@ -241,9 +230,9 @@
         {
             <div class="sb-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <h3>Heç bir məhsul tapılmadı</h3>
-                <p>Filtri dəyiş, daha geniş axtarış et və ya hamısını sıfırla.</p>
-                <a class="sb-btn sb-btn--primary" asp-action="Index">Hamısını göstər</a>
+                <h3>@L["Heç bir məhsul tapılmadı"]</h3>
+                <p>@L["Filtri dəyiş, daha geniş axtarış et və ya hamısını sıfırla."]</p>
+                <a class="sb-btn sb-btn--primary" asp-action="Index">@L["Hamısını göstər"]</a>
             </div>
         }
         else
@@ -258,7 +247,7 @@
             @* Pagination *@
             @if (Model.Products.Pages > 1)
             {
-                <nav class="sb-pagination" aria-label="Səhifələmə">
+                <nav class="sb-pagination" aria-label="@L["Səhifələmə"]">
                     @{
                         int currentPage = Model.Products.Index + 1; // 1-based
                         int totalPages = Model.Products.Pages;
@@ -273,7 +262,7 @@
                            asp-route-search="@q.Search" asp-route-categoryId="@q.CategoryId" asp-route-brand="@q.Brand"
                            asp-route-minPrice="@q.MinPrice" asp-route-maxPrice="@q.MaxPrice"
                            asp-route-condition="@q.Condition" asp-route-isFeatured="@q.IsFeatured" asp-route-sortBy="@q.SortBy"
-                           aria-label="Əvvəlki">
+                           aria-label="@L["Əvvəlki"]">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
                         </a>
                     }
@@ -326,7 +315,7 @@
                            asp-route-search="@q.Search" asp-route-categoryId="@q.CategoryId" asp-route-brand="@q.Brand"
                            asp-route-minPrice="@q.MinPrice" asp-route-maxPrice="@q.MaxPrice"
                            asp-route-condition="@q.Condition" asp-route-isFeatured="@q.IsFeatured" asp-route-sortBy="@q.SortBy"
-                           aria-label="Növbəti">
+                           aria-label="@L["Növbəti"]">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
                         </a>
                     }

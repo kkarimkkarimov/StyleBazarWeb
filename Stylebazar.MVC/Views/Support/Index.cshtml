@@ -1,58 +1,58 @@
 @{
-    ViewData["Title"] = "Dəstək";
+    ViewData["Title"] = L["Dəstək"].Value;
 }
 
 <section class="sb-page-hero">
-    <span class="sb-eyebrow">Dəstək mərkəzi</span>
-    <h1>Sənin <em style="font-style: italic; color: var(--sb-accent);">sualına</em> cavabımız var.</h1>
-    <p>Tez-tez verilən sualları aşağıda topladıq. Tapmadığını dəstək ekipimizdən soruş.</p>
+    <span class="sb-eyebrow">@L["Dəstək mərkəzi"]</span>
+    <h1>@L["Sənin"] <em style="font-style: italic; color: var(--sb-accent);">@L["sualına"]</em> @L["cavabımız var."]</h1>
+    <p>@L["Tez-tez verilən sualları aşağıda topladıq. Tapmadığını dəstək ekipimizdən soruş."]</p>
 </section>
 
 <section class="sb-section">
     <div style="display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 760px; margin: 0 auto;">
         <details class="sb-card" style="padding: 20px 24px;">
             <summary style="font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                Necə qeydiyyatdan keçə bilərəm?
+                @L["Necə qeydiyyatdan keçə bilərəm?"]
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
-            <p class="sb-muted" style="margin: 12px 0 0;">Üst sağda "Qeydiyyat" düyməsini sıx, ad, e-mail və parol daxil et, rolu seç (Alıcı və ya Satıcı) — bir kliklə tamam.</p>
+            <p class="sb-muted" style="margin: 12px 0 0;">@L["Üst sağda \"Qeydiyyat\" düyməsini sıx, ad, e-mail və parol daxil et, rolu seç (Alıcı və ya Satıcı) — bir kliklə tamam."]</p>
         </details>
         <details class="sb-card" style="padding: 20px 24px;">
             <summary style="font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                Mağazamı necə yaradaram?
+                @L["Mağazamı necə yaradaram?"]
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
-            <p class="sb-muted" style="margin: 12px 0 0;">Satıcı kimi qeydiyyatdan keçdikdən sonra "Satıcı paneli"-nə daxil ol, mağaza adı, profil şəkli, əlaqə nömrəsi əlavə et — və mağazan canlıdır.</p>
+            <p class="sb-muted" style="margin: 12px 0 0;">@L["Satıcı kimi qeydiyyatdan keçdikdən sonra \"Satıcı paneli\"-nə daxil ol, mağaza adı, profil şəkli, əlaqə nömrəsi əlavə et — və mağazan canlıdır."]</p>
         </details>
         <details class="sb-card" style="padding: 20px 24px;">
             <summary style="font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                Komissiya nə qədərdir?
+                @L["Komissiya nə qədərdir?"]
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
-            <p class="sb-muted" style="margin: 12px 0 0;">Yeni satıcılar üçün ilk ay komissiyasızdır. Sonra hər satışdan kiçik komissiya tutulur — dəqiq tariflər satıcı panelində göstərilir.</p>
+            <p class="sb-muted" style="margin: 12px 0 0;">@L["Yeni satıcılar üçün ilk ay komissiyasızdır. Sonra hər satışdan kiçik komissiya tutulur — dəqiq tariflər satıcı panelində göstərilir."]</p>
         </details>
         <details class="sb-card" style="padding: 20px 24px;">
             <summary style="font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                Çatdırılma necədir?
+                @L["Çatdırılma necədir?"]
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
-            <p class="sb-muted" style="margin: 12px 0 0;">Çatdırılma satıcı və alıcı arasında razılaşdırılır. Çoxu yerli kuryer xidmətləri ilə Bakı və regionlara çatdırır.</p>
+            <p class="sb-muted" style="margin: 12px 0 0;">@L["Çatdırılma satıcı və alıcı arasında razılaşdırılır. Çoxu yerli kuryer xidmətləri ilə Bakı və regionlara çatdırır."]</p>
         </details>
         <details class="sb-card" style="padding: 20px 24px;">
             <summary style="font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                Geri qaytarma siyasəti?
+                @L["Geri qaytarma siyasəti?"]
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
-            <p class="sb-muted" style="margin: 12px 0 0;">Hər mağazanın öz geri qaytarma siyasəti var. Məhsul səhifəsində bu məlumat göstərilir. Problem olarsa, dəstək komandamız işlə.</p>
+            <p class="sb-muted" style="margin: 12px 0 0;">@L["Hər mağazanın öz geri qaytarma siyasəti var. Məhsul səhifəsində bu məlumat göstərilir. Problem olarsa, dəstək komandamız işlə."]</p>
         </details>
     </div>
 </section>
 
 <section class="sb-section">
     <div class="sb-newsletter">
-        <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">Hələ sual var?</span>
-        <h2>Bizimlə əlaqə saxla</h2>
-        <p>Cavabını tapmadın? E-mail göndər, 24 saat ərzində cavablandıraq.</p>
+        <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">@L["Hələ sual var?"]</span>
+        <h2>@L["Bizimlə əlaqə saxla"]</h2>
+        <p>@L["Cavabını tapmadın? E-mail göndər, 24 saat ərzində cavablandıraq."]</p>
         <a class="sb-btn sb-btn--accent sb-btn--lg" href="mailto:support@stylebazar.az">support@@stylebazar.az</a>
     </div>
 </section>

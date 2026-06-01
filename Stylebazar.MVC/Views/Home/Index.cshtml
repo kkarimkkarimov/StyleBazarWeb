@@ -3,7 +3,7 @@
 @using Stylebazar.DAL.Entities
 @inject SignInManager<AppUser> SignInManager
 @{
-    ViewData["Title"] = "Ana səhifə";
+    ViewData["Title"] = L["Ana səhifə"].Value;
     ViewData["WishlistIds"] = Model.WishlistProductIds;
     // Inline-shape the JSON so the JS doesn't depend on JsonSerializer defaults
     // (PascalCase + integer enums). Match the property names the viewer JS reads,
@@ -82,9 +82,9 @@
 @* ============== FEATURED — pastel lilac rail with arrow nav ============== *@
 <section class="sb-tile sb-tile--lilac">
     <header class="sb-tile__head">
-        <h2>Seçilmiş məhsullar</h2>
+        <h2>@L["Seçilmiş məhsullar"]</h2>
         <a asp-controller="Shop" asp-action="Index" asp-route-isFeatured="true" class="sb-tile__view-all">
-            Hamısına bax
+            @L["Hamısına bax"]
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
     </header>
@@ -92,7 +92,7 @@
     @if (Model.FeaturedProducts.Any())
     {
         <div class="sb-tile__rail-wrap">
-            <button type="button" class="sb-tile__nav sb-tile__nav--prev" data-rail-prev aria-label="Sol">
+            <button type="button" class="sb-tile__nav sb-tile__nav--prev" data-rail-prev aria-label="@L["Sol"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
             <div class="sb-tile__rail" data-rail>
@@ -107,14 +107,14 @@
                     ViewData["CardVariant"] = "rich";
                 }
             </div>
-            <button type="button" class="sb-tile__nav sb-tile__nav--next" data-rail-next aria-label="Sağ">
+            <button type="button" class="sb-tile__nav sb-tile__nav--next" data-rail-next aria-label="@L["Sağ"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
         </div>
     }
     else
     {
-        <div class="sb-tile__empty"><span>İlk seçilmişlər tezliklə burada görsənəcək.</span></div>
+        <div class="sb-tile__empty"><span>@L["İlk seçilmişlər tezliklə burada görsənəcək."]</span></div>
     }
 </section>
 
@@ -123,7 +123,7 @@
 {
     <section class="sb-tile sb-tile--blush">
         <header class="sb-tile__head">
-            <h2>Hekayələr</h2>
+            <h2>@L["Hekayələr"]</h2>
         </header>
         <div class="sb-stories-rail" id="sbStoriesRail">
             @foreach (var storeGroup in Model.Stories)
@@ -153,9 +153,9 @@
 @* ============== PRODUCTS — pastel mint grid (rich cards) ============== *@
 <section class="sb-tile sb-tile--mint">
     <header class="sb-tile__head">
-        <h2>Məhsullar</h2>
+        <h2>@L["Məhsullar"]</h2>
         <a asp-controller="Shop" asp-action="Index" class="sb-tile__view-all">
-            Hamısına bax
+            @L["Hamısına bax"]
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
     </header>
@@ -171,20 +171,20 @@
     }
     else
     {
-        <div class="sb-tile__empty"><span>İlk məhsullar tezliklə görsənəcək.</span></div>
+        <div class="sb-tile__empty"><span>@L["İlk məhsullar tezliklə görsənəcək."]</span></div>
     }
 </section>
 
 @* ============== NEWSLETTER — ink-dark CTA with AJAX form ============== *@
 <section class="sb-section">
     <div class="sb-newsletter">
-        <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">Yeniliklərə abunə</span>
-        <h2>İlk biz xəbər verək</h2>
-        <p>Yeni mağazalar, kolleksiyalar və endirimlər — həftədə bir email, spam yox.</p>
+        <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">@L["Yeniliklərə abunə"]</span>
+        <h2>@L["İlk biz xəbər verək"]</h2>
+        <p>@L["Yeni mağazalar, kolleksiyalar və endirimlər — həftədə bir email, spam yox."]</p>
         <form id="sbNewsletterForm" novalidate>
             @Html.AntiForgeryToken()
             <input type="email" name="email" placeholder="sen@example.com" required autocomplete="email" aria-label="Email" />
-            <button type="submit" class="sb-btn sb-btn--accent">Abunə ol</button>
+            <button type="submit" class="sb-btn sb-btn--accent">@L["Abunə ol"]</button>
         </form>
         <div id="sbNewsletterResult" class="sb-newsletter__result" aria-live="polite"></div>
     </div>
@@ -192,7 +192,7 @@
 
 @* ============== STORY VIEWER MODAL ============== *@
 <div class="sb-story-viewer" id="sbStoryViewer" aria-hidden="true">
-    <button type="button" class="sb-story-viewer__close" id="sbStoryClose" aria-label="Bağla">
+    <button type="button" class="sb-story-viewer__close" id="sbStoryClose" aria-label="@L["Bağla"]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="sb-story-viewer__frame">
@@ -200,7 +200,7 @@
         <header class="sb-story-viewer__head">
             <span class="sb-story-viewer__avatar" id="sbStoryAvatar"></span>
             <span class="sb-story-viewer__store" id="sbStoryStoreName"></span>
-            <button type="button" class="sb-story-viewer__mute" id="sbStoryMute" hidden aria-label="Səssiz / səsli">
+            <button type="button" class="sb-story-viewer__mute" id="sbStoryMute" hidden aria-label="@L["Səssiz / səsli"]">
                 <svg class="sb-story-viewer__mute-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
                 <svg class="sb-story-viewer__mute-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" hidden><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
             </button>
@@ -211,15 +211,15 @@
             <video class="sb-story-viewer__vid" id="sbStoryVideo" playsinline muted hidden></video>
         </div>
         <span class="sb-story-viewer__caption" id="sbStoryCaption"></span>
-        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--prev" id="sbStoryTapPrev" aria-label="Əvvəlki"></button>
-        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--next" id="sbStoryTapNext" aria-label="Növbəti"></button>
+        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--prev" id="sbStoryTapPrev" aria-label="@L["Əvvəlki"]"></button>
+        <button type="button" class="sb-story-viewer__tap sb-story-viewer__tap--next" id="sbStoryTapNext" aria-label="@L["Növbəti"]"></button>
         @* Reply input — wired up in Phase 14.7. Rendered only for signed-in
            users (anonymous viewers can still watch, just can't reply). *@
         @if (SignInManager.IsSignedIn(User))
         {
             <form class="sb-story-viewer__reply" id="sbStoryReply" hidden>
-                <input type="text" placeholder="Hekayəyə cavab yaz..." maxlength="500" autocomplete="off" />
-                <button type="submit" aria-label="Göndər">
+                <input type="text" placeholder="@L["Hekayəyə cavab yaz..."]" maxlength="500" autocomplete="off" />
+                <button type="submit" aria-label="@L["Göndər"]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </form>

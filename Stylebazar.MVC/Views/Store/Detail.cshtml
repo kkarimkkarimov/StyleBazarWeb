@@ -25,7 +25,7 @@
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
-    <a asp-controller="Store" asp-action="Index">Mağazalar</a>
+    <a asp-controller="Store" asp-action="Index">@L["Mağazalar"]</a>
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
@@ -66,7 +66,7 @@
                     @st.Name
                     @if (st.IsVerified)
                     {
-                        <span class="sb-verified-badge sb-verified-badge--lg" title="Verified VIP satıcı" aria-label="Verified satıcı">
+                        <span class="sb-verified-badge sb-verified-badge--lg" title="@L["Verified VIP satıcı"]" aria-label="@L["Verified satıcı"]">
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.39 1.96 3.06-.18 1.05 2.88 2.5 1.78-.96 2.91 1.32 2.78-2.17 2.16.06 3.07-2.78 1.31-1.78 2.5-2.91-.96-3.07.07-1.31-2.78-2.5-1.78.96-2.91-1.32-2.78L4.43 9.6l-.07-3.07 2.78-1.31L8.92 2.7 11.84 3.66 12 2z"/><path d="M9.5 12.5l2 2 3.5-3.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </span>
                     }
@@ -94,7 +94,7 @@
                                     <line x1="5" y1="12" x2="19" y2="12"/>
                                 }
                             </svg>
-                            <span data-store-follow-label>@(Model.IsFollowedByCurrentUser ? "İzlənilir" : "İzlə")</span>
+                            <span data-store-follow-label>@(Model.IsFollowedByCurrentUser ? L["İzlənilir"].Value : L["İzlə"].Value)</span>
                         </button>
 
                         @* Open chat with the store owner. data-chat-open-with hooks
@@ -103,7 +103,7 @@
                         {
                             <button type="button" class="sb-storepage__msg" data-chat-open-with="@st.OwnerId">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                                <span>Mesaj yaz</span>
+                                <span>@L["Mesaj yaz"]</span>
                             </button>
                         }
                     }
@@ -115,13 +115,13 @@
                                 <line x1="12" y1="5" x2="12" y2="19"/>
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                             </svg>
-                            <span>İzlə</span>
+                            <span>@L["İzlə"]</span>
                         </a>
                     }
 
                     <span class="sb-storepage__follower-count">
                         <strong data-store-follower-count>@Model.FollowerCount</strong>
-                        <span>izləyici</span>
+                        <span>@L["izləyici"]</span>
                     </span>
                 </div>
 
@@ -190,7 +190,7 @@
     @if (Model.Stories.Any())
     {
         <div class="sb-storepage__stories-card">
-            <h2 class="sb-storepage__stories-title">Hekayələr</h2>
+            <h2 class="sb-storepage__stories-title">@L["Hekayələr"]</h2>
             <div class="sb-storepage__stories-rail" data-store-stories>
                 @for (int i = 0; i < Model.Stories.Count; i++)
                 {
@@ -223,7 +223,7 @@
 
     @* ============== PRODUCTS HEADER + FILTERS ============== *@
     <header class="sb-storepage__products-head">
-        <h2>@st.Name <span class="sb-storepage__count">(@Model.TotalCount) məhsul</span></h2>
+        <h2>@st.Name <span class="sb-storepage__count">(@Model.TotalCount) @L["məhsul"]</span></h2>
 
         <form method="get" class="sb-storepage__filter-row">
             <label class="sb-storepage__filter-pill">
@@ -231,13 +231,13 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
                 </svg>
-                <span>Yalnız stokda</span>
+                <span>@L["Yalnız stokda"]</span>
             </label>
 
             <select name="sort" onchange="this.form.submit()" class="sb-storepage__sort-select">
-                <option value="newest" selected="@(Model.Sort == "newest")">Ən yeni</option>
-                <option value="price-asc" selected="@(Model.Sort == "price-asc")">Ucuzdan bahaya</option>
-                <option value="price-desc" selected="@(Model.Sort == "price-desc")">Bahadan ucuza</option>
+                <option value="newest" selected="@(Model.Sort == "newest")">@L["Ən yeni"]</option>
+                <option value="price-asc" selected="@(Model.Sort == "price-asc")">@L["Ucuzdan bahaya"]</option>
+                <option value="price-desc" selected="@(Model.Sort == "price-desc")">@L["Bahadan ucuza"]</option>
             </select>
         </form>
     </header>
@@ -247,8 +247,8 @@
     {
         <div class="sb-storepage__products-empty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            <strong>Bu mağazada hələ məhsul yoxdur</strong>
-            <span>Satıcı tezliklə yeni məhsullar əlavə edəcək — geri qayıt və yeniləri kəşf et.</span>
+            <strong>@L["Bu mağazada hələ məhsul yoxdur"]</strong>
+            <span>@L["Satıcı tezliklə yeni məhsullar əlavə edəcək — geri qayıt və yeniləri kəşf et."]</span>
         </div>
     }
     else
@@ -263,7 +263,7 @@
         @* Pagination — reuses .sb-pagination block from Shop/Index *@
         @if (Model.TotalPages > 1)
         {
-            <nav class="sb-pagination" aria-label="Səhifələmə">
+            <nav class="sb-pagination" aria-label="@L["Səhifələmə"]">
                 @{
                     int curr = Model.CurrentPage;
                     int total = Model.TotalPages;
@@ -277,7 +277,7 @@
                     <a class="sb-pagination__item"
                        asp-action="Detail" asp-route-slug="@st.Slug"
                        asp-route-sort="@sortQ" asp-route-inStock="@stockQ"
-                       asp-route-page="@(curr - 1)" aria-label="Əvvəlki">
+                       asp-route-page="@(curr - 1)" aria-label="@L["Əvvəlki"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
                     </a>
                 }
@@ -318,7 +318,7 @@
                     <a class="sb-pagination__item"
                        asp-action="Detail" asp-route-slug="@st.Slug"
                        asp-route-sort="@sortQ" asp-route-inStock="@stockQ"
-                       asp-route-page="@(curr + 1)" aria-label="Növbəti">
+                       asp-route-page="@(curr + 1)" aria-label="@L["Növbəti"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                 }

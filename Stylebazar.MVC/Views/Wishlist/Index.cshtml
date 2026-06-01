@@ -1,12 +1,12 @@
 @model WishlistIndexViewModel
 @{
-    ViewData["Title"] = "Wishlist";
+    ViewData["Title"] = L["Wishlist"].Value;
 }
 
 <header class="sb-shop__header">
     <span class="sb-eyebrow">StyleBazar</span>
-    <h1>Wishlist</h1>
-    <p>Bəyəndiyin məhsulları burada saxla — istədiyin vaxt qayıt.</p>
+    <h1>@L["Wishlist"]</h1>
+    <p>@L["Bəyəndiyin məhsulları burada saxla — istədiyin vaxt qayıt."]</p>
 </header>
 
 @if (!Model.HasItems)
@@ -17,10 +17,10 @@
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
             </svg>
         </div>
-        <h2>Wishlist boşdur</h2>
-        <p>Bəyəndiyin məhsulun üzərindəki ❤ ikonuna toxun — burada saxlanılacaq.</p>
+        <h2>@L["Wishlist boşdur"]</h2>
+        <p>@L["Bəyəndiyin məhsulun üzərindəki ❤ ikonuna toxun — burada saxlanılacaq."]</p>
         <a asp-controller="Shop" asp-action="Index" class="sb-btn-primary">
-            <span>Mağazaya keç</span>
+            <span>@L["Mağazaya keç"]</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
     </div>
@@ -29,7 +29,7 @@ else
 {
     <div class="sb-wishlist-toolbar">
         <span class="sb-wishlist-toolbar__count">
-            <strong>@Model.Items.Count</strong> məhsul
+            <strong>@Model.Items.Count</strong> @L["məhsul"]
         </span>
     </div>
 
@@ -51,7 +51,7 @@ else
                     }
                 </a>
 
-                <button type="button" class="sb-wishlist-card__remove" data-wishlist-remove data-product-id="@item.ProductId" aria-label="Wishlist-dən sil">
+                <button type="button" class="sb-wishlist-card__remove" data-wishlist-remove data-product-id="@item.ProductId" aria-label="@L["Wishlist-dən sil"]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
 
@@ -72,7 +72,7 @@ else
                         }
                     </div>
                     <a class="sb-wishlist-card__cta" asp-controller="Shop" asp-action="Detail" asp-route-id="@item.ProductId">
-                        Məhsula bax
+                        @L["Məhsula bax"]
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                 </div>

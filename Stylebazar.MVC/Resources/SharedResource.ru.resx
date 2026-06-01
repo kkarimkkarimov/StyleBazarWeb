@@ -74,4 +74,228 @@
   <data name="Lang.AZ" xml:space="preserve"><value>Azərbaycan</value></data>
   <data name="Lang.EN" xml:space="preserve"><value>English</value></data>
   <data name="Lang.RU" xml:space="preserve"><value>Русский</value></data>
+  <!-- ===== Home / public pages (key = Azerbaijani source text) ===== -->
+  <data name="Ana səhifə" xml:space="preserve"><value>Главная</value></data>
+  <data name="Seçilmiş məhsullar" xml:space="preserve"><value>Избранные товары</value></data>
+  <data name="Hamısına bax" xml:space="preserve"><value>Смотреть все</value></data>
+  <data name="Sol" xml:space="preserve"><value>Влево</value></data>
+  <data name="Sağ" xml:space="preserve"><value>Вправо</value></data>
+  <data name="İlk seçilmişlər tezliklə burada görsənəcək." xml:space="preserve"><value>Первые избранные товары скоро появятся здесь.</value></data>
+  <data name="Hekayələr" xml:space="preserve"><value>Истории</value></data>
+  <data name="Məhsullar" xml:space="preserve"><value>Товары</value></data>
+  <data name="İlk məhsullar tezliklə görsənəcək." xml:space="preserve"><value>Первые товары скоро появятся.</value></data>
+  <data name="Yeniliklərə abunə" xml:space="preserve"><value>Подписка на новости</value></data>
+  <data name="İlk biz xəbər verək" xml:space="preserve"><value>Узнайте первыми</value></data>
+  <data name="Yeni mağazalar, kolleksiyalar və endirimlər — həftədə bir email, spam yox." xml:space="preserve"><value>Новые магазины, коллекции и скидки — одно письмо в неделю, без спама.</value></data>
+  <data name="Abunə ol" xml:space="preserve"><value>Подписаться</value></data>
+  <data name="Bağla" xml:space="preserve"><value>Закрыть</value></data>
+  <data name="Səssiz / səsli" xml:space="preserve"><value>Звук вкл/выкл</value></data>
+  <data name="Əvvəlki" xml:space="preserve"><value>Назад</value></data>
+  <data name="Növbəti" xml:space="preserve"><value>Вперёд</value></data>
+  <data name="Hekayəyə cavab yaz..." xml:space="preserve"><value>Ответить на историю...</value></data>
+  <data name="Göndər" xml:space="preserve"><value>Отправить</value></data>
+  <data name="Mağazaya bax" xml:space="preserve"><value>Перейти в магазин</value></data>
+  <!-- About -->
+  <data name="Haqqımızda" xml:space="preserve"><value>О нас</value></data>
+  <data name="Bizim haqqımızda" xml:space="preserve"><value>О нас</value></data>
+  <data name="Yerli moda üçün" xml:space="preserve"><value>Для местной моды —</value></data>
+  <data name="tək platforma." xml:space="preserve"><value>единая платформа.</value></data>
+  <data name="StyleBazar — Azərbaycanda fəaliyyət göstərən kiçik və orta moda mağazalarına onlayn satış imkanı verən, alıcılara isə yerli brendləri kəşf etmək imkanı yaradan platformadır." xml:space="preserve"><value>StyleBazar — платформа, которая даёт малым и средним модным магазинам Азербайджана возможность продавать онлайн, а покупателям — открывать местные бренды.</value></data>
+  <data name="Missiyamız" xml:space="preserve"><value>Наша миссия</value></data>
+  <data name="Hər yerli brendin öz auditoriyasına çıxa bilməsi." xml:space="preserve"><value>Чтобы каждый местный бренд мог выйти к своей аудитории.</value></data>
+  <data name="Onlayn ticarət böyük platformaların inhisarındadır. Biz inanırıq ki, yerli kiçik mağazaların da öz hekayəsi və auditoriyası ola bilər — sadəcə doğru alət lazımdır." xml:space="preserve"><value>Онлайн-торговля монополизирована крупными платформами. Мы верим, что у небольших местных магазинов тоже может быть своя история и аудитория — нужен лишь правильный инструмент.</value></data>
+  <data name="Rəqəmlərlə" xml:space="preserve"><value>В цифрах</value></data>
+  <data name="StyleBazar bu gün" xml:space="preserve"><value>StyleBazar сегодня</value></data>
+  <data name="Yerli mağaza" xml:space="preserve"><value>Местных магазинов</value></data>
+  <data name="StyleBazar üzərindən satışa başlayan satıcılar." xml:space="preserve"><value>Продавцы, начавшие продавать через StyleBazar.</value></data>
+  <data name="Stat.Products" xml:space="preserve"><value>Товаров</value></data>
+  <data name="Geyim, ayaqqabı, aksesuar — bir-bir seçilmişdir." xml:space="preserve"><value>Одежда, обувь, аксессуары — отобраны один за другим.</value></data>
+  <data name="Məmnun alıcı" xml:space="preserve"><value>Довольных покупателей</value></data>
+  <data name="Şəkilli rəylər və real reytinqlər əsasında." xml:space="preserve"><value>На основе отзывов с фото и реальных рейтингов.</value></data>
+  <data name="Bizimlə qoşul" xml:space="preserve"><value>Присоединяйтесь</value></data>
+  <data name="Mağazanı bu gün başlat" xml:space="preserve"><value>Запустите магазин сегодня</value></data>
+  <data name="Qeydiyyatdan keç, 5 dəqiqədə öz mağazanı qur, ilk məhsulunu yüklə." xml:space="preserve"><value>Зарегистрируйтесь, создайте магазин за 5 минут, загрузите первый товар.</value></data>
+  <data name="Satıcı kimi qoşul" xml:space="preserve"><value>Стать продавцом</value></data>
+  <!-- Blog -->
+  <data name="Blog" xml:space="preserve"><value>Блог</value></data>
+  <data name="Moda hekayələri," xml:space="preserve"><value>Истории моды,</value></data>
+  <data name="birbaşa Bakıdan." xml:space="preserve"><value>прямо из Баку.</value></data>
+  <data name="Trend, üslub bələdçiləri, yerli brand hekayələri və satıcılar üçün e-ticarət məsləhətləri." xml:space="preserve"><value>Тренды, гайды по стилю, истории местных брендов и советы по электронной коммерции для продавцов.</value></data>
+  <data name="Hamısı" xml:space="preserve"><value>Все</value></data>
+  <data name="Moda" xml:space="preserve"><value>Мода</value></data>
+  <data name="Geyim rəhbərləri" xml:space="preserve"><value>Гайды по одежде</value></data>
+  <data name="Alış məsləhətləri" xml:space="preserve"><value>Советы по покупкам</value></data>
+  <data name="E-Ticarət" xml:space="preserve"><value>Электронная коммерция</value></data>
+  <data name="Brand hekayələri" xml:space="preserve"><value>Истории брендов</value></data>
+  <data name="Tezliklə içəri" xml:space="preserve"><value>Скоро здесь</value></data>
+  <data name="İlk yazılarımız hazırlanır. Newsletter-ə abunə ol — hazır olanda ilk sən xəbər tut." xml:space="preserve"><value>Наши первые статьи готовятся. Подпишитесь на рассылку — узнайте первыми, когда они выйдут.</value></data>
+  <!-- Support -->
+  <data name="Dəstək" xml:space="preserve"><value>Поддержка</value></data>
+  <data name="Dəstək mərkəzi" xml:space="preserve"><value>Центр поддержки</value></data>
+  <data name="Sənin" xml:space="preserve"><value>У нас есть ответ</value></data>
+  <data name="sualına" xml:space="preserve"><value>на ваш вопрос</value></data>
+  <data name="cavabımız var." xml:space="preserve"><value>.</value></data>
+  <data name="Tez-tez verilən sualları aşağıda topladıq. Tapmadığını dəstək ekipimizdən soruş." xml:space="preserve"><value>Самые частые вопросы мы собрали ниже. Если не нашли свой — спросите нашу службу поддержки.</value></data>
+  <data name="Necə qeydiyyatdan keçə bilərəm?" xml:space="preserve"><value>Как зарегистрироваться?</value></data>
+  <data name="Üst sağda &quot;Qeydiyyat&quot; düyməsini sıx, ad, e-mail və parol daxil et, rolu seç (Alıcı və ya Satıcı) — bir kliklə tamam." xml:space="preserve"><value>Нажмите кнопку «Регистрация» вверху справа, введите имя, e-mail и пароль, выберите роль (Покупатель или Продавец) — готово в один клик.</value></data>
+  <data name="Mağazamı necə yaradaram?" xml:space="preserve"><value>Как создать свой магазин?</value></data>
+  <data name="Satıcı kimi qeydiyyatdan keçdikdən sonra &quot;Satıcı paneli&quot;-nə daxil ol, mağaza adı, profil şəkli, əlaqə nömrəsi əlavə et — və mağazan canlıdır." xml:space="preserve"><value>После регистрации как продавец зайдите в «Панель продавца», добавьте название магазина, фото профиля и контактный номер — и ваш магазин в эфире.</value></data>
+  <data name="Komissiya nə qədərdir?" xml:space="preserve"><value>Какая комиссия?</value></data>
+  <data name="Yeni satıcılar üçün ilk ay komissiyasızdır. Sonra hər satışdan kiçik komissiya tutulur — dəqiq tariflər satıcı panelində göstərilir." xml:space="preserve"><value>Для новых продавцов первый месяц без комиссии. Затем с каждой продажи берётся небольшая комиссия — точные тарифы указаны в панели продавца.</value></data>
+  <data name="Çatdırılma necədir?" xml:space="preserve"><value>Как работает доставка?</value></data>
+  <data name="Çatdırılma satıcı və alıcı arasında razılaşdırılır. Çoxu yerli kuryer xidmətləri ilə Bakı və regionlara çatdırır." xml:space="preserve"><value>Доставка согласовывается между продавцом и покупателем. Большинство доставляют в Баку и регионы через местные курьерские службы.</value></data>
+  <data name="Geri qaytarma siyasəti?" xml:space="preserve"><value>Политика возврата?</value></data>
+  <data name="Hər mağazanın öz geri qaytarma siyasəti var. Məhsul səhifəsində bu məlumat göstərilir. Problem olarsa, dəstək komandamız işlə." xml:space="preserve"><value>У каждого магазина своя политика возврата. Эта информация указана на странице товара. Если возникла проблема — наша служба поддержки рядом.</value></data>
+  <data name="Hələ sual var?" xml:space="preserve"><value>Остались вопросы?</value></data>
+  <data name="Bizimlə əlaqə saxla" xml:space="preserve"><value>Свяжитесь с нами</value></data>
+  <data name="Cavabını tapmadın? E-mail göndər, 24 saat ərzində cavablandıraq." xml:space="preserve"><value>Не нашли ответ? Напишите на e-mail, ответим в течение 24 часов.</value></data>
+  <!-- Privacy -->
+  <data name="Gizlilik" xml:space="preserve"><value>Конфиденциальность</value></data>
+  <data name="Hüquqi" xml:space="preserve"><value>Юридическое</value></data>
+  <data name="Gizlilik siyasəti" xml:space="preserve"><value>Политика конфиденциальности</value></data>
+  <data name="StyleBazar istifadəçilərinin şəxsi məlumatlarının qorunmasına önəm verir. Aşağıda hansı məlumatları topladığımız və necə istifadə etdiyimiz qısaca göstərilib." xml:space="preserve"><value>StyleBazar придаёт значение защите личных данных своих пользователей. Ниже кратко указано, какие данные мы собираем и как их используем.</value></data>
+  <data name="Toplanan məlumat" xml:space="preserve"><value>Собираемые данные</value></data>
+  <data name="Ad, e-mail, parol (yalnız hash şəklində saxlanılır)" xml:space="preserve"><value>Имя, e-mail, пароль (хранится только в виде хеша)</value></data>
+  <data name="Profil şəkli, bio (istəyə görə)" xml:space="preserve"><value>Фото профиля, био (по желанию)</value></data>
+  <data name="Sifarişlər, wishlist, rəylər" xml:space="preserve"><value>Заказы, избранное, отзывы</value></data>
+  <data name="Hüquqların" xml:space="preserve"><value>Ваши права</value></data>
+  <data name="Profilini istənilən vaxt redaktə və ya silə bilərsən. Hər hansı sual üçün" xml:space="preserve"><value>Вы можете редактировать или удалить свой профиль в любое время. По любым вопросам пишите на</value></data>
+  <data name="ünvanına yaz." xml:space="preserve"><value>.</value></data>
+  <!-- Error / Access denied -->
+  <data name="Səhifə tapılmadı" xml:space="preserve"><value>Страница не найдена</value></data>
+  <data name="Giriş qadağandır" xml:space="preserve"><value>Доступ запрещён</value></data>
+  <data name="Giriş tələb olunur" xml:space="preserve"><value>Требуется вход</value></data>
+  <data name="Bir səhv baş verdi" xml:space="preserve"><value>Произошла ошибка</value></data>
+  <data name="Axtardığın səhifə köçürülmüş, silinmiş və ya heç vaxt mövcud olmamış ola bilər." xml:space="preserve"><value>Страница, которую вы ищете, могла быть перемещена, удалена или никогда не существовала.</value></data>
+  <data name="Bu səhifəyə icazən yoxdur. Hesabını dəyişməyə cəhd et və ya ana səhifəyə qayıt." xml:space="preserve"><value>У вас нет доступа к этой странице. Попробуйте сменить аккаунт или вернитесь на главную.</value></data>
+  <data name="Bu səhifəyə baxmaq üçün hesabına daxil olmalısan." xml:space="preserve"><value>Чтобы просмотреть эту страницу, нужно войти в аккаунт.</value></data>
+  <data name="Sorğu emal olunarkən gözlənilməz problem yarandı. Səhifəni yeniləyə və ya ana səhifəyə qayıda bilərsən." xml:space="preserve"><value>При обработке запроса возникла непредвиденная проблема. Вы можете обновить страницу или вернуться на главную.</value></data>
+  <data name="Bu səhifəyə girişin yoxdur. Əgər səhv güman edirsənsə, başqa hesabla daxil ol." xml:space="preserve"><value>У вас нет доступа к этой странице. Если считаете это ошибкой, войдите под другим аккаунтом.</value></data>
+  <data name="Yenidən daxil ol" xml:space="preserve"><value>Войти снова</value></data>
+  <!-- ===== Shop / Store / Wishlist / Product card ===== -->
+  <data name="Mağaza" xml:space="preserve"><value>Магазин</value></data>
+  <data name="Yerli satıcılardan brend geyimləri kəşf et." xml:space="preserve"><value>Откройте брендовую одежду от местных продавцов.</value></data>
+  <data name="Filtrlər" xml:space="preserve"><value>Фильтры</value></data>
+  <data name="Axtarış" xml:space="preserve"><value>Поиск</value></data>
+  <data name="Məhsul axtar..." xml:space="preserve"><value>Искать товары...</value></data>
+  <data name="Kateqoriya" xml:space="preserve"><value>Категория</value></data>
+  <data name="Qiymət (₼)" xml:space="preserve"><value>Цена (₼)</value></data>
+  <data name="Min" xml:space="preserve"><value>Мин</value></data>
+  <data name="Max" xml:space="preserve"><value>Макс</value></data>
+  <data name="Vəziyyət" xml:space="preserve"><value>Состояние</value></data>
+  <data name="Yeni" xml:space="preserve"><value>Новое</value></data>
+  <data name="İkinci əl" xml:space="preserve"><value>Б/у</value></data>
+  <data name="Vintage" xml:space="preserve"><value>Винтаж</value></data>
+  <data name="Brend" xml:space="preserve"><value>Бренд</value></data>
+  <data name="Featured" xml:space="preserve"><value>Избранное</value></data>
+  <data name="Yalnız önə çıxanlar" xml:space="preserve"><value>Только избранные</value></data>
+  <data name="Tətbiq et" xml:space="preserve"><value>Применить</value></data>
+  <data name="Sıfırla" xml:space="preserve"><value>Сбросить</value></data>
+  <data name="nəticə" xml:space="preserve"><value>результатов</value></data>
+  <data name="üçün" xml:space="preserve"><value>по запросу</value></data>
+  <data name="Filtr" xml:space="preserve"><value>Фильтр</value></data>
+  <data name="Ən yeni" xml:space="preserve"><value>Новые</value></data>
+  <data name="Qiymət ↑" xml:space="preserve"><value>Цена ↑</value></data>
+  <data name="Qiymət ↓" xml:space="preserve"><value>Цена ↓</value></data>
+  <data name="Ad: A → Z" xml:space="preserve"><value>Название: А → Я</value></data>
+  <data name="Ad: Z → A" xml:space="preserve"><value>Название: Я → А</value></data>
+  <data name="Önə çıxan" xml:space="preserve"><value>Избранное</value></data>
+  <data name="Hamısını sıfırla" xml:space="preserve"><value>Сбросить всё</value></data>
+  <data name="Heç bir məhsul tapılmadı" xml:space="preserve"><value>Товары не найдены</value></data>
+  <data name="Filtri dəyiş, daha geniş axtarış et və ya hamısını sıfırla." xml:space="preserve"><value>Измените фильтр, расширьте поиск или сбросьте всё.</value></data>
+  <data name="Hamısını göstər" xml:space="preserve"><value>Показать все</value></data>
+  <data name="Səhifələmə" xml:space="preserve"><value>Постраничная навигация</value></data>
+  <data name="Tükəndi" xml:space="preserve"><value>Распродано</value></data>
+  <data name="Stokda" xml:space="preserve"><value>В наличии</value></data>
+  <data name="Wishlist-ə əlavə et" xml:space="preserve"><value>Добавить в избранное</value></data>
+  <data name="Wishlist" xml:space="preserve"><value>Избранное</value></data>
+  <data name="Bəyəndiyin məhsulları burada saxla — istədiyin vaxt qayıt." xml:space="preserve"><value>Сохраняйте понравившиеся товары здесь — возвращайтесь в любое время.</value></data>
+  <data name="Wishlist boşdur" xml:space="preserve"><value>Избранное пусто</value></data>
+  <data name="Bəyəndiyin məhsulun üzərindəki ❤ ikonuna toxun — burada saxlanılacaq." xml:space="preserve"><value>Нажмите на иконку ❤ на понравившемся товаре — он сохранится здесь.</value></data>
+  <data name="Mağazaya keç" xml:space="preserve"><value>Перейти в магазин</value></data>
+  <data name="məhsul" xml:space="preserve"><value>товаров</value></data>
+  <data name="Wishlist-dən sil" xml:space="preserve"><value>Удалить из избранного</value></data>
+  <data name="Məhsula bax" xml:space="preserve"><value>Смотреть товар</value></data>
+  <data name="Mağazalar" xml:space="preserve"><value>Магазины</value></data>
+  <data name="Yerli satıcıları kəşf et — kolleksiyalarına bax, birbaşa əlaqə saxla." xml:space="preserve"><value>Откройте местных продавцов — смотрите их коллекции, связывайтесь напрямую.</value></data>
+  <data name="Mağaza axtar..." xml:space="preserve"><value>Искать магазины...</value></data>
+  <data name="Təmizlə" xml:space="preserve"><value>Очистить</value></data>
+  <data name="üçün nəticə yoxdur" xml:space="preserve"><value>— нет результатов</value></data>
+  <data name="Başqa açar sözlər sına və ya hamısına bax." xml:space="preserve"><value>Попробуйте другие ключевые слова или посмотрите все.</value></data>
+  <data name="Bütün mağazalar" xml:space="preserve"><value>Все магазины</value></data>
+  <data name="Hələ mağaza yoxdur" xml:space="preserve"><value>Магазинов пока нет</value></data>
+  <data name="Tezliklə yerli satıcılar burada görünəcək." xml:space="preserve"><value>Местные продавцы скоро появятся здесь.</value></data>
+  <data name="Count.Stores" xml:space="preserve"><value>магазинов</value></data>
+  <data name="Verified VIP satıcı" xml:space="preserve"><value>Проверенный VIP-продавец</value></data>
+  <data name="Verified satıcı" xml:space="preserve"><value>Проверенный продавец</value></data>
+  <data name="Mağaza haqqında məlumat yoxdur." xml:space="preserve"><value>Нет описания магазина.</value></data>
+  <!-- ===== Product detail (PDP) ===== -->
+  <data name="Şəkli böyüt" xml:space="preserve"><value>Увеличить изображение</value></data>
+  <data name="Şəkil" xml:space="preserve"><value>Фото</value></data>
+  <data name="daha çox" xml:space="preserve"><value>ещё</value></data>
+  <data name="Reytinq:" xml:space="preserve"><value>Рейтинг:</value></data>
+  <data name="rəy" xml:space="preserve"><value>отзывов</value></data>
+  <data name="sual" xml:space="preserve"><value>вопросов</value></data>
+  <data name="Rəng:" xml:space="preserve"><value>Цвет:</value></data>
+  <data name="Ölçü:" xml:space="preserve"><value>Размер:</value></data>
+  <data name="Wishlist-də" xml:space="preserve"><value>В избранном</value></data>
+  <data name="Bəyən" xml:space="preserve"><value>Нравится</value></data>
+  <data name="Satıcı əlaqə məlumatı əlavə etməyib" xml:space="preserve"><value>Продавец не добавил контактные данные</value></data>
+  <data name="Satıcıya mesaj yaz" xml:space="preserve"><value>Написать продавцу</value></data>
+  <data name="Digər əlaqə vasitələri" xml:space="preserve"><value>Другие способы связи</value></data>
+  <data name="Zəng et" xml:space="preserve"><value>Позвонить</value></data>
+  <data name="Telefon:" xml:space="preserve"><value>Телефон:</value></data>
+  <data name="Çatdırılma var" xml:space="preserve"><value>Доставка есть</value></data>
+  <data name="Çatdırılma yoxdur — satıcıya yaz" xml:space="preserve"><value>Доставки нет — напишите продавцу</value></data>
+  <data name="Paylaş:" xml:space="preserve"><value>Поделиться:</value></data>
+  <data name="Instagram-da paylaş" xml:space="preserve"><value>Поделиться в Instagram</value></data>
+  <data name="WhatsApp-da paylaş" xml:space="preserve"><value>Поделиться в WhatsApp</value></data>
+  <data name="Telegram-da paylaş" xml:space="preserve"><value>Поделиться в Telegram</value></data>
+  <data name="Facebook-da paylaş" xml:space="preserve"><value>Поделиться в Facebook</value></data>
+  <data name="X-də paylaş" xml:space="preserve"><value>Поделиться в X</value></data>
+  <data name="Linki köçür" xml:space="preserve"><value>Скопировать ссылку</value></data>
+  <data name="Satıcı" xml:space="preserve"><value>Продавец</value></data>
+  <data name="Material" xml:space="preserve"><value>Материал</value></data>
+  <data name="Naxış" xml:space="preserve"><value>Узор</value></data>
+  <data name="Yaxa" xml:space="preserve"><value>Воротник</value></data>
+  <data name="Qol" xml:space="preserve"><value>Рукав</value></data>
+  <data name="Görünüş" xml:space="preserve"><value>Посадка</value></data>
+  <data name="Mövsüm" xml:space="preserve"><value>Сезон</value></data>
+  <data name="Stil" xml:space="preserve"><value>Стиль</value></data>
+  <data name="Mənşə" xml:space="preserve"><value>Происхождение</value></data>
+  <data name="Məhsul xüsusiyyətləri" xml:space="preserve"><value>Характеристики товара</value></data>
+  <data name="Məhsul haqqında" xml:space="preserve"><value>О товаре</value></data>
+  <data name="Sual-cavab" xml:space="preserve"><value>Вопросы и ответы</value></data>
+  <data name="Rəylər" xml:space="preserve"><value>Отзывы</value></data>
+  <data name="Satıcı təsvir əlavə etməyib." xml:space="preserve"><value>Продавец не добавил описание.</value></data>
+  <data name="Hələ sual yoxdur" xml:space="preserve"><value>Вопросов пока нет</value></data>
+  <data name="Sual-cavab funksiyası tezliklə əlavə olunacaq." xml:space="preserve"><value>Функция вопросов и ответов скоро появится.</value></data>
+  <data name="Sənin rəyin" xml:space="preserve"><value>Ваш отзыв</value></data>
+  <data name="Sil" xml:space="preserve"><value>Удалить</value></data>
+  <data name="Sənin reytinqin" xml:space="preserve"><value>Ваша оценка</value></data>
+  <data name="Rəy yaz" xml:space="preserve"><value>Написать отзыв</value></data>
+  <data name="Reytinqin" xml:space="preserve"><value>Ваша оценка</value></data>
+  <data name="ulduz" xml:space="preserve"><value>звезда</value></data>
+  <data name="Ulduz seç" xml:space="preserve"><value>Выберите звезду</value></data>
+  <data name="Şərh" xml:space="preserve"><value>Комментарий</value></data>
+  <data name="Məhsul haqqında fikirlərini bizimlə bölüş..." xml:space="preserve"><value>Поделитесь мыслями о товаре...</value></data>
+  <data name="Ləğv" xml:space="preserve"><value>Отмена</value></data>
+  <data name="Bu məhsulu sınamısan?" xml:space="preserve"><value>Вы пробовали этот товар?</value></data>
+  <data name="Rəy yazmaq üçün hesabına daxil ol." xml:space="preserve"><value>Войдите, чтобы написать отзыв.</value></data>
+  <data name="Daxil ol" xml:space="preserve"><value>Войти</value></data>
+  <data name="Hələ rəy yoxdur" xml:space="preserve"><value>Отзывов пока нет</value></data>
+  <data name="Bu məhsulun ilk rəyini sən yaz!" xml:space="preserve"><value>Будьте первым, кто оставит отзыв!</value></data>
+  <data name="MoreFrom.Prefix" xml:space="preserve"><value>Ещё из</value></data>
+  <data name="MoreFrom.Suffix" xml:space="preserve"><value></value></data>
+  <data name="Şəkil baxışı" xml:space="preserve"><value>Просмотр изображения</value></data>
+  <!-- ===== Store detail page ===== -->
+  <data name="İzlənilir" xml:space="preserve"><value>Вы подписаны</value></data>
+  <data name="İzlə" xml:space="preserve"><value>Подписаться</value></data>
+  <data name="Mesaj yaz" xml:space="preserve"><value>Написать</value></data>
+  <data name="izləyici" xml:space="preserve"><value>подписчиков</value></data>
+  <data name="Yalnız stokda" xml:space="preserve"><value>Только в наличии</value></data>
+  <data name="Ucuzdan bahaya" xml:space="preserve"><value>Сначала дешёвые</value></data>
+  <data name="Bahadan ucuza" xml:space="preserve"><value>Сначала дорогие</value></data>
+  <data name="Bu mağazada hələ məhsul yoxdur" xml:space="preserve"><value>В этом магазине пока нет товаров</value></data>
+  <data name="Satıcı tezliklə yeni məhsullar əlavə edəcək — geri qayıt və yeniləri kəşf et." xml:space="preserve"><value>Продавец скоро добавит новые товары — возвращайтесь и открывайте новинки.</value></data>
 </root>

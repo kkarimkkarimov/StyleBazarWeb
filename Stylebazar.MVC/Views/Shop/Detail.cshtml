@@ -38,7 +38,7 @@
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
-    <a asp-controller="Shop" asp-action="Index">Mağaza</a>
+    <a asp-controller="Shop" asp-action="Index">@L["Mağaza"]</a>
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
@@ -61,7 +61,7 @@
 
     @* ============== GALLERY (left) ============== *@
     <div class="sb-gallery" data-gallery>
-        <div class="sb-gallery__main" data-gallery-main role="button" tabindex="0" aria-label="Şəkli böyüt">
+        <div class="sb-gallery__main" data-gallery-main role="button" tabindex="0" aria-label="@L["Şəkli böyüt"]">
             @if (mainImg != null)
             {
                 <img id="sbGalleryMainImg" src="@mainImg.ImageUrl" alt="@p.Name" data-main-img />
@@ -75,7 +75,7 @@
             <button type="button" class="sb-gallery__heart @(Model.IsInWishlist ? "is-active" : "")"
                     data-product-id="@p.Id" data-wish-toggle
                     aria-pressed="@(Model.IsInWishlist ? "true" : "false")"
-                    aria-label="Wishlist-ə əlavə et">
+                    aria-label="@L["Wishlist-ə əlavə et"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
             </button>
         </div>
@@ -91,7 +91,7 @@
                             data-thumb-index="@idx"
                             data-thumb-url="@img.ImageUrl"
                             role="tab"
-                            aria-label="Şəkil @(idx + 1)">
+                            aria-label="@L["Şəkil"] @(idx + 1)">
                         <img src="@img.ImageUrl" alt="@p.Name" loading="lazy" />
                     </button>
                     idx++;
@@ -109,21 +109,21 @@
         {
             <p class="sb-pdp__desc" data-desc>
                 <span class="sb-pdp__desc-text">@p.Description</span>
-                <button type="button" class="sb-pdp__desc-more" data-desc-more>daha çox</button>
+                <button type="button" class="sb-pdp__desc-more" data-desc-more>@L["daha çox"]</button>
             </p>
         }
 
         <div class="sb-pdp__rating">
-            <span class="sb-pdp__stars" aria-label="Reytinq: @avg.ToString("F1") / 5">
+            <span class="sb-pdp__stars" aria-label="@L["Reytinq:"] @avg.ToString("F1") / 5">
                 @for (var i = 1; i <= 5; i++)
                 {
                     var filled = i <= fullStars || (i == fullStars + 1 && hasHalf);
                     <svg class="@(filled ? "" : "is-empty")" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 }
             </span>
-            <a class="sb-pdp__rating-link" href="#sbReviews">@p.ReviewCount rəy</a>
+            <a class="sb-pdp__rating-link" href="#sbReviews">@p.ReviewCount @L["rəy"]</a>
             <span class="sb-pdp__rating-dot" aria-hidden="true"></span>
-            <a class="sb-pdp__rating-link" href="#sbQa">@questionCount sual</a>
+            <a class="sb-pdp__rating-link" href="#sbQa">@questionCount @L["sual"]</a>
         </div>
 
         <div class="sb-pdp__price-row">
@@ -144,16 +144,16 @@
             {
                 <span class="sb-pdp-tag sb-pdp-tag--recycle">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 17 12 22 17 17"/><polyline points="12 2 12 22"/><polyline points="17 7 12 2 7 7"/></svg>
-                    İkinci əl
+                    @L["İkinci əl"]
                 </span>
             }
             else if (p.Condition == ProductCondition.Vintage)
             {
-                <span class="sb-pdp-tag sb-pdp-tag--recycle">Vintage</span>
+                <span class="sb-pdp-tag sb-pdp-tag--recycle">@L["Vintage"]</span>
             }
             else
             {
-                <span class="sb-pdp-tag sb-pdp-tag--new">Yeni</span>
+                <span class="sb-pdp-tag sb-pdp-tag--new">@L["Yeni"]</span>
             }
 
             <a class="sb-pdp-tag" asp-controller="Shop" asp-action="Index" asp-route-categoryId="@p.CategoryId">
@@ -169,7 +169,7 @@
         @if (p.Colors.Any())
         {
             <div class="sb-pdp-picker">
-                <label class="sb-pdp-picker__label">Rəng: <span data-color-label>—</span></label>
+                <label class="sb-pdp-picker__label">@L["Rəng:"] <span data-color-label>—</span></label>
                 <div class="sb-color-picker" data-color-picker>
                     @foreach (var c in p.Colors)
                     {
@@ -190,7 +190,7 @@
         @if (p.Sizes.Any())
         {
             <div class="sb-pdp-picker">
-                <label class="sb-pdp-picker__label">Ölçü: <span data-size-label>—</span></label>
+                <label class="sb-pdp-picker__label">@L["Ölçü:"] <span data-size-label>—</span></label>
                 <div class="sb-size-picker" data-size-picker>
                     @foreach (var sz in p.Sizes)
                     {
@@ -214,7 +214,7 @@
                 data-wish-toggle
                 aria-pressed="@(Model.IsInWishlist ? "true" : "false")">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            <span data-like-label>@(Model.IsInWishlist ? "Wishlist-də" : "Bəyən")</span>
+            <span data-like-label>@(Model.IsInWishlist ? L["Wishlist-də"].Value : L["Bəyən"].Value)</span>
         </button>
 
         @* ===== Primary contact CTA + dropdown ===== *@
@@ -222,7 +222,7 @@
         {
             <div class="sb-pdp-contact-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Satıcı əlaqə məlumatı əlavə etməyib
+                @L["Satıcı əlaqə məlumatı əlavə etməyib"]
             </div>
         }
         else
@@ -230,12 +230,12 @@
             <button type="button" class="sb-btn-contact" data-contact-primary data-channel="@primaryChannel"
                     data-click-track="@primaryChannel" data-click-store-id="@p.StoreId" data-click-product-id="@p.Id">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                <span>Satıcıya mesaj yaz</span>
+                <span>@L["Satıcıya mesaj yaz"]</span>
             </button>
 
             <details class="sb-pdp-channels" data-channels>
                 <summary>
-                    Digər əlaqə vasitələri
+                    @L["Digər əlaqə vasitələri"]
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="sb-pdp-channels__list">
@@ -268,7 +268,7 @@
                         <a class="sb-pdp-channel" href="tel:@p.StorePhone" data-channel="phone"
                            data-click-track="phone" data-click-store-id="@p.StoreId" data-click-product-id="@p.Id">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
-                            Zəng et
+                            @L["Zəng et"]
                         </a>
                     }
                 </div>
@@ -279,7 +279,7 @@
         {
             <p class="sb-pdp-phone">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
-                Telefon: <a href="tel:@p.StorePhone">@p.StorePhone</a>
+                @L["Telefon:"] <a href="tel:@p.StorePhone">@p.StorePhone</a>
             </p>
         }
 
@@ -287,33 +287,33 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             @if (p.HasDelivery)
             {
-                <span>Çatdırılma var</span>
+                <span>@L["Çatdırılma var"]</span>
             }
             else
             {
-                <span>Çatdırılma yoxdur — satıcıya yaz</span>
+                <span>@L["Çatdırılma yoxdur — satıcıya yaz"]</span>
             }
         </div>
 
         @* ===== Social share row ===== *@
         <div class="sb-pdp-share">
-            <span>Paylaş:</span>
-            <a class="sb-share sb-share--instagram" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram-da paylaş">
+            <span>@L["Paylaş:"]</span>
+            <a class="sb-share sb-share--instagram" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="@L["Instagram-da paylaş"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             </a>
-            <a class="sb-share sb-share--whatsapp" data-share-whatsapp aria-label="WhatsApp-da paylaş">
+            <a class="sb-share sb-share--whatsapp" data-share-whatsapp aria-label="@L["WhatsApp-da paylaş"]">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3.5C18.2 1.2 15.2 0 12 0 5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.3zM12 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7.9.9-3.6-.2-.4c-1-1.6-1.5-3.4-1.5-5.1 0-5.5 4.5-9.9 9.9-9.9 2.7 0 5.2 1 7 2.9 1.9 1.9 2.9 4.4 2.9 7 .1 5.6-4.4 9.8-9.8 9.8z"/></svg>
             </a>
-            <a class="sb-share sb-share--telegram" data-share-telegram aria-label="Telegram-da paylaş">
+            <a class="sb-share sb-share--telegram" data-share-telegram aria-label="@L["Telegram-da paylaş"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </a>
-            <a class="sb-share sb-share--facebook" data-share-facebook aria-label="Facebook-da paylaş">
+            <a class="sb-share sb-share--facebook" data-share-facebook aria-label="@L["Facebook-da paylaş"]">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.6 9.9v-7H8v-3h2.4V9.4c0-2.4 1.4-3.7 3.6-3.7 1 0 2.1.2 2.1.2v2.3h-1.2c-1.2 0-1.5.7-1.5 1.5V12H16l-.4 3h-2.2v7A10 10 0 0022 12z"/></svg>
             </a>
-            <a class="sb-share sb-share--x" data-share-x aria-label="X-də paylaş">
+            <a class="sb-share sb-share--x" data-share-x aria-label="@L["X-də paylaş"]">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
-            <button type="button" class="sb-share sb-share--copy" data-share-copy aria-label="Linki köçür">
+            <button type="button" class="sb-share sb-share--copy" data-share-copy aria-label="@L["Linki köçür"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
             </button>
         </div>
@@ -323,29 +323,29 @@
     <aside class="sb-pdp__aside">
 
         <div class="sb-seller-card">
-            <span class="sb-seller-card__label">Satıcı</span>
+            <span class="sb-seller-card__label">@L["Satıcı"]</span>
             <h3 class="sb-seller-card__name">@p.StoreName</h3>
         </div>
 
         @{
             var feats = new List<(string label, string? value)>
             {
-                ("Material", p.Material),
-                ("Brend",    p.Brand),
-                ("Naxış",    p.Pattern),
-                ("Yaxa",     p.Neckline),
-                ("Qol",      p.SleeveLength),
-                ("Görünüş",  p.Fit),
-                ("Mövsüm",   p.Season),
-                ("Stil",     p.Style),
-                ("Mənşə",    p.CountryOfOrigin)
+                (L["Material"].Value, p.Material),
+                (L["Brend"].Value,    p.Brand),
+                (L["Naxış"].Value,    p.Pattern),
+                (L["Yaxa"].Value,     p.Neckline),
+                (L["Qol"].Value,      p.SleeveLength),
+                (L["Görünüş"].Value,  p.Fit),
+                (L["Mövsüm"].Value,   p.Season),
+                (L["Stil"].Value,     p.Style),
+                (L["Mənşə"].Value,    p.CountryOfOrigin)
             };
             var presented = feats.Where(f => !string.IsNullOrWhiteSpace(f.value)).ToList();
         }
         @if (presented.Any())
         {
             <div class="sb-features">
-                <h4>Məhsul xüsusiyyətləri</h4>
+                <h4>@L["Məhsul xüsusiyyətləri"]</h4>
                 <div class="sb-features__grid">
                     @foreach (var f in presented)
                     {
@@ -363,9 +363,9 @@
 @* ============== TABS (about / Q&A / reviews) ============== *@
 <section class="sb-pdp-tabs" data-tabs>
     <div class="sb-pdp-tabs__head" role="tablist">
-        <button type="button" class="sb-pdp-tabs__tab is-active" data-tab="about" role="tab" aria-selected="true">Məhsul haqqında</button>
-        <button type="button" class="sb-pdp-tabs__tab" data-tab="qa" role="tab" aria-selected="false">Sual-cavab</button>
-        <button type="button" class="sb-pdp-tabs__tab" data-tab="reviews" role="tab" aria-selected="false">Rəylər (@p.ReviewCount)</button>
+        <button type="button" class="sb-pdp-tabs__tab is-active" data-tab="about" role="tab" aria-selected="true">@L["Məhsul haqqında"]</button>
+        <button type="button" class="sb-pdp-tabs__tab" data-tab="qa" role="tab" aria-selected="false">@L["Sual-cavab"]</button>
+        <button type="button" class="sb-pdp-tabs__tab" data-tab="reviews" role="tab" aria-selected="false">@L["Rəylər"] (@p.ReviewCount)</button>
     </div>
 
     <div class="sb-pdp-tabs__panels">
@@ -378,7 +378,7 @@
             }
             else
             {
-                <p class="sb-pdp-about sb-text-muted">Satıcı təsvir əlavə etməyib.</p>
+                <p class="sb-pdp-about sb-text-muted">@L["Satıcı təsvir əlavə etməyib."]</p>
             }
         </div>
 
@@ -386,8 +386,8 @@
         <div class="sb-pdp-tabs__panel" data-tab-panel="qa" role="tabpanel" id="sbQa">
             <div class="sb-tab-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <strong>Hələ sual yoxdur</strong>
-                <span>Sual-cavab funksiyası tezliklə əlavə olunacaq.</span>
+                <strong>@L["Hələ sual yoxdur"]</strong>
+                <span>@L["Sual-cavab funksiyası tezliklə əlavə olunacaq."]</span>
             </div>
         </div>
 
@@ -400,15 +400,15 @@
                 var mr = Model.MyReview;
                 <div class="sb-my-review" data-my-review data-review-id="@mr.Id">
                     <header class="sb-my-review__head">
-                        <span class="sb-my-review__pill">Sənin rəyin</span>
+                        <span class="sb-my-review__pill">@L["Sənin rəyin"]</span>
                         <div class="sb-my-review__head-right">
-                            <button type="button" class="sb-my-review__action sb-my-review__action--danger" data-my-review-delete aria-label="Sil">
+                            <button type="button" class="sb-my-review__action sb-my-review__action--danger" data-my-review-delete aria-label="@L["Sil"]">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                                <span>Sil</span>
+                                <span>@L["Sil"]</span>
                             </button>
                         </div>
                     </header>
-                    <div class="sb-my-review__stars" aria-label="Sənin reytinqin">
+                    <div class="sb-my-review__stars" aria-label="@L["Sənin reytinqin"]">
                         @for (var i = 1; i <= 5; i++)
                         {
                             <svg class="@(i <= mr.Rating ? "" : "is-empty")" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -426,33 +426,33 @@
                 <div class="sb-review-form" data-review-form data-product-id="@p.Id">
                     <button type="button" class="sb-review-form__toggle" data-review-form-toggle aria-expanded="false">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <span>Rəy yaz</span>
+                        <span>@L["Rəy yaz"]</span>
                     </button>
                     <form class="sb-review-form__body" data-review-form-body novalidate>
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="productId" value="@p.Id" />
                         <div class="sb-review-form__row">
-                            <label class="sb-review-form__label">Reytinqin</label>
+                            <label class="sb-review-form__label">@L["Reytinqin"]</label>
                             <div class="sb-rating-input" data-rating-input role="radiogroup">
                                 @for (var i = 1; i <= 5; i++)
                                 {
-                                    <button type="button" class="sb-rating-input__star" data-rating-value="@i" role="radio" aria-checked="false" aria-label="@i ulduz">
+                                    <button type="button" class="sb-rating-input__star" data-rating-value="@i" role="radio" aria-checked="false" aria-label="@i @L["ulduz"]">
                                         <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                     </button>
                                 }
                                 <input type="hidden" name="rating" value="0" data-rating-value-input required />
-                                <span class="sb-rating-input__hint" data-rating-hint>Ulduz seç</span>
+                                <span class="sb-rating-input__hint" data-rating-hint>@L["Ulduz seç"]</span>
                             </div>
                         </div>
                         <div class="sb-review-form__row">
-                            <label class="sb-review-form__label" for="sbReviewComment">Şərh</label>
-                            <textarea id="sbReviewComment" class="sb-review-form__textarea" name="comment" rows="4" maxlength="1000" placeholder="Məhsul haqqında fikirlərini bizimlə bölüş..." data-review-textarea></textarea>
+                            <label class="sb-review-form__label" for="sbReviewComment">@L["Şərh"]</label>
+                            <textarea id="sbReviewComment" class="sb-review-form__textarea" name="comment" rows="4" maxlength="1000" placeholder="@L["Məhsul haqqında fikirlərini bizimlə bölüş..."]" data-review-textarea></textarea>
                             <span class="sb-review-form__counter" data-review-counter>0 / 1000</span>
                         </div>
                         <div class="sb-review-form__error" data-review-error hidden></div>
                         <div class="sb-review-form__actions">
-                            <button type="button" class="sb-btn-ghost" data-review-form-cancel>Ləğv</button>
-                            <button type="submit" class="sb-btn-primary" data-review-submit><span>Göndər</span></button>
+                            <button type="button" class="sb-btn-ghost" data-review-form-cancel>@L["Ləğv"]</button>
+                            <button type="submit" class="sb-btn-primary" data-review-submit><span>@L["Göndər"]</span></button>
                         </div>
                     </form>
                 </div>
@@ -461,10 +461,10 @@
             {
                 <div class="sb-review-cta">
                     <div>
-                        <strong>Bu məhsulu sınamısan?</strong>
-                        <p>Rəy yazmaq üçün hesabına daxil ol.</p>
+                        <strong>@L["Bu məhsulu sınamısan?"]</strong>
+                        <p>@L["Rəy yazmaq üçün hesabına daxil ol."]</p>
                     </div>
-                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Detail", "Shop", new { id = p.Id })#sbReviews" class="sb-btn-primary">Daxil ol</a>
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Detail", "Shop", new { id = p.Id })#sbReviews" class="sb-btn-primary">@L["Daxil ol"]</a>
                 </div>
             }
 
@@ -509,8 +509,8 @@
             {
                 <div class="sb-tab-empty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                    <strong>Hələ rəy yoxdur</strong>
-                    <span>Bu məhsulun ilk rəyini sən yaz!</span>
+                    <strong>@L["Hələ rəy yoxdur"]</strong>
+                    <span>@L["Bu məhsulun ilk rəyini sən yaz!"]</span>
                 </div>
             }
         </div>
@@ -522,7 +522,7 @@
 {
     <section class="sb-detail-related">
         <div class="sb-detail-related__header">
-            <h2>Daha çox <span style="color: var(--sb-accent);">@p.StoreName</span> mağazasından</h2>
+            <h2>@L["MoreFrom.Prefix"] <span style="color: var(--sb-accent);">@p.StoreName</span> @L["MoreFrom.Suffix"]</h2>
         </div>
         <div class="sb-detail-related__grid">
             @foreach (var rel in Model.RelatedFromStore)
@@ -534,16 +534,16 @@
 }
 
 @* ============== LIGHTBOX ============== *@
-<div class="sb-lightbox" id="sbLightbox" role="dialog" aria-hidden="true" aria-label="Şəkil baxışı">
-    <button type="button" class="sb-lightbox__close" data-lightbox-close aria-label="Bağla">
+<div class="sb-lightbox" id="sbLightbox" role="dialog" aria-hidden="true" aria-label="@L["Şəkil baxışı"]">
+    <button type="button" class="sb-lightbox__close" data-lightbox-close aria-label="@L["Bağla"]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="sb-lightbox__stage">
-        <button type="button" class="sb-lightbox__nav sb-lightbox__nav--prev" data-lightbox-prev aria-label="Əvvəlki">
+        <button type="button" class="sb-lightbox__nav sb-lightbox__nav--prev" data-lightbox-prev aria-label="@L["Əvvəlki"]">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <img id="sbLightboxImg" class="sb-lightbox__img" src="" alt="" />
-        <button type="button" class="sb-lightbox__nav sb-lightbox__nav--next" data-lightbox-next aria-label="Növbəti">
+        <button type="button" class="sb-lightbox__nav sb-lightbox__nav--next" data-lightbox-next aria-label="@L["Növbəti"]">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <span class="sb-lightbox__counter" id="sbLightboxCounter">1 / @p.Images.Count</span>

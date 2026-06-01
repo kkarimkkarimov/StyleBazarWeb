@@ -1,21 +1,21 @@
 @model ShopsIndexViewModel
 @{
-    ViewData["Title"] = "Mağazalar";
+    ViewData["Title"] = L["Mağazalar"].Value;
 }
 
 <header class="sb-shops-header">
     <span class="sb-eyebrow">StyleBazar</span>
-    <h1>Mağazalar</h1>
-    <p>Yerli satıcıları kəşf et — kolleksiyalarına bax, birbaşa əlaqə saxla.</p>
+    <h1>@L["Mağazalar"]</h1>
+    <p>@L["Yerli satıcıları kəşf et — kolleksiyalarına bax, birbaşa əlaqə saxla."]</p>
 </header>
 
 <form class="sb-shops-search" method="get" action="@Url.Action("Index", "Store")">
     <div class="sb-shops-search__field">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" name="search" value="@Model.Search" placeholder="Mağaza axtar..." autocomplete="off" data-shops-search />
+        <input type="search" name="search" value="@Model.Search" placeholder="@L["Mağaza axtar..."]" autocomplete="off" data-shops-search />
         @if (!string.IsNullOrEmpty(Model.Search))
         {
-            <a class="sb-shops-search__clear" asp-controller="Store" asp-action="Index" aria-label="Təmizlə">
+            <a class="sb-shops-search__clear" asp-controller="Store" asp-action="Index" aria-label="@L["Təmizlə"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </a>
         }
@@ -30,24 +30,24 @@
         </div>
         @if (!string.IsNullOrEmpty(Model.Search))
         {
-            <h2>"@Model.Search" üçün nəticə yoxdur</h2>
-            <p>Başqa açar sözlər sına və ya hamısına bax.</p>
-            <a asp-controller="Store" asp-action="Index" class="sb-btn-primary">Bütün mağazalar</a>
+            <h2>"@Model.Search" @L["üçün nəticə yoxdur"]</h2>
+            <p>@L["Başqa açar sözlər sına və ya hamısına bax."]</p>
+            <a asp-controller="Store" asp-action="Index" class="sb-btn-primary">@L["Bütün mağazalar"]</a>
         }
         else
         {
-            <h2>Hələ mağaza yoxdur</h2>
-            <p>Tezliklə yerli satıcılar burada görünəcək.</p>
+            <h2>@L["Hələ mağaza yoxdur"]</h2>
+            <p>@L["Tezliklə yerli satıcılar burada görünəcək."]</p>
         }
     </div>
 }
 else
 {
     <div class="sb-shops-meta">
-        <span><strong>@Model.Stores.Count</strong> mağaza</span>
+        <span><strong>@Model.Stores.Count</strong> @L["Count.Stores"]</span>
         @if (!string.IsNullOrEmpty(Model.Search))
         {
-            <span class="sb-text-muted">— "@Model.Search" üçün</span>
+            <span class="sb-text-muted">— "@Model.Search" @L["üçün"]</span>
         }
     </div>
 
@@ -69,7 +69,7 @@ else
                         {
                             <div class="sb-shop-card__cover-fallback" style="background: linear-gradient(135deg, var(--sb-soft), #fff)"></div>
                         }
-                        <span class="sb-shop-card__count">@s.ProductCount məhsul</span>
+                        <span class="sb-shop-card__count">@s.ProductCount @L["məhsul"]</span>
                     </div>
                     <div class="sb-shop-card__avatar">
                         @if (!string.IsNullOrEmpty(s.ProfileImageUrl))
@@ -88,7 +88,7 @@ else
                         <a asp-controller="Store" asp-action="Detail" asp-route-slug="@s.Slug">@s.Name</a>
                         @if (s.IsVerified)
                         {
-                            <span class="sb-verified-badge" title="Verified VIP satıcı" aria-label="Verified satıcı">
+                            <span class="sb-verified-badge" title="@L["Verified VIP satıcı"]" aria-label="@L["Verified satıcı"]">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.39 1.96 3.06-.18 1.05 2.88 2.5 1.78-.96 2.91 1.32 2.78-2.17 2.16.06 3.07-2.78 1.31-1.78 2.5-2.91-.96-3.07.07-1.31-2.78-2.5-1.78.96-2.91-1.32-2.78L4.43 9.6l-.07-3.07 2.78-1.31L8.92 2.7 11.84 3.66 12 2z"/><path d="M9.5 12.5l2 2 3.5-3.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </span>
                         }
@@ -99,7 +99,7 @@ else
                     }
                     else
                     {
-                        <p class="sb-shop-card__bio sb-text-muted">Mağaza haqqında məlumat yoxdur.</p>
+                        <p class="sb-shop-card__bio sb-text-muted">@L["Mağaza haqqında məlumat yoxdur."]</p>
                     }
 
                     @if (s.ThumbnailImageUrls.Any())

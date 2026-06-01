@@ -120,4 +120,11 @@
   <data name="Lang.AZ" xml:space="preserve"><value>Azərbaycan</value></data>
   <data name="Lang.EN" xml:space="preserve"><value>English</value></data>
   <data name="Lang.RU" xml:space="preserve"><value>Русский</value></data>
+  <!-- Semantic keys (not literal AZ text — need an explicit AZ value here so the
+       neutral culture doesn't render the raw key). Used where the same AZ word
+       maps to different translations by context, or count nouns. -->
+  <data name="Count.Stores" xml:space="preserve"><value>mağaza</value></data>
+  <data name="Stat.Products" xml:space="preserve"><value>Məhsul</value></data>
+  <data name="MoreFrom.Prefix" xml:space="preserve"><value>Daha çox</value></data>
+  <data name="MoreFrom.Suffix" xml:space="preserve"><value>mağazasından</value></data>
 </root>
