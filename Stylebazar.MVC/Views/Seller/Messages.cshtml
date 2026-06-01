@@ -1,6 +1,6 @@
 @model SellerPanelViewModel
 @{
-    ViewData["StubTitle"] = "Messages";
-    ViewData["StubSubtitle"] = "Alıcılarla yazışmalar Phase 6c-də.";
+    ViewData["StubTitle"] = L["Mesajlar"].Value;
+    ViewData["StubSubtitle"] = L["Alıcılarla yazışmalar tezliklə."].Value;
 }
 @await Html.PartialAsync("_SellerStubPage", Model)

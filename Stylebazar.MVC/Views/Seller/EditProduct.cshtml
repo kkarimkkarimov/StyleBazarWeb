@@ -1,6 +1,6 @@
 @model SellerProductFormViewModel
 @{
-    ViewData["Title"] = Model.Product?.Name ?? "Məhsulu redaktə et";
+    ViewData["Title"] = Model.Product?.Name ?? L["Məhsulu redaktə et"].Value;
     var p = Model.Profile;
     var pr = Model.Product!;
 }
@@ -10,11 +10,11 @@
 
     <main class="sb-seller-main">
         <nav class="sb-breadcrumb sb-acc-breadcrumb" aria-label="Breadcrumb">
-            <a asp-action="Dashboard">Seller Panel</a>
+            <a asp-action="Dashboard">@L["Satıcı paneli"]</a>
             <span class="sb-breadcrumb__sep" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
-            <a asp-action="Products">Məhsullar</a>
+            <a asp-action="Products">@L["Məhsullar"]</a>
             <span class="sb-breadcrumb__sep" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
@@ -30,7 +30,7 @@
         <div class="sb-seller-card" data-prod-images data-product-id="@pr.Id">
             <header class="sb-seller-card__head">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <h2>Şəkillər</h2>
+                <h2>@L["Şəkillər"]</h2>
             </header>
 
             <div class="sb-img-gallery" data-img-gallery>
@@ -40,16 +40,16 @@
                         <img src="@img.ImageUrl" alt="" />
                         @if (img.IsMain)
                         {
-                            <span class="sb-img-tile__main-badge">Əsas</span>
+                            <span class="sb-img-tile__main-badge">@L["Əsas"]</span>
                         }
                         <div class="sb-img-tile__actions">
                             @if (!img.IsMain)
                             {
-                                <button type="button" class="sb-img-tile__btn" data-img-set-main title="Əsas et">
+                                <button type="button" class="sb-img-tile__btn" data-img-set-main title="@L["Əsas et"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                 </button>
                             }
-                            <button type="button" class="sb-img-tile__btn sb-img-tile__btn--danger" data-img-delete title="Sil">
+                            <button type="button" class="sb-img-tile__btn sb-img-tile__btn--danger" data-img-delete title="@L["Sil"]">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                             </button>
                         </div>
@@ -60,7 +60,7 @@
                     <span class="sb-img-tile__upload-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </span>
-                    <strong>Şəkil yüklə</strong>
+                    <strong>@L["Şəkil yüklə"]</strong>
                     <small>JPG/PNG/WEBP · max 10 MB</small>
                 </label>
             </div>
@@ -81,10 +81,10 @@
             @await Html.PartialAsync("_ProductFormFields", Model)
 
             <div class="sb-prod-form__footer">
-                <a asp-action="Products" class="sb-btn-ghost">Geri</a>
+                <a asp-action="Products" class="sb-btn-ghost">@L["Geri"]</a>
                 <button type="submit" class="sb-btn-primary sb-btn-primary--cyan sb-btn-primary--lg" data-submit>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    <span>Yadda saxla</span>
+                    <span>@L["Yadda saxla"]</span>
                 </button>
             </div>
         </form>

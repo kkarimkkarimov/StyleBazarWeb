@@ -538,4 +538,131 @@
   <data name="Stok:" xml:space="preserve"><value>Stock:</value></data>
   <data name="Deaktiv et" xml:space="preserve"><value>Deactivate</value></data>
   <data name="Aktiv et" xml:space="preserve"><value>Activate</value></data>
+  <!-- ===== Seller: Stories ===== -->
+  <data name="24 saatlıq Instagram-tipli hekayələr. Şəkil (10 MB) və ya video (30 MB, max 30 saniyə)." xml:space="preserve"><value>24-hour Instagram-style stories. Image (10 MB) or video (30 MB, max 30 seconds).</value></data>
+  <data name="Limit:" xml:space="preserve"><value>Limit:</value></data>
+  <data name="Yeni hekayə" xml:space="preserve"><value>New story</value></data>
+  <data name="Şəkil və ya video seç" xml:space="preserve"><value>Choose an image or video</value></data>
+  <data name="Video: maksimum 30 saniyə / 30 MB" xml:space="preserve"><value>Video: maximum 30 seconds / 30 MB</value></data>
+  <data name="Mətn (caption)" xml:space="preserve"><value>Text (caption)</value></data>
+  <data name="Hekayə üçün qısa mətn..." xml:space="preserve"><value>Short text for the story...</value></data>
+  <data name="Link (məhsul URL-i, opsional)" xml:space="preserve"><value>Link (product URL, optional)</value></data>
+  <data name="Yayımla" xml:space="preserve"><value>Publish</value></data>
+  <data name="Aktiv hekayələr" xml:space="preserve"><value>Active stories</value></data>
+  <data name="Hələ aktiv hekayə yoxdur" xml:space="preserve"><value>No active stories yet</value></data>
+  <data name="Yuxarıdakı formadan birinci hekayəni yarat." xml:space="preserve"><value>Create your first story from the form above.</value></data>
+  <data name="(başlıqsız)" xml:space="preserve"><value>(untitled)</value></data>
+  <data name="saat qalıb" xml:space="preserve"><value>hours left</value></data>
+  <data name="Bu hekayəni silməyə əminsən?" xml:space="preserve"><value>Are you sure you want to delete this story?</value></data>
+  <data name="Bitmiş hekayələr" xml:space="preserve"><value>Expired stories</value></data>
+  <data name="Yalnız tarixçə üçün — silmək olar." xml:space="preserve"><value>History only — can be deleted.</value></data>
+  <data name="baxış" xml:space="preserve"><value>views</value></data>
+  <data name="Sil?" xml:space="preserve"><value>Delete?</value></data>
+  <!-- ===== Seller: Add/Edit product + form fields ===== -->
+  <data name="Satıcı paneli" xml:space="preserve"><value>Seller panel</value></data>
+  <data name="Yarat və davam et" xml:space="preserve"><value>Create and continue</value></data>
+  <data name="Məhsul yaradıldıqdan sonra şəkilləri yükləyə biləcəksiniz." xml:space="preserve"><value>You'll be able to upload images after the product is created.</value></data>
+  <data name="Məhsulu redaktə et" xml:space="preserve"><value>Edit product</value></data>
+  <data name="Şəkillər" xml:space="preserve"><value>Images</value></data>
+  <data name="Əsas" xml:space="preserve"><value>Main</value></data>
+  <data name="Əsas et" xml:space="preserve"><value>Set as main</value></data>
+  <data name="Şəkil yüklə" xml:space="preserve"><value>Upload image</value></data>
+  <data name="Əsas məlumatlar" xml:space="preserve"><value>Basic info</value></data>
+  <data name="Məhsulun adı *" xml:space="preserve"><value>Product name *</value></data>
+  <data name="Məs: Mavi koftadan ipək parça" xml:space="preserve"><value>E.g.: Blue silk-blend top</value></data>
+  <data name="(URL üçün, boş buraxılsa avtomatik yaranır)" xml:space="preserve"><value>(for the URL, auto-generated if left blank)</value></data>
+  <data name="Kateqoriya *" xml:space="preserve"><value>Category *</value></data>
+  <data name="Seç..." xml:space="preserve"><value>Select...</value></data>
+  <data name="Təsvir *" xml:space="preserve"><value>Description *</value></data>
+  <data name="Materialı, faydaları, niyə xüsusi — alıcının suallarını qabaqla." xml:space="preserve"><value>Material, benefits, why it's special — answer the buyer's questions in advance.</value></data>
+  <data name="Qiymət (₼) *" xml:space="preserve"><value>Price (₼) *</value></data>
+  <data name="Endirimli qiymət (₼)" xml:space="preserve"><value>Discounted price (₼)</value></data>
+  <data name="Ümumi stok" xml:space="preserve"><value>Total stock</value></data>
+  <data name="Ölçülər" xml:space="preserve"><value>Sizes</value></data>
+  <data name="Yaz, Enter bas — hər ölçü üçün stok rəqəmi əlavə et." xml:space="preserve"><value>Type, press Enter — add a stock number for each size.</value></data>
+  <data name="S, M, L, XL... (Enter ilə əlavə et)" xml:space="preserve"><value>S, M, L, XL... (add with Enter)</value></data>
+  <data name="Rənglər" xml:space="preserve"><value>Colors</value></data>
+  <data name="Rəng adı yaz, kvadrata klikləyib rəngi seç, Enter bas." xml:space="preserve"><value>Type a color name, click the square to pick the color, press Enter.</value></data>
+  <data name="Qara, Çəhrayı, Açıq mavi... (Enter ilə əlavə et)" xml:space="preserve"><value>Black, Pink, Light blue... (add with Enter)</value></data>
+  <data name="Xüsusiyyətlər" xml:space="preserve"><value>Features</value></data>
+  <data name="Hamısı isteğe bağlı — doldurulduqca məhsul səhifəsində sağ sidebar-da görünür." xml:space="preserve"><value>All optional — as you fill them in, they appear in the right sidebar of the product page.</value></data>
+  <data name="Pambıq, Polyester, Yun..." xml:space="preserve"><value>Cotton, Polyester, Wool...</value></data>
+  <data name="Düz, Çəkmə, Logo print..." xml:space="preserve"><value>Plain, Striped, Logo print...</value></data>
+  <data name="Yaxalıq" xml:space="preserve"><value>Neckline</value></data>
+  <data name="Crew, V-neck, Yuvarlaq..." xml:space="preserve"><value>Crew, V-neck, Round...</value></data>
+  <data name="Qol uzunluğu" xml:space="preserve"><value>Sleeve length</value></data>
+  <data name="Qısa qol, Uzun qol, 3/4..." xml:space="preserve"><value>Short sleeve, Long sleeve, 3/4...</value></data>
+  <data name="Yay, Payız, Qış..." xml:space="preserve"><value>Summer, Autumn, Winter...</value></data>
+  <data name="Mənşə ölkə" xml:space="preserve"><value>Country of origin</value></data>
+  <data name="Türkiyə, İtaliya..." xml:space="preserve"><value>Turkey, Italy...</value></data>
+  <!-- ===== Seller: Analytics ===== -->
+  <data name="Telefon" xml:space="preserve"><value>Phone</value></data>
+  <data name="Mağazaların ümumi performansı və alıcı maraq göstəriciləri" xml:space="preserve"><value>Overall store performance and buyer-interest metrics</value></data>
+  <data name="Ümumi əlaqə click" xml:space="preserve"><value>Total contact clicks</value></data>
+  <data name="Son 30 gün click" xml:space="preserve"><value>Clicks last 30 days</value></data>
+  <data name="Wishlist əlavə" xml:space="preserve"><value>Wishlist adds</value></data>
+  <data name="Aktiv məhsul" xml:space="preserve"><value>Active products</value></data>
+  <data name="cəmi:" xml:space="preserve"><value>total:</value></data>
+  <data name="Kanal bölgüsü" xml:space="preserve"><value>Channel breakdown</value></data>
+  <data name="Alıcılar səni necə tapır?" xml:space="preserve"><value>How do buyers find you?</value></data>
+  <data name="Hələ click yoxdur" xml:space="preserve"><value>No clicks yet</value></data>
+  <data name="Alıcılar məhsulların kontakt düymələrinə basdıqda burada görünəcək." xml:space="preserve"><value>This appears when buyers tap your products' contact buttons.</value></data>
+  <data name="Ən populyar məhsullar" xml:space="preserve"><value>Most popular products</value></data>
+  <data name="click sayına görə top 5" xml:space="preserve"><value>top 5 by click count</value></data>
+  <data name="Hələ data yoxdur" xml:space="preserve"><value>No data yet</value></data>
+  <data name="Məhsul detallarına ən çox click edilənlər burada görünəcək." xml:space="preserve"><value>The most-clicked product details will appear here.</value></data>
+  <data name="click" xml:space="preserve"><value>clicks</value></data>
+  <data name="Məsləhət:" xml:space="preserve"><value>Tip:</value></data>
+  <data name="Ən çox click alan kanalı vurğulamaq üçün satıcı profilində o kanalın ikonunu birinci sıraya gətirə bilərsən." xml:space="preserve"><value>To highlight your most-clicked channel, move that channel's icon to the first position in your seller profile.</value></data>
+  <!-- ===== Seller: Packages ===== -->
+  <data name="Plan və paketlər" xml:space="preserve"><value>Plan and packages</value></data>
+  <data name="Daha çox məhsul, daha çox alıcı, daha çox güvən — biznesini böyütmək üçün uyğun planı seç." xml:space="preserve"><value>More products, more buyers, more trust — pick the right plan to grow your business.</value></data>
+  <data name="Cari planın" xml:space="preserve"><value>Your current plan</value></data>
+  <data name="gün qalıb" xml:space="preserve"><value>days left</value></data>
+  <data name="Müddəti bitib" xml:space="preserve"><value>Expired</value></data>
+  <data name="Ən populyar" xml:space="preserve"><value>Most popular</value></data>
+  <data name="Pulsuz" xml:space="preserve"><value>Free</value></data>
+  <data name="/ay" xml:space="preserve"><value>/mo</value></data>
+  <data name="plana keç" xml:space="preserve"><value>plan — upgrade</value></data>
+  <data name="Ödəniş hazırda manualdır." xml:space="preserve"><value>Payment is currently manual.</value></data>
+  <data name="&quot;Yüksəlt&quot; düyməsini basdıqdan sonra biz səninlə əlaqə saxlayacayıq və ödəniş təsdiqləndikdən sonra planı aktivləşdirəcəyik. Onlayn ödəniş tezliklə." xml:space="preserve"><value>After you press "Upgrade", we'll contact you and activate the plan once payment is confirmed. Online payment coming soon.</value></data>
+  <data name="Aylıq ödəniş:" xml:space="preserve"><value>Monthly payment:</value></data>
+  <data name="Ödənişi aşağıdakı kanallardan biri ilə həyata keçirə bilərsən, sonra biz planı aktivləşdirəcəyik." xml:space="preserve"><value>You can pay via one of the channels below, then we'll activate the plan.</value></data>
+  <data name="Ödəniş haqqında əlavə suallar üçün hər iki kanaldan birinə yaz — adətən 24 saat ərzində cavablandırırıq." xml:space="preserve"><value>For more payment questions, message either channel — we usually reply within 24 hours.</value></data>
+  <!-- ===== Seller: StoreSettings ===== -->
+  <data name="Mağaza banneri yoxdur" xml:space="preserve"><value>No store banner</value></data>
+  <data name="Banner dəyiş" xml:space="preserve"><value>Change banner</value></data>
+  <data name="Banner sil" xml:space="preserve"><value>Remove banner</value></data>
+  <data name="-dən" xml:space="preserve"><value> onward</value></data>
+  <data name="Aktiv mağaza" xml:space="preserve"><value>Active store</value></data>
+  <data name="Deaktiv mağaza" xml:space="preserve"><value>Inactive store</value></data>
+  <data name="Mağaza adı *" xml:space="preserve"><value>Store name *</value></data>
+  <data name="(boş = avtomatik addan)" xml:space="preserve"><value>(blank = auto from name)</value></data>
+  <data name="Təsvir" xml:space="preserve"><value>Description</value></data>
+  <data name="(mağazan haqqında qısa məlumat)" xml:space="preserve"><value>(a short note about your store)</value></data>
+  <data name="Bakı mərkəzində 2020-ci ildən fəaliyyət göstərən qadın geyim mağazası..." xml:space="preserve"><value>A women's clothing store operating in central Baku since 2020...</value></data>
+  <data name="Əlaqə telefonu" xml:space="preserve"><value>Contact phone</value></data>
+  <data name="Bakı, Nəsimi r., Nizami küç." xml:space="preserve"><value>Baku, Nasimi dist., Nizami St.</value></data>
+  <data name="Əlaqə kanalları" xml:space="preserve"><value>Contact channels</value></data>
+  <data name="Alıcılar məhsul səhifəsində bu kanallar üzərindən sənə yazacaq." xml:space="preserve"><value>Buyers will contact you through these channels on the product page.</value></data>
+  <data name="(yalnız rəqəm: ölkə kodu + nömrə)" xml:space="preserve"><value>(digits only: country code + number)</value></data>
+  <data name="(@ olmadan)" xml:space="preserve"><value>(without @)</value></data>
+  <data name="(səhifə adı və ya ID)" xml:space="preserve"><value>(page name or ID)</value></data>
+  <!-- ===== Seller: Profile ===== -->
+  <data name="Satıcı Profili" xml:space="preserve"><value>Seller Profile</value></data>
+  <data name="Şəxsi məlumatlar" xml:space="preserve"><value>Personal Information</value></data>
+  <data name="Satıcı ID" xml:space="preserve"><value>Seller ID</value></data>
+  <data name="İstifadəçi adı" xml:space="preserve"><value>Username</value></data>
+  <data name="Sosial media" xml:space="preserve"><value>Social Media</value></data>
+  <data name="Profildə göstər" xml:space="preserve"><value>Show in Profile</value></data>
+  <data name="Hələ ünvan əlavə etməmisiniz. Yuxarıdakı düymə ilə yeni ünvan yaradın." xml:space="preserve"><value>You haven't added an address yet. Create one with the button above.</value></data>
+  <data name="Saxla" xml:space="preserve"><value>Save</value></data>
+  <!-- ===== Seller: stub pages ===== -->
+  <data name="Tezliklə" xml:space="preserve"><value>Coming soon</value></data>
+  <data name="Bu bölmə tezliklə əlavə olunacaq." xml:space="preserve"><value>This section will be added soon.</value></data>
+  <data name="Alıcılarla yazışmalar tezliklə." xml:space="preserve"><value>Conversations with buyers coming soon.</value></data>
+  <data name="Data inteqrasiyası" xml:space="preserve"><value>Data Integration</value></data>
+  <data name="CSV/XML export və üçüncü tərəf inteqrasiya tezliklə." xml:space="preserve"><value>CSV/XML export and third-party integration coming soon.</value></data>
+  <data name="Ağıllı yükləmə" xml:space="preserve"><value>Smart Upload</value></data>
+  <data name="Toplu məhsul yüklənmə (CSV/Excel) tezliklə." xml:space="preserve"><value>Bulk product upload (CSV/Excel) coming soon.</value></data>
 </root>

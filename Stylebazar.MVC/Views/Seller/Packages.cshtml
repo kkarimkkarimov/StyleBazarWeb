@@ -1,7 +1,7 @@
 @model SellerPackagesPageViewModel
 @using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["Title"] = "Paketlər";
+    ViewData["Title"] = L["Paketlər"].Value;
 
     var currentPlan = Model.CurrentSubscription.Plan;
 }
@@ -11,16 +11,16 @@
 
     <main class="sb-seller-main">
         <header class="sb-acc-section-title">
-            <h1>Plan və paketlər</h1>
+            <h1>@L["Plan və paketlər"]</h1>
             <p class="sb-acc-section-title__sub">
-                Daha çox məhsul, daha çox alıcı, daha çox güvən — biznesini böyütmək üçün uyğun planı seç.
+                @L["Daha çox məhsul, daha çox alıcı, daha çox güvən — biznesini böyütmək üçün uyğun planı seç."]
             </p>
         </header>
 
         @* ===== Cari plan banner ===== *@
         <div class="sb-pkg-current sb-pkg-current--@currentPlan.ToString().ToLower()">
             <div class="sb-pkg-current__left">
-                <span class="sb-pkg-current__label">Cari planın</span>
+                <span class="sb-pkg-current__label">@L["Cari planın"]</span>
                 <strong class="sb-pkg-current__plan">@currentPlan</strong>
                 @if (Model.CurrentSubscription.ExpiresAt.HasValue)
                 {
@@ -28,17 +28,17 @@
                     <span class="sb-pkg-current__expiry">
                         @if (days.HasValue && days.Value > 0)
                         {
-                            <text>@days gün qalıb (@Model.CurrentSubscription.ExpiresAt.Value.ToLocalTime().ToString("dd.MM.yyyy"))</text>
+                            <text>@days @L["gün qalıb"] (@Model.CurrentSubscription.ExpiresAt.Value.ToLocalTime().ToString("dd.MM.yyyy"))</text>
                         }
                         else
                         {
-                            <text>Müddəti bitib</text>
+                            <text>@L["Müddəti bitib"]</text>
                         }
                     </span>
                 }
             </div>
             <div class="sb-pkg-current__right">
-                <span class="sb-pkg-current__usage-label">Məhsul</span>
+                <span class="sb-pkg-current__usage-label">@L["Stat.Products"]</span>
                 <strong class="sb-pkg-current__usage">@Model.CurrentProductCount / @Stylebazar.BLL.Services.Subscriptions.PlanCatalog.MaxProductsFor(currentPlan)</strong>
             </div>
         </div>
@@ -57,7 +57,7 @@
                 <article class="sb-pkg-card @toneClass @(isCurrent ? "is-current" : "") @(tier.Plan == SubscriptionPlan.Pro ? "is-popular" : "")">
                     @if (tier.Plan == SubscriptionPlan.Pro)
                     {
-                        <span class="sb-pkg-card__badge">Ən populyar</span>
+                        <span class="sb-pkg-card__badge">@L["Ən populyar"]</span>
                     }
                     <header class="sb-pkg-card__head">
                         <h2 class="sb-pkg-card__name">@tier.Name</h2>
@@ -65,12 +65,12 @@
                         <div class="sb-pkg-card__price">
                             @if (tier.MonthlyPriceAzn == 0)
                             {
-                                <span class="sb-pkg-card__price-amount">Pulsuz</span>
+                                <span class="sb-pkg-card__price-amount">@L["Pulsuz"]</span>
                             }
                             else
                             {
                                 <span class="sb-pkg-card__price-amount">@tier.MonthlyPriceAzn.ToString("0")<small>₼</small></span>
-                                <span class="sb-pkg-card__price-period">/ay</span>
+                                <span class="sb-pkg-card__price-period">@L["/ay"]</span>
                             }
                         </div>
                     </header>
@@ -96,7 +96,7 @@
                     <footer class="sb-pkg-card__footer">
                         @if (isCurrent)
                         {
-                            <button type="button" class="sb-btn sb-btn--ghost sb-btn--block" disabled>Cari plan</button>
+                            <button type="button" class="sb-btn sb-btn--ghost sb-btn--block" disabled>@L["Cari plan"]</button>
                         }
                         else if (tier.Plan == SubscriptionPlan.Free)
                         {
@@ -105,7 +105,7 @@
                         else
                         {
                             <button type="button" class="sb-btn sb-btn--primary sb-btn--block" data-pkg-upgrade data-pkg-name="@tier.Name" data-pkg-price="@tier.MonthlyPriceAzn">
-                                @tier.Name plana keç
+                                @tier.Name @L["plana keç"]
                             </button>
                         }
                     </footer>
@@ -117,8 +117,8 @@
         <div class="sb-pkg-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             <div>
-                <strong>Ödəniş hazırda manualdır.</strong>
-                <span>"Yüksəlt" düyməsini basdıqdan sonra biz səninlə əlaqə saxlayacayıq və ödəniş təsdiqləndikdən sonra planı aktivləşdirəcəyik. Onlayn ödəniş tezliklə.</span>
+                <strong>@L["Ödəniş hazırda manualdır."]</strong>
+                <span>@L["\"Yüksəlt\" düyməsini basdıqdan sonra biz səninlə əlaqə saxlayacayıq və ödəniş təsdiqləndikdən sonra planı aktivləşdirəcəyik. Onlayn ödəniş tezliklə."]</span>
             </div>
         </div>
     </main>
@@ -130,16 +130,16 @@
     <div class="sb-pkg-modal__panel">
         <header class="sb-pkg-modal__head">
             <h3 id="sbPkgModalTitle">
-                <span data-pkg-modal-name>—</span> plana keç
+                <span data-pkg-modal-name>—</span> @L["plana keç"]
             </h3>
-            <button type="button" class="sb-icon-btn" data-pkg-close aria-label="Bağla">
+            <button type="button" class="sb-icon-btn" data-pkg-close aria-label="@L["Bağla"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </header>
         <div class="sb-pkg-modal__body">
             <p>
-                Aylıq ödəniş: <strong data-pkg-modal-price>—</strong> ₼.
-                Ödənişi aşağıdakı kanallardan biri ilə həyata keçirə bilərsən, sonra biz planı aktivləşdirəcəyik.
+                @L["Aylıq ödəniş:"] <strong data-pkg-modal-price>—</strong> ₼.
+                @L["Ödənişi aşağıdakı kanallardan biri ilə həyata keçirə bilərsən, sonra biz planı aktivləşdirəcəyik."]
             </p>
             <div class="sb-pkg-modal__channels">
                 <a class="sb-pkg-modal__channel" href="https://wa.me/994508204111" target="_blank" rel="noopener">
@@ -158,7 +158,7 @@
                 </a>
             </div>
             <p class="sb-pkg-modal__hint">
-                Ödəniş haqqında əlavə suallar üçün hər iki kanaldan birinə yaz — adətən 24 saat ərzində cavablandırırıq.
+                @L["Ödəniş haqqında əlavə suallar üçün hər iki kanaldan birinə yaz — adətən 24 saat ərzində cavablandırırıq."]
             </p>
         </div>
     </div>

@@ -8,26 +8,26 @@
 <div class="sb-seller-card sb-prod-form__section">
     <header class="sb-seller-card__head">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <h2>Əsas məlumatlar</h2>
+        <h2>@L["Əsas məlumatlar"]</h2>
     </header>
 
     <div class="sb-prod-form__grid">
         <div class="sb-acc-field sb-prod-form__col-2">
-            <label asp-for="Form.Name">Məhsulun adı *</label>
-            <input asp-for="Form.Name" class="@(ViewData.ModelState["Form.Name"]?.Errors.Count > 0 ? "is-error" : "")" placeholder="Məs: Mavi koftadan ipək parça" maxlength="200" />
+            <label asp-for="Form.Name">@L["Məhsulun adı *"]</label>
+            <input asp-for="Form.Name" class="@(ViewData.ModelState["Form.Name"]?.Errors.Count > 0 ? "is-error" : "")" placeholder="@L["Məs: Mavi koftadan ipək parça"]" maxlength="200" />
             <span class="sb-field__error" asp-validation-for="Form.Name"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.Slug">Slug <small>(URL üçün, boş buraxılsa avtomatik yaranır)</small></label>
+            <label asp-for="Form.Slug">Slug <small>@L["(URL üçün, boş buraxılsa avtomatik yaranır)"]</small></label>
             <input asp-for="Form.Slug" placeholder="mavi-koftadan-ipek-parca" maxlength="220" />
             <span class="sb-field__error" asp-validation-for="Form.Slug"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.CategoryId">Kateqoriya *</label>
+            <label asp-for="Form.CategoryId">@L["Kateqoriya *"]</label>
             <select asp-for="Form.CategoryId" class="@(ViewData.ModelState["Form.CategoryId"]?.Errors.Count > 0 ? "is-error" : "")">
-                <option value="">Seç...</option>
+                <option value="">@L["Seç..."]</option>
                 @foreach (var c in Model.Categories)
                 {
                     <option value="@c.Id" selected="@(c.Id == f.CategoryId)">@c.Name</option>
@@ -37,52 +37,52 @@
         </div>
 
         <div class="sb-acc-field sb-prod-form__col-2">
-            <label asp-for="Form.Description">Təsvir *</label>
-            <textarea asp-for="Form.Description" rows="5" maxlength="4000" class="@(ViewData.ModelState["Form.Description"]?.Errors.Count > 0 ? "is-error" : "")" placeholder="Materialı, faydaları, niyə xüsusi — alıcının suallarını qabaqla."></textarea>
+            <label asp-for="Form.Description">@L["Təsvir *"]</label>
+            <textarea asp-for="Form.Description" rows="5" maxlength="4000" class="@(ViewData.ModelState["Form.Description"]?.Errors.Count > 0 ? "is-error" : "")" placeholder="@L["Materialı, faydaları, niyə xüsusi — alıcının suallarını qabaqla."]"></textarea>
             <span class="sb-field__error" asp-validation-for="Form.Description"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.Price">Qiymət (₼) *</label>
+            <label asp-for="Form.Price">@L["Qiymət (₼) *"]</label>
             <input asp-for="Form.Price" type="number" step="0.01" min="0.01" class="@(ViewData.ModelState["Form.Price"]?.Errors.Count > 0 ? "is-error" : "")" placeholder="0.00" />
             <span class="sb-field__error" asp-validation-for="Form.Price"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.DiscountPrice">Endirimli qiymət (₼)</label>
+            <label asp-for="Form.DiscountPrice">@L["Endirimli qiymət (₼)"]</label>
             <input asp-for="Form.DiscountPrice" type="number" step="0.01" min="0.01" placeholder="—" />
             <span class="sb-field__error" asp-validation-for="Form.DiscountPrice"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.StockQuantity">Ümumi stok</label>
+            <label asp-for="Form.StockQuantity">@L["Ümumi stok"]</label>
             <input asp-for="Form.StockQuantity" type="number" step="1" min="0" placeholder="0" />
             <span class="sb-field__error" asp-validation-for="Form.StockQuantity"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.Brand">Brend</label>
+            <label asp-for="Form.Brand">@L["Brend"]</label>
             <input asp-for="Form.Brand" maxlength="100" placeholder="—" />
             <span class="sb-field__error" asp-validation-for="Form.Brand"></span>
         </div>
 
         <div class="sb-acc-field">
-            <label asp-for="Form.Condition">Vəziyyət</label>
+            <label asp-for="Form.Condition">@L["Vəziyyət"]</label>
             <select asp-for="Form.Condition">
-                <option value="@ProductCondition.New" selected="@(f.Condition == ProductCondition.New)">Yeni</option>
-                <option value="@ProductCondition.SecondHand" selected="@(f.Condition == ProductCondition.SecondHand)">İkinci əl</option>
-                <option value="@ProductCondition.Vintage" selected="@(f.Condition == ProductCondition.Vintage)">Vintage</option>
+                <option value="@ProductCondition.New" selected="@(f.Condition == ProductCondition.New)">@L["Yeni"]</option>
+                <option value="@ProductCondition.SecondHand" selected="@(f.Condition == ProductCondition.SecondHand)">@L["İkinci əl"]</option>
+                <option value="@ProductCondition.Vintage" selected="@(f.Condition == ProductCondition.Vintage)">@L["Vintage"]</option>
             </select>
         </div>
 
         <div class="sb-acc-field sb-prod-form__col-2 sb-prod-form__toggles">
             <label class="sb-seller-toggle">
-                <span>Aktiv</span>
+                <span>@L["Aktiv"]</span>
                 <input asp-for="Form.IsActive" type="checkbox" />
                 <span class="sb-seller-toggle__slider"></span>
             </label>
             <label class="sb-seller-toggle">
-                <span>Çatdırılma var</span>
+                <span>@L["Çatdırılma var"]</span>
                 <input asp-for="Form.HasDelivery" type="checkbox" />
                 <span class="sb-seller-toggle__slider"></span>
             </label>
@@ -94,9 +94,9 @@
 <div class="sb-seller-card sb-prod-form__section">
     <header class="sb-seller-card__head">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
-        <h2>Ölçülər</h2>
+        <h2>@L["Ölçülər"]</h2>
     </header>
-    <p class="sb-prod-form__field-hint">Yaz, Enter bas — hər ölçü üçün stok rəqəmi əlavə et.</p>
+    <p class="sb-prod-form__field-hint">@L["Yaz, Enter bas — hər ölçü üçün stok rəqəmi əlavə et."]</p>
     <div class="sb-tag-input" data-tag-input data-tag-kind="size">
         <div class="sb-tag-list" data-tag-list>
             @for (int i = 0; i < f.Sizes.Count; i++)
@@ -106,13 +106,13 @@
                     <input class="sb-tag__stock" type="number" min="0" step="1" data-tag-stock value="@f.Sizes[i].StockQuantity" />
                     <input type="hidden" name="Form.Sizes[@i].Size" value="@f.Sizes[i].Size" data-tag-hidden-label />
                     <input type="hidden" name="Form.Sizes[@i].StockQuantity" value="@f.Sizes[i].StockQuantity" data-tag-hidden-stock />
-                    <button type="button" class="sb-tag__remove" data-tag-remove aria-label="Sil">
+                    <button type="button" class="sb-tag__remove" data-tag-remove aria-label="@L["Sil"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </span>
             }
         </div>
-        <input type="text" class="sb-tag-input__entry" data-tag-entry placeholder="S, M, L, XL... (Enter ilə əlavə et)" />
+        <input type="text" class="sb-tag-input__entry" data-tag-entry placeholder="@L["S, M, L, XL... (Enter ilə əlavə et)"]" />
     </div>
 </div>
 
@@ -120,9 +120,9 @@
 <div class="sb-seller-card sb-prod-form__section">
     <header class="sb-seller-card__head">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-        <h2>Rənglər</h2>
+        <h2>@L["Rənglər"]</h2>
     </header>
-    <p class="sb-prod-form__field-hint">Rəng adı yaz, kvadrata klikləyib rəngi seç, Enter bas.</p>
+    <p class="sb-prod-form__field-hint">@L["Rəng adı yaz, kvadrata klikləyib rəngi seç, Enter bas."]</p>
     <div class="sb-tag-input sb-tag-input--color" data-tag-input data-tag-kind="color">
         <div class="sb-tag-list" data-tag-list>
             @for (int i = 0; i < f.Colors.Count; i++)
@@ -132,7 +132,7 @@
                     <span class="sb-tag__label" data-tag-label>@f.Colors[i].Name</span>
                     <input type="hidden" name="Form.Colors[@i].Name" value="@f.Colors[i].Name" data-tag-hidden-label />
                     <input type="hidden" name="Form.Colors[@i].Hex" value="@f.Colors[i].Hex" data-tag-hidden-stock />
-                    <button type="button" class="sb-tag__remove" data-tag-remove aria-label="Sil">
+                    <button type="button" class="sb-tag__remove" data-tag-remove aria-label="@L["Sil"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </span>
@@ -143,7 +143,7 @@
                 <input type="color" data-tag-color value="#000000" />
                 <span class="sb-tag-input__color-swatch" data-tag-color-preview style="background:#000000"></span>
             </label>
-            <input type="text" class="sb-tag-input__entry" data-tag-entry placeholder="Qara, Çəhrayı, Açıq mavi... (Enter ilə əlavə et)" />
+            <input type="text" class="sb-tag-input__entry" data-tag-entry placeholder="@L["Qara, Çəhrayı, Açıq mavi... (Enter ilə əlavə et)"]" />
         </div>
     </div>
 </div>
@@ -152,49 +152,49 @@
 <div class="sb-seller-card sb-prod-form__section">
     <header class="sb-seller-card__head">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M3 3h18l-2 13H5L3 3z"/><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg>
-        <h2>Xüsusiyyətlər</h2>
+        <h2>@L["Xüsusiyyətlər"]</h2>
     </header>
-    <p class="sb-prod-form__field-hint">Hamısı isteğe bağlı — doldurulduqca məhsul səhifəsində sağ sidebar-da görünür.</p>
+    <p class="sb-prod-form__field-hint">@L["Hamısı isteğe bağlı — doldurulduqca məhsul səhifəsində sağ sidebar-da görünür."]</p>
 
     <div class="sb-prod-form__grid">
         <div class="sb-acc-field">
-            <label asp-for="Form.Material">Material</label>
-            <input asp-for="Form.Material" maxlength="80" placeholder="Pambıq, Polyester, Yun..." />
+            <label asp-for="Form.Material">@L["Material"]</label>
+            <input asp-for="Form.Material" maxlength="80" placeholder="@L["Pambıq, Polyester, Yun..."]" />
             <span class="sb-field__error" asp-validation-for="Form.Material"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.Pattern">Naxış</label>
-            <input asp-for="Form.Pattern" maxlength="80" placeholder="Düz, Çəkmə, Logo print..." />
+            <label asp-for="Form.Pattern">@L["Naxış"]</label>
+            <input asp-for="Form.Pattern" maxlength="80" placeholder="@L["Düz, Çəkmə, Logo print..."]" />
             <span class="sb-field__error" asp-validation-for="Form.Pattern"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.Neckline">Yaxalıq</label>
-            <input asp-for="Form.Neckline" maxlength="80" placeholder="Crew, V-neck, Yuvarlaq..." />
+            <label asp-for="Form.Neckline">@L["Yaxalıq"]</label>
+            <input asp-for="Form.Neckline" maxlength="80" placeholder="@L["Crew, V-neck, Yuvarlaq..."]" />
             <span class="sb-field__error" asp-validation-for="Form.Neckline"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.SleeveLength">Qol uzunluğu</label>
-            <input asp-for="Form.SleeveLength" maxlength="80" placeholder="Qısa qol, Uzun qol, 3/4..." />
+            <label asp-for="Form.SleeveLength">@L["Qol uzunluğu"]</label>
+            <input asp-for="Form.SleeveLength" maxlength="80" placeholder="@L["Qısa qol, Uzun qol, 3/4..."]" />
             <span class="sb-field__error" asp-validation-for="Form.SleeveLength"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.Fit">Fit</label>
+            <label asp-for="Form.Fit">@L["Görünüş"]</label>
             <input asp-for="Form.Fit" maxlength="80" placeholder="Slim, Regular, Loose..." />
             <span class="sb-field__error" asp-validation-for="Form.Fit"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.Season">Mövsüm</label>
-            <input asp-for="Form.Season" maxlength="80" placeholder="Yay, Payız, Qış..." />
+            <label asp-for="Form.Season">@L["Mövsüm"]</label>
+            <input asp-for="Form.Season" maxlength="80" placeholder="@L["Yay, Payız, Qış..."]" />
             <span class="sb-field__error" asp-validation-for="Form.Season"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.Style">Stil</label>
+            <label asp-for="Form.Style">@L["Stil"]</label>
             <input asp-for="Form.Style" maxlength="80" placeholder="Casual, Formal, Vintage..." />
             <span class="sb-field__error" asp-validation-for="Form.Style"></span>
         </div>
         <div class="sb-acc-field">
-            <label asp-for="Form.CountryOfOrigin">Mənşə ölkə</label>
-            <input asp-for="Form.CountryOfOrigin" maxlength="80" placeholder="Türkiyə, İtaliya..." />
+            <label asp-for="Form.CountryOfOrigin">@L["Mənşə ölkə"]</label>
+            <input asp-for="Form.CountryOfOrigin" maxlength="80" placeholder="@L["Türkiyə, İtaliya..."]" />
             <span class="sb-field__error" asp-validation-for="Form.CountryOfOrigin"></span>
         </div>
     </div>

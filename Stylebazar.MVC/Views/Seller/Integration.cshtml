@@ -1,6 +1,6 @@
 @model SellerPanelViewModel
 @{
-    ViewData["StubTitle"] = "Data Integration";
-    ViewData["StubSubtitle"] = "CSV/XML export və üçüncü tərəf inteqrasiya tezliklə.";
+    ViewData["StubTitle"] = L["Data inteqrasiyası"].Value;
+    ViewData["StubSubtitle"] = L["CSV/XML export və üçüncü tərəf inteqrasiya tezliklə."].Value;
 }
 @await Html.PartialAsync("_SellerStubPage", Model)

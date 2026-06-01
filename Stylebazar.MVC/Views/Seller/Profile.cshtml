@@ -1,19 +1,20 @@
 @model SellerProfilePageViewModel
 @{
-    ViewData["Title"] = "Satıcı Profili";
+    ViewData["Title"] = L["Satıcı Profili"].Value;
     var p = Model.Profile;
     var st = Model.PrimaryStore;
+
+    string TimeAgo(DateTime when)
+    {
+        var diff = DateTime.UtcNow - when.ToUniversalTime();
+        if (diff.TotalSeconds < 60) return L["indi"].Value;
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} {L["dəqiqə əvvəl"].Value}";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} {L["saat əvvəl"].Value}";
+        return $"{(int)diff.TotalDays} {L["gün əvvəl"].Value}";
+    }
 }
 
 @functions {
-    static string TimeAgo(DateTime when)
-    {
-        var diff = DateTime.UtcNow - when.ToUniversalTime();
-        if (diff.TotalSeconds < 60) return "indi";
-        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} dəqiqə əvvəl";
-        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} saat əvvəl";
-        return $"{(int)diff.TotalDays} gün əvvəl";
-    }
     static string EventClass(Stylebazar.DAL.Entities.Enums.LoginEventType t) => t switch
     {
         Stylebazar.DAL.Entities.Enums.LoginEventType.SignUp => "is-success",
@@ -34,7 +35,7 @@
         <div class="sb-seller-card">
             <header class="sb-seller-card__head">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-                <h2>Personal Information</h2>
+                <h2>@L["Şəxsi məlumatlar"]</h2>
             </header>
             <form data-seller-profile-form novalidate>
                 @Html.AntiForgeryToken()
@@ -60,30 +61,30 @@
 
                 <div class="sb-seller-grid">
                     <div class="sb-acc-field">
-                        <label>Full Name</label>
+                        <label>@L["Ad-soyad"]</label>
                         <input type="text" name="fullName" value="@p.FullName" required maxlength="100" />
                     </div>
                     <div class="sb-acc-field">
-                        <label>Email</label>
+                        <label>@L["Email"]</label>
                         <input type="email" value="@p.Email" readonly />
                     </div>
                     <div class="sb-acc-field">
-                        <label>Vendor ID</label>
+                        <label>@L["Satıcı ID"]</label>
                         <input type="text" value="#@(p.VendorCode ?? "—")" readonly class="sb-acc-field__id" />
                     </div>
                     <div class="sb-acc-field">
-                        <label>Mobile</label>
-                        <input type="tel" name="phoneNumber" value="@p.PhoneNumber" placeholder="None" />
+                        <label>@L["Mobil"]</label>
+                        <input type="tel" name="phoneNumber" value="@p.PhoneNumber" placeholder="@L["Yoxdur"]" />
                     </div>
                     <div class="sb-acc-field">
-                        <label>Username</label>
+                        <label>@L["İstifadəçi adı"]</label>
                         <input type="text" value="@p.UserName" readonly />
                     </div>
                     <div class="sb-acc-field">
-                        <label>Security</label>
+                        <label>@L["Təhlükəsizlik"]</label>
                         <button type="button" class="sb-btn-ghost sb-btn-ghost--cyan sb-btn-ghost--full" data-change-password-open>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                            <span>Change Password</span>
+                            <span>@L["Parolu dəyiş"]</span>
                         </button>
                     </div>
                 </div>
@@ -96,7 +97,7 @@
         <div class="sb-seller-card">
             <header class="sb-seller-card__head">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                <h2>Social Media</h2>
+                <h2>@L["Sosial media"]</h2>
             </header>
             <form data-seller-social-form novalidate>
                 @Html.AntiForgeryToken()
@@ -109,7 +110,7 @@
                         </span>
                         <input type="text" name="instagramHandle" value="@(st?.InstagramHandle)" placeholder="instagram.com/..." />
                         <label class="sb-seller-toggle">
-                            <span>Show in Profile</span>
+                            <span>@L["Profildə göstər"]</span>
                             <input type="checkbox" checked />
                             <span class="sb-seller-toggle__slider"></span>
                         </label>
@@ -121,7 +122,7 @@
                         </span>
                         <input type="text" name="facebookHandle" value="@(st?.FacebookHandle)" placeholder="facebook.com/..." />
                         <label class="sb-seller-toggle">
-                            <span>Show in Profile</span>
+                            <span>@L["Profildə göstər"]</span>
                             <input type="checkbox" checked />
                             <span class="sb-seller-toggle__slider"></span>
                         </label>
@@ -133,7 +134,7 @@
                         </span>
                         <input type="text" name="tikTokHandle" value="@(st?.TikTokHandle)" placeholder="tiktok.com/@@..." />
                         <label class="sb-seller-toggle">
-                            <span>Show in Profile</span>
+                            <span>@L["Profildə göstər"]</span>
                             <input type="checkbox" checked />
                             <span class="sb-seller-toggle__slider"></span>
                         </label>
@@ -145,7 +146,7 @@
                         </span>
                         <input type="tel" name="whatsAppNumber" value="@(st?.WhatsAppNumber)" placeholder="+994501234567" />
                         <label class="sb-seller-toggle">
-                            <span>Show in Profile</span>
+                            <span>@L["Profildə göstər"]</span>
                             <input type="checkbox" checked />
                             <span class="sb-seller-toggle__slider"></span>
                         </label>
@@ -161,11 +162,11 @@
             <header class="sb-seller-card__head sb-seller-card__head--split">
                 <span class="sb-seller-card__head-left">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <h2>Addresses</h2>
+                    <h2>@L["Ünvanlar"]</h2>
                 </span>
                 <button type="button" class="sb-btn-pill sb-btn-pill--add" data-addr-modal-open>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    New Address
+                    @L["Yeni ünvan"]
                 </button>
             </header>
 
@@ -181,7 +182,7 @@
 
             <div class="sb-seller-addresses-empty" data-addr-empty @(Model.Addresses.Any() ? "hidden" : "")>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>Hələ ünvan əlavə etməmisiniz. Yuxarıdakı düymə ilə yeni ünvan yaradın.</span>
+                <span>@L["Hələ ünvan əlavə etməmisiniz. Yuxarıdakı düymə ilə yeni ünvan yaradın."]</span>
             </div>
         </div>
 
@@ -189,7 +190,7 @@
         <div class="sb-seller-save-row">
             <button type="button" class="sb-btn-primary sb-btn-primary--cyan sb-btn-primary--lg" data-seller-save-all>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                <span>Save</span>
+                <span>@L["Saxla"]</span>
             </button>
         </div>
 
@@ -197,14 +198,14 @@
         <div class="sb-seller-card">
             <header class="sb-seller-card__head">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <h2>Security</h2>
+                <h2>@L["Təhlükəsizlik"]</h2>
             </header>
 
             <div class="sb-acc-sec-block">
                 <h3 class="sb-acc-sec-block__title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
-                    Active Sessions
-                    <span class="sb-acc-sec-block__sub">(Maximum 3 concurrent sessions)</span>
+                    @L["Aktiv sessiyalar"]
+                    <span class="sb-acc-sec-block__sub">@L["(Maksimum 3 eyni vaxtda sessiya)"]</span>
                 </h3>
                 <div class="sb-acc-sessions">
                     @if (Model.ActiveSessions.Any())
@@ -217,7 +218,7 @@
                                     <strong>@s.DeviceLabel</strong>
                                     @if (s.IsCurrent)
                                     {
-                                        <span class="sb-acc-session__current">Current</span>
+                                        <span class="sb-acc-session__current">@L["Cari"]</span>
                                     }
                                 </div>
                                 <div class="sb-acc-session__meta">
@@ -229,7 +230,7 @@
                     }
                     else
                     {
-                        <p class="sb-acc-sec-block__empty">Aktiv sessiya yoxdur.</p>
+                        <p class="sb-acc-sec-block__empty">@L["Aktiv sessiya yoxdur."]</p>
                     }
                 </div>
             </div>
@@ -237,8 +238,8 @@
             <div class="sb-acc-sec-block">
                 <h3 class="sb-acc-sec-block__title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-                    Login History
-                    <span class="sb-acc-sec-block__sub">(Last 30 days)</span>
+                    @L["Giriş tarixçəsi"]
+                    <span class="sb-acc-sec-block__sub">@L["(Son 30 gün)"]</span>
                 </h3>
                 <table class="sb-acc-login-history">
                     @if (Model.LoginHistory.Any())
@@ -254,7 +255,7 @@
                     }
                     else
                     {
-                        <tr><td colspan="3" class="sb-acc-sec-block__empty">Tarixçə boşdur.</td></tr>
+                        <tr><td colspan="3" class="sb-acc-sec-block__empty">@L["Tarixçə boşdur."]</td></tr>
                     }
                 </table>
             </div>
@@ -268,29 +269,29 @@
     <div class="sb-modal__backdrop" data-modal-close></div>
     <div class="sb-modal__panel">
         <header class="sb-modal__head">
-            <h3>Parolu dəyiş</h3>
-            <button type="button" class="sb-icon-btn" data-modal-close aria-label="Bağla">
+            <h3>@L["Parolu dəyiş"]</h3>
+            <button type="button" class="sb-icon-btn" data-modal-close aria-label="@L["Bağla"]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </header>
         <form class="sb-modal__body" data-change-password-form novalidate>
             @Html.AntiForgeryToken()
             <div class="sb-acc-field">
-                <label>Mövcud parol</label>
+                <label>@L["Mövcud parol"]</label>
                 <input type="password" name="currentPassword" required autocomplete="current-password" />
             </div>
             <div class="sb-acc-field">
-                <label>Yeni parol</label>
+                <label>@L["Yeni parol"]</label>
                 <input type="password" name="newPassword" required minlength="6" autocomplete="new-password" />
             </div>
             <div class="sb-acc-field">
-                <label>Yeni parolu təkrarla</label>
+                <label>@L["Yeni parolu təkrarla"]</label>
                 <input type="password" name="confirmNewPassword" required minlength="6" autocomplete="new-password" />
             </div>
             <div class="sb-modal__error" data-change-password-error hidden></div>
             <div class="sb-modal__actions">
-                <button type="button" class="sb-btn-ghost" data-modal-close>Ləğv</button>
-                <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" data-change-password-submit>Yenilə</button>
+                <button type="button" class="sb-btn-ghost" data-modal-close>@L["Ləğv"]</button>
+                <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" data-change-password-submit>@L["Yenilə"]</button>
             </div>
         </form>
     </div>

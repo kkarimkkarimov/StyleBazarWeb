@@ -1,7 +1,7 @@
 @model SellerPanelViewModel
 @{
-    string title = (ViewData["StubTitle"] as string) ?? "Tezliklə";
-    string subtitle = (ViewData["StubSubtitle"] as string) ?? "Bu bölmə tezliklə əlavə olunacaq.";
+    string title = (ViewData["StubTitle"] as string) ?? L["Tezliklə"].Value;
+    string subtitle = (ViewData["StubSubtitle"] as string) ?? L["Bu bölmə tezliklə əlavə olunacaq."].Value;
     ViewData["Title"] = title;
 }
 
