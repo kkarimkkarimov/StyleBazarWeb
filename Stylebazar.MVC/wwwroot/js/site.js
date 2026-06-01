@@ -5,6 +5,19 @@
 (function () {
     'use strict';
 
+    // ---- Client-side i18n ----
+    // The layout injects window.SB_I18N = { "<az source>": "<translated>" }
+    // for the current culture (see _Layout.cshtml). t() looks a string up by its
+    // Azerbaijani source text and falls back to that text when no entry exists —
+    // so on the AZ culture (empty dict) every call returns the original string.
+    function t(s) {
+        try {
+            var d = window.SB_I18N;
+            if (d && Object.prototype.hasOwnProperty.call(d, s)) return d[s];
+        } catch (_) {}
+        return s;
+    }
+
     // Each setup is wrapped in a try-catch so a single page-specific
     // setup throwing (e.g. a selector that didn't exist) never cascades
     // and prevents later setups (notably setupRevealOnScroll) from
@@ -446,7 +459,10 @@
             toastEl.setAttribute('aria-live', 'polite');
             document.body.appendChild(toastEl);
         }
-        toastEl.textContent = message;
+        // Auto-translate the message so every showToast() call site is localized
+        // without per-call edits. Server-supplied error strings (already in the
+        // user's language) pass through unchanged because they won't be dict keys.
+        toastEl.textContent = t(message);
         toastEl.classList.remove('is-error', 'is-success', 'is-visible');
         if (kind === 'error') toastEl.classList.add('is-error');
         else if (kind === 'success') toastEl.classList.add('is-success');
@@ -779,7 +795,7 @@
                     }
                 };
                 var fail = function () {
-                    alert('Cavab göndərilə bilmədi. Qoşulduğunuzu yoxlayın.');
+                    alert(t('Cavab göndərilə bilmədi. Qoşulduğunuzu yoxlayın.'));
                     paused = false;
                     if (currentMode === 'video') { try { vidEl.play(); } catch (_) {} }
                     startTs = performance.now();
@@ -847,7 +863,7 @@
         }
         function showError(msg) {
             // Cheap inline error — replace with proper toast once chat lands.
-            alert(msg);
+            alert(t(msg));
             reset();
         }
 
@@ -1070,7 +1086,7 @@
                         '<span class="sb-chat-conv__avatar">' + avatar + onlineDot + '</span>' +
                         '<span class="sb-chat-conv__body">' +
                             '<strong>' + escapeHtml(c.peerFullName) + '</strong>' +
-                            '<span>' + escapeHtml(c.lastMessagePreview || '(yeni söhbət)') + '</span>' +
+                            '<span>' + escapeHtml(c.lastMessagePreview || t('(yeni söhbət)')) + '</span>' +
                         '</span>' +
                         '<span class="sb-chat-conv__meta">' +
                             '<small>' + fmtTime(c.lastMessageAt) + '</small>' +
@@ -1107,14 +1123,14 @@
                     var thumb = sp.thumbnailUrl || sp.mediaUrl || '';
                     body = '<div class="sb-chat-msg__story">' +
                         (thumb ? '<img src="' + escapeHtml(thumb) + '" alt="" />' : '<span>↩</span>') +
-                        '<span>' + escapeHtml(sp.caption || 'Hekayə') + '</span>' +
+                        '<span>' + escapeHtml(sp.caption || t('Hekayə')) + '</span>' +
                         '</div>' +
                         '<div class="sb-chat-msg__text">' + escapeHtml(msg.body || '') + '</div>';
                 } else if (msg.messageType === 3 || msg.messageType === 'ProductShare') {
                     var pp = msg.productPreview || {};
                     body = '<div class="sb-chat-msg__product">' +
                         (pp.imageUrl ? '<img src="' + escapeHtml(pp.imageUrl) + '" alt="" />' : '') +
-                        '<span>' + escapeHtml(pp.name || 'Məhsul') + '</span>' +
+                        '<span>' + escapeHtml(pp.name || t('Məhsul')) + '</span>' +
                         '</div>' +
                         (msg.body ? '<div class="sb-chat-msg__text">' + escapeHtml(msg.body) + '</div>' : '');
                 } else {
@@ -1122,7 +1138,7 @@
                 }
                 bubble.innerHTML = body +
                     '<span class="sb-chat-msg__time">' + fmtTime(msg.createdDate) +
-                    (mine && msg.isReadByRecipient ? ' · <span class="sb-chat-msg__seen">Görüldü</span>' : '') +
+                    (mine && msg.isReadByRecipient ? ' · <span class="sb-chat-msg__seen">' + t('Görüldü') + '</span>' : '') +
                     '</span>';
 
                 if (prepend) messagesEl.insertBefore(bubble, messagesEl.firstChild);
@@ -1192,7 +1208,7 @@
                 var times = messagesEl.querySelectorAll('.sb-chat-msg.is-mine .sb-chat-msg__time');
                 for (var i = 0; i < times.length; i++) {
                     if (!times[i].querySelector('.sb-chat-msg__seen')) {
-                        times[i].innerHTML += ' · <span class="sb-chat-msg__seen">Görüldü</span>';
+                        times[i].innerHTML += ' · <span class="sb-chat-msg__seen">' + t('Görüldü') + '</span>';
                     }
                 }
             });
@@ -1210,7 +1226,7 @@
                 b.innerHTML =
                     '<div class="sb-chat-msg__text">' + escapeHtml(text) + '</div>' +
                     '<span class="sb-chat-msg__time">' + fmtTime(new Date().toISOString()) +
-                    ' · <span class="sb-chat-msg__status">Göndərilir…</span></span>';
+                    ' · <span class="sb-chat-msg__status">' + t('Göndərilir…') + '</span></span>';
                 messagesEl.appendChild(b);
                 messagesEl.scrollTop = messagesEl.scrollHeight;
             }
@@ -1227,11 +1243,11 @@
                 temp.classList.add('is-failed');
                 var status = temp.querySelector('.sb-chat-msg__status');
                 if (status) {
-                    status.textContent = 'Göndərilmədi · ';
+                    status.textContent = t('Göndərilmədi · ');
                     var retry = document.createElement('button');
                     retry.type = 'button';
                     retry.className = 'sb-chat-msg__retry';
-                    retry.textContent = 'Yenidən';
+                    retry.textContent = t('Yenidən');
                     retry.addEventListener('click', function () { temp.remove(); retryFn(); });
                     status.appendChild(retry);
                 }
@@ -1286,7 +1302,7 @@
                         }
                         attachEl.value = '';
                         if (inputEl) inputEl.value = '';
-                    }).catch(function () { alert('Şəkil göndərilə bilmədi.'); });
+                    }).catch(function () { alert(t('Şəkil göndərilə bilmədi.')); });
                 });
             }
             if (backBtn) backBtn.addEventListener('click', function () { showList(); currentConv = null; });
@@ -1393,19 +1409,19 @@
                 if (submitBtn) submitBtn.classList.remove('is-loading');
                 if (r.ok) {
                     result.classList.add('is-success');
-                    result.textContent = 'Təşəkkürlər! Abunəliyin təsdiqləndi.';
+                    result.textContent = t('Təşəkkürlər! Abunəliyin təsdiqləndi.');
                     emailInput.value = '';
                 } else if (r.status === 429) {
                     result.classList.add('is-error');
-                    result.textContent = 'Çox tez-tez cəhd edirsən. Bir az gözlə.';
+                    result.textContent = t('Çox tez-tez cəhd edirsən. Bir az gözlə.');
                 } else {
                     result.classList.add('is-error');
-                    result.textContent = 'Email düzgün formatda deyil. Yenidən cəhd et.';
+                    result.textContent = t('Email düzgün formatda deyil. Yenidən cəhd et.');
                 }
             }).catch(function () {
                 if (submitBtn) submitBtn.classList.remove('is-loading');
                 result.classList.add('is-error');
-                result.textContent = 'Şəbəkə xətası. Sonra cəhd et.';
+                result.textContent = t('Şəbəkə xətası. Sonra cəhd et.');
             });
         });
     }
@@ -1488,7 +1504,7 @@
                     eye.style.display = isHidden ? 'none' : '';
                     eyeOff.style.display = isHidden ? '' : 'none';
                 }
-                btn.setAttribute('aria-label', isHidden ? 'Parolu gizlət' : 'Parolu göstər');
+                btn.setAttribute('aria-label', isHidden ? t('Parolu gizlət') : t('Parolu göstər'));
             });
         });
 
@@ -1531,18 +1547,18 @@
                 if (label) {
                     label.classList.remove('is-weak', 'is-medium', 'is-strong');
                     if (!input.value) {
-                        label.textContent = 'Parol gücü';
+                        label.textContent = t('Parol gücü');
                     } else if (s === 0) {
-                        label.textContent = 'Çox zəif — minimum 6 simvol';
+                        label.textContent = t('Çox zəif — minimum 6 simvol');
                         label.classList.add('is-weak');
                     } else if (s === 1) {
-                        label.textContent = 'Zəif — rəqəm və hərf əlavə et';
+                        label.textContent = t('Zəif — rəqəm və hərf əlavə et');
                         label.classList.add('is-weak');
                     } else if (s === 2) {
-                        label.textContent = 'Yaxşı — qəbul olunur';
+                        label.textContent = t('Yaxşı — qəbul olunur');
                         label.classList.add('is-medium');
                     } else {
-                        label.textContent = 'Güclü';
+                        label.textContent = t('Güclü');
                         label.classList.add('is-strong');
                     }
                 }
@@ -1734,7 +1750,7 @@
                 var size = chip.getAttribute('data-size-value');
                 var stock = parseInt(chip.getAttribute('data-size-stock') || '0', 10);
                 if (label) {
-                    label.textContent = size + ' — ' + stock + ' ədəd stokda';
+                    label.textContent = size + ' — ' + stock + ' ' + t('ədəd stokda');
                     label.style.color = 'var(--sb-ink)';
                 }
                 // If size has its own stock, clamp qty max to that stock
@@ -1861,7 +1877,7 @@
                 var url = b.getAttribute('data-review-image');
                 if (!url) return;
                 // Use the review image as a single-entry override
-                images = [{ url: url, alt: 'Rəy şəkli' }];
+                images = [{ url: url, alt: t('Rəy şəkli') }];
                 idx = 0;
                 open(0);
             });
@@ -2004,7 +2020,7 @@
 
                 var rating = parseInt(ratingInput.value, 10) || 0;
                 if (rating < 1 || rating > 5) {
-                    showError('Zəhmət olmasa ulduz seçin.');
+                    showError(t('Zəhmət olmasa ulduz seçin.'));
                     return;
                 }
 
@@ -2067,7 +2083,7 @@
 
         function showError(msg) {
             if (!errorBox) return;
-            errorBox.textContent = msg;
+            errorBox.textContent = t(msg);
             errorBox.hidden = false;
         }
         function hideError() {
@@ -2086,7 +2102,7 @@
         }
         function resetForm() {
             ratingInput.value = '0';
-            ratingHint.textContent = 'Ulduz seç';
+            ratingHint.textContent = t('Ulduz seç');
             ratingHint.classList.remove('is-set');
             paintStars(0, false);
             if (textarea) textarea.value = '';
@@ -2105,7 +2121,7 @@
         var del = card.querySelector('[data-my-review-delete]');
         if (del) {
             del.addEventListener('click', function () {
-                if (!confirm('Bu rəyi silmək istədiyinizdən əminsiniz?')) return;
+                if (!confirm(t('Bu rəyi silmək istədiyinizdən əminsiniz?'))) return;
                 var formData = new FormData();
                 formData.append('id', reviewId);
                 var token = getAntiForgeryToken();
@@ -2152,7 +2168,7 @@
         }
         btn.addEventListener('click', function () {
             var open = wrap.classList.toggle('is-expanded');
-            btn.textContent = open ? 'daha az' : 'daha çox';
+            btn.textContent = open ? t('daha az') : t('daha çox');
         });
     }
 
@@ -2196,9 +2212,9 @@
         function buildMessage() {
             var size = selectedSize();
             var color = selectedColor();
-            var lines = ['Salam! "' + productName + '" məhsulu ilə maraqlanıram.'];
-            if (color) lines.push('Rəng: ' + color);
-            if (size) lines.push('Ölçü: ' + size);
+            var lines = [t('Salam! Bu məhsulla maraqlanıram:') + ' "' + productName + '"'];
+            if (color) lines.push(t('Rəng:') + ' ' + color);
+            if (size) lines.push(t('Ölçü:') + ' ' + size);
             if (productUrl) lines.push('Link: ' + productUrl);
             return lines.join('\n');
         }
@@ -2700,7 +2716,7 @@
             form.reset();
             editingId = null;
             if (idEl) idEl.value = '';
-            if (titleEl) titleEl.textContent = 'Yeni ünvan';
+            if (titleEl) titleEl.textContent = t('Yeni ünvan');
             if (submitLabelEl) submitLabelEl.textContent = 'Yadda saxla';
         }
         function fillForm(addr) {
@@ -2717,7 +2733,7 @@
             var defCb = form.querySelector('[data-addr-default-cb]');
             if (defCb) defCb.checked = !!addr.isDefault;
 
-            if (titleEl) titleEl.textContent = 'Ünvanı redaktə et';
+            if (titleEl) titleEl.textContent = t('Ünvanı redaktə et');
             if (submitLabelEl) submitLabelEl.textContent = 'Yadda saxla';
         }
 
@@ -2737,10 +2753,10 @@
 
         function renderCard(addr) {
             var defaultBadge = addr.isDefault
-                ? '<span class="sb-addr-card__badge">Defolt</span>'
+                ? '<span class="sb-addr-card__badge">' + t('Defolt') + '</span>'
                 : '';
             var setDefaultBtn = addr.isDefault ? '' :
-                '<button type="button" class="sb-addr-card__btn" data-addr-set-default aria-label="Defolt et" title="Defolt et">' +
+                '<button type="button" class="sb-addr-card__btn" data-addr-set-default aria-label="' + t('Defolt et') + '" title="' + t('Defolt et') + '">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
                 '</button>';
             var districtPart = addr.district ? ', ' + escapeHtml(addr.district) : '';
@@ -2763,10 +2779,10 @@
                     '</div>' +
                     '<div class="sb-addr-card__actions">' +
                       setDefaultBtn +
-                      '<button type="button" class="sb-addr-card__btn" data-addr-edit aria-label="Redaktə et" title="Redaktə et">' +
+                      '<button type="button" class="sb-addr-card__btn" data-addr-edit aria-label="' + t('Redaktə et') + '" title="' + t('Redaktə et') + '">' +
                       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
                       '</button>' +
-                      '<button type="button" class="sb-addr-card__btn sb-addr-card__btn--danger" data-addr-delete aria-label="Sil" title="Sil">' +
+                      '<button type="button" class="sb-addr-card__btn sb-addr-card__btn--danger" data-addr-delete aria-label="' + t('Sil') + '" title="' + t('Sil') + '">' +
                       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>' +
                       '</button>' +
                     '</div>' +
@@ -2850,7 +2866,7 @@
             }
             if (e.target.closest('[data-addr-delete]')) {
                 e.preventDefault();
-                if (!window.confirm('Bu ünvanı silmək istədiyinə əminsən?')) return;
+                if (!window.confirm(t('Bu ünvanı silmək istədiyinə əminsən?'))) return;
                 var fd = new FormData();
                 fd.append('id', String(id));
                 post('/Address/Delete', fd).then(function (r) {
@@ -2967,7 +2983,7 @@
                     list.insertBefore(node, list.firstChild);
                 }
 
-                showToast(editingId ? 'Ünvan yeniləndi' : 'Yeni ünvan əlavə olundu', 'success');
+                showToast(editingId ? t('Ünvan yeniləndi') : t('Yeni ünvan əlavə olundu'), 'success');
                 close();
                 resetForm();
                 refreshEmptyState();
@@ -3024,7 +3040,7 @@
 
         function showError(msg) {
             if (!errorBox) return;
-            errorBox.textContent = msg;
+            errorBox.textContent = t(msg);
             errorBox.hidden = false;
             setTimeout(function () { errorBox.hidden = true; }, 6000);
         }
@@ -3089,7 +3105,7 @@
                 for (var i = 0; i < files.length; i++) {
                     var file = files[i];
                     if (file.size > 10 * 1024 * 1024) {
-                        showError('"' + file.name + '" 10 MB-dan böyükdür.');
+                        showError('"' + file.name + '" ' + t('10 MB-dan böyükdür.'));
                         continue;
                     }
 
@@ -3131,7 +3147,7 @@
             if (!btn) return;
             var tile = btn.closest('[data-image-id]');
             if (!tile) return;
-            if (!confirm('Bu şəkli silmək istəyirsən?')) return;
+            if (!confirm(t('Bu şəkli silmək istəyirsən?'))) return;
             var imageId = tile.getAttribute('data-image-id');
 
             var fd = new FormData();
@@ -3355,7 +3371,7 @@
 
             function showImgError(msg) {
                 if (!errBox) return;
-                errBox.textContent = msg;
+                errBox.textContent = t(msg);
                 errBox.hidden = false;
                 setTimeout(function () { errBox.hidden = true; }, 4000);
             }
@@ -3475,7 +3491,7 @@
                     return;
                 }
                 if (e.target.closest('[data-img-delete]')) {
-                    if (!window.confirm('Bu şəkli silmək istədiyinə əminsən?')) return;
+                    if (!window.confirm(t('Bu şəkli silmək istədiyinə əminsən?'))) return;
                     var fd2 = new FormData();
                     if (token) fd2.append('__RequestVerificationToken', token);
                     fetch('/Seller/Products/' + productId + '/Images/' + imageId + '/Delete', {
@@ -3521,7 +3537,7 @@
                     }
                     var card = cb.closest('[data-product-id]');
                     if (card) card.classList.toggle('is-inactive', !r.json.isActive);
-                    showToast(r.json.isActive ? 'Məhsul aktivləşdirildi' : 'Məhsul deaktiv edildi', 'success');
+                    showToast(r.json.isActive ? t('Məhsul aktivləşdirildi') : t('Məhsul deaktiv edildi'), 'success');
                 })
                 .catch(function () {
                     cb.checked = !cb.checked;
@@ -3534,7 +3550,7 @@
         // ---------- 4. Delete-product confirm ----------
         document.querySelectorAll('[data-prod-delete-form]').forEach(function (form) {
             form.addEventListener('submit', function (e) {
-                if (!window.confirm('Bu məhsulu silmək istədiyinə əminsən? Bu əməliyyat geri qaytarıla bilməz.')) {
+                if (!window.confirm(t('Bu məhsulu silmək istədiyinə əminsən? Bu əməliyyat geri qaytarıla bilməz.'))) {
                     e.preventDefault();
                 }
             });
@@ -3558,7 +3574,7 @@
 
         function showErr(msg) {
             if (errBox) {
-                errBox.textContent = msg;
+                errBox.textContent = t(msg);
                 errBox.hidden = false;
                 setTimeout(function () { errBox.hidden = true; }, 4500);
             } else {
@@ -3627,7 +3643,7 @@
 
         if (coverRemove) {
             coverRemove.addEventListener('click', function () {
-                if (!window.confirm('Banner şəklini silmək istədiyinə əminsən?')) return;
+                if (!window.confirm(t('Banner şəklini silmək istədiyinə əminsən?'))) return;
                 var fd = new FormData();
                 fd.append('storeId', String(storeId));
                 if (token) fd.append('__RequestVerificationToken', token);
@@ -3718,7 +3734,7 @@
                         statusWrap.classList.toggle('is-off', !on);
                     }
                     if (statusLabel) statusLabel.textContent = on ? 'Aktiv' : 'Deaktiv';
-                    showToast(on ? 'Mağaza aktivdir' : 'Mağaza deaktiv edildi', 'success');
+                    showToast(on ? t('Mağaza aktivdir') : t('Mağaza deaktiv edildi'), 'success');
                 })
                 .catch(function () {
                     statusCb.checked = !statusCb.checked;
@@ -3777,7 +3793,7 @@
                     var nowFollowing = !!r.json.isFollowing;
                     followBtn.classList.toggle('is-following', nowFollowing);
                     var label = followBtn.querySelector('[data-store-follow-label]');
-                    if (label) label.textContent = nowFollowing ? 'İzlənilir' : 'İzlə';
+                    if (label) label.textContent = nowFollowing ? t('İzlənilir') : t('İzlə');
                     // Swap the icon — plus → check
                     var icon = followBtn.querySelector('.sb-storepage__follow-icon');
                     if (icon) {
@@ -3786,7 +3802,7 @@
                             : '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
                     }
                     if (counter) counter.textContent = String(r.json.followerCount);
-                    showToast(nowFollowing ? 'Mağaza izlənir' : 'İzləməni dayandırdın', 'success');
+                    showToast(nowFollowing ? t('Mağaza izlənir') : t('İzləməni dayandırdın'), 'success');
                 })
                 .catch(function () { showToast('Şəbəkə xətası.', 'error'); })
                 .finally(function () { followBtn.classList.remove('is-loading'); });
@@ -3956,8 +3972,8 @@
                     if (catNameInput) catNameInput.value = btn.getAttribute('data-name') || '';
                     if (catSlugInput) catSlugInput.value = btn.getAttribute('data-slug') || '';
                     if (catParentSelect) catParentSelect.value = btn.getAttribute('data-parent') || '';
-                    if (catTitle) catTitle.textContent = 'Kateqoriyanı redaktə et';
-                    if (catSubmit) catSubmit.textContent = 'Yenilə';
+                    if (catTitle) catTitle.textContent = t('Kateqoriyanı redaktə et');
+                    if (catSubmit) catSubmit.textContent = t('Yenilə');
                     catForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
             });
@@ -4008,8 +4024,8 @@
                     if (bO) bO.value = btn.getAttribute('data-order') || '0';
                     if (bA) bA.checked = btn.getAttribute('data-active') === 'true';
                     if (bAField) bAField.hidden = false;
-                    if (bTitle) bTitle.textContent = 'Banner redaktə et';
-                    if (bSubmit) bSubmit.textContent = 'Yenilə';
+                    if (bTitle) bTitle.textContent = t('Banner redaktə et');
+                    if (bSubmit) bSubmit.textContent = t('Yenilə');
                     bForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
             });

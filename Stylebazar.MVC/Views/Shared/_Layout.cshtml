@@ -587,6 +587,7 @@
            compatible with the ASP.NET Core 10 server hub. *@
         <script src="~/lib/signalr/signalr.min.js" asp-append-version="true"></script>
     }
+    @await Html.PartialAsync("_JsI18n")
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

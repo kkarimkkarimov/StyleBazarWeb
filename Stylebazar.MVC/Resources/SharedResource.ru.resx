@@ -807,4 +807,83 @@
   <data name="Plan dəyiş" xml:space="preserve"><value>Изменить план</value></data>
   <data name="Son dəyişikliklər" xml:space="preserve"><value>Недавние изменения</value></data>
   <data name="qeyd" xml:space="preserve"><value>записей</value></data>
+  <!-- ===== JS dynamic strings (site.js, looked up by t()) ===== -->
+  <data name="Wishlist-ə əlavə olundu" xml:space="preserve"><value>Добавлено в избранное</value></data>
+  <data name="Wishlist-dən silindi" xml:space="preserve"><value>Удалено из избранного</value></data>
+  <data name="Xəta baş verdi. Yenidən cəhd edin." xml:space="preserve"><value>Произошла ошибка. Попробуйте снова.</value></data>
+  <data name="Xəta baş verdi." xml:space="preserve"><value>Произошла ошибка.</value></data>
+  <data name="Cavab göndərilə bilmədi. Qoşulduğunuzu yoxlayın." xml:space="preserve"><value>Не удалось отправить ответ. Проверьте подключение.</value></data>
+  <data name="Video uzunluğu oxuna bilmədi." xml:space="preserve"><value>Не удалось определить длину видео.</value></data>
+  <data name="Video maksimum 30 saniyə ola bilər." xml:space="preserve"><value>Видео может быть не более 30 секунд.</value></data>
+  <data name="(yeni söhbət)" xml:space="preserve"><value>(новая переписка)</value></data>
+  <data name="Görüldü" xml:space="preserve"><value>Просмотрено</value></data>
+  <data name="Göndərilir…" xml:space="preserve"><value>Отправка…</value></data>
+  <data name="Göndərilmədi · " xml:space="preserve"><value>Не отправлено · </value></data>
+  <data name="Şəkil göndərilə bilmədi." xml:space="preserve"><value>Не удалось отправить изображение.</value></data>
+  <data name="Təşəkkürlər! Abunəliyin təsdiqləndi." xml:space="preserve"><value>Спасибо! Ваша подписка подтверждена.</value></data>
+  <data name="Çox tez-tez cəhd edirsən. Bir az gözlə." xml:space="preserve"><value>Вы пробуете слишком часто. Подождите немного.</value></data>
+  <data name="Email düzgün formatda deyil. Yenidən cəhd et." xml:space="preserve"><value>Неверный формат e-mail. Попробуйте снова.</value></data>
+  <data name="Şəbəkə xətası. Sonra cəhd et." xml:space="preserve"><value>Ошибка сети. Попробуйте позже.</value></data>
+  <data name="Parolu gizlət" xml:space="preserve"><value>Скрыть пароль</value></data>
+  <data name="Çox zəif — minimum 6 simvol" xml:space="preserve"><value>Очень слабый — минимум 6 символов</value></data>
+  <data name="Zəif — rəqəm və hərf əlavə et" xml:space="preserve"><value>Слабый — добавьте цифру и букву</value></data>
+  <data name="Yaxşı — qəbul olunur" xml:space="preserve"><value>Хорошо — приемлемо</value></data>
+  <data name="Güclü" xml:space="preserve"><value>Надёжный</value></data>
+  <data name="ədəd stokda" xml:space="preserve"><value>в наличии</value></data>
+  <data name="Rəy şəkli" xml:space="preserve"><value>Фото отзыва</value></data>
+  <data name="Zəhmət olmasa ulduz seçin." xml:space="preserve"><value>Пожалуйста, выберите оценку.</value></data>
+  <data name="Rəy göndərilə bilmədi." xml:space="preserve"><value>Не удалось отправить отзыв.</value></data>
+  <data name="Rəyiniz əlavə olundu" xml:space="preserve"><value>Ваш отзыв добавлен</value></data>
+  <data name="Bu rəyi silmək istədiyinizdən əminsiniz?" xml:space="preserve"><value>Удалить этот отзыв?</value></data>
+  <data name="Rəy silindi" xml:space="preserve"><value>Отзыв удалён</value></data>
+  <data name="Silinə bilmədi." xml:space="preserve"><value>Не удалось удалить.</value></data>
+  <data name="Redaktə yaxında qoşulacaq — hələlik silib yenidən yaza bilərsiniz." xml:space="preserve"><value>Редактирование скоро — пока можно удалить и написать заново.</value></data>
+  <data name="daha az" xml:space="preserve"><value>меньше</value></data>
+  <data name="Salam! Bu məhsulla maraqlanıram:" xml:space="preserve"><value>Здравствуйте! Меня интересует этот товар:</value></data>
+  <data name="Brauzeriniz dəstəkləmir." xml:space="preserve"><value>Ваш браузер это не поддерживает.</value></data>
+  <data name="Link köçürüldü" xml:space="preserve"><value>Ссылка скопирована</value></data>
+  <data name="Şəkil yeniləndi" xml:space="preserve"><value>Изображение обновлено</value></data>
+  <data name="Şəkil yüklənmədi." xml:space="preserve"><value>Изображение не загружено.</value></data>
+  <data name="Yenilənmədi." xml:space="preserve"><value>Не обновлено.</value></data>
+  <data name="Profil yeniləndi" xml:space="preserve"><value>Профиль обновлён</value></data>
+  <data name="Şəbəkə xətası." xml:space="preserve"><value>Ошибка сети.</value></data>
+  <data name="Bütün dəyişikliklər yadda saxlanıldı" xml:space="preserve"><value>Все изменения сохранены</value></data>
+  <data name="Parol yenilənmədi." xml:space="preserve"><value>Пароль не обновлён.</value></data>
+  <data name="Parol yeniləndi" xml:space="preserve"><value>Пароль обновлён</value></data>
+  <data name="Ünvanı redaktə et" xml:space="preserve"><value>Редактировать адрес</value></data>
+  <data name="Bu ünvanı silmək istədiyinə əminsən?" xml:space="preserve"><value>Удалить этот адрес?</value></data>
+  <data name="Silinmədi." xml:space="preserve"><value>Не удалено.</value></data>
+  <data name="Defolt ünvan dəyişdi" xml:space="preserve"><value>Адрес по умолчанию изменён</value></data>
+  <data name="Yadda saxlanılmadı." xml:space="preserve"><value>Не сохранено.</value></data>
+  <data name="Ünvan yeniləndi" xml:space="preserve"><value>Адрес обновлён</value></data>
+  <data name="Yeni ünvan əlavə olundu" xml:space="preserve"><value>Новый адрес добавлен</value></data>
+  <data name="10 MB-dan böyükdür." xml:space="preserve"><value>больше 10 МБ.</value></data>
+  <data name="Yükləmə uğursuz oldu (HTTP " xml:space="preserve"><value>Загрузка не удалась (HTTP </value></data>
+  <data name="Şəbəkə xətası — yenidən cəhd et." xml:space="preserve"><value>Ошибка сети — попробуйте снова.</value></data>
+  <data name="Bu şəkli silmək istəyirsən?" xml:space="preserve"><value>Удалить это изображение?</value></data>
+  <data name="Silmək mümkün olmadı (HTTP " xml:space="preserve"><value>Не удалось удалить (HTTP </value></data>
+  <data name="Əsas etmək mümkün olmadı (HTTP " xml:space="preserve"><value>Не удалось сделать главным (HTTP </value></data>
+  <data name="Şəkil 10 MB-dan böyük ola bilməz." xml:space="preserve"><value>Изображение не может быть больше 10 МБ.</value></data>
+  <data name="Yüklənmədi." xml:space="preserve"><value>Не загружено.</value></data>
+  <data name="Şəkil yükləndi" xml:space="preserve"><value>Изображение загружено</value></data>
+  <data name="Əsas şəkil təyin edildi" xml:space="preserve"><value>Главное изображение установлено</value></data>
+  <data name="Bu şəkli silmək istədiyinə əminsən?" xml:space="preserve"><value>Удалить это изображение?</value></data>
+  <data name="Şəkil silindi" xml:space="preserve"><value>Изображение удалено</value></data>
+  <data name="Məhsul aktivləşdirildi" xml:space="preserve"><value>Товар активирован</value></data>
+  <data name="Məhsul deaktiv edildi" xml:space="preserve"><value>Товар деактивирован</value></data>
+  <data name="Bu məhsulu silmək istədiyinə əminsən? Bu əməliyyat geri qaytarıla bilməz." xml:space="preserve"><value>Удалить этот товар? Это необратимо.</value></data>
+  <data name="Banner 10 MB-dan böyük ola bilməz." xml:space="preserve"><value>Баннер не может быть больше 10 МБ.</value></data>
+  <data name="Banner yüklənmədi." xml:space="preserve"><value>Баннер не загружен.</value></data>
+  <data name="Banner yeniləndi" xml:space="preserve"><value>Баннер обновлён</value></data>
+  <data name="Banner şəklini silmək istədiyinə əminsən?" xml:space="preserve"><value>Удалить изображение баннера?</value></data>
+  <data name="Logo 5 MB-dan böyük ola bilməz." xml:space="preserve"><value>Логотип не может быть больше 5 МБ.</value></data>
+  <data name="Logo yüklənmədi." xml:space="preserve"><value>Логотип не загружен.</value></data>
+  <data name="Logo yeniləndi" xml:space="preserve"><value>Логотип обновлён</value></data>
+  <data name="Status dəyişmədi." xml:space="preserve"><value>Статус не изменился.</value></data>
+  <data name="Mağaza aktivdir" xml:space="preserve"><value>Магазин активен</value></data>
+  <data name="Mağaza deaktiv edildi" xml:space="preserve"><value>Магазин деактивирован</value></data>
+  <data name="Mağaza izlənir" xml:space="preserve"><value>Вы подписаны на магазин</value></data>
+  <data name="İzləməni dayandırdın" xml:space="preserve"><value>Вы отписались</value></data>
+  <data name="Kateqoriyanı redaktə et" xml:space="preserve"><value>Редактировать категорию</value></data>
+  <data name="Banner redaktə et" xml:space="preserve"><value>Редактировать баннер</value></data>
 </root>

@@ -1,0 +1,52 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<Stylebazar.MVC.SharedResource> L
+@{
+    // Client-side i18n bootstrap. site.js's t() helper looks strings up in
+    // window.SB_I18N by their Azerbaijani source text. We only emit the dict for
+    // non-AZ cultures — on AZ, t() returns the source text unchanged, so the dict
+    // is empty and the script stays tiny. Keys MUST match the literal strings
+    // passed to t()/showToast()/showError() in site.js exactly.
+    string jsCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLowerInvariant();
+
+    // Every AZ source string used dynamically in site.js. The value is the
+    // localized form for the current culture (falls back to AZ via the neutral
+    // resource, so a missing translation still renders correct Azerbaijani).
+    string[] jsKeys = new[]
+    {
+        "Wishlist-ə əlavə olundu", "Wishlist-dən silindi", "Xəta baş verdi. Yenidən cəhd edin.",
+        "Xəta baş verdi.", "Cavab göndərilə bilmədi. Qoşulduğunuzu yoxlayın.",
+        "Video maksimum 30 MB ola bilər.", "Şəkil maksimum 10 MB ola bilər.",
+        "Video uzunluğu oxuna bilmədi.", "Video maksimum 30 saniyə ola bilər.",
+        "(yeni söhbət)", "Hekayə", "Məhsul", "Görüldü", "Göndərilir…", "Göndərilmədi · ",
+        "Yenidən", "Şəkil göndərilə bilmədi.", "Təşəkkürlər! Abunəliyin təsdiqləndi.",
+        "Çox tez-tez cəhd edirsən. Bir az gözlə.", "Email düzgün formatda deyil. Yenidən cəhd et.",
+        "Şəbəkə xətası. Sonra cəhd et.", "Parolu gizlət", "Parolu göstər", "Parol gücü",
+        "Çox zəif — minimum 6 simvol", "Zəif — rəqəm və hərf əlavə et", "Yaxşı — qəbul olunur",
+        "Güclü", "ədəd stokda", "Rəy şəkli", "Zəhmət olmasa ulduz seçin.", "Rəy göndərilə bilmədi.",
+        "Rəyiniz əlavə olundu", "Ulduz seç", "Bu rəyi silmək istədiyinizdən əminsiniz?",
+        "Rəy silindi", "Silinə bilmədi.", "Redaktə yaxında qoşulacaq — hələlik silib yenidən yaza bilərsiniz.",
+        "daha az", "daha çox", "Salam! Bu məhsulla maraqlanıram:", "Rəng:", "Ölçü:",
+        "Brauzeriniz dəstəkləmir.", "Link köçürüldü", "Şəkil yeniləndi", "Şəkil yüklənmədi.",
+        "Yenilənmədi.", "Profil yeniləndi", "Şəbəkə xətası.", "Bütün dəyişikliklər yadda saxlanıldı",
+        "Parol yenilənmədi.", "Parol yeniləndi", "Yeni ünvan", "Ünvanı redaktə et", "Redaktə et",
+        "Defolt", "Defolt et", "Sil", "Bu ünvanı silmək istədiyinə əminsən?", "Silinmədi.",
+        "Defolt ünvan dəyişdi", "Yadda saxlanılmadı.", "Yadda saxlandı", "Ünvan yeniləndi",
+        "Yeni ünvan əlavə olundu", "10 MB-dan böyükdür.", "Yükləmə uğursuz oldu (HTTP ",
+        "Şəbəkə xətası — yenidən cəhd et.", "Bu şəkli silmək istəyirsən?", "Silmək mümkün olmadı (HTTP ",
+        "Əsas etmək mümkün olmadı (HTTP ", "Şəkil 10 MB-dan böyük ola bilməz.", "Yüklənmədi.",
+        "Şəkil yükləndi", "Əsas şəkil təyin edildi", "Bu şəkli silmək istədiyinə əminsən?",
+        "Şəkil silindi", "Məhsul aktivləşdirildi", "Məhsul deaktiv edildi",
+        "Bu məhsulu silmək istədiyinə əminsən? Bu əməliyyat geri qaytarıla bilməz.",
+        "Banner 10 MB-dan böyük ola bilməz.", "Banner yüklənmədi.", "Banner yeniləndi",
+        "Banner şəklini silmək istədiyinə əminsən?", "Logo 5 MB-dan böyük ola bilməz.",
+        "Logo yüklənmədi.", "Logo yeniləndi", "Status dəyişmədi.", "Mağaza aktivdir",
+        "Mağaza deaktiv edildi", "İzlənilir", "İzlə", "Mağaza izlənir", "İzləməni dayandırdın",
+        "Kateqoriyanı redaktə et", "Yenilə", "Banner redaktə et"
+    };
+}
+@if (jsCulture != "az")
+{
+    <text><script>window.SB_I18N=@Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        jsKeys.Distinct().ToDictionary(k => k, k => L[k].Value)));</script></text>
+}
