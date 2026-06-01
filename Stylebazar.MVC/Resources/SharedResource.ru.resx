@@ -408,4 +408,67 @@
   <data name="Dünən" xml:space="preserve"><value>Вчера</value></data>
   <data name="Bu həftə" xml:space="preserve"><value>На этой неделе</value></data>
   <data name="Daha əvvəl" xml:space="preserve"><value>Ранее</value></data>
+  <!-- ===== Account: Dashboard / Profile / Addresses / Messages ===== -->
+  <data name="Xoş gəldin" xml:space="preserve"><value>Добро пожаловать</value></data>
+  <data name="Salam," xml:space="preserve"><value>Привет,</value></data>
+  <data name="Müştəri kodu" xml:space="preserve"><value>Код клиента</value></data>
+  <data name="Ünvan" xml:space="preserve"><value>Адрес</value></data>
+  <data name="Son aktivlik" xml:space="preserve"><value>Недавняя активность</value></data>
+  <data name="5K+ məhsul, 100+ mağaza" xml:space="preserve"><value>5K+ товаров, 100+ магазинов</value></data>
+  <data name="Şəxsi məlumat, parol" xml:space="preserve"><value>Личные данные, пароль</value></data>
+  <data name="Mağaza idarəsi və stats" xml:space="preserve"><value>Управление магазином и статистика</value></data>
+  <data name="Son hesab aktivliyi" xml:space="preserve"><value>Недавняя активность аккаунта</value></data>
+  <data name="Ünvanlarım" xml:space="preserve"><value>Мои адреса</value></data>
+  <data name="Yeni ünvan" xml:space="preserve"><value>Новый адрес</value></data>
+  <data name="Hələ ünvan əlavə etməmisiniz" xml:space="preserve"><value>Вы ещё не добавили адрес</value></data>
+  <data name="Çatdırılma və əlaqə üçün ən az bir ünvan əlavə edin. Defolt ünvan ən üstdə göstərilir." xml:space="preserve"><value>Добавьте хотя бы один адрес для доставки и связи. Адрес по умолчанию показывается вверху.</value></data>
+  <data name="Yeni ünvan əlavə et" xml:space="preserve"><value>Добавить новый адрес</value></data>
+  <data name="Defolt" xml:space="preserve"><value>По умолчанию</value></data>
+  <data name="Defolt et" xml:space="preserve"><value>Сделать основным</value></data>
+  <data name="Redaktə et" xml:space="preserve"><value>Редактировать</value></data>
+  <data name="Ünvan adı *" xml:space="preserve"><value>Название адреса *</value></data>
+  <data name="Ev, Ofis, Anamın evi..." xml:space="preserve"><value>Дом, Офис, у мамы...</value></data>
+  <data name="Qəbul edən *" xml:space="preserve"><value>Получатель *</value></data>
+  <data name="Ad Soyad" xml:space="preserve"><value>Имя Фамилия</value></data>
+  <data name="Telefon *" xml:space="preserve"><value>Телефон *</value></data>
+  <data name="Şəhər *" xml:space="preserve"><value>Город *</value></data>
+  <data name="Bakı" xml:space="preserve"><value>Баку</value></data>
+  <data name="Rayon / region" xml:space="preserve"><value>Район / регион</value></data>
+  <data name="Nəsimi r." xml:space="preserve"><value>Насиминский р-н</value></data>
+  <data name="Poçt indeksi" xml:space="preserve"><value>Почтовый индекс</value></data>
+  <data name="Ünvan *" xml:space="preserve"><value>Адрес *</value></data>
+  <data name="Küçə, bina, mənzil..." xml:space="preserve"><value>Улица, дом, квартира...</value></data>
+  <data name="Qeyd / orientir" xml:space="preserve"><value>Заметка / ориентир</value></data>
+  <data name="Kuryer üçün əlavə təlimat..." xml:space="preserve"><value>Доп. инструкции для курьера...</value></data>
+  <data name="Defolt ünvan kimi təyin et" xml:space="preserve"><value>Сделать адресом по умолчанию</value></data>
+  <data name="Yadda saxla" xml:space="preserve"><value>Сохранить</value></data>
+  <data name="Profil parametrləri" xml:space="preserve"><value>Параметры профиля</value></data>
+  <data name="Şəkil seçilməyib" xml:space="preserve"><value>Изображение не выбрано</value></data>
+  <data name="Yüklə" xml:space="preserve"><value>Загрузить</value></data>
+  <data name="Mobil" xml:space="preserve"><value>Мобильный</value></data>
+  <data name="Yoxdur" xml:space="preserve"><value>Нет</value></data>
+  <data name="Dəyişiklikləri saxla" xml:space="preserve"><value>Сохранить изменения</value></data>
+  <data name="Təhlükəsizlik" xml:space="preserve"><value>Безопасность</value></data>
+  <data name="Aktiv sessiyalar" xml:space="preserve"><value>Активные сессии</value></data>
+  <data name="(Maksimum 3 eyni vaxtda sessiya)" xml:space="preserve"><value>(Максимум 3 одновременные сессии)</value></data>
+  <data name="Cari" xml:space="preserve"><value>Текущая</value></data>
+  <data name="Aktiv sessiya yoxdur." xml:space="preserve"><value>Нет активных сессий.</value></data>
+  <data name="Giriş tarixçəsi" xml:space="preserve"><value>История входов</value></data>
+  <data name="(Son 30 gün)" xml:space="preserve"><value>(Последние 30 дней)</value></data>
+  <data name="Tarixçə boşdur." xml:space="preserve"><value>История пуста.</value></data>
+  <data name="Mövcud parol" xml:space="preserve"><value>Текущий пароль</value></data>
+  <data name="Yeni parolu təkrarla" xml:space="preserve"><value>Повторите новый пароль</value></data>
+  <data name="Yenilə" xml:space="preserve"><value>Обновить</value></data>
+  <data name="indi" xml:space="preserve"><value>сейчас</value></data>
+  <data name="dəqiqə əvvəl" xml:space="preserve"><value>минут назад</value></data>
+  <data name="Real-vaxt yazışma — alıcılar, satıcılar və admin ilə." xml:space="preserve"><value>Переписка в реальном времени — с покупателями, продавцами и админом.</value></data>
+  <data name="Söhbətlər" xml:space="preserve"><value>Переписки</value></data>
+  <data name="Hələ söhbət yoxdur" xml:space="preserve"><value>Переписок пока нет</value></data>
+  <data name="Mağaza səhifəsindən satıcı ilə əlaqə qur." xml:space="preserve"><value>Начните, связавшись с продавцом со страницы магазина.</value></data>
+  <data name="Geri" xml:space="preserve"><value>Назад</value></data>
+  <data name="Bir söhbət seç" xml:space="preserve"><value>Выберите переписку</value></data>
+  <data name="Sol tərəfdən bir söhbətə klikləyərək başla." xml:space="preserve"><value>Начните, нажав на переписку слева.</value></data>
+  <data name="yazır..." xml:space="preserve"><value>печатает...</value></data>
+  <data name="Şəkil əlavə et" xml:space="preserve"><value>Добавить фото</value></data>
+  <data name="Mesaj yaz..." xml:space="preserve"><value>Напишите сообщение...</value></data>
 </root>

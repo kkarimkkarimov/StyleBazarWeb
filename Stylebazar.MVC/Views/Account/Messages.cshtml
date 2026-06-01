@@ -1,6 +1,6 @@
 @model AccountPanelViewModel
 @{
-    ViewData["Title"] = "Mesajlar";
+    ViewData["Title"] = L["Mesajlar"].Value;
 }
 
 @* Full-page chat inbox. Same JS handler as the floating widget — it picks the
@@ -11,28 +11,28 @@
 
     <main class="sb-acc-main">
         <header class="sb-acc-pagehead">
-            <h1>Mesajlar</h1>
-            <p>Real-vaxt yazışma — alıcılar, satıcılar və admin ilə.</p>
+            <h1>@L["Mesajlar"]</h1>
+            <p>@L["Real-vaxt yazışma — alıcılar, satıcılar və admin ilə."]</p>
         </header>
 
         <div class="sb-chat-fullpage" data-chat-fullpage>
             @* Left: inbox list *@
             <aside class="sb-chat-fullpage__list">
                 <header class="sb-chat-fullpage__list-head">
-                    <h2>Söhbətlər</h2>
+                    <h2>@L["Söhbətlər"]</h2>
                 </header>
                 <div class="sb-chat-list" data-chat-conversations></div>
                 <div class="sb-chat-empty" data-chat-empty hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                    <strong>Hələ söhbət yoxdur</strong>
-                    <span>Mağaza səhifəsindən satıcı ilə əlaqə qur.</span>
+                    <strong>@L["Hələ söhbət yoxdur"]</strong>
+                    <span>@L["Mağaza səhifəsindən satıcı ilə əlaqə qur."]</span>
                 </div>
             </aside>
 
             @* Right: active thread *@
             <section class="sb-chat-fullpage__thread" data-chat-thread>
                 <header class="sb-chat-fullpage__thread-head" data-chat-thread-head hidden>
-                    <button type="button" class="sb-chat-fullpage__back" data-chat-back aria-label="Geri">
+                    <button type="button" class="sb-chat-fullpage__back" data-chat-back aria-label="@L["Geri"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
                     <span class="sb-chat-fullpage__peer-avatar" data-chat-peer-avatar></span>
@@ -44,22 +44,22 @@
 
                 <div class="sb-chat-fullpage__placeholder" data-chat-placeholder>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                    <strong>Bir söhbət seç</strong>
-                    <span>Sol tərəfdən bir söhbətə klikləyərək başla.</span>
+                    <strong>@L["Bir söhbət seç"]</strong>
+                    <span>@L["Sol tərəfdən bir söhbətə klikləyərək başla."]</span>
                 </div>
 
                 <div class="sb-chat-thread__messages" data-chat-messages hidden></div>
                 <div class="sb-chat-thread__typing" data-chat-typing hidden>
-                    <span></span><span></span><span></span> yazır...
+                    <span></span><span></span><span></span> @L["yazır..."]
                 </div>
 
                 <form class="sb-chat-composer sb-chat-composer--fullpage" data-chat-composer hidden>
-                    <label class="sb-chat-composer__attach" title="Şəkil əlavə et">
+                    <label class="sb-chat-composer__attach" title="@L["Şəkil əlavə et"]">
                         <input type="file" accept="image/*" hidden data-chat-attach />
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                     </label>
-                    <input type="text" placeholder="Mesaj yaz..." maxlength="2000" data-chat-input autocomplete="off" />
-                    <button type="submit" aria-label="Göndər">
+                    <input type="text" placeholder="@L["Mesaj yaz..."]" maxlength="2000" data-chat-input autocomplete="off" />
+                    <button type="submit" aria-label="@L["Göndər"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                 </form>

@@ -1,19 +1,19 @@
 @model AccountAddressesPageViewModel
 @{
-    ViewData["Title"] = "Ünvanlarım";
+    ViewData["Title"] = L["Ünvanlarım"].Value;
     var p = Model.Profile;
 }
 
 <nav class="sb-breadcrumb sb-acc-breadcrumb" aria-label="Breadcrumb">
-    <a asp-controller="Home" asp-action="Index">Home</a>
+    <a asp-controller="Home" asp-action="Index">@L["Ana səhifə"]</a>
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
-    <a asp-controller="Account" asp-action="Dashboard">Customer</a>
+    <a asp-controller="Account" asp-action="Dashboard">@L["İcmal"]</a>
     <span class="sb-breadcrumb__sep" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
     </span>
-    <span class="sb-breadcrumb__current">Ünvanlarım</span>
+    <span class="sb-breadcrumb__current">@L["Ünvanlarım"]</span>
 </nav>
 
 <section class="sb-acc-layout">
@@ -23,11 +23,11 @@
         <header class="sb-acc-section-title sb-acc-section-title--split">
             <span class="sb-acc-section-title__left">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <h1>Ünvanlarım</h1>
+                <h1>@L["Ünvanlarım"]</h1>
             </span>
             <button type="button" class="sb-btn-primary sb-btn-primary--cyan" data-addr-modal-open>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Yeni ünvan</span>
+                <span>@L["Yeni ünvan"]</span>
             </button>
         </header>
 
@@ -44,11 +44,11 @@
 
             <div class="sb-addr-empty" data-addr-empty @(Model.Addresses.Any() ? "hidden" : "")>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <h3>Hələ ünvan əlavə etməmisiniz</h3>
-                <p>Çatdırılma və əlaqə üçün ən az bir ünvan əlavə edin. Defolt ünvan ən üstdə göstərilir.</p>
+                <h3>@L["Hələ ünvan əlavə etməmisiniz"]</h3>
+                <p>@L["Çatdırılma və əlaqə üçün ən az bir ünvan əlavə edin. Defolt ünvan ən üstdə göstərilir."]</p>
                 <button type="button" class="sb-btn-primary sb-btn-primary--cyan" data-addr-modal-open>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span>Yeni ünvan əlavə et</span>
+                    <span>@L["Yeni ünvan əlavə et"]</span>
                 </button>
             </div>
         </div>

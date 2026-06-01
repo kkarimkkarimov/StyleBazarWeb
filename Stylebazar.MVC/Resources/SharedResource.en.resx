@@ -408,4 +408,67 @@
   <data name="Dünən" xml:space="preserve"><value>Yesterday</value></data>
   <data name="Bu həftə" xml:space="preserve"><value>This week</value></data>
   <data name="Daha əvvəl" xml:space="preserve"><value>Earlier</value></data>
+  <!-- ===== Account: Dashboard / Profile / Addresses / Messages ===== -->
+  <data name="Xoş gəldin" xml:space="preserve"><value>Welcome</value></data>
+  <data name="Salam," xml:space="preserve"><value>Hi,</value></data>
+  <data name="Müştəri kodu" xml:space="preserve"><value>Customer code</value></data>
+  <data name="Ünvan" xml:space="preserve"><value>Address</value></data>
+  <data name="Son aktivlik" xml:space="preserve"><value>Recent activity</value></data>
+  <data name="5K+ məhsul, 100+ mağaza" xml:space="preserve"><value>5K+ products, 100+ stores</value></data>
+  <data name="Şəxsi məlumat, parol" xml:space="preserve"><value>Personal info, password</value></data>
+  <data name="Mağaza idarəsi və stats" xml:space="preserve"><value>Store management and stats</value></data>
+  <data name="Son hesab aktivliyi" xml:space="preserve"><value>Recent account activity</value></data>
+  <data name="Ünvanlarım" xml:space="preserve"><value>My addresses</value></data>
+  <data name="Yeni ünvan" xml:space="preserve"><value>New address</value></data>
+  <data name="Hələ ünvan əlavə etməmisiniz" xml:space="preserve"><value>You haven't added an address yet</value></data>
+  <data name="Çatdırılma və əlaqə üçün ən az bir ünvan əlavə edin. Defolt ünvan ən üstdə göstərilir." xml:space="preserve"><value>Add at least one address for delivery and contact. The default address is shown at the top.</value></data>
+  <data name="Yeni ünvan əlavə et" xml:space="preserve"><value>Add a new address</value></data>
+  <data name="Defolt" xml:space="preserve"><value>Default</value></data>
+  <data name="Defolt et" xml:space="preserve"><value>Set as default</value></data>
+  <data name="Redaktə et" xml:space="preserve"><value>Edit</value></data>
+  <data name="Ünvan adı *" xml:space="preserve"><value>Address name *</value></data>
+  <data name="Ev, Ofis, Anamın evi..." xml:space="preserve"><value>Home, Office, Mom's place...</value></data>
+  <data name="Qəbul edən *" xml:space="preserve"><value>Recipient *</value></data>
+  <data name="Ad Soyad" xml:space="preserve"><value>Full Name</value></data>
+  <data name="Telefon *" xml:space="preserve"><value>Phone *</value></data>
+  <data name="Şəhər *" xml:space="preserve"><value>City *</value></data>
+  <data name="Bakı" xml:space="preserve"><value>Baku</value></data>
+  <data name="Rayon / region" xml:space="preserve"><value>District / region</value></data>
+  <data name="Nəsimi r." xml:space="preserve"><value>Nasimi dist.</value></data>
+  <data name="Poçt indeksi" xml:space="preserve"><value>Postal code</value></data>
+  <data name="Ünvan *" xml:space="preserve"><value>Address *</value></data>
+  <data name="Küçə, bina, mənzil..." xml:space="preserve"><value>Street, building, apartment...</value></data>
+  <data name="Qeyd / orientir" xml:space="preserve"><value>Note / landmark</value></data>
+  <data name="Kuryer üçün əlavə təlimat..." xml:space="preserve"><value>Extra instructions for the courier...</value></data>
+  <data name="Defolt ünvan kimi təyin et" xml:space="preserve"><value>Set as default address</value></data>
+  <data name="Yadda saxla" xml:space="preserve"><value>Save</value></data>
+  <data name="Profil parametrləri" xml:space="preserve"><value>Profile parameters</value></data>
+  <data name="Şəkil seçilməyib" xml:space="preserve"><value>No image selected</value></data>
+  <data name="Yüklə" xml:space="preserve"><value>Upload</value></data>
+  <data name="Mobil" xml:space="preserve"><value>Mobile</value></data>
+  <data name="Yoxdur" xml:space="preserve"><value>None</value></data>
+  <data name="Dəyişiklikləri saxla" xml:space="preserve"><value>Save Changes</value></data>
+  <data name="Təhlükəsizlik" xml:space="preserve"><value>Security</value></data>
+  <data name="Aktiv sessiyalar" xml:space="preserve"><value>Active Sessions</value></data>
+  <data name="(Maksimum 3 eyni vaxtda sessiya)" xml:space="preserve"><value>(Maximum 3 concurrent sessions)</value></data>
+  <data name="Cari" xml:space="preserve"><value>Current</value></data>
+  <data name="Aktiv sessiya yoxdur." xml:space="preserve"><value>No active sessions.</value></data>
+  <data name="Giriş tarixçəsi" xml:space="preserve"><value>Login History</value></data>
+  <data name="(Son 30 gün)" xml:space="preserve"><value>(Last 30 days)</value></data>
+  <data name="Tarixçə boşdur." xml:space="preserve"><value>History is empty.</value></data>
+  <data name="Mövcud parol" xml:space="preserve"><value>Current password</value></data>
+  <data name="Yeni parolu təkrarla" xml:space="preserve"><value>Repeat new password</value></data>
+  <data name="Yenilə" xml:space="preserve"><value>Update</value></data>
+  <data name="indi" xml:space="preserve"><value>now</value></data>
+  <data name="dəqiqə əvvəl" xml:space="preserve"><value>minutes ago</value></data>
+  <data name="Real-vaxt yazışma — alıcılar, satıcılar və admin ilə." xml:space="preserve"><value>Real-time messaging — with buyers, sellers and admin.</value></data>
+  <data name="Söhbətlər" xml:space="preserve"><value>Conversations</value></data>
+  <data name="Hələ söhbət yoxdur" xml:space="preserve"><value>No conversations yet</value></data>
+  <data name="Mağaza səhifəsindən satıcı ilə əlaqə qur." xml:space="preserve"><value>Start by contacting a seller from a store page.</value></data>
+  <data name="Geri" xml:space="preserve"><value>Back</value></data>
+  <data name="Bir söhbət seç" xml:space="preserve"><value>Select a conversation</value></data>
+  <data name="Sol tərəfdən bir söhbətə klikləyərək başla." xml:space="preserve"><value>Start by clicking a conversation on the left.</value></data>
+  <data name="yazır..." xml:space="preserve"><value>typing...</value></data>
+  <data name="Şəkil əlavə et" xml:space="preserve"><value>Add image</value></data>
+  <data name="Mesaj yaz..." xml:space="preserve"><value>Write a message...</value></data>
 </root>

@@ -1,16 +1,16 @@
 @model AccountDashboardPageViewModel
 @{
-    ViewData["Title"] = "İcmal";
-    string firstName = (Model.Profile?.FullName?.Split(' ').FirstOrDefault()) ?? "alıcı";
+    ViewData["Title"] = L["İcmal"].Value;
+    string firstName = (Model.Profile?.FullName?.Split(' ').FirstOrDefault()) ?? L["Alıcı"].Value;
     bool isSeller = Model.Profile != null && (Model.Profile.Roles.Contains("Seller") || Model.Profile.Roles.Contains("Admin"));
 
     string Relative(DateTime dtUtc)
     {
         var span = DateTime.UtcNow - dtUtc;
-        if (span.TotalMinutes < 1) return "indicə";
-        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} dəq əvvəl";
-        if (span.TotalHours < 24) return $"{(int)span.TotalHours} saat əvvəl";
-        if (span.TotalDays < 7) return $"{(int)span.TotalDays} gün əvvəl";
+        if (span.TotalMinutes < 1) return L["indicə"].Value;
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} {L["dəq əvvəl"].Value}";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} {L["saat əvvəl"].Value}";
+        if (span.TotalDays < 7) return $"{(int)span.TotalDays} {L["gün əvvəl"].Value}";
         return dtUtc.ToLocalTime().ToString("dd.MM.yyyy");
     }
 }
@@ -22,13 +22,13 @@
         @* ===== Welcome ===== *@
         <header class="sb-acc-hello">
             <div>
-                <span class="sb-acc-section-title__sub">Xoş gəldin</span>
-                <h1>Salam, @firstName!</h1>
+                <span class="sb-acc-section-title__sub">@L["Xoş gəldin"]</span>
+                <h1>@L["Salam,"] @firstName!</h1>
             </div>
             @if (!string.IsNullOrEmpty(Model.Profile?.CustomerCode))
             {
                 <div class="sb-acc-hello__code">
-                    <span>Müştəri kodu</span>
+                    <span>@L["Müştəri kodu"]</span>
                     <strong>@Model.Profile.CustomerCode</strong>
                 </div>
             }
@@ -42,7 +42,7 @@
                 </span>
                 <div>
                     <strong class="sb-acc-kpi__value">@Model.WishlistCount</strong>
-                    <span class="sb-acc-kpi__label">Wishlist</span>
+                    <span class="sb-acc-kpi__label">@L["Wishlist"]</span>
                 </div>
             </a>
             <a asp-action="Addresses" class="sb-acc-kpi__card sb-acc-kpi__card--link">
@@ -51,7 +51,7 @@
                 </span>
                 <div>
                     <strong class="sb-acc-kpi__value">@Model.AddressCount</strong>
-                    <span class="sb-acc-kpi__label">Ünvan</span>
+                    <span class="sb-acc-kpi__label">@L["Ünvan"]</span>
                 </div>
             </a>
             <a asp-action="Notifications" class="sb-acc-kpi__card sb-acc-kpi__card--link">
@@ -60,7 +60,7 @@
                 </span>
                 <div>
                     <strong class="sb-acc-kpi__value">@Model.RecentEvents.Count</strong>
-                    <span class="sb-acc-kpi__label">Son aktivlik</span>
+                    <span class="sb-acc-kpi__label">@L["Son aktivlik"]</span>
                 </div>
             </a>
         </div>
@@ -72,8 +72,8 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </span>
                 <div>
-                    <strong>Mağazaya bax</strong>
-                    <span>5K+ məhsul, 100+ mağaza</span>
+                    <strong>@L["Mağazaya bax"]</strong>
+                    <span>@L["5K+ məhsul, 100+ mağaza"]</span>
                 </div>
             </a>
             <a asp-action="Profile" class="sb-dash-action">
@@ -81,8 +81,8 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </span>
                 <div>
-                    <strong>Profil</strong>
-                    <span>Şəxsi məlumat, parol</span>
+                    <strong>@L["Profil"]</strong>
+                    <span>@L["Şəxsi məlumat, parol"]</span>
                 </div>
             </a>
             <a asp-controller="Store" asp-action="Index" class="sb-dash-action">
@@ -90,8 +90,8 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M3 9h18l-1.5 11.5a2 2 0 0 1-2 1.5H6.5a2 2 0 0 1-2-1.5L3 9z"/><path d="M16 9V5a4 4 0 0 0-8 0v4"/></svg>
                 </span>
                 <div>
-                    <strong>Mağazalar</strong>
-                    <span>Yerli satıcıları kəşf et</span>
+                    <strong>@L["Mağazalar"]</strong>
+                    <span>@L["Yerli satıcıları kəşf et"]</span>
                 </div>
             </a>
             @if (isSeller)
@@ -101,8 +101,8 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
                     </span>
                     <div>
-                        <strong>Satıcı paneli</strong>
-                        <span>Mağaza idarəsi və stats</span>
+                        <strong>@L["Satıcı paneli"]</strong>
+                        <span>@L["Mağaza idarəsi və stats"]</span>
                     </div>
                 </a>
             }
@@ -113,8 +113,8 @@
         {
             <div class="sb-acc-card sb-acc-recent">
                 <header class="sb-acc-section-title">
-                    <h2>Son hesab aktivliyi</h2>
-                    <a asp-action="Notifications" class="sb-dash-reviews__more">Hamısına bax →</a>
+                    <h2>@L["Son hesab aktivliyi"]</h2>
+                    <a asp-action="Notifications" class="sb-dash-reviews__more">@L["Hamısına bax"] →</a>
                 </header>
                 <ul class="sb-dash-rev-list">
                     @foreach (var e in Model.RecentEvents)
