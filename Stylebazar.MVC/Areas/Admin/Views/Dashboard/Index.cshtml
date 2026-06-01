@@ -1,7 +1,7 @@
 @model AdminDashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
-    ViewData["PageTitle"] = "Dashboard — ümumi baxış";
+    ViewData["PageTitle"] = L["Dashboard — ümumi baxış"].Value;
 }
 
 <div class="sb-admin-kpi-grid">
@@ -10,7 +10,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
         </div>
         <div class="sb-admin-kpi__body">
-            <span class="sb-admin-kpi__label">İstifadəçilər</span>
+            <span class="sb-admin-kpi__label">@L["İstifadəçilər"]</span>
             <strong class="sb-admin-kpi__value">@Model.TotalUsers</strong>
         </div>
     </a>
@@ -20,7 +20,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M3 9l1-5h16l1 5"/><path d="M5 9v11h14V9"/></svg>
         </div>
         <div class="sb-admin-kpi__body">
-            <span class="sb-admin-kpi__label">Satıcılar</span>
+            <span class="sb-admin-kpi__label">@L["Satıcılar"]</span>
             <strong class="sb-admin-kpi__value">@Model.TotalSellers</strong>
         </div>
     </a>
@@ -30,7 +30,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         </div>
         <div class="sb-admin-kpi__body">
-            <span class="sb-admin-kpi__label">Mağazalar</span>
+            <span class="sb-admin-kpi__label">@L["Mağazalar"]</span>
             <strong class="sb-admin-kpi__value">@Model.TotalStores</strong>
         </div>
     </a>
@@ -40,7 +40,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
         </div>
         <div class="sb-admin-kpi__body">
-            <span class="sb-admin-kpi__label">Məhsullar</span>
+            <span class="sb-admin-kpi__label">@L["Məhsullar"]</span>
             <strong class="sb-admin-kpi__value">@Model.TotalProducts</strong>
         </div>
     </a>
@@ -50,7 +50,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
         <div class="sb-admin-kpi__body">
-            <span class="sb-admin-kpi__label">Aktiv hekayələr</span>
+            <span class="sb-admin-kpi__label">@L["Aktiv hekayələr"]</span>
             <strong class="sb-admin-kpi__value">@Model.ActiveStories</strong>
         </div>
     </a>
@@ -60,7 +60,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
         <div class="sb-admin-kpi__body">
-            <span class="sb-admin-kpi__label">Oxunmamış mesaj</span>
+            <span class="sb-admin-kpi__label">@L["Oxunmamış mesaj"]</span>
             <strong class="sb-admin-kpi__value">@Model.UnreadContactMessages</strong>
         </div>
     </a>
@@ -69,12 +69,12 @@
 <div class="sb-admin-grid-2col">
     <div class="sb-admin-card">
         <header class="sb-admin-card__head">
-            <h2>Son qeydiyyatlar</h2>
-            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="sb-admin-card__link">Hamısı →</a>
+            <h2>@L["Son qeydiyyatlar"]</h2>
+            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="sb-admin-card__link">@L["Hamısı"] →</a>
         </header>
         @if (!Model.RecentUsers.Any())
         {
-            <p class="sb-admin-empty-line">Hələ qeydiyyat yoxdur.</p>
+            <p class="sb-admin-empty-line">@L["Hələ qeydiyyat yoxdur."]</p>
         }
         else
         {
@@ -107,12 +107,12 @@
 
     <div class="sb-admin-card">
         <header class="sb-admin-card__head">
-            <h2>Son mesajlar</h2>
-            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" class="sb-admin-card__link">Hamısı →</a>
+            <h2>@L["Son mesajlar"]</h2>
+            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Index" class="sb-admin-card__link">@L["Hamısı"] →</a>
         </header>
         @if (!Model.RecentMessages.Any())
         {
-            <p class="sb-admin-empty-line">Hələ mesaj yoxdur.</p>
+            <p class="sb-admin-empty-line">@L["Hələ mesaj yoxdur."]</p>
         }
         else
         {
@@ -123,7 +123,7 @@
                         <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Detail" asp-route-id="@m.Id">
                             <div class="sb-admin-feed__body">
                                 <strong>@m.FullName <span class="sb-admin-feed__status sb-admin-feed__status--@m.Status.ToString().ToLower()">@m.Status</span></strong>
-                                <span>@(string.IsNullOrEmpty(m.Subject) ? "(başlıqsız)" : m.Subject)</span>
+                                <span>@(string.IsNullOrEmpty(m.Subject) ? L["(başlıqsız)"].Value : m.Subject)</span>
                             </div>
                             <span class="sb-admin-feed__date">@m.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span>
                         </a>
@@ -136,12 +136,12 @@
 
 <div class="sb-admin-card">
     <header class="sb-admin-card__head">
-        <h2>Son auth hadisələri</h2>
-        <span class="sb-admin-meta">Sondan son 10</span>
+        <h2>@L["Son auth hadisələri"]</h2>
+        <span class="sb-admin-meta">@L["Sondan son 10"]</span>
     </header>
     @if (!Model.RecentLoginEvents.Any())
     {
-        <p class="sb-admin-empty-line">Hələ qeydiyyat/giriş hadisəsi yoxdur.</p>
+        <p class="sb-admin-empty-line">@L["Hələ qeydiyyat/giriş hadisəsi yoxdur."]</p>
     }
     else
     {
@@ -149,10 +149,10 @@
             <table class="sb-admin-table sb-admin-table--compact">
                 <thead>
                     <tr>
-                        <th>Vaxt</th>
-                        <th>Hadisə</th>
-                        <th>İstifadəçi</th>
-                        <th>Cihaz</th>
+                        <th>@L["Vaxt"]</th>
+                        <th>@L["Hadisə"]</th>
+                        <th>@L["İstifadəçi"]</th>
+                        <th>@L["Cihaz"]</th>
                         <th>IP</th>
                     </tr>
                 </thead>

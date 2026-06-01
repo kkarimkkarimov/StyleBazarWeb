@@ -8,8 +8,8 @@
     int from = Math.Max(1, currentPage - 2);
     int to = Math.Min(totalPages, currentPage + 2);
 }
-<nav class="sb-admin-pagination" aria-label="Səhifələr">
-    <span class="sb-admin-pagination__info">@totalCount nəticə · səh. @currentPage / @totalPages</span>
+<nav class="sb-admin-pagination" aria-label="@L["Səhifələr"]">
+    <span class="sb-admin-pagination__info">@totalCount @L["nəticə"] · @L["səh."] @currentPage / @totalPages</span>
     <div class="sb-admin-pagination__pages">
         @if (currentPage > 1)
         {

@@ -1,35 +1,35 @@
 @model AdminReviewsPageViewModel
 @{
-    ViewData["Title"] = "Rəylər";
-    ViewData["PageTitle"] = "Rəylər";
+    ViewData["Title"] = L["Rəylər"].Value;
+    ViewData["PageTitle"] = L["Rəylər"].Value;
 }
 
 <form method="get" class="sb-admin-filter-bar">
-    <input type="text" name="search" value="@Model.Search" placeholder="Şərhdə axtar..." class="sb-admin-search" />
+    <input type="text" name="search" value="@Model.Search" placeholder="@L["Şərhdə axtar..."]" class="sb-admin-search" />
     <select name="maxRating" class="sb-admin-select">
-        <option value="">Bütün ulduzlar</option>
+        <option value="">@L["Bütün ulduzlar"]</option>
         @for (int i = 1; i <= 5; i++)
         {
             int v = i;
-            <option value="@v" selected="@(Model.RatingFilter == v)">≤ @v ulduz</option>
+            <option value="@v" selected="@(Model.RatingFilter == v)">≤ @v @L["ulduz"]</option>
         }
     </select>
-    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Filter</button>
+    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">@L["Filtr"]</button>
 </form>
 
 @* Bulk form: empty sibling, table checkboxes attach via form="adm-review-bulk". *@
 <form id="adm-review-bulk" asp-area="Admin" asp-controller="Review" asp-action="BulkDelete" method="post" data-admin-bulk-form>
     @Html.AntiForgeryToken()
     <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
-        <span><strong data-admin-bulk-count>0</strong> seçildi</span>
-        <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Seçilmiş rəyləri silməyə əminsən?">Sil</button>
+        <span><strong data-admin-bulk-count>0</strong> @L["seçildi"]</span>
+        <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="@L["Seçilmiş rəyləri silməyə əminsən?"]">@L["Sil"]</button>
     </div>
 </form>
 
 <div class="sb-admin-card sb-admin-table-card">
     @if (!Model.Reviews.Any())
     {
-        <div class="sb-admin-empty"><strong>Rəy yoxdur</strong></div>
+        <div class="sb-admin-empty"><strong>@L["Rəy yoxdur"]</strong></div>
     }
     else
     {
@@ -37,11 +37,11 @@
             <thead>
                 <tr>
                     <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle form="adm-review-bulk" /></th>
-                    <th>Ulduz</th>
-                    <th>Şərh</th>
-                    <th>Məhsul</th>
-                    <th>İstifadəçi</th>
-                    <th>Tarix</th>
+                    <th>@L["Reytinq"]</th>
+                    <th>@L["Şərh"]</th>
+                    <th>@L["Stat.Products"]</th>
+                    <th>@L["İstifadəçi"]</th>
+                    <th>@L["Tarix"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -70,7 +70,7 @@
                             <form asp-area="Admin" asp-controller="Review" asp-action="Delete" method="post" class="sb-admin-inline-form">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@rev.Id" />
-                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="@L["Silməyə əminsən?"]" title="@L["Sil"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                                 </button>
                             </form>

@@ -1,33 +1,33 @@
 @model AdminUsersPageViewModel
 @{
-    ViewData["Title"] = "İstifadəçilər";
-    ViewData["PageTitle"] = "İstifadəçilər";
+    ViewData["Title"] = L["İstifadəçilər"].Value;
+    ViewData["PageTitle"] = L["İstifadəçilər"].Value;
     var f = Model.Filter;
 }
 
 <form method="get" class="sb-admin-filter-bar">
-    <input type="text" name="Search" value="@f.Search" placeholder="Ad və ya email axtar..." class="sb-admin-search" />
+    <input type="text" name="Search" value="@f.Search" placeholder="@L["Ad və ya email axtar..."]" class="sb-admin-search" />
     <select name="Role" class="sb-admin-select">
-        <option value="" selected="@(string.IsNullOrEmpty(f.Role))">Bütün rollar</option>
-        <option value="Buyer" selected="@(f.Role == "Buyer")">Alıcı</option>
-        <option value="Seller" selected="@(f.Role == "Seller")">Satıcı</option>
+        <option value="" selected="@(string.IsNullOrEmpty(f.Role))">@L["Bütün rollar"]</option>
+        <option value="Buyer" selected="@(f.Role == "Buyer")">@L["Alıcı"]</option>
+        <option value="Seller" selected="@(f.Role == "Seller")">@L["Satıcı"]</option>
         <option value="Admin" selected="@(f.Role == "Admin")">Admin</option>
     </select>
     <select name="Status" class="sb-admin-select">
-        <option value="" selected="@(string.IsNullOrEmpty(f.Status))">Bütün statuslar</option>
-        <option value="active" selected="@(f.Status == "active")">Aktiv</option>
-        <option value="suspended" selected="@(f.Status == "suspended")">Bloklu</option>
+        <option value="" selected="@(string.IsNullOrEmpty(f.Status))">@L["Bütün statuslar"]</option>
+        <option value="active" selected="@(f.Status == "active")">@L["Aktiv"]</option>
+        <option value="suspended" selected="@(f.Status == "suspended")">@L["Bloklu"]</option>
     </select>
-    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Filter</button>
+    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">@L["Filtr"]</button>
 </form>
 
 <form asp-area="Admin" asp-controller="User" asp-action="BulkAction" method="post" data-admin-bulk-form>
     @Html.AntiForgeryToken()
 
     <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
-        <span><strong data-admin-bulk-count>0</strong> seçildi</span>
-        <button type="submit" name="action" value="suspend" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Seçilmiş istifadəçilərin statusunu dəyişməyə əminsən?">Blok et / aç</button>
-        <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Seçilmiş istifadəçiləri silməyə əminsən? Geri qaytarıla bilməz.">Sil</button>
+        <span><strong data-admin-bulk-count>0</strong> @L["seçildi"]</span>
+        <button type="submit" name="action" value="suspend" class="sb-admin-btn sb-admin-btn--warn" data-confirm="@L["Seçilmiş istifadəçilərin statusunu dəyişməyə əminsən?"]">@L["Blok et / aç"]</button>
+        <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="@L["Seçilmiş istifadəçiləri silməyə əminsən? Geri qaytarıla bilməz."]">@L["Sil"]</button>
     </div>
 
     <div class="sb-admin-card sb-admin-table-card">
@@ -35,8 +35,8 @@
         {
             <div class="sb-admin-empty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                <strong>İstifadəçi tapılmadı</strong>
-                <span>Filtri dəyişdirməyə cəhd et.</span>
+                <strong>@L["İstifadəçi tapılmadı"]</strong>
+                <span>@L["Filtri dəyişdirməyə cəhd et."]</span>
             </div>
         }
         else
@@ -45,12 +45,12 @@
                 <thead>
                     <tr>
                         <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle /></th>
-                        <th>İstifadəçi</th>
+                        <th>@L["İstifadəçi"]</th>
                         <th>Email</th>
-                        <th>Rol</th>
-                        <th>Mağazalar</th>
+                        <th>@L["Rol"]</th>
+                        <th>@L["Mağazalar"]</th>
                         <th>Status</th>
-                        <th>Qoşulub</th>
+                        <th>@L["Qoşulub"]</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -72,12 +72,12 @@
                             <td><span class="sb-admin-chip sb-admin-chip--@u.Role.ToLower()">@u.Role</span></td>
                             <td>@u.StoreCount</td>
                             <td>
-                                @if (u.IsSuspended) { <span class="sb-admin-chip sb-admin-chip--danger">Bloklu</span> }
-                                else { <span class="sb-admin-chip sb-admin-chip--ok">Aktiv</span> }
+                                @if (u.IsSuspended) { <span class="sb-admin-chip sb-admin-chip--danger">@L["Bloklu"]</span> }
+                                else { <span class="sb-admin-chip sb-admin-chip--ok">@L["Aktiv"]</span> }
                             </td>
                             <td><span class="sb-admin-date">@u.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</span></td>
                             <td class="sb-admin-table__actions">
-                                <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@u.Id" class="sb-admin-icon-btn" title="Bax">
+                                <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@u.Id" class="sb-admin-icon-btn" title="@L["Bax"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>
                             </td>

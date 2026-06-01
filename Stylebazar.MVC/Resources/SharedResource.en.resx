@@ -665,4 +665,88 @@
   <data name="CSV/XML export və üçüncü tərəf inteqrasiya tezliklə." xml:space="preserve"><value>CSV/XML export and third-party integration coming soon.</value></data>
   <data name="Ağıllı yükləmə" xml:space="preserve"><value>Smart Upload</value></data>
   <data name="Toplu məhsul yüklənmə (CSV/Excel) tezliklə." xml:space="preserve"><value>Bulk product upload (CSV/Excel) coming soon.</value></data>
+  <!-- ===== Admin: chrome ===== -->
+  <data name="Admin naviqasiya" xml:space="preserve"><value>Admin navigation</value></data>
+  <data name="Ümumi" xml:space="preserve"><value>General</value></data>
+  <data name="İdarəetmə" xml:space="preserve"><value>Management</value></data>
+  <data name="İstifadəçilər" xml:space="preserve"><value>Users</value></data>
+  <data name="Kateqoriyalar" xml:space="preserve"><value>Categories</value></data>
+  <data name="Kontent" xml:space="preserve"><value>Content</value></data>
+  <data name="Hero Banner-lər" xml:space="preserve"><value>Hero Banners</value></data>
+  <data name="Əlaqə" xml:space="preserve"><value>Contact</value></data>
+  <data name="Mesajlar" xml:space="preserve"><value>Messages</value></data>
+  <data name="Hesab" xml:space="preserve"><value>Account</value></data>
+  <data name="Menyu" xml:space="preserve"><value>Menu</value></data>
+  <data name="Sayta qayıt" xml:space="preserve"><value>Back to site</value></data>
+  <data name="Sayt" xml:space="preserve"><value>Site</value></data>
+  <data name="Səhifələr" xml:space="preserve"><value>Pages</value></data>
+  <data name="səh." xml:space="preserve"><value>page</value></data>
+  <!-- ===== Admin: content views ===== -->
+  <data name="Dashboard — ümumi baxış" xml:space="preserve"><value>Dashboard — overview</value></data>
+  <data name="Oxunmamış mesaj" xml:space="preserve"><value>Unread messages</value></data>
+  <data name="Son qeydiyyatlar" xml:space="preserve"><value>Recent registrations</value></data>
+  <data name="Hələ qeydiyyat yoxdur." xml:space="preserve"><value>No registrations yet.</value></data>
+  <data name="Son mesajlar" xml:space="preserve"><value>Recent messages</value></data>
+  <data name="Hələ mesaj yoxdur." xml:space="preserve"><value>No messages yet.</value></data>
+  <data name="Son auth hadisələri" xml:space="preserve"><value>Recent auth events</value></data>
+  <data name="Sondan son 10" xml:space="preserve"><value>Latest 10</value></data>
+  <data name="Hələ qeydiyyat/giriş hadisəsi yoxdur." xml:space="preserve"><value>No registration/login events yet.</value></data>
+  <data name="Vaxt" xml:space="preserve"><value>Time</value></data>
+  <data name="Cihaz" xml:space="preserve"><value>Device</value></data>
+  <data name="Kateqoriya yoxdur" xml:space="preserve"><value>No categories</value></data>
+  <data name="Sağdakı formadan birinci kateqoriyanı yarat." xml:space="preserve"><value>Create your first category from the form on the right.</value></data>
+  <data name="Ad" xml:space="preserve"><value>Name</value></data>
+  <data name="Yaradılıb" xml:space="preserve"><value>Created</value></data>
+  <data name="Silməyə əminsən?" xml:space="preserve"><value>Are you sure you want to delete?</value></data>
+  <data name="Yeni kateqoriya" xml:space="preserve"><value>New category</value></data>
+  <data name="(boş = avtomatik)" xml:space="preserve"><value>(blank = auto)</value></data>
+  <data name="Ana kateqoriya" xml:space="preserve"><value>Parent category</value></data>
+  <data name="(yoxdur — root)" xml:space="preserve"><value>(none — root)</value></data>
+  <data name="Yarat" xml:space="preserve"><value>Create</value></data>
+  <data name="Newsletter abunəçiləri" xml:space="preserve"><value>Newsletter subscribers</value></data>
+  <data name="İmtina edənlər" xml:space="preserve"><value>Unsubscribed</value></data>
+  <data name="CSV yüklə" xml:space="preserve"><value>Download CSV</value></data>
+  <data name="yalnız aktiv" xml:space="preserve"><value>active only</value></data>
+  <data name="yalnız imtina" xml:space="preserve"><value>unsubscribed only</value></data>
+  <data name="Abunəçi yoxdur" xml:space="preserve"><value>No subscribers</value></data>
+  <data name="Qoşulub" xml:space="preserve"><value>Joined</value></data>
+  <data name="İmtina" xml:space="preserve"><value>Unsubscribed</value></data>
+  <data name="seçildi" xml:space="preserve"><value>selected</value></data>
+  <data name="Seçilmiş hekayələri silməyə əminsən?" xml:space="preserve"><value>Delete the selected stories?</value></data>
+  <data name="Hekayə yoxdur" xml:space="preserve"><value>No stories</value></data>
+  <data name="Önizləmə" xml:space="preserve"><value>Preview</value></data>
+  <data name="Açıqlama" xml:space="preserve"><value>Caption</value></data>
+  <data name="Bitmə tarixi" xml:space="preserve"><value>Expiry date</value></data>
+  <data name="Bitib" xml:space="preserve"><value>Expired</value></data>
+  <data name="Şərhdə axtar..." xml:space="preserve"><value>Search in comments...</value></data>
+  <data name="Bütün ulduzlar" xml:space="preserve"><value>All stars</value></data>
+  <data name="Seçilmiş rəyləri silməyə əminsən?" xml:space="preserve"><value>Delete the selected reviews?</value></data>
+  <data name="Rəy yoxdur" xml:space="preserve"><value>No reviews</value></data>
+  <data name="Mağaza adı axtar..." xml:space="preserve"><value>Search store name...</value></data>
+  <data name="Bütün statuslar" xml:space="preserve"><value>All statuses</value></data>
+  <data name="Statusu dəyişməyə əminsən?" xml:space="preserve"><value>Are you sure you want to change the status?</value></data>
+  <data name="Status dəyiş" xml:space="preserve"><value>Change status</value></data>
+  <data name="Silməyə əminsən? Yalnız məhsulu olmayan mağazaları silmək olar." xml:space="preserve"><value>Are you sure? Only stores without products can be deleted.</value></data>
+  <data name="Mağaza tapılmadı" xml:space="preserve"><value>No stores found</value></data>
+  <data name="Saytda bax" xml:space="preserve"><value>View on site</value></data>
+  <data name="Aktivləşdir" xml:space="preserve"><value>Activate</value></data>
+  <data name="Məhsul adı axtar..." xml:space="preserve"><value>Search product name...</value></data>
+  <data name="Bütün kateqoriyalar" xml:space="preserve"><value>All categories</value></data>
+  <data name="Aktiv/Deaktiv" xml:space="preserve"><value>Active/Inactive</value></data>
+  <data name="14 gün boyu featured edilsin?" xml:space="preserve"><value>Feature for 14 days?</value></data>
+  <data name="Featured et" xml:space="preserve"><value>Make featured</value></data>
+  <data name="Məhsul tapılmadı" xml:space="preserve"><value>No products found</value></data>
+  <data name="Qiymət" xml:space="preserve"><value>Price</value></data>
+  <data name="Stok" xml:space="preserve"><value>Stock</value></data>
+  <data name="Featured-ni ləğv et" xml:space="preserve"><value>Clear featured</value></data>
+  <data name="14 gün featured et" xml:space="preserve"><value>Feature for 14 days</value></data>
+  <data name="Ad və ya email axtar..." xml:space="preserve"><value>Search name or email...</value></data>
+  <data name="Bütün rollar" xml:space="preserve"><value>All roles</value></data>
+  <data name="Bloklu" xml:space="preserve"><value>Suspended</value></data>
+  <data name="Seçilmiş istifadəçilərin statusunu dəyişməyə əminsən?" xml:space="preserve"><value>Change the status of the selected users?</value></data>
+  <data name="Blok et / aç" xml:space="preserve"><value>Suspend / unsuspend</value></data>
+  <data name="Seçilmiş istifadəçiləri silməyə əminsən? Geri qaytarıla bilməz." xml:space="preserve"><value>Delete the selected users? This can't be undone.</value></data>
+  <data name="İstifadəçi tapılmadı" xml:space="preserve"><value>No users found</value></data>
+  <data name="Filtri dəyişdirməyə cəhd et." xml:space="preserve"><value>Try changing the filter.</value></data>
+  <data name="Bax" xml:space="preserve"><value>View</value></data>
 </root>
