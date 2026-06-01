@@ -1,16 +1,16 @@
 @model AdminContactMessagesPageViewModel
 @{
-    ViewData["Title"] = "Mesajlar";
-    ViewData["PageTitle"] = "Əlaqə mesajları";
+    ViewData["Title"] = L["Mesajlar"].Value;
+    ViewData["PageTitle"] = L["Əlaqə mesajları"].Value;
 }
 
 <form method="get" class="sb-admin-filter-bar">
     <select name="status" class="sb-admin-select" onchange="this.form.submit()">
-        <option value="" selected="@(Model.StatusFilter == null)">Bütün statuslar</option>
-        <option value="New" selected="@(Model.StatusFilter == ContactStatus.New)">Yeni</option>
-        <option value="InProgress" selected="@(Model.StatusFilter == ContactStatus.InProgress)">Baxılır</option>
-        <option value="Resolved" selected="@(Model.StatusFilter == ContactStatus.Resolved)">Həll olunub</option>
-        <option value="Closed" selected="@(Model.StatusFilter == ContactStatus.Closed)">Bağlı</option>
+        <option value="" selected="@(Model.StatusFilter == null)">@L["Bütün statuslar"]</option>
+        <option value="New" selected="@(Model.StatusFilter == ContactStatus.New)">@L["Yeni"]</option>
+        <option value="InProgress" selected="@(Model.StatusFilter == ContactStatus.InProgress)">@L["Baxılır"]</option>
+        <option value="Resolved" selected="@(Model.StatusFilter == ContactStatus.Resolved)">@L["Həll olunub"]</option>
+        <option value="Closed" selected="@(Model.StatusFilter == ContactStatus.Closed)">@L["Bağlı"]</option>
     </select>
 </form>
 
@@ -18,17 +18,17 @@
 <form id="adm-msg-bulk" asp-area="Admin" asp-controller="ContactMessage" asp-action="BulkAction" method="post" data-admin-bulk-form>
     @Html.AntiForgeryToken()
     <div class="sb-admin-bulk-bar" data-admin-bulk-bar hidden>
-        <span><strong data-admin-bulk-count>0</strong> seçildi</span>
-        <button type="submit" name="action" value="read" class="sb-admin-btn sb-admin-btn--ghost">Baxılır kimi işarələ</button>
-        <button type="submit" name="action" value="close" class="sb-admin-btn sb-admin-btn--ok">Həll edildi</button>
-        <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Silməyə əminsən?">Sil</button>
+        <span><strong data-admin-bulk-count>0</strong> @L["seçildi"]</span>
+        <button type="submit" name="action" value="read" class="sb-admin-btn sb-admin-btn--ghost">@L["Baxılır kimi işarələ"]</button>
+        <button type="submit" name="action" value="close" class="sb-admin-btn sb-admin-btn--ok">@L["Həll edildi"]</button>
+        <button type="submit" name="action" value="delete" class="sb-admin-btn sb-admin-btn--danger" data-confirm="@L["Silməyə əminsən?"]">@L["Sil"]</button>
     </div>
 </form>
 
 <div class="sb-admin-card sb-admin-table-card">
     @if (!Model.Messages.Items.Any())
     {
-        <div class="sb-admin-empty"><strong>Mesaj yoxdur</strong></div>
+        <div class="sb-admin-empty"><strong>@L["Mesaj yoxdur"]</strong></div>
     }
     else
     {
@@ -36,11 +36,11 @@
             <thead>
                 <tr>
                     <th class="sb-admin-table__check"><input type="checkbox" data-admin-bulk-toggle form="adm-msg-bulk" /></th>
-                    <th>Göndərən</th>
-                    <th>Mövzu</th>
-                    <th>Mesaj</th>
+                    <th>@L["Göndərən"]</th>
+                    <th>@L["Mövzu"]</th>
+                    <th>@L["Mesaj"]</th>
                     <th>Status</th>
-                    <th>Tarix</th>
+                    <th>@L["Tarix"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -58,13 +58,13 @@
                         <td><span class="sb-admin-chip sb-admin-chip--@m.Status.ToString().ToLower()">@m.Status</span></td>
                         <td><span class="sb-admin-date">@m.CreatedDate.ToLocalTime().ToString("dd.MM HH:mm")</span></td>
                         <td class="sb-admin-table__actions">
-                            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Detail" asp-route-id="@m.Id" class="sb-admin-icon-btn" title="Aç">
+                            <a asp-area="Admin" asp-controller="ContactMessage" asp-action="Detail" asp-route-id="@m.Id" class="sb-admin-icon-btn" title="@L["Aç"]">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </a>
                             <form asp-area="Admin" asp-controller="ContactMessage" asp-action="Delete" method="post" class="sb-admin-inline-form">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@m.Id" />
-                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="@L["Silməyə əminsən?"]" title="@L["Sil"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                                 </button>
                             </form>

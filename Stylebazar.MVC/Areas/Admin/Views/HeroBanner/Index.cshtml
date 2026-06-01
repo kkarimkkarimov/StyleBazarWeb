@@ -1,15 +1,15 @@
 @model AdminHeroBannersPageViewModel
 @{
-    ViewData["Title"] = "Hero Banner-lər";
-    ViewData["PageTitle"] = "Hero Banner-lər";
+    ViewData["Title"] = L["Hero Banner-lər"].Value;
+    ViewData["PageTitle"] = L["Hero Banner-lər"].Value;
 }
 
 <div class="sb-admin-grid-2col sb-admin-grid-2col--3-1">
     <div class="sb-admin-card">
-        <header class="sb-admin-card__head"><h2>Mövcud banner-lər</h2></header>
+        <header class="sb-admin-card__head"><h2>@L["Mövcud banner-lər"]</h2></header>
         @if (!Model.Banners.Any())
         {
-            <div class="sb-admin-empty"><strong>Banner yoxdur</strong><span>Sağdakı formadan birinci banner-i yarat.</span></div>
+            <div class="sb-admin-empty"><strong>@L["Banner yoxdur"]</strong><span>@L["Sağdakı formadan birinci banner-i yarat."]</span></div>
         }
         else
         {
@@ -24,15 +24,15 @@
                             <strong>@b.Title</strong>
                             @if (!string.IsNullOrWhiteSpace(b.Subtitle)) { <p>@b.Subtitle</p> }
                             <div class="sb-admin-meta">
-                                <span>Sıra: @b.DisplayOrder</span>
-                                <span>@(b.IsActive ? Html.Raw("<span class='sb-admin-chip sb-admin-chip--ok'>Aktiv</span>") : Html.Raw("<span class='sb-admin-chip sb-admin-chip--muted'>Deaktiv</span>"))</span>
+                                <span>@L["Sıra:"] @b.DisplayOrder</span>
+                                <span>@(b.IsActive ? Html.Raw($"<span class='sb-admin-chip sb-admin-chip--ok'>{L["Aktiv"].Value}</span>") : Html.Raw($"<span class='sb-admin-chip sb-admin-chip--muted'>{L["Deaktiv"].Value}</span>"))</span>
                             </div>
                         </div>
                         <div class="sb-admin-banner-row__actions">
                             <form asp-area="Admin" asp-controller="HeroBanner" asp-action="ToggleActive" method="post" class="sb-admin-inline-form">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@b.Id" />
-                                <button type="submit" class="sb-admin-icon-btn @(b.IsActive ? "sb-admin-icon-btn--active" : "")" title="@(b.IsActive ? "Deaktiv et" : "Aktivləşdir")">
+                                <button type="submit" class="sb-admin-icon-btn @(b.IsActive ? "sb-admin-icon-btn--active" : "")" title="@(b.IsActive ? L["Deaktiv et"].Value : L["Aktivləşdir"].Value)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="22 4 12 14.01 9 11.01"/></svg>
                                 </button>
                             </form>
@@ -45,13 +45,13 @@
                                     data-ctaurl="@b.CtaUrl"
                                     data-order="@b.DisplayOrder"
                                     data-active="@(b.IsActive ? "true" : "false")"
-                                    title="Redaktə et">
+                                    title="@L["Redaktə et"]">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
                             <form asp-area="Admin" asp-controller="HeroBanner" asp-action="Delete" method="post" class="sb-admin-inline-form">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@b.Id" />
-                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="Silməyə əminsən?" title="Sil">
+                                <button type="submit" class="sb-admin-icon-btn sb-admin-icon-btn--danger" data-confirm="@L["Silməyə əminsən?"]" title="@L["Sil"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                                 </button>
                             </form>
@@ -63,13 +63,13 @@
     </div>
 
     <div class="sb-admin-card">
-        <header class="sb-admin-card__head"><h2 data-admin-banner-form-title>Yeni banner</h2></header>
+        <header class="sb-admin-card__head"><h2 data-admin-banner-form-title>@L["Yeni banner"]</h2></header>
         <form asp-area="Admin" asp-controller="HeroBanner" asp-action="Create" method="post" enctype="multipart/form-data" data-admin-banner-form>
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="" data-admin-banner-id />
 
             <div class="sb-admin-field">
-                <label>Başlıq *</label>
+                <label>@L["Başlıq *"]</label>
                 <input type="text" name="title" required maxlength="200" data-admin-banner-title />
             </div>
             <div class="sb-admin-field">
@@ -77,11 +77,11 @@
                 <input type="text" name="eyebrow" maxlength="100" data-admin-banner-eyebrow />
             </div>
             <div class="sb-admin-field">
-                <label>Alt başlıq</label>
+                <label>@L["Alt başlıq"]</label>
                 <textarea name="subtitle" rows="2" maxlength="500" data-admin-banner-subtitle></textarea>
             </div>
             <div class="sb-admin-field">
-                <label>CTA mətni</label>
+                <label>@L["CTA mətni"]</label>
                 <input type="text" name="ctaText" maxlength="60" data-admin-banner-ctatext />
             </div>
             <div class="sb-admin-field">
@@ -89,24 +89,24 @@
                 <input type="text" name="ctaUrl" maxlength="500" data-admin-banner-ctaurl />
             </div>
             <div class="sb-admin-field">
-                <label>Sıralama</label>
+                <label>@L["Sıralama"]</label>
                 <input type="number" name="displayOrder" min="0" value="0" data-admin-banner-order />
             </div>
             <div class="sb-admin-field" data-admin-banner-active-field hidden>
                 <label class="sb-admin-inline-check">
                     <input type="checkbox" name="isActive" value="true" data-admin-banner-active checked />
-                    <span>Aktiv</span>
+                    <span>@L["Aktiv"]</span>
                 </label>
             </div>
             <div class="sb-admin-field">
-                <label>Şəkil (banner)</label>
+                <label>@L["Şəkil (banner)"]</label>
                 <input type="file" name="file" accept="image/*" />
-                <small>Yeni şəkil yükləmədikdə mövcud qalır.</small>
+                <small>@L["Yeni şəkil yükləmədikdə mövcud qalır."]</small>
             </div>
 
             <div class="sb-admin-field-actions">
-                <button type="button" class="sb-admin-btn sb-admin-btn--ghost" data-admin-banner-cancel>Reset</button>
-                <button type="submit" class="sb-admin-btn sb-admin-btn--primary" data-admin-banner-submit>Yarat</button>
+                <button type="button" class="sb-admin-btn sb-admin-btn--ghost" data-admin-banner-cancel>@L["Sıfırla"]</button>
+                <button type="submit" class="sb-admin-btn sb-admin-btn--primary" data-admin-banner-submit>@L["Yarat"]</button>
             </div>
         </form>
     </div>

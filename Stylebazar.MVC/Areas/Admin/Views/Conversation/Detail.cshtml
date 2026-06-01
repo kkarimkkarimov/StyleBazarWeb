@@ -1,12 +1,12 @@
 @model AdminConversationDetailViewModel
 @using Stylebazar.DAL.Entities.Enums
 @{
-    ViewData["Title"] = "Söhbət #" + Model.Conversation.Id;
-    ViewData["PageTitle"] = "Söhbət #" + Model.Conversation.Id;
+    ViewData["Title"] = L["Söhbət"].Value + " #" + Model.Conversation.Id;
+    ViewData["PageTitle"] = L["Söhbət"].Value + " #" + Model.Conversation.Id;
 }
 
 <nav class="sb-admin-breadcrumb">
-    <a asp-area="Admin" asp-controller="Conversation" asp-action="Index">Söhbətlər</a>
+    <a asp-area="Admin" asp-controller="Conversation" asp-action="Index">@L["Söhbətlər"]</a>
     <span>/</span>
     <span>#@Model.Conversation.Id</span>
 </nav>
@@ -18,7 +18,7 @@
             <span style="opacity:.5">↔</span>
             @Model.Conversation.User2FullName <small>(@Model.Conversation.User2Role)</small>
         </h2>
-        <span class="sb-admin-meta">@Model.Conversation.MessageCount mesaj</span>
+        <span class="sb-admin-meta">@Model.Conversation.MessageCount @L["Mesaj"]</span>
     </header>
 
     <div class="sb-admin-convo-msgs">
@@ -42,14 +42,14 @@
                 @if (m.StoryPreview is not null)
                 {
                     <div class="sb-admin-convo-msg__ref">
-                        ↩ Hekayə: @(m.StoryPreview.Caption ?? "(başlıqsız)")
-                        @if (m.StoryPreview.IsExpired) { <em>(bitib)</em> }
+                        ↩ @L["Hekayə:"] @(m.StoryPreview.Caption ?? L["(başlıqsız)"].Value)
+                        @if (m.StoryPreview.IsExpired) { <em>@L["(bitib)"]</em> }
                     </div>
                 }
                 @if (m.ProductPreview is not null)
                 {
                     <div class="sb-admin-convo-msg__ref">
-                        🛍 Məhsul: @m.ProductPreview.Name (@m.ProductPreview.Price ₼)
+                        🛍 @L["Məhsul:"] @m.ProductPreview.Name (@m.ProductPreview.Price ₼)
                     </div>
                 }
                 @if (!string.IsNullOrEmpty(m.Body))
@@ -58,13 +58,13 @@
                 }
                 @if (m.AttachmentUrl is null && m.StoryPreview is null && m.ProductPreview is null && string.IsNullOrEmpty(m.Body))
                 {
-                    <p class="sb-admin-meta-small">(boş mesaj)</p>
+                    <p class="sb-admin-meta-small">@L["(boş mesaj)"]</p>
                 }
                 <form asp-area="Admin" asp-controller="Conversation" asp-action="DeleteMessage" method="post" class="sb-admin-convo-msg__delete">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@m.Id" />
                     <input type="hidden" name="conversationId" value="@Model.Conversation.Id" />
-                    <button type="submit" data-confirm="Bu mesajı moderasiya üçün gizlət?" aria-label="Sil">
+                    <button type="submit" data-confirm="@L["Bu mesajı moderasiya üçün gizlət?"]" aria-label="@L["Sil"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                     </button>
                 </form>

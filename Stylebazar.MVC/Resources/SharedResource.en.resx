@@ -749,4 +749,62 @@
   <data name="İstifadəçi tapılmadı" xml:space="preserve"><value>No users found</value></data>
   <data name="Filtri dəyişdirməyə cəhd et." xml:space="preserve"><value>Try changing the filter.</value></data>
   <data name="Bax" xml:space="preserve"><value>View</value></data>
+  <!-- ===== Admin: ContactMessage / HeroBanner / Conversation / User detail ===== -->
+  <data name="Əlaqə mesajları" xml:space="preserve"><value>Contact messages</value></data>
+  <data name="Baxılır" xml:space="preserve"><value>In progress</value></data>
+  <data name="Həll olunub" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Bağlı" xml:space="preserve"><value>Closed</value></data>
+  <data name="Baxılır kimi işarələ" xml:space="preserve"><value>Mark as in progress</value></data>
+  <data name="Həll edildi" xml:space="preserve"><value>Resolved</value></data>
+  <data name="Mesaj yoxdur" xml:space="preserve"><value>No messages</value></data>
+  <data name="Göndərən" xml:space="preserve"><value>Sender</value></data>
+  <data name="Mövzu" xml:space="preserve"><value>Subject</value></data>
+  <data name="Mesaj" xml:space="preserve"><value>Message</value></data>
+  <data name="Aç" xml:space="preserve"><value>Open</value></data>
+  <data name="Email ilə cavab yaz" xml:space="preserve"><value>Reply by email</value></data>
+  <data name="Status + admin qeydi" xml:space="preserve"><value>Status + admin note</value></data>
+  <data name="Admin qeydi (yalnız admin görür)" xml:space="preserve"><value>Admin note (visible to admin only)</value></data>
+  <data name="məs. cavab göndərildi, telefonla əlaqə saxlandı..." xml:space="preserve"><value>e.g. reply sent, contacted by phone...</value></data>
+  <data name="Bu mesajı silməyə əminsən?" xml:space="preserve"><value>Are you sure you want to delete this message?</value></data>
+  <data name="Mövcud banner-lər" xml:space="preserve"><value>Existing banners</value></data>
+  <data name="Banner yoxdur" xml:space="preserve"><value>No banners</value></data>
+  <data name="Sağdakı formadan birinci banner-i yarat." xml:space="preserve"><value>Create your first banner from the form on the right.</value></data>
+  <data name="Sıra:" xml:space="preserve"><value>Order:</value></data>
+  <data name="Yeni banner" xml:space="preserve"><value>New banner</value></data>
+  <data name="Başlıq *" xml:space="preserve"><value>Title *</value></data>
+  <data name="Alt başlıq" xml:space="preserve"><value>Subtitle</value></data>
+  <data name="CTA mətni" xml:space="preserve"><value>CTA text</value></data>
+  <data name="Sıralama" xml:space="preserve"><value>Order</value></data>
+  <data name="Şəkil (banner)" xml:space="preserve"><value>Image (banner)</value></data>
+  <data name="Yeni şəkil yükləmədikdə mövcud qalır." xml:space="preserve"><value>The existing image stays if you don't upload a new one.</value></data>
+  <data name="İstifadəçilər mesajlaşdıqca burada görünəcək." xml:space="preserve"><value>This appears as users message each other.</value></data>
+  <data name="İştirakçılar" xml:space="preserve"><value>Participants</value></data>
+  <data name="Mesaj sayı" xml:space="preserve"><value>Message count</value></data>
+  <data name="Son mesaj" xml:space="preserve"><value>Last message</value></data>
+  <data name="Söhbət" xml:space="preserve"><value>Conversation</value></data>
+  <data name="Hekayə:" xml:space="preserve"><value>Story:</value></data>
+  <data name="(bitib)" xml:space="preserve"><value>(expired)</value></data>
+  <data name="Məhsul:" xml:space="preserve"><value>Product:</value></data>
+  <data name="(boş mesaj)" xml:space="preserve"><value>(empty message)</value></data>
+  <data name="Bu mesajı moderasiya üçün gizlət?" xml:space="preserve"><value>Hide this message for moderation?</value></data>
+  <data name="Bu sənin hesabındır. Rol/blok/silmə əməliyyatları üçün başqa admin lazımdır." xml:space="preserve"><value>This is your own account. Another admin is required for role/suspend/delete actions.</value></data>
+  <data name="Rol dəyiş" xml:space="preserve"><value>Change role</value></data>
+  <data name="Blokunu açmağa əminsən?" xml:space="preserve"><value>Are you sure you want to unsuspend?</value></data>
+  <data name="Bloku aç" xml:space="preserve"><value>Unsuspend</value></data>
+  <data name="Bu istifadəçini blok etməyə əminsən?" xml:space="preserve"><value>Are you sure you want to suspend this user?</value></data>
+  <data name="Blok et" xml:space="preserve"><value>Suspend</value></data>
+  <data name="Bu istifadəçini həmişəlik silməyə əminsən?" xml:space="preserve"><value>Are you sure you want to permanently delete this user?</value></data>
+  <data name="Sahib olduğu mağazalar" xml:space="preserve"><value>Owned stores</value></data>
+  <data name="Mağaza yoxdur." xml:space="preserve"><value>No stores.</value></data>
+  <data name="Abunəlik" xml:space="preserve"><value>Subscription</value></data>
+  <data name="Başlanğıc" xml:space="preserve"><value>Start</value></data>
+  <data name="Bitmə" xml:space="preserve"><value>Expiry</value></data>
+  <data name="Plan" xml:space="preserve"><value>Plan</value></data>
+  <data name="Bitmə tarixi (boş = Free)" xml:space="preserve"><value>Expiry date (blank = Free)</value></data>
+  <data name="Qeyd (ödəniş mənbəyi, müddət)" xml:space="preserve"><value>Note (payment source, duration)</value></data>
+  <data name="məs. Kapital Bank, 19.05.2026, 3 ay Pro" xml:space="preserve"><value>e.g. Kapital Bank, 19.05.2026, 3 months Pro</value></data>
+  <data name="Bu istifadəçinin planını dəyişməyə əminsən?" xml:space="preserve"><value>Are you sure you want to change this user's plan?</value></data>
+  <data name="Plan dəyiş" xml:space="preserve"><value>Change plan</value></data>
+  <data name="Son dəyişikliklər" xml:space="preserve"><value>Recent changes</value></data>
+  <data name="qeyd" xml:space="preserve"><value>records</value></data>
 </root>

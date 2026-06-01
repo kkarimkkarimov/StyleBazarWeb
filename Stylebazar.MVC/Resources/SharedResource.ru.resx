@@ -749,4 +749,62 @@
   <data name="İstifadəçi tapılmadı" xml:space="preserve"><value>Пользователи не найдены</value></data>
   <data name="Filtri dəyişdirməyə cəhd et." xml:space="preserve"><value>Попробуйте изменить фильтр.</value></data>
   <data name="Bax" xml:space="preserve"><value>Смотреть</value></data>
+  <!-- ===== Admin: ContactMessage / HeroBanner / Conversation / User detail ===== -->
+  <data name="Əlaqə mesajları" xml:space="preserve"><value>Сообщения обратной связи</value></data>
+  <data name="Baxılır" xml:space="preserve"><value>В обработке</value></data>
+  <data name="Həll olunub" xml:space="preserve"><value>Решено</value></data>
+  <data name="Bağlı" xml:space="preserve"><value>Закрыто</value></data>
+  <data name="Baxılır kimi işarələ" xml:space="preserve"><value>Отметить как в обработке</value></data>
+  <data name="Həll edildi" xml:space="preserve"><value>Решено</value></data>
+  <data name="Mesaj yoxdur" xml:space="preserve"><value>Сообщений нет</value></data>
+  <data name="Göndərən" xml:space="preserve"><value>Отправитель</value></data>
+  <data name="Mövzu" xml:space="preserve"><value>Тема</value></data>
+  <data name="Mesaj" xml:space="preserve"><value>Сообщение</value></data>
+  <data name="Aç" xml:space="preserve"><value>Открыть</value></data>
+  <data name="Email ilə cavab yaz" xml:space="preserve"><value>Ответить по e-mail</value></data>
+  <data name="Status + admin qeydi" xml:space="preserve"><value>Статус + заметка админа</value></data>
+  <data name="Admin qeydi (yalnız admin görür)" xml:space="preserve"><value>Заметка админа (видна только админу)</value></data>
+  <data name="məs. cavab göndərildi, telefonla əlaqə saxlandı..." xml:space="preserve"><value>напр. ответ отправлен, связались по телефону...</value></data>
+  <data name="Bu mesajı silməyə əminsən?" xml:space="preserve"><value>Удалить это сообщение?</value></data>
+  <data name="Mövcud banner-lər" xml:space="preserve"><value>Существующие баннеры</value></data>
+  <data name="Banner yoxdur" xml:space="preserve"><value>Баннеров нет</value></data>
+  <data name="Sağdakı formadan birinci banner-i yarat." xml:space="preserve"><value>Создайте первый баннер в форме справа.</value></data>
+  <data name="Sıra:" xml:space="preserve"><value>Порядок:</value></data>
+  <data name="Yeni banner" xml:space="preserve"><value>Новый баннер</value></data>
+  <data name="Başlıq *" xml:space="preserve"><value>Заголовок *</value></data>
+  <data name="Alt başlıq" xml:space="preserve"><value>Подзаголовок</value></data>
+  <data name="CTA mətni" xml:space="preserve"><value>Текст CTA</value></data>
+  <data name="Sıralama" xml:space="preserve"><value>Порядок</value></data>
+  <data name="Şəkil (banner)" xml:space="preserve"><value>Изображение (баннер)</value></data>
+  <data name="Yeni şəkil yükləmədikdə mövcud qalır." xml:space="preserve"><value>Если не загрузить новое изображение, останется текущее.</value></data>
+  <data name="İstifadəçilər mesajlaşdıqca burada görünəcək." xml:space="preserve"><value>Появится, когда пользователи начнут переписку.</value></data>
+  <data name="İştirakçılar" xml:space="preserve"><value>Участники</value></data>
+  <data name="Mesaj sayı" xml:space="preserve"><value>Кол-во сообщений</value></data>
+  <data name="Son mesaj" xml:space="preserve"><value>Последнее сообщение</value></data>
+  <data name="Söhbət" xml:space="preserve"><value>Переписка</value></data>
+  <data name="Hekayə:" xml:space="preserve"><value>История:</value></data>
+  <data name="(bitib)" xml:space="preserve"><value>(истекло)</value></data>
+  <data name="Məhsul:" xml:space="preserve"><value>Товар:</value></data>
+  <data name="(boş mesaj)" xml:space="preserve"><value>(пустое сообщение)</value></data>
+  <data name="Bu mesajı moderasiya üçün gizlət?" xml:space="preserve"><value>Скрыть это сообщение для модерации?</value></data>
+  <data name="Bu sənin hesabındır. Rol/blok/silmə əməliyyatları üçün başqa admin lazımdır." xml:space="preserve"><value>Это ваш аккаунт. Для смены роли/блокировки/удаления нужен другой админ.</value></data>
+  <data name="Rol dəyiş" xml:space="preserve"><value>Изменить роль</value></data>
+  <data name="Blokunu açmağa əminsən?" xml:space="preserve"><value>Разблокировать?</value></data>
+  <data name="Bloku aç" xml:space="preserve"><value>Разблокировать</value></data>
+  <data name="Bu istifadəçini blok etməyə əminsən?" xml:space="preserve"><value>Заблокировать этого пользователя?</value></data>
+  <data name="Blok et" xml:space="preserve"><value>Заблокировать</value></data>
+  <data name="Bu istifadəçini həmişəlik silməyə əminsən?" xml:space="preserve"><value>Удалить этого пользователя навсегда?</value></data>
+  <data name="Sahib olduğu mağazalar" xml:space="preserve"><value>Магазины во владении</value></data>
+  <data name="Mağaza yoxdur." xml:space="preserve"><value>Магазинов нет.</value></data>
+  <data name="Abunəlik" xml:space="preserve"><value>Подписка</value></data>
+  <data name="Başlanğıc" xml:space="preserve"><value>Начало</value></data>
+  <data name="Bitmə" xml:space="preserve"><value>Окончание</value></data>
+  <data name="Plan" xml:space="preserve"><value>План</value></data>
+  <data name="Bitmə tarixi (boş = Free)" xml:space="preserve"><value>Дата окончания (пусто = Free)</value></data>
+  <data name="Qeyd (ödəniş mənbəyi, müddət)" xml:space="preserve"><value>Заметка (источник оплаты, срок)</value></data>
+  <data name="məs. Kapital Bank, 19.05.2026, 3 ay Pro" xml:space="preserve"><value>напр. Kapital Bank, 19.05.2026, 3 месяца Pro</value></data>
+  <data name="Bu istifadəçinin planını dəyişməyə əminsən?" xml:space="preserve"><value>Изменить план этого пользователя?</value></data>
+  <data name="Plan dəyiş" xml:space="preserve"><value>Изменить план</value></data>
+  <data name="Son dəyişikliklər" xml:space="preserve"><value>Недавние изменения</value></data>
+  <data name="qeyd" xml:space="preserve"><value>записей</value></data>
 </root>

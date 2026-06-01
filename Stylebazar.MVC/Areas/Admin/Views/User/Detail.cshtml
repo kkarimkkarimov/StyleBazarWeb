@@ -18,7 +18,7 @@
 }
 
 <nav class="sb-admin-breadcrumb">
-    <a asp-area="Admin" asp-controller="User" asp-action="Index">İstifadəçilər</a>
+    <a asp-area="Admin" asp-controller="User" asp-action="Index">@L["İstifadəçilər"]</a>
     <span>/</span>
     <span>@u.FullName</span>
 </nav>
@@ -33,7 +33,7 @@
             <div>
                 <h2>@u.FullName</h2>
                 <p>@u.Email · <span class="sb-admin-chip sb-admin-chip--@u.Role.ToLower()">@u.Role</span></p>
-                <p class="sb-admin-meta">Telefon: @(u.PhoneNumber ?? "—") · Qoşulub @u.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
+                <p class="sb-admin-meta">@L["Telefon:"] @(u.PhoneNumber ?? "—") · @L["Qoşulub"] @u.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
             </div>
         </div>
 
@@ -42,7 +42,7 @@
             {
                 <p class="sb-admin-self-notice">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    Bu sənin hesabındır. Rol/blok/silmə əməliyyatları üçün başqa admin lazımdır.
+                    @L["Bu sənin hesabındır. Rol/blok/silmə əməliyyatları üçün başqa admin lazımdır."]
                 </p>
             }
             else
@@ -50,13 +50,13 @@
                 <form asp-area="Admin" asp-controller="User" asp-action="SetRole" method="post" class="sb-admin-inline-form">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@u.Id" />
-                    <label class="sb-admin-field-label">Rol dəyiş</label>
+                    <label class="sb-admin-field-label">@L["Rol dəyiş"]</label>
                     <select name="role" class="sb-admin-select">
-                        <option value="Buyer" selected="@(CurrentRole == "Buyer")">Alıcı</option>
-                        <option value="Seller" selected="@(CurrentRole == "Seller")">Satıcı</option>
+                        <option value="Buyer" selected="@(CurrentRole == "Buyer")">@L["Alıcı"]</option>
+                        <option value="Seller" selected="@(CurrentRole == "Seller")">@L["Satıcı"]</option>
                         <option value="Admin" selected="@(CurrentRole == "Admin")">Admin</option>
                     </select>
-                    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">Yenilə</button>
+                    <button type="submit" class="sb-admin-btn sb-admin-btn--ghost">@L["Yenilə"]</button>
                 </form>
 
                 <form asp-area="Admin" asp-controller="User" asp-action="ToggleSuspension" method="post" class="sb-admin-inline-form">
@@ -64,18 +64,18 @@
                     <input type="hidden" name="id" value="@u.Id" />
                     @if (u.IsSuspended)
                     {
-                        <button type="submit" class="sb-admin-btn sb-admin-btn--ok" data-confirm="Blokunu açmağa əminsən?">Bloku aç</button>
+                        <button type="submit" class="sb-admin-btn sb-admin-btn--ok" data-confirm="@L["Blokunu açmağa əminsən?"]">@L["Bloku aç"]</button>
                     }
                     else
                     {
-                        <button type="submit" class="sb-admin-btn sb-admin-btn--warn" data-confirm="Bu istifadəçini blok etməyə əminsən?">Blok et</button>
+                        <button type="submit" class="sb-admin-btn sb-admin-btn--warn" data-confirm="@L["Bu istifadəçini blok etməyə əminsən?"]">@L["Blok et"]</button>
                     }
                 </form>
 
                 <form asp-area="Admin" asp-controller="User" asp-action="Delete" method="post" class="sb-admin-inline-form">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@u.Id" />
-                    <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="Bu istifadəçini həmişəlik silməyə əminsən?">Sil</button>
+                    <button type="submit" class="sb-admin-btn sb-admin-btn--danger" data-confirm="@L["Bu istifadəçini həmişəlik silməyə əminsən?"]">@L["Sil"]</button>
                 </form>
             }
         </div>
@@ -83,11 +83,11 @@
 
     <div class="sb-admin-card">
         <header class="sb-admin-card__head">
-            <h2>Sahib olduğu mağazalar (@Model.Stores.Count)</h2>
+            <h2>@L["Sahib olduğu mağazalar"] (@Model.Stores.Count)</h2>
         </header>
         @if (!Model.Stores.Any())
         {
-            <p class="sb-admin-empty-line">Mağaza yoxdur.</p>
+            <p class="sb-admin-empty-line">@L["Mağaza yoxdur."]</p>
         }
         else
         {
@@ -102,7 +102,7 @@
                             </div>
                             <div class="sb-admin-feed__body">
                                 <strong>@s.Name</strong>
-                                <span>@s.ProductCount məhsul · @(s.IsActive ? "Aktiv" : "Deaktiv")</span>
+                                <span>@s.ProductCount @L["məhsul"] · @(s.IsActive ? L["Aktiv"].Value : L["Deaktiv"].Value)</span>
                             </div>
                         </a>
                     </li>
@@ -115,26 +115,26 @@
 @* ============== SUBSCRIPTION SECTION ============== *@
 <div class="sb-admin-card sb-admin-sub">
     <header class="sb-admin-card__head">
-        <h2>Abunəlik</h2>
+        <h2>@L["Abunəlik"]</h2>
         <span class="sb-admin-chip sb-admin-chip--plan-@sub.Plan.ToString().ToLower()">@sub.Plan</span>
     </header>
 
     <div class="sb-admin-sub__row">
         <dl class="sb-admin-sub__dl">
             <div>
-                <dt>Cari plan</dt>
+                <dt>@L["Cari plan"]</dt>
                 <dd><strong>@sub.Plan</strong></dd>
             </div>
             <div>
-                <dt>Vəziyyət</dt>
+                <dt>@L["Vəziyyət"]</dt>
                 <dd>@sub.Status</dd>
             </div>
             <div>
-                <dt>Başlanğıc</dt>
+                <dt>@L["Başlanğıc"]</dt>
                 <dd>@sub.StartedAt.ToLocalTime().ToString("dd.MM.yyyy")</dd>
             </div>
             <div>
-                <dt>Bitmə</dt>
+                <dt>@L["Bitmə"]</dt>
                 <dd>
                     @if (sub.ExpiresAt.HasValue)
                     {
@@ -142,11 +142,11 @@
                         <text>@sub.ExpiresAt.Value.ToLocalTime().ToString("dd.MM.yyyy")</text>
                         if (d.HasValue && d.Value > 0)
                         {
-                            <small> · @d gün qalıb</small>
+                            <small> · @d @L["gün qalıb"]</small>
                         }
                         else if (d == 0)
                         {
-                            <small class="sb-admin-warn"> · bitib</small>
+                            <small class="sb-admin-warn"> · @L["Bitib"]</small>
                         }
                     }
                     else
@@ -164,7 +164,7 @@
 
         <div class="sb-admin-sub__grid">
             <label>
-                <span>Plan</span>
+                <span>@L["Plan"]</span>
                 <select name="plan" class="sb-admin-select">
                     <option value="@((int)SubscriptionPlan.Free)" selected="@(sub.Plan == SubscriptionPlan.Free)">Free</option>
                     <option value="@((int)SubscriptionPlan.Pro)" selected="@(sub.Plan == SubscriptionPlan.Pro)">Pro</option>
@@ -173,36 +173,36 @@
             </label>
 
             <label>
-                <span>Bitmə tarixi (boş = Free)</span>
+                <span>@L["Bitmə tarixi (boş = Free)"]</span>
                 <input type="date" name="expiresAt" class="sb-admin-input"
                        value="@(sub.ExpiresAt?.ToLocalTime().ToString("yyyy-MM-dd"))" />
             </label>
 
             <label class="sb-admin-sub__notes">
-                <span>Qeyd (ödəniş mənbəyi, müddət)</span>
-                <input type="text" name="notes" class="sb-admin-input" maxlength="1000" placeholder="məs. Kapital Bank, 19.05.2026, 3 ay Pro" />
+                <span>@L["Qeyd (ödəniş mənbəyi, müddət)"]</span>
+                <input type="text" name="notes" class="sb-admin-input" maxlength="1000" placeholder="@L["məs. Kapital Bank, 19.05.2026, 3 ay Pro"]" />
             </label>
         </div>
 
-        <button type="submit" class="sb-admin-btn sb-admin-btn--primary" data-confirm="Bu istifadəçinin planını dəyişməyə əminsən?">Plan dəyiş</button>
+        <button type="submit" class="sb-admin-btn sb-admin-btn--primary" data-confirm="@L["Bu istifadəçinin planını dəyişməyə əminsən?"]">@L["Plan dəyiş"]</button>
     </form>
 
     @if (Model.SubscriptionHistory.Any())
     {
         <header class="sb-admin-sub__history-head">
-            <h3>Son dəyişikliklər</h3>
-            <span class="sb-admin-meta">@Model.SubscriptionHistory.Count qeyd</span>
+            <h3>@L["Son dəyişikliklər"]</h3>
+            <span class="sb-admin-meta">@Model.SubscriptionHistory.Count @L["qeyd"]</span>
         </header>
         <div class="sb-admin-table-wrap">
             <table class="sb-admin-table sb-admin-table--compact">
                 <thead>
                     <tr>
-                        <th>Tarix</th>
-                        <th>Plan</th>
-                        <th>Vəziyyət</th>
-                        <th>Bitmə</th>
+                        <th>@L["Tarix"]</th>
+                        <th>@L["Plan"]</th>
+                        <th>@L["Vəziyyət"]</th>
+                        <th>@L["Bitmə"]</th>
                         <th>Admin</th>
-                        <th>Qeyd</th>
+                        <th>@L["Qeyd"]</th>
                     </tr>
                 </thead>
                 <tbody>
