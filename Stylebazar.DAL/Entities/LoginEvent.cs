@@ -3,20 +3,16 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.DAL.Entities;
 
-/// <summary>
-/// An audit row for every authentication-related event. Rendered on the
-/// user's Profile page → Security → Login History.
-/// </summary>
+// GİRİŞ HADİSƏSİ entity-si — "LoginEvents" cədvəli. Hər autentifikasiya hadisəsi (giriş,
+// uğursuz cəhd və s.) üçün audit sətri. Profil → Təhlükəsizlik → Giriş tarixçəsində göstərilir.
 public class LoginEvent : Entity<int>
 {
-    public required string UserId { get; set; }
-    public LoginEventType EventType { get; set; }
+    public required string UserId { get; set; }       // Kimə aiddir (FK → AppUser)
+    public LoginEventType EventType { get; set; }     // Hadisə növü (giriş / çıxış / uğursuz cəhd...)
 
-    /// <summary>Source IP (proxy-aware via X-Forwarded-For when present).</summary>
-    public string? IpAddress { get; set; }
+    public string? IpAddress { get; set; }            // Mənbə IP (proxy arxasında X-Forwarded-For nəzərə alınır)
 
-    /// <summary>Raw User-Agent header — parsed at render time into device hints.</summary>
-    public string? UserAgent { get; set; }
+    public string? UserAgent { get; set; }            // Brauzer/cihaz məlumatı (User-Agent başlığı)
 
-    public virtual AppUser User { get; set; } = null!;
+    public virtual AppUser User { get; set; } = null!;  // Aid olduğu istifadəçi
 }

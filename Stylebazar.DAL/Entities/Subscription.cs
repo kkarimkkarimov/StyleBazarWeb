@@ -3,36 +3,27 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.DAL.Entities;
 
-/// <summary>
-/// Audit row for a single subscription event in a user's history.
-/// Hybrid model: AppUser holds the denormalized "current" plan for fast
-/// reads; this table is the immutable log of every change so finance
-/// and disputes can be reconstructed (e.g. "user says they paid 3 months,
-/// not 1 — show me the row admin entered").
-///
-/// Always exactly ONE row per user has Status = Active. UpgradeAsync
-/// flips the prior Active row to Expired/Cancelled before inserting the
-/// new Active row.
-/// </summary>
+// ABUNƏLİK entity-si — "Subscriptions" cədvəli. İstifadəçinin abunəlik tarixçəsində hər
+// dəyişiklik üçün bir audit sətri. Hibrid model: AppUser cari planı saxlayır (tez oxu üçün),
+// bu cədvəl isə bütün dəyişikliklərin DƏYİŞMƏZ jurnalıdır (maliyyə/mübahisə üçün).
+//
+// Hər istifadəçidə həmişə YALNIZ BİR sətir Status = Active olur. Yüksəltmə (upgrade) köhnə
+// Active sətri Expired/Cancelled edib yeni Active sətir əlavə edir.
 public class Subscription : Entity<int>
 {
-    public required string UserId { get; set; }
+    public required string UserId { get; set; }    // Kimə aiddir (FK → AppUser)
 
-    public SubscriptionPlan Plan { get; set; }
-    public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Active;
+    public SubscriptionPlan Plan { get; set; }     // Plan: Free / Pro / VIP
+    public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Active;  // Vəziyyət (default: Aktiv)
 
-    /// <summary>UTC. Set to the moment admin applied the change.</summary>
-    public DateTime StartedAt { get; set; }
+    public DateTime StartedAt { get; set; }        // Dəyişikliyin tətbiq edildiyi an (UTC)
 
-    /// <summary>UTC. Null = lifetime (e.g. when admin sets Free as a downgrade).</summary>
-    public DateTime? ExpiresAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }       // Bitmə tarixi (UTC); null = ömürlük (məs. Free)
 
-    /// <summary>UserId of the admin who approved the change (for audit).</summary>
-    public string? ApprovedByAdminId { get; set; }
+    public string? ApprovedByAdminId { get; set; } // Dəyişikliyi təsdiqləyən admin-in id-si (audit üçün)
 
-    /// <summary>Free-form note ("Kapital Bank, 19.05.2026, 3-aylıq Pro").</summary>
-    public string? Notes { get; set; }
+    public string? Notes { get; set; }             // Sərbəst qeyd ("Kapital Bank, 3-aylıq Pro")
 
-    public virtual AppUser User { get; set; } = null!;
-    public virtual AppUser? ApprovedByAdmin { get; set; }
+    public virtual AppUser User { get; set; } = null!;       // Abunəlik sahibi
+    public virtual AppUser? ApprovedByAdmin { get; set; }    // Təsdiqləyən admin
 }

@@ -2,43 +2,29 @@ using Core.Persistence.Repositories;
 
 namespace Stylebazar.DAL.Entities;
 
-/// <summary>
-/// A shipping / contact address belonging to a single user. Sellers use these
-/// addresses for the "send package from" hint and buyers for the "deliver to"
-/// metadata on outbound seller messages. A user can have multiple addresses;
-/// exactly one is flagged <see cref="IsDefault"/>.
-/// </summary>
+// ÜNVAN entity-si — "Addresses" cədvəli. Bir istifadəçinin çatdırılma/əlaqə ünvanları.
+// Bir istifadəçinin bir neçə ünvanı ola bilər; yalnız BİRİ default (IsDefault) olur.
 public class Address : Entity<int>
 {
-    /// <summary>Owning user (FK to AppUser.Id).</summary>
-    public required string UserId { get; set; }
+    public required string UserId { get; set; }        // Ünvanın sahibi (FK → AppUser)
 
-    /// <summary>Short label — "Home", "Ofis", "Anamın evi". Max 60 chars.</summary>
-    public required string Title { get; set; }
+    public required string Title { get; set; }          // Qısa etiket: "Ev", "Ofis"
 
-    /// <summary>Recipient full name. Max 100 chars.</summary>
-    public required string FullName { get; set; }
+    public required string FullName { get; set; }       // Alıcının ad-soyadı
 
-    /// <summary>Recipient phone — store as user typed, validated at DTO layer.</summary>
-    public required string Phone { get; set; }
+    public required string Phone { get; set; }          // Əlaqə telefonu
 
-    /// <summary>City. Required. Max 80 chars.</summary>
-    public required string City { get; set; }
+    public required string City { get; set; }           // Şəhər (məcburi)
 
-    /// <summary>Region / district. Optional. Max 80 chars.</summary>
-    public string? District { get; set; }
+    public string? District { get; set; }               // Rayon/bölgə (opsional)
 
-    /// <summary>Street + house + flat (free-form). Required. Max 300 chars.</summary>
-    public required string AddressLine { get; set; }
+    public required string AddressLine { get; set; }    // Küçə + ev + mənzil (sərbəst mətn)
 
-    /// <summary>Postal / ZIP code. Optional. Max 16 chars.</summary>
-    public string? PostalCode { get; set; }
+    public string? PostalCode { get; set; }             // Poçt indeksi (opsional)
 
-    /// <summary>Landmark / courier note. Optional. Max 300 chars.</summary>
-    public string? Notes { get; set; }
+    public string? Notes { get; set; }                  // Kuryer üçün qeyd/orientir (opsional)
 
-    /// <summary>True for the user's single default address.</summary>
-    public bool IsDefault { get; set; }
+    public bool IsDefault { get; set; }                 // Default ünvandır? (istifadəçidə yalnız biri)
 
-    public virtual AppUser User { get; set; } = null!;
+    public virtual AppUser User { get; set; } = null!;  // Ünvanın sahibi
 }

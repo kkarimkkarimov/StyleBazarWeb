@@ -3,39 +3,28 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.DAL.Entities;
 
-/// <summary>
-/// Instagram-style ephemeral content. Sellers publish per-store stories.
-/// Default lifetime = 24h via ExpiresAt; IsActive can be flipped by admin
-/// for moderation without waiting on expiry.
-///
-/// Phase 14.1: now supports both image and video. MediaUrl is the new
-/// canonical field; ImageUrl is kept as a property alias for back-compat
-/// with existing rows + the AutoMapper profile (maps to/from MediaUrl).
-/// </summary>
+// HEKAYƏ (STORY) entity-si — "Stories" cədvəli. Instagram tipli müvəqqəti məzmun.
+// Satıcı mağaza adından hekayə paylaşır. Default ömrü = 24 saat (ExpiresAt).
+// Admin moderasiya üçün ExpiresAt-ı gözləmədən IsActive-i söndürə bilər. Şəkil + video dəstəklənir.
 public class Story : Entity<int>
 {
-    public int StoreId { get; set; }
+    public int StoreId { get; set; }                  // Hansı mağazaya aiddir (FK → Store)
 
-    /// <summary>URL to the uploaded image or video file.</summary>
-    public required string MediaUrl { get; set; }
+    public required string MediaUrl { get; set; }      // Yüklənmiş şəkil/video faylının URL-i
 
-    /// <summary>Image vs. Video — drives viewer rendering + upload validation.</summary>
-    public StoryMediaType MediaType { get; set; } = StoryMediaType.Image;
+    public StoryMediaType MediaType { get; set; } = StoryMediaType.Image;  // Şəkil yoxsa Video (default: Şəkil)
 
-    /// <summary>Optional poster frame for videos (auto-set client-side later).</summary>
-    public string? ThumbnailUrl { get; set; }
+    public string? ThumbnailUrl { get; set; }          // Video üçün üz qabığı (poster) şəkli
 
-    /// <summary>
-    /// Video duration in seconds; null for images. Used by the viewer so it
-    /// doesn't auto-advance mid-video, and by the validator (max 30s).
-    /// </summary>
+    // Video uzunluğu (saniyə); şəkillər üçün null. Viewer videonu yarıda kəsməsin və
+    // validator (maks. 30 san) yoxlasın deyə lazımdır.
     public int? DurationSeconds { get; set; }
 
-    public string? Caption { get; set; }
-    public string? LinkUrl { get; set; }
-    public DateTime ExpiresAt { get; set; }
-    public bool IsActive { get; set; } = true;
-    public int ViewCount { get; set; }
+    public string? Caption { get; set; }               // Altyazı/mətn
+    public string? LinkUrl { get; set; }               // Hekayədəki keçid ünvanı
+    public DateTime ExpiresAt { get; set; }            // Bitmə vaxtı (adətən +24 saat)
+    public bool IsActive { get; set; } = true;         // Aktivdir? (default: bəli)
+    public int ViewCount { get; set; }                 // Baxış sayı
 
-    public virtual Store Store { get; set; } = null!;
+    public virtual Store Store { get; set; } = null!;  // Aid olduğu mağaza
 }

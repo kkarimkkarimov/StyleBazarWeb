@@ -1,18 +1,16 @@
 namespace Stylebazar.DAL.Entities.Enums;
 
-/// <summary>
-/// The kind of authentication event a LoginEvent row records.
-/// Drives the colour + label of the badge in the user's Login History.
-/// </summary>
+// GİRİŞ HADİSƏSİNİN NÖVÜ enum-u. LoginEvent sətrinin hansı autentifikasiya hadisəsini
+// qeyd etdiyini bildirir. Giriş tarixçəsindəki nişanın rəngini və etiketini idarə edir.
 public enum LoginEventType
 {
-    SignUp = 0,             // First-time registration
-    SignIn = 1,             // Successful login
-    SignOut = 2,            // Manual logout
-    FailedSignIn = 3,       // Wrong password
-    PasswordChanged = 4,    // Self-service change
-    PasswordReset = 5,      // Reset via email token
-    EmailVerified = 6,      // Email confirmation
-    TwoFactorChallenge = 7, // 2FA prompt (future)
-    Locked = 8              // Lockout triggered (5 consecutive fails)
+    SignUp = 0,             // İlk dəfə qeydiyyat
+    SignIn = 1,             // Uğurlu giriş
+    SignOut = 2,            // Əl ilə çıxış
+    FailedSignIn = 3,       // Səhv parol (uğursuz giriş)
+    PasswordChanged = 4,    // Parolun dəyişdirilməsi
+    PasswordReset = 5,      // Email token ilə parol bərpası
+    EmailVerified = 6,      // Email təsdiqi
+    TwoFactorChallenge = 7, // 2FA sorğusu (gələcək üçün)
+    Locked = 8              // Hesab kilidləndi (5 ardıcıl uğursuz cəhd)
 }

@@ -3,40 +3,29 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.DAL.Entities;
 
-/// <summary>
-/// One row per buyer-initiated contact attempt on a product or store
-/// (WhatsApp / Instagram / phone deep-link click). Buyers may be
-/// anonymous (UserId null) — IP is anonymized (last octet zeroed)
-/// before persistence to stay GDPR-friendly while still allowing
-/// "unique visitor" approximation per day.
-///
-/// Drives Seller Analytics dashboard and is the keystone metric for
-/// the premium-subscription monetization model: sellers see ROI,
-/// platform sees value-per-listing.
-/// </summary>
+// ƏLAQƏ KLİKİ entity-si — "ContactClicks" cədvəli. Alıcının məhsul/mağaza üzərində hər əlaqə
+// cəhdi (WhatsApp / Instagram / telefon klikləməsi) bir sətir kimi yazılır.
+// Alıcı anonim ola bilər (UserId null). IP GDPR üçün anonimləşdirilir (son hissə sıfırlanır).
+//
+// Satıcı analitika panelini qidalandırır və premium abunəlik modelinin əsas metrikasıdır
+// (satıcı gəlir/dəyər görür, platforma listinqin dəyərini göstərir).
 public class ContactClick : Entity<int>
 {
-    /// <summary>Optional product (when click happened on a product detail page).</summary>
-    public int? ProductId { get; set; }
+    public int? ProductId { get; set; }            // Hansı məhsul (məhsul səhifəsində klik olduqda); null ola bilər
 
-    /// <summary>Store always set — every contact click resolves to a store owner.</summary>
-    public int StoreId { get; set; }
+    public int StoreId { get; set; }               // Mağaza həmişə var — hər klik bir mağazaya bağlıdır
 
-    /// <summary>Authenticated buyer's id; null for anonymous visitors.</summary>
-    public string? UserId { get; set; }
+    public string? UserId { get; set; }            // Giriş etmiş alıcının id-si; anonim üçün null
 
-    public ContactType ContactType { get; set; }
+    public ContactType ContactType { get; set; }   // Kanal: WhatsApp / Instagram / telefon...
 
-    /// <summary>Source IP with last octet zeroed (e.g. 192.168.1.0).</summary>
-    public string? IpAddress { get; set; }
+    public string? IpAddress { get; set; }         // Son okteti sıfırlanmış IP (məs. 192.168.1.0)
 
-    /// <summary>Raw User-Agent header — used to bucket device class in analytics.</summary>
-    public string? UserAgent { get; set; }
+    public string? UserAgent { get; set; }         // Cihaz/brauzer məlumatı (analitikada cihaz növü üçün)
 
-    /// <summary>HTTP Referer header — what page they came from. Optional.</summary>
-    public string? Referer { get; set; }
+    public string? Referer { get; set; }           // Hansı səhifədən gəlib (HTTP Referer); opsional
 
-    public virtual Product? Product { get; set; }
-    public virtual Store Store { get; set; } = null!;
-    public virtual AppUser? User { get; set; }
+    public virtual Product? Product { get; set; }          // Aid olduğu məhsul (varsa)
+    public virtual Store Store { get; set; } = null!;      // Aid olduğu mağaza
+    public virtual AppUser? User { get; set; }             // Klikləyən istifadəçi (varsa)
 }

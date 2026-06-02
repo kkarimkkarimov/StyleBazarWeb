@@ -2,43 +2,40 @@ using Core.Persistence.Repositories;
 
 namespace Stylebazar.DAL.Entities;
 
+// MAĞAZA entity-si — "Stores" cədvəli. Hər satıcının öz mağazası var; məhsullar
+// mağazaya bağlanır. Marketplace-in əsas obyektlərindən biridir.
 public class Store : Entity<int>
 {
-    public required string Name { get; set; }
-    public required string Slug { get; set; }
-    public string? Description { get; set; }
-    public required string ProfileImageUrl { get; set; }
-    public string? CoverImageUrl { get; set; }
-    public string? ContactPhone { get; set; }
-    public string? Address { get; set; }
-    public required string OwnerId { get; set; }
-    public bool IsActive { get; set; }
+    public required string Name { get; set; }              // Mağaza adı (məcburi)
+    public required string Slug { get; set; }              // URL üçün təmiz ad
+    public string? Description { get; set; }                // Mağaza haqqında
+    public required string ProfileImageUrl { get; set; }    // Profil/logo şəkli (məcburi)
+    public string? CoverImageUrl { get; set; }              // Üst (cover) banner şəkli
+    public string? ContactPhone { get; set; }               // Əlaqə telefonu
+    public string? Address { get; set; }                    // Ünvan
+    public required string OwnerId { get; set; }            // Sahibinin id-si (FK → AppUser)
+    public bool IsActive { get; set; }                      // Aktivdir? (false = gizli)
 
-    // --- Contact channels (the heart of our marketplace UX) ---
+    // --- Əlaqə kanalları (marketplace UX-in ürəyi — alıcı buradan satıcıya yazır) ---
 
-    /// <summary>
-    /// E.164 phone number used for wa.me deep links (e.g. "994508204111").
-    /// We store digits-only; the UI prepends https://wa.me/ on click.
-    /// </summary>
+    // WhatsApp nömrəsi yalnız rəqəmlərlə saxlanılır (məs. "994508204111").
+    // Klik olunanda UI əvvəlinə https://wa.me/ əlavə edir.
     public string? WhatsAppNumber { get; set; }
 
-    /// <summary>
-    /// Instagram username without the @ ("useremda" → instagram.com/useremda).
-    /// </summary>
+    // Instagram istifadəçi adı (@ olmadan) → instagram.com/istifadeci
     public string? InstagramHandle { get; set; }
 
-    /// <summary>
-    /// Telegram username without the @ ("useremda" → t.me/useremda).
-    /// </summary>
+    // Telegram istifadəçi adı (@ olmadan) → t.me/istifadeci
     public string? TelegramHandle { get; set; }
 
-    /// <summary>Facebook page/profile slug ("yourpage" → facebook.com/yourpage).</summary>
+    // Facebook səhifə adı → facebook.com/sehife
     public string? FacebookHandle { get; set; }
 
-    /// <summary>TikTok username without the @ ("useremda" → tiktok.com/@useremda).</summary>
+    // TikTok istifadəçi adı (@ olmadan) → tiktok.com/@istifadeci
     public string? TikTokHandle { get; set; }
 
-    public virtual AppUser Owner { get; set; } = null!;
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
-    public virtual ICollection<StoreFollower> Followers { get; set; } = new List<StoreFollower>();
+    // --- Naviqasiya sahələri ---
+    public virtual AppUser Owner { get; set; } = null!;                                       // Mağaza sahibi (istifadəçi)
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();          // Mağazanın məhsulları
+    public virtual ICollection<StoreFollower> Followers { get; set; } = new List<StoreFollower>(); // Mağazanı izləyənlər
 }

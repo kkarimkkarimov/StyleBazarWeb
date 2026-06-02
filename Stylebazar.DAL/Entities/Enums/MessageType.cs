@@ -1,17 +1,14 @@
 namespace Stylebazar.DAL.Entities.Enums;
 
-/// <summary>
-/// What a Message carries. Each row picks exactly one:
-///   - Text:         free-text body (default)
-///   - Image:        AttachmentUrl points to an uploaded image
-///   - StoryReply:   text body + StoryId references the story being replied to;
-///                   recipient sees a small story preview above the bubble
-///   - ProductShare: text body + ProductId references a product card
-/// </summary>
+// MESAJ NÖVÜ enum-u — mesaj nə daşıyır? Hər sətir dəqiq birini seçir:
+//   - Text:         sərbəst mətn (default)
+//   - Image:        AttachmentUrl yüklənmiş şəklə işarə edir
+//   - StoryReply:   mətn + StoryId cavab verilən hekayəyə istinad (qabarcıq üstündə kiçik önizləmə)
+//   - ProductShare: mətn + ProductId paylaşılan məhsul kartına istinad
 public enum MessageType
 {
-    Text = 0,
-    Image = 1,
-    StoryReply = 2,
-    ProductShare = 3
+    Text = 0,          // Mətn
+    Image = 1,         // Şəkil
+    StoryReply = 2,    // Hekayəyə cavab
+    ProductShare = 3   // Məhsul paylaşımı
 }
