@@ -32,12 +32,14 @@ public class AdminDashboardViewModel
     public List<AdminLoginEventDto> RecentLoginEvents { get; set; } = new();
 }
 
+// AdminUsersPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminUsersPageViewModel
 {
     public Paginate<UserAdminDto> Users { get; set; } = new();
     public UserAdminListFilter Filter { get; set; } = new();
 }
 
+// AdminUserDetailViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminUserDetailViewModel
 {
     public UserAdminDto User { get; set; } = new();
@@ -51,6 +53,7 @@ public class AdminUserDetailViewModel
     public List<SubscriptionDto> SubscriptionHistory { get; set; } = new();
 }
 
+// AdminStoresPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminStoresPageViewModel
 {
     public Paginate<StoreListDto> Stores { get; set; } = new();
@@ -59,6 +62,7 @@ public class AdminStoresPageViewModel
     public int Page { get; set; } = 1;
 }
 
+// AdminProductsPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminProductsPageViewModel
 {
     public Paginate<ProductListDto> Products { get; set; } = new();
@@ -67,11 +71,13 @@ public class AdminProductsPageViewModel
     public ProductListQueryDto Query { get; set; } = new();
 }
 
+// AdminCategoriesPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminCategoriesPageViewModel
 {
     public List<CategoryListDto> Categories { get; set; } = new();
 }
 
+// AdminReviewsPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminReviewsPageViewModel
 {
     public List<ReviewAdminRow> Reviews { get; set; } = new();
@@ -79,6 +85,7 @@ public class AdminReviewsPageViewModel
     public string? Search { get; set; }
 }
 
+// ReviewAdminRow — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class ReviewAdminRow
 {
     public ReviewDto Review { get; set; } = new();
@@ -86,6 +93,7 @@ public class ReviewAdminRow
     public int ProductId { get; set; }
 }
 
+// AdminContactMessagesPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminContactMessagesPageViewModel
 {
     public Paginate<ContactMessageDto> Messages { get; set; } = new();
@@ -93,6 +101,7 @@ public class AdminContactMessagesPageViewModel
     public int Page { get; set; } = 1;
 }
 
+// AdminNewsletterPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminNewsletterPageViewModel
 {
     public Paginate<NewsletterSubscriberDto> Subscribers { get; set; } = new();
@@ -100,16 +109,19 @@ public class AdminNewsletterPageViewModel
     public int Page { get; set; } = 1;
 }
 
+// AdminHeroBannersPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminHeroBannersPageViewModel
 {
     public List<HeroBannerDto> Banners { get; set; } = new();
 }
 
+// AdminStoriesPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminStoriesPageViewModel
 {
     public List<StoryAdminRow> Stories { get; set; } = new();
 }
 
+// StoryAdminRow — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class StoryAdminRow
 {
     public StoryDto Story { get; set; } = new();
@@ -117,12 +129,14 @@ public class StoryAdminRow
     public string StoreSlug { get; set; } = string.Empty;
 }
 
+// AdminConversationsPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminConversationsPageViewModel
 {
     public Paginate<AdminConversationRowDto> Conversations { get; set; } = new();
     public int Page { get; set; } = 1;
 }
 
+// AdminConversationDetailViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminConversationDetailViewModel
 {
     public AdminConversationRowDto Conversation { get; set; } = new();

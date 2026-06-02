@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Stories;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// HomeIndexViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class HomeIndexViewModel
 {
     public List<HeroBannerDto> HeroBanners { get; set; } = new();

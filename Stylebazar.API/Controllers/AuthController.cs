@@ -6,6 +6,7 @@ using Stylebazar.BLL.Services.Authentication;
 
 namespace Stylebazar.API.Controllers;
 
+// AuthController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase

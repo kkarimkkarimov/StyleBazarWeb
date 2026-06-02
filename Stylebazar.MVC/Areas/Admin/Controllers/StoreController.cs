@@ -7,6 +7,7 @@ using Stylebazar.MVC.Areas.Admin.ViewModels;
 
 namespace Stylebazar.MVC.Areas.Admin.Controllers;
 
+// StoreController (Admin paneli) — yalnız adminə açıq əməliyyatlar üçün controller. İstəyi alır, biznes xidmətini çağırır, idarəetmə nəticəsini/səhifəsini qaytarır.
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
 public class StoreController : Controller

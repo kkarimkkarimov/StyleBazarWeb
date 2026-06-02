@@ -16,6 +16,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.MVC.Areas.Admin.Controllers;
 
+// UserController (Admin paneli) — yalnız adminə açıq əməliyyatlar üçün controller. İstəyi alır, biznes xidmətini çağırır, idarəetmə nəticəsini/səhifəsini qaytarır.
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
 public class UserController : Controller

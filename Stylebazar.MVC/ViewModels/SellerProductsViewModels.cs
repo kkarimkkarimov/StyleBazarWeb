@@ -98,12 +98,14 @@ public class ProductFormInput
     [System.ComponentModel.DataAnnotations.StringLength(80)] public string? CountryOfOrigin { get; set; }
 }
 
+// ProductFormSizeRow — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class ProductFormSizeRow
 {
     public string Size { get; set; } = string.Empty;
     public int StockQuantity { get; set; }
 }
 
+// ProductFormColorRow — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class ProductFormColorRow
 {
     public string Name { get; set; } = string.Empty;

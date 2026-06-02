@@ -5,6 +5,7 @@ using Stylebazar.BLL.Services.HeroBanners;
 
 namespace Stylebazar.API.Controllers;
 
+// HeroBannersController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]

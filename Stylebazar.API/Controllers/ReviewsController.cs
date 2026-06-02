@@ -6,6 +6,7 @@ using Stylebazar.BLL.Services.Reviews;
 
 namespace Stylebazar.API.Controllers;
 
+// ReviewsController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Produces("application/json")]
 public class ReviewsController : ControllerBase

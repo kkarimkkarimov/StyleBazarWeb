@@ -1,3 +1,10 @@
+// ════════════════════════════════════════════════════════════════════════
+// Program.cs (API) — REST API-nin BAŞLANĞIC NÖQTƏSİ (startup).
+// Xidmətləri DI konteynerinə qeyd edir (controllers, JWT auth, DB, biznes
+// xidmətləri, CORS, rate limit, health) və HTTP boru xəttini qurur. Bu, JWT
+// token ilə qorunan, JSON qaytaran API-dir (brauzer səhifəsi yox).
+// Aşağıdakı ingiliscə şərhlər hər addımı ətraflı izah edir.
+// ════════════════════════════════════════════════════════════════════════
 using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;

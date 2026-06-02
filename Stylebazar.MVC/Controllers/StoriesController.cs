@@ -5,6 +5,7 @@ using Stylebazar.BLL.Services.Stories;
 
 namespace Stylebazar.MVC.Controllers;
 
+// StoriesController — HTTP sorğularını qarşılayan MVC controller-i. İstəyi alır, biznes xidmətini (service) çağırır və nəticəni Razor view / JSON kimi qaytarır.
 [Route("[controller]")]
 public class StoriesController : Controller
 {

@@ -17,6 +17,7 @@ public class SellerPanelViewModel
     public StoreDetailDto? PrimaryStore { get; set; }
 }
 
+// SellerProfilePageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerProfilePageViewModel : SellerPanelViewModel
 {
     public List<ActiveSessionDto> ActiveSessions { get; set; } = new();
@@ -24,6 +25,7 @@ public class SellerProfilePageViewModel : SellerPanelViewModel
     public List<AddressDto> Addresses { get; set; } = new();
 }
 
+// SellerReviewsPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerReviewsPageViewModel : SellerPanelViewModel
 {
     public List<SellerReviewRowDto> Reviews { get; set; } = new();
@@ -34,11 +36,13 @@ public class SellerReviewsPageViewModel : SellerPanelViewModel
     public int? MaxRatingFilter { get; set; }
 }
 
+// SellerAnalyticsPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerAnalyticsPageViewModel : SellerPanelViewModel
 {
     public SellerAnalyticsDto Stats { get; set; } = new();
 }
 
+// SellerPackagesPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerPackagesPageViewModel : SellerPanelViewModel
 {
     public Stylebazar.BLL.DTOs.Subscriptions.SubscriptionDto CurrentSubscription { get; set; } = new();
@@ -48,6 +52,7 @@ public class SellerPackagesPageViewModel : SellerPanelViewModel
     public int CurrentProductCount { get; set; }
 }
 
+// SellerDashboardPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerDashboardPageViewModel : SellerPanelViewModel
 {
     public Stylebazar.BLL.DTOs.Subscriptions.SubscriptionDto CurrentSubscription { get; set; } = new();
@@ -64,11 +69,13 @@ public class SellerDashboardPageViewModel : SellerPanelViewModel
     public bool HasStore { get; set; }
 }
 
+// SellerNotificationsPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerNotificationsPageViewModel : SellerPanelViewModel
 {
     public List<SellerNotificationItem> Items { get; set; } = new();
 }
 
+// SellerStoriesPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class SellerStoriesPageViewModel : SellerPanelViewModel
 {
     public List<Stylebazar.BLL.DTOs.Stories.StoryDto> Active { get; set; } = new();
@@ -76,6 +83,7 @@ public class SellerStoriesPageViewModel : SellerPanelViewModel
     public int Limit { get; set; } = 10;
 }
 
+// SellerNotificationItem — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public record SellerNotificationItem(
     string Tone,         // ok / info / warn / danger / muted
     string Icon,         // svg path data

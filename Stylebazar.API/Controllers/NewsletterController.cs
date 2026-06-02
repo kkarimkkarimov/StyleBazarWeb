@@ -6,6 +6,7 @@ using Stylebazar.BLL.Services.Newsletter;
 
 namespace Stylebazar.API.Controllers;
 
+// NewsletterController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]

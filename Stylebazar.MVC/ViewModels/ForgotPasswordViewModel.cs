@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// ForgotPasswordViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class ForgotPasswordViewModel
 {
     [Required(ErrorMessage = "Email daxil edin.")]
@@ -10,6 +11,7 @@ public class ForgotPasswordViewModel
     public string Email { get; set; } = string.Empty;
 }
 
+// ResetPasswordViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class ResetPasswordViewModel
 {
     [Required]

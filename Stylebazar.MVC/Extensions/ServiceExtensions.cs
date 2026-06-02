@@ -1,5 +1,7 @@
-﻿namespace Stylebazar.MVC.Extensions
+namespace Stylebazar.MVC.Extensions
 {
+    // ServiceExtensions — DI qeydiyyatı üçün köməkçi extension metodları nəzərdə tutulan sinif.
+    // Hələlik boşdur (şablon olaraq qalıb); bütün DI qeydiyyatı Program.cs-də aparılır.
     public class ServiceExtensions
     {
     }

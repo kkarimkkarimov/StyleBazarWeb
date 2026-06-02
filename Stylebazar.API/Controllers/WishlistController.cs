@@ -5,6 +5,7 @@ using Stylebazar.BLL.Services.Wishlist;
 
 namespace Stylebazar.API.Controllers;
 
+// WishlistController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]

@@ -11,6 +11,7 @@ using Stylebazar.MVC.ViewModels;
 
 namespace Stylebazar.MVC.Controllers;
 
+// ShopController — HTTP sorğularını qarşılayan MVC controller-i. İstəyi alır, biznes xidmətini (service) çağırır və nəticəni Razor view / JSON kimi qaytarır.
 public class ShopController : Controller
 {
     private readonly IProductService _products;

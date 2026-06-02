@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Reviews;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// ShopDetailViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class ShopDetailViewModel
 {
     public ProductDetailDto Product { get; set; } = new();

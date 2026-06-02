@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Stores;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// ShopsIndexViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class ShopsIndexViewModel
 {
     public Paginate<StoreListDto> Stores { get; set; } = new();

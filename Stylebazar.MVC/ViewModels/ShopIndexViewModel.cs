@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Products;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// ShopIndexViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class ShopIndexViewModel
 {
     /// <summary>Current filter state (bound from query string).</summary>

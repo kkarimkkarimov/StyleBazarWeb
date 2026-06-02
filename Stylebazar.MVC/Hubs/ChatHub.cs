@@ -8,26 +8,21 @@ using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.MVC.Hubs;
 
-/// <summary>
-/// Real-time chat hub. Every signed-in user is auto-joined to a SignalR group
-/// named "user-{UserId}" so peer-to-peer delivery is just
-/// <c>Clients.Group("user-{recipient}").SendAsync(...)</c>.
-///
-/// Presence is tracked in a lightweight in-memory dict (Set&lt;ConnectionId&gt; per
-/// user); for a single-instance deployment that's enough. When we scale out we
-/// move this to Redis via the SignalR backplane.
-///
-/// Auth is enforced at the class level — no anonymous connections allowed.
-/// </summary>
+// CHAT HUB — REAL-VAXT (anlıq) mesajlaşma üçün SignalR hub-ı.
+// SignalR brauzerlə server arasında daimi bağlantı (WebSocket) saxlayır, beləliklə mesaj
+// səhifəni yeniləmədən dərhal gəlir. Hər giriş etmiş istifadəçi "user-{id}" qrupuna qoşulur;
+// kiməsə mesaj göndərmək = onun qrupuna SendAsync etmək.
+// Onlayn/oflayn vəziyyəti yaddaşda (in-memory) saxlanır (tək server üçün kifayətdir).
+// [Authorize] → yalnız giriş etmiş istifadəçilər qoşula bilər.
 [Authorize]
 public class ChatHub : Hub
 {
-    /// <summary>Shared by all hub instances. Key = userId, value = set of active connection ids.</summary>
+    // Bütün hub nümunələri üçün ortaq: açar = userId, dəyər = onun aktiv bağlantı id-ləri.
     private static readonly ConcurrentDictionary<string, HashSet<string>> _onlineConnections = new();
     private static readonly object _onlineLock = new();
 
-    private readonly IChatService _chat;
-    private readonly UserManager<AppUser> _users;
+    private readonly IChatService _chat;              // mesajları yadda saxlayan biznes xidməti
+    private readonly UserManager<AppUser> _users;     // cari istifadəçini tapmaq üçün
 
     public ChatHub(IChatService chat, UserManager<AppUser> users)
     {
@@ -35,6 +30,7 @@ public class ChatHub : Hub
         _users = users;
     }
 
+    // İstifadəçi qoşulanda işə düşür: onu öz qrupuna əlavə et və "onlayn oldu" siqnalı göndər.
     public override async Task OnConnectedAsync()
     {
         string? userId = _users.GetUserId(Context.User!);
@@ -44,13 +40,14 @@ public class ChatHub : Hub
             bool wasOffline = AddConnection(userId, Context.ConnectionId);
             if (wasOffline)
             {
-                // Tell anyone who has this user in their open conversations: this peer just came online.
+                // Bu istifadəçini açıq söhbətində saxlayanlara bildir: bu nəfər indi onlayn oldu.
                 await Clients.Others.SendAsync("UserPresence", new { userId, online = true });
             }
         }
         await base.OnConnectedAsync();
     }
 
+    // İstifadəçi ayrılanda işə düşür: bağlantını çıxar; başqa bağlantısı qalmadısa "oflayn" bildir.
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         string? userId = _users.GetUserId(Context.User!);
@@ -66,21 +63,17 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    /// <summary>
-    /// Send a message via SignalR. Persists via BLL (same path as REST) then
-    /// pushes the saved DTO to BOTH the sender's other tabs and the recipient.
-    /// Returns the saved DTO so the calling tab can replace its optimistic row.
-    /// </summary>
+    // MESAJ GÖNDƏR — əvvəlcə BLL ilə bazaya yaz, sonra həm göndərənin digər tab-larına,
+    // həm də qəbul edənə anlıq çatdır. Yadda saxlanmış mesajı geri qaytarır.
     public async Task<MessageDto> SendMessage(SendMessageDto dto)
     {
-        // BLL throws on validation/business issues; the JS catches via the
-        // hub method's promise rejection and surfaces a toast.
+        // BLL yoxlama/biznes problemində xəta atır; JS bunu tutub toast göstərir.
         MessageDto saved = await _chat.SendMessageAsync(dto, Context.ConnectionAborted);
 
         string? me = _users.GetUserId(Context.User!);
         if (!string.IsNullOrEmpty(me))
         {
-            // Sender's other tabs get the message echoed (so they update too).
+            // Göndərənin digər açıq tab-larına da mesajı göndər (onlar da yenilənsin).
             await Clients.Group(GroupName(me)).SendAsync("MessageReceived", saved);
         }
         if (!string.Equals(dto.RecipientUserId, me, StringComparison.OrdinalIgnoreCase))
@@ -90,24 +83,20 @@ public class ChatHub : Hub
         return saved;
     }
 
-    /// <summary>Marks all messages in the conversation as read on behalf of the caller.</summary>
+    // OXUNDU İŞARƏLƏ — söhbətdəki mesajları cari istifadəçi adından oxundu kimi qeyd et.
     public async Task MarkRead(int conversationId)
     {
         string? peerId = await _chat.MarkConversationReadAsync(conversationId, Context.ConnectionAborted);
         string? me = _users.GetUserId(Context.User!);
         if (!string.IsNullOrEmpty(peerId) && !string.IsNullOrEmpty(me))
         {
-            // Notify ONLY the peer (the original sender) that their messages were
-            // seen — drives the "Görüldü" indicator on their side. Targeting the
-            // peer's group avoids leaking read receipts to unrelated clients.
+            // YALNIZ qarşı tərəfə (mesajı göndərənə) bildir ki, mesajları görüldü →
+            // onun tərəfində "Görüldü" nişanını işə salır.
             await Clients.Group(GroupName(peerId)).SendAsync("MessagesRead", new { conversationId, readerUserId = me });
         }
     }
 
-    /// <summary>
-    /// Typing indicator — fire-and-forget. We don't persist it; the recipient
-    /// receives a transient "Typing" event that decays client-side after a few seconds.
-    /// </summary>
+    // YAZIR... göstəricisi — saxlanılmır, sadəcə qarşı tərəfə ötəri siqnal göndərilir.
     public async Task Typing(string peerUserId, bool isTyping)
     {
         string? me = _users.GetUserId(Context.User!);
@@ -115,7 +104,7 @@ public class ChatHub : Hub
         await Clients.Group(GroupName(peerUserId)).SendAsync("PeerTyping", new { userId = me, isTyping });
     }
 
-    /// <summary>Returns presence status for a batch of users (used by the inbox dot).</summary>
+    // Bir qrup istifadəçinin onlayn/oflayn vəziyyətini qaytarır (gələnlər qutusundakı nöqtə üçün).
     public Task<Dictionary<string, bool>> GetPresence(string[] userIds)
     {
         var snapshot = new Dictionary<string, bool>(userIds.Length);
@@ -129,11 +118,12 @@ public class ChatHub : Hub
         return Task.FromResult(snapshot);
     }
 
-    // -------- helpers --------
+    // -------- köməkçi metodlar --------
 
+    // İstifadəçinin SignalR qrup adı.
     private static string GroupName(string userId) => "user-" + userId;
 
-    /// <summary>True if this user wasn't online before (i.e. first connection).</summary>
+    // Bağlantı əlavə et. İstifadəçi əvvəl oflayn idisə true qaytarır (ilk bağlantı).
     private static bool AddConnection(string userId, string connectionId)
     {
         lock (_onlineLock)
@@ -150,7 +140,7 @@ public class ChatHub : Hub
         }
     }
 
-    /// <summary>True if removing this connection leaves the user with zero connections.</summary>
+    // Bağlantını çıxar. İstifadəçinin heç bağlantısı qalmadısa true qaytarır (tam oflayn).
     private static bool RemoveConnection(string userId, string connectionId)
     {
         lock (_onlineLock)

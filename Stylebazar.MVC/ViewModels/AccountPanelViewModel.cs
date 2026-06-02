@@ -13,12 +13,14 @@ public class AccountPanelViewModel
     public AccountProfileDto Profile { get; set; } = new();
 }
 
+// AccountProfilePageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AccountProfilePageViewModel : AccountPanelViewModel
 {
     public List<ActiveSessionDto> ActiveSessions { get; set; } = new();
     public List<LoginEventDto> LoginHistory { get; set; } = new();
 }
 
+// AccountAddressesPageViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AccountAddressesPageViewModel : AccountPanelViewModel
 {
     public List<AddressDto> Addresses { get; set; } = new();

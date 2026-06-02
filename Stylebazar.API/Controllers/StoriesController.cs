@@ -5,6 +5,7 @@ using Stylebazar.BLL.Services.Stories;
 
 namespace Stylebazar.API.Controllers;
 
+// StoriesController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Produces("application/json")]
 public class StoriesController : ControllerBase

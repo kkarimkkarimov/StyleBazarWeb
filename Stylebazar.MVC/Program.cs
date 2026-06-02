@@ -1,3 +1,12 @@
+// ════════════════════════════════════════════════════════════════════════
+// Program.cs (MVC) — TƏTBİQİN BAŞLANĞIC NÖQTƏSİ (startup).
+// Burada hər şey qurulur: əvvəlcə xidmətlər DI konteynerinə qeyd olunur
+// (builder.Services...), sonra HTTP boru xətti (middleware) sıraya düzülür
+// (app.Use...). MIDDLEWARE SIRASI ƏHƏMİYYƏTLİDİR. Qısa axın: Serilog log →
+// secret yoxlaması → lokalizasiya (AZ/RU/EN) → DB/Identity/biznes xidmətləri →
+// rate limit → təhlükəsizlik başlıqları → routing → auth → controller-lər.
+// Aşağıdakı ingiliscə şərhlər hər addımı ətraflı izah edir.
+// ════════════════════════════════════════════════════════════════════════
 using System.Net;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.DataProtection;

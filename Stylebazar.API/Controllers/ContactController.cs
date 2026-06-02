@@ -7,6 +7,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.API.Controllers;
 
+// ContactController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]

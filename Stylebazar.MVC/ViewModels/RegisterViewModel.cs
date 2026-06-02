@@ -4,6 +4,7 @@ using Stylebazar.MVC.Validation;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// RegisterViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class RegisterViewModel
 {
     [Required(ErrorMessage = "Ad-soyad daxil edin.")]

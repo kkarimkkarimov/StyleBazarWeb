@@ -4,6 +4,10 @@ using Stylebazar.BLL.Exceptions;
 
 namespace Stylebazar.API.Middlewares;
 
+// EXCEPTION MIDDLEWARE — bütün API sorğularını əhatə edən "tələ". İçəridə baş verən hər
+// xətanı tutur və onu uyğun HTTP status koduna + JSON mesaja çevirir (NotFound→404,
+// Validation→400, Business→422, gözlənilməz→500). Beləliklə kod hər yerdə try/catch yazmır
+// və istifadəçiyə çirkin xəta yox, səliqəli JSON cavab gedir.
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;

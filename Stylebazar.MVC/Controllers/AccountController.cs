@@ -20,6 +20,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.MVC.Controllers;
 
+// AccountController — HTTP sorğularını qarşılayan MVC controller-i. İstəyi alır, biznes xidmətini (service) çağırır və nəticəni Razor view / JSON kimi qaytarır.
 public class AccountController : Controller
 {
     private readonly IAuthService _authService;

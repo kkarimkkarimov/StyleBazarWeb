@@ -6,6 +6,7 @@ using Stylebazar.BLL.Services.Products;
 
 namespace Stylebazar.API.Controllers;
 
+// ProductsController — REST API controller. HTTP sorğusunu qəbul edir, biznes xidmətini çağırır və JSON cavab qaytarır.
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]

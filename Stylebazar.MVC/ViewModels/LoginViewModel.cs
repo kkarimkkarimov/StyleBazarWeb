@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Stylebazar.MVC.ViewModels;
 
+// LoginViewModel — view (səhifə) üçün məlumat modeli. Controller doldurur, Razor səhifəsi göstərir.
 public class LoginViewModel
 {
     [Required(ErrorMessage = "Email tələb olunur.")]
