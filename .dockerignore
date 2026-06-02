@@ -1,0 +1,22 @@
+# Build outputs
+**/bin/
+**/obj/
+publish/
+
+# VCS / CI / IDE
+.git/
+.github/
+.vs/
+.vscode/
+**/*.user
+
+# Runtime artifacts that must never bake into an image
+**/logs/
+**/keys/
+**/wwwroot/uploads/
+
+# Tests aren't needed in runtime images
+Stylebazar.Tests/
+
+# Local-only secrets
+**/appsettings.*.local.json

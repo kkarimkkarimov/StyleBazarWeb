@@ -41,6 +41,12 @@ Optional override-lar:
 ```bash
 ASPNETCORE_ENVIRONMENT=Production    # appsettings.Production.json-u yükləyir
 ASPNETCORE_URLS=http://+:5000        # reverse proxy üçün port
+
+# Yeni (opsional) capability-lər:
+Cors__Origins__0=https://stylebazar.az            # API: icazəli cross-origin domenlər
+DataProtection__KeyRingPath=/var/keys/stylebazar  # MVC: multi-instance üçün paylaşılan volume
+Observability__OtlpEndpoint=http://otel:4317      # OpenTelemetry collector (boş = söndürülü)
+ForwardedHeaders__KnownProxies__0=10.0.0.5        # proxy ayrı host/konteynerdədirsə
 ```
 
 `__` (ikili underscore) konfiq səviyyəsi ayırıcısıdır — `Jwt:Key` → `Jwt__Key`.
@@ -124,6 +130,13 @@ server {
 
 HSTS app tərəfindən aktivdir (`UseHsts()` — 30 gün default). HTTPS-i 30 gündən tez söndürmək lazım olsa, `UseHsts` parametrini override et.
 
+### Forwarded headers (vacib)
+
+Tətbiq `X-Forwarded-For` / `X-Forwarded-Proto`-ya **etibar edir** (`UseForwardedHeaders`). Bu olmadan rate limiter bütün istifadəçiləri proxy-nin IP-si altında **bir bucket-ə** yığır (per-IP limit çökür) və HTTPS redirect loop-a düşə bilər.
+
+- **Eyni host-da nginx** (yuxarıdakı config, loopback) — avtomatik işləyir, əlavə konfiq lazım deyil.
+- **Proxy ayrı host/konteynerdədirsə** — onun IP-lərini ver: `ForwardedHeaders__KnownProxies__0=10.0.0.5`.
+
 ---
 
 ## 💾 6. SQL backup
@@ -206,6 +219,55 @@ dotnet ef database update <EarlierMigrationName> --project Stylebazar.DAL --star
 ```
 
 **Diqqət:** Cascade-li delete olan migration-ları geriyə qaytarmaq data itkisinə səbəb ola bilər. Kritik dəyişikliklərdən əvvəl `git tag deploy-YYYY-MM-DD` ilə revision-u qeyd edin.
+
+---
+
+## 🐳 Docker
+
+Multi-stage Dockerfile-lar (`Stylebazar.MVC/Dockerfile`, `Stylebazar.API/Dockerfile`) + `docker-compose.yml` (SQL Server + MVC + API). Build context **repo root**-dur (app-lar sibling layihələrə referans verir). Image-lər **non-root** işləyir.
+
+```bash
+# Lokal tam stack
+docker compose up --build
+# MVC → http://localhost:8080   API → http://localhost:8081 (Scalar: /scalar)
+
+# Tək image (deploy üçün)
+docker build -f Stylebazar.MVC/Dockerfile -t stylebazar-mvc .
+docker run -p 8080:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e ConnectionStrings__DefaultConnection="..." \
+  -e Jwt__Key="..." -e Admin__Password="..." \
+  -v stylebazar-keys:/app/keys \
+  -v stylebazar-uploads:/app/wwwroot/uploads \
+  stylebazar-mvc
+```
+
+MVC-də Data Protection açarları `/app/keys`-ə yazılır — multi-instance üçün bu volume-u paylaşılan storage-a bağla.
+
+---
+
+## 📈 Observability
+
+- **Request logging** — hər request üçün strukturlu Serilog sətri (method / path / status / müddət). `/health` poll-ları Verbose-a düşür, 5xx + exception-lar Error.
+- **OpenTelemetry (traces + metrics)** — config ilə gated. Collector ünvanı verəndə aktivləşir:
+  ```bash
+  Observability__OtlpEndpoint=http://otel-collector:4317
+  ```
+  Backend: Grafana/Tempo, Jaeger, Azure Monitor, Honeycomb — istənilən OTLP. Boş = söndürülü (sıfır overhead).
+
+---
+
+## 🧪 Testlər & CI
+
+```bash
+# Bütün testlər (integration üçün SQL Server lazımdır)
+dotnet test Stylebazar.Tests/Stylebazar.Tests.csproj
+
+# Yalnız unit (DB lazım deyil)
+dotnet test Stylebazar.Tests/Stylebazar.Tests.csproj --filter "Category!=Integration"
+```
+
+GitHub Actions (`.github/workflows/ci.yml`): hər push/PR-də **build → test (real SQL service container) → publish**. Coverage (Cobertura) + TRX artefakt kimi yüklənir. `master`-ə publish job MVC + API artefaktlarını çıxarır.
 
 ---
 
