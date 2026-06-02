@@ -1,5 +1,9 @@
+using System.Net;
 using System.Text;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -62,6 +66,86 @@ builder.Services
         };
     });
 
+// ──────────────────────────────────────────────────────────────
+// Production hardening — parity with the MVC app
+// ──────────────────────────────────────────────────────────────
+
+// Reverse proxy (X-Forwarded-*). Behind nginx/IIS the real client IP + scheme
+// arrive in forwarded headers. Without this the rate limiter keys every request
+// on the proxy's loopback IP (one global bucket instead of per-IP) and HTTPS
+// redirect can loop. Loopback is trusted by default; extra proxy IPs (container/
+// k8s) come from config: ForwardedHeaders:KnownProxies = [ "10.0.0.5", ... ].
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.KnownIPNetworks.Clear();
+    o.KnownProxies.Clear();
+    o.KnownProxies.Add(IPAddress.Loopback);
+    o.KnownProxies.Add(IPAddress.IPv6Loopback);
+    foreach (var ip in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>())
+        if (IPAddress.TryParse(ip, out var addr)) o.KnownProxies.Add(addr);
+});
+
+// CORS — browser clients (SPA / mobile webview) calling the API cross-origin.
+// Production: explicit allow-list from config (Cors:Origins). Development:
+// reflect any origin so local front-ends on random ports work without per-port
+// config. Empty list in Production = no cross-origin access (safe default).
+builder.Services.AddCors(o => o.AddPolicy("frontend", p =>
+{
+    var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? Array.Empty<string>();
+    if (origins.Length > 0)
+        p.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+    else if (builder.Environment.IsDevelopment())
+        p.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+}));
+
+// Health — liveness/readiness wired to the DbContext so a DB outage surfaces as
+// "Unhealthy" at /health without polling controllers.
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<Stylebazar.DAL.Contexts.ApplicationDbContext>(name: "db");
+
+// Response compression for JSON payloads (HTTPS-enabled; BREACH risk bounded —
+// API responses carry no secret-mixed HTML).
+builder.Services.AddResponseCompression(o => o.EnableForHttps = true);
+
+// Rate limiting — per-IP fixed window. A generous GlobalLimiter protects every
+// endpoint automatically; the tight "auth-strict" policy is opt-in for login /
+// token endpoints via [EnableRateLimiting("auth-strict")].
+builder.Services.AddRateLimiter(opts =>
+{
+    opts.RejectionStatusCode = (int)HttpStatusCode.TooManyRequests;
+
+    opts.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 120,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    opts.AddPolicy("auth-strict", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    opts.OnRejected = async (context, ct) =>
+    {
+        context.HttpContext.Response.Headers["Retry-After"] = "60";
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            """{"message":"Too many requests. Please try again in a minute."}""", ct);
+    };
+});
+
 // Resolve file-storage RootPath against the web project's wwwroot.
 string uploadsRoot = Path.Combine(
     builder.Environment.WebRootPath ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot"),
@@ -97,6 +181,11 @@ await RoleSeeder.SeedAsync(app.Services);
 await AdminSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
+
+// Reverse-proxy headers FIRST so every downstream middleware (rate limiter,
+// HTTPS redirect, auth) sees the real client IP + scheme. No-op in dev.
+app.UseForwardedHeaders();
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -110,14 +199,41 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseResponseCompression();
+}
+
 app.UseHttpsRedirection();
+
+// Security headers on every response (JSON + served upload files). No CSP — this
+// is a JSON API, not an HTML surface; nosniff + DENY framing + tight referrer
+// are the relevant ones.
+app.Use(async (ctx, next) =>
+{
+    var h = ctx.Response.Headers;
+    h["X-Content-Type-Options"] = "nosniff";
+    h["X-Frame-Options"] = "DENY";
+    h["Referrer-Policy"] = "no-referrer";
+    h["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
+    await next();
+});
 
 // Serve uploaded files (wwwroot/uploads → /uploads/...)
 app.UseStaticFiles();
 
+app.UseRouting();
+
+// CORS after routing, before auth (preflight must not be blocked by auth).
+app.UseCors("frontend");
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Liveness/readiness — DB-backed, mirrors the MVC endpoint.
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

@@ -1,5 +1,7 @@
 using System.Net;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -31,6 +33,45 @@ ApplyDevFallbackSecrets(builder);
 // safety net for the (very rare) case where even the in-memory defaults
 // couldn't be applied.
 ValidateRequiredSecrets(builder.Configuration, builder.Environment);
+
+// ---- Reverse proxy (X-Forwarded-*) ----
+// Behind nginx/IIS the real client IP + scheme arrive in X-Forwarded-For /
+// X-Forwarded-Proto. Without honouring them, (a) the rate limiter keys every
+// request on the proxy's loopback IP — collapsing per-IP buckets into ONE
+// global bucket, so real users 429 each other while an attacker rotating
+// X-Forwarded-For slips through — and (b) UseHttpsRedirection can loop because
+// it sees the proxy→Kestrel hop as plain HTTP. Loopback is trusted by default
+// (same-host nginx, per DEPLOYMENT.md); extra proxy IPs (container/k8s) come
+// from config: ForwardedHeaders:KnownProxies = [ "10.0.0.5", ... ].
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.KnownIPNetworks.Clear();
+    o.KnownProxies.Clear();
+    o.KnownProxies.Add(IPAddress.Loopback);
+    o.KnownProxies.Add(IPAddress.IPv6Loopback);
+    foreach (var ip in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>())
+        if (IPAddress.TryParse(ip, out var addr)) o.KnownProxies.Add(addr);
+});
+
+// ---- Data Protection (key-ring persistence) ----
+// The key ring encrypts the auth cookie, antiforgery tokens and TempData. The
+// default key store is per-instance and ephemeral — regenerated on every
+// restart — so a redeploy silently logs everyone out (cookie can't decrypt) and
+// a second load-balanced instance can't read the first's cookies/antiforgery
+// tokens. Persisting to a stable path keeps sessions valid across restarts and
+// instances. Dev stays ephemeral (fine); Production defaults to <ContentRoot>/
+// keys and, for multi-instance, is pointed at a SHARED volume (or Redis) via
+// DataProtection:KeyRingPath.
+var dpBuilder = builder.Services.AddDataProtection().SetApplicationName("StyleBazar");
+var keyRingPath = builder.Configuration["DataProtection:KeyRingPath"];
+if (string.IsNullOrWhiteSpace(keyRingPath) && !builder.Environment.IsDevelopment())
+    keyRingPath = Path.Combine(builder.Environment.ContentRootPath, "keys");
+if (!string.IsNullOrWhiteSpace(keyRingPath))
+{
+    Directory.CreateDirectory(keyRingPath);
+    dpBuilder.PersistKeysToFileSystem(new DirectoryInfo(keyRingPath));
+}
 
 // ---- Localization (AZ / RU / EN) ----
 // Resources live in /Resources/SharedResource.{culture}.resx. The neutral
@@ -199,6 +240,11 @@ using (var scope = app.Services.CreateScope())
 await RoleSeeder.SeedAsync(app.Services);
 await AdminSeeder.SeedAsync(app.Services);
 await SubscriptionSeeder.SeedAsync(app.Services);
+
+// Reverse-proxy headers FIRST — every downstream middleware (rate limiter,
+// HTTPS redirect, auth) must see the real client IP + scheme, not the proxy's.
+// No-op in dev (no forwarded headers present).
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
