@@ -6,15 +6,18 @@ using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.DAL.Repositories.Concrete;
 
+// Message repository-sinin GERÇƏKLƏŞMƏSİ. CRUD EfRepositoryBase-dən gəlir; əlavə olaraq
+// "söhbəti oxundu işarələ" metodunu effektiv (çoxluq-əsaslı) şəkildə həyata keçirir.
 public class MessageRepository : EfRepositoryBase<Message, int, ApplicationDbContext>, IMessageRepository
 {
     public MessageRepository(ApplicationDbContext context) : base(context) { }
 
     public async Task<int> MarkConversationReadAsync(int conversationId, string readerUserId, CancellationToken ct = default)
     {
-        // Single set-based UPDATE — no entities loaded into the change tracker,
-        // no per-row SaveChanges. ExecuteUpdateAsync respects the soft-delete
-        // global query filter, so deleted rows are left untouched.
+        // Tək, çoxluq-əsaslı (set-based) UPDATE — heç bir obyekt yaddaşa (change tracker-ə)
+        // yüklənmir, sətir-sətir SaveChanges yoxdur. ExecuteUpdateAsync soft-delete filtrinə
+        // hörmət edir, ona görə silinmiş sətirlərə toxunulmur.
+        // Şərt: bu söhbətdə + göndərən oxucu DEYİL + hələ oxunmayıb → IsReadByRecipient = true.
         return await Context.Set<Message>()
             .Where(m => m.ConversationId == conversationId
                         && m.SenderId != readerUserId
