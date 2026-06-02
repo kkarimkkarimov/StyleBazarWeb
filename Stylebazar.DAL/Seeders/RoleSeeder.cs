@@ -8,27 +8,29 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.DAL.Seeders;
 
+// ROL SEEDER — tətbiq ilk dəfə başlayanda sistemə lazım olan rolları (Admin, Seller, Buyer)
+// bazada yaradır. "Seed" = ilkin/zəruri məlumatı bazaya "əkmək". İdempotentdir: rol artıq varsa atlanır.
 public static class RoleSeeder
 {
     public static async Task SeedAsync(IServiceProvider services)
     {
-        using IServiceScope scope = services.CreateScope();
+        using IServiceScope scope = services.CreateScope();   // xidmətlər üçün müvəqqəti scope
         ILogger logger = scope.ServiceProvider
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger(typeof(RoleSeeder).FullName!);
 
-        // Wait for LocalDB / SQL Server to be reachable.
-        // Useful when LocalDB is cold-starting and EF's built-in
-        // retry policy doesn't cover hard-failure connection errors.
+        // Baza əlçatan olana qədər gözlə (LocalDB / SQL Server soyuq başlayanda lazım olur).
         await WaitForDatabaseAsync(scope.ServiceProvider, logger);
 
+        // RoleManager — Identity-nin rol idarəetmə xidməti.
         RoleManager<AppRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
 
+        // UserRole enum-undakı hər dəyər (Admin, Seller, Buyer) üçün rol yarat.
         foreach (UserRole role in Enum.GetValues<UserRole>())
         {
             string roleName = role.ToString();
             if (await roleManager.RoleExistsAsync(roleName))
-                continue;
+                continue;   // artıq varsa atla (idempotentlik)
 
             await roleManager.CreateAsync(new AppRole
             {
@@ -38,6 +40,7 @@ public static class RoleSeeder
         }
     }
 
+    // Baza əlçatan olana qədər təkrar-təkrar yoxlayır (maks. 10 cəhd, hər 2 saniyədən bir).
     private static async Task WaitForDatabaseAsync(IServiceProvider provider, ILogger logger)
     {
         const int maxAttempts = 10;
@@ -49,7 +52,7 @@ public static class RoleSeeder
         {
             try
             {
-                if (await db.Database.CanConnectAsync())
+                if (await db.Database.CanConnectAsync())   // bazaya qoşula bilirikmi?
                     return;
 
                 logger.LogWarning("Database not yet reachable (attempt {Attempt}/{Max}).", attempt, maxAttempts);
@@ -60,9 +63,10 @@ public static class RoleSeeder
                     attempt, maxAttempts, delay.TotalSeconds);
             }
 
-            await Task.Delay(delay);
+            await Task.Delay(delay);   // gözlə və yenidən cəhd et
         }
 
+        // 10 cəhddən sonra hələ də əlçatan deyilsə — aydın xəta ver.
         throw new InvalidOperationException(
             $"Database was not reachable after {maxAttempts} attempts. Make sure LocalDB / SQL Server is running.");
     }

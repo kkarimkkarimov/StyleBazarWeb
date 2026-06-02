@@ -7,6 +7,9 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.DAL.Seeders;
 
+// ADMIN SEEDER — başlanğıcda konfiqurasiyadakı (appsettings/env) məlumatla admin
+// istifadəçisini yaradır. Əgər həmin email-li istifadəçi artıq varsa, onu Admin roluna
+// yüksəldir. İdempotentdir: dəfələrlə işləsə də təkrar admin yaratmır.
 public static class AdminSeeder
 {
     public static async Task SeedAsync(IServiceProvider services)
@@ -17,10 +20,12 @@ public static class AdminSeeder
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger(typeof(AdminSeeder).FullName!);
 
+        // Admin məlumatlarını konfiqurasiyadan oxu (Admin:Email, Admin:FullName, Admin:Password).
         string? email = config["Admin:Email"];
         string? fullName = config["Admin:FullName"];
         string? password = config["Admin:Password"];
 
+        // Hər hansı biri yoxdursa — admin yaratmağı atla.
         if (string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrWhiteSpace(fullName) ||
             string.IsNullOrWhiteSpace(password))
@@ -31,32 +36,28 @@ public static class AdminSeeder
 
         UserManager<AppUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
+        // Bu email-li istifadəçi artıq varmı?
         AppUser? existing = await userManager.FindByEmailAsync(email);
         if (existing is not null)
         {
             bool wasAdmin = await userManager.IsInRoleAsync(existing, UserRole.Admin.ToString());
 
-            // Promote to Admin if not already in the role.
+            // Admin rolunda deyilsə — Admin roluna əlavə et.
             if (!wasAdmin)
                 await userManager.AddToRoleAsync(existing, UserRole.Admin.ToString());
 
-            // ONE-TIME password reset on promotion only. Without this, taking
-            // an existing user (e.g. a previously-registered Buyer) and making
-            // them admin via Admin__Email config leaves them with their OLD
-            // password — the config password never gets applied. Once they're
-            // already in the Admin role, subsequent restarts skip this so a
-            // self-service password change via /Account/Profile isn't reverted
-            // every time the app boots.
+            // YALNIZ yüksəltmə anında BİR dəfə parolu sinxronlaşdır. Yəni mövcud bir
+            // istifadəçini (məs. əvvəl Buyer olanı) admin edəndə, onun parolunu
+            // konfiqdəki parola çevir. Artıq admindirsə bu hissə atlanır ki, sonradan
+            // istifadəçinin özü dəyişdiyi parol hər başlanğıcda geri qayıtmasın.
             if (!wasAdmin)
             {
+                // Parolu birbaşa təyin etmək olmur — Identity reset token tələb edir.
                 string resetToken = await userManager.GeneratePasswordResetTokenAsync(existing);
                 await userManager.ResetPasswordAsync(existing, resetToken, password);
 
-                // Make sure FullName reflects the configured admin name and
-                // the email is treated as confirmed (Identity uses
-                // EmailConfirmed for token-based flows like password reset).
                 existing.FullName = fullName;
-                existing.EmailConfirmed = true;
+                existing.EmailConfirmed = true;   // admin email-i təsdiqlənmiş sayılır
                 if (existing.CreatedDate == default) existing.CreatedDate = DateTime.UtcNow;
                 await userManager.UpdateAsync(existing);
 
@@ -66,8 +67,7 @@ public static class AdminSeeder
             }
             else
             {
-                // Backfill CreatedDate for admins seeded before that field was set
-                // (pre-fix runs left it at DateTime.MinValue / 0001-01-01).
+                // Köhnə admin-lərdə CreatedDate boş qalıbsa (yamaqdan əvvəl) — doldur.
                 if (existing.CreatedDate == default)
                 {
                     existing.CreatedDate = DateTime.UtcNow;
@@ -77,6 +77,7 @@ public static class AdminSeeder
             return;
         }
 
+        // İstifadəçi yoxdursa — yeni admin yarat.
         AppUser admin = new()
         {
             Id = Guid.NewGuid().ToString(),
@@ -84,11 +85,12 @@ public static class AdminSeeder
             Email = email,
             FullName = fullName,
             EmailConfirmed = true,
-            // AppUser is IdentityUser-based, not Entity<TId>, so the SaveChanges
-            // audit hook doesn't fire — stamp creation time explicitly.
+            // AppUser Identity-əsaslıdır (Entity<TId> deyil), ona görə SaveChanges audit
+            // hook-u işləmir — yaranma tarixini əl ilə qoyuruq.
             CreatedDate = DateTime.UtcNow
         };
 
+        // İstifadəçini parol ilə yarat (Identity parolu hash-ləyir).
         IdentityResult create = await userManager.CreateAsync(admin, password);
         if (!create.Succeeded)
         {
@@ -97,6 +99,7 @@ public static class AdminSeeder
             return;
         }
 
+        // Admin roluna əlavə et. Alınmasa — yaratdığımız istifadəçini geri sil (təmizlik).
         IdentityResult role = await userManager.AddToRoleAsync(admin, UserRole.Admin.ToString());
         if (!role.Succeeded)
         {
