@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Products;
 
 namespace Stylebazar.BLL.Services.Products;
 
+// IProductService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IProductService
 {
     Task<Paginate<ProductListDto>> GetListAsync(ProductListQueryDto query, CancellationToken ct = default);

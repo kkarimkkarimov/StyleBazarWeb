@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Contact;
 
+// CreateContactMessageDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateContactMessageDto
 {
     public string FullName { get; set; } = string.Empty;

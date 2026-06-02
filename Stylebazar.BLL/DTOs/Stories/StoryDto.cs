@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Stories;
 
+// StoryDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class StoryDto
 {
     public int Id { get; set; }

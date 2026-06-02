@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Account;
 
+// LoginEventDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class LoginEventDto
 {
     public int Id { get; set; }

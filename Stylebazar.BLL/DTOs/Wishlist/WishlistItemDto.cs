@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Wishlist;
 
+// WishlistItemDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class WishlistItemDto
 {
     public int Id { get; set; }

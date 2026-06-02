@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Stylebazar.BLL.Services.FileStorage;
 
+// IFileStorageService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IFileStorageService
 {
     /// <summary>

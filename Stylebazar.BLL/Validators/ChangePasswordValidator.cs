@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Account;
 
 namespace Stylebazar.BLL.Validators;
 
+// ChangePasswordValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class ChangePasswordValidator : AbstractValidator<ChangePasswordDto>
 {
     public ChangePasswordValidator()

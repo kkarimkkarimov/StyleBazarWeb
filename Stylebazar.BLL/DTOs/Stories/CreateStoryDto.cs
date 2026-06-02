@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Stories;
 
+// CreateStoryDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateStoryDto
 {
     public string? Caption { get; set; }

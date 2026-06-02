@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Account;
 
 namespace Stylebazar.BLL.Validators;
 
+// UpdateProfileValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class UpdateProfileValidator : AbstractValidator<UpdateProfileDto>
 {
     public UpdateProfileValidator()

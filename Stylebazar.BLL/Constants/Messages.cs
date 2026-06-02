@@ -1,5 +1,8 @@
 namespace Stylebazar.BLL.Constants;
 
+// MESAJLAR (SABİTLƏR) — biznes qaydalarında atılan xəta mesajlarının mərkəzi yeri.
+// Bir yerdə saxlanır ki, təkrar yazılmasın və lazım olanda asanca dəyişdirilsin.
+// Hər iç-sinif bir domenə aiddir (Category, Store, Product, ...).
 public static class Messages
 {
     public static class Category

@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Products;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateProductValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateProductValidator : AbstractValidator<CreateProductDto>
 {
     public CreateProductValidator()

@@ -10,6 +10,7 @@ using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.BLL.Services.Wishlist;
 
+// WishlistManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class WishlistManager : IWishlistService
 {
     private readonly IWishlistRepository _repo;

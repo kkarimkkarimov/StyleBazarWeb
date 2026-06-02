@@ -2,6 +2,7 @@ using Stylebazar.BLL.DTOs.Authentication;
 
 namespace Stylebazar.BLL.Services.Authentication;
 
+// IAuthService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IAuthService
 {
     /// <summary>

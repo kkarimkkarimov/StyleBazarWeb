@@ -11,6 +11,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Newsletter;
 
+// NewsletterManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class NewsletterManager : INewsletterService
 {
     private const int MaxPageSize = 200;

@@ -4,6 +4,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.Services.Contact;
 
+// IContactMessageService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IContactMessageService
 {
     Task<ContactMessageDto> SubmitAsync(CreateContactMessageDto dto, string? ipAddress, CancellationToken ct = default);

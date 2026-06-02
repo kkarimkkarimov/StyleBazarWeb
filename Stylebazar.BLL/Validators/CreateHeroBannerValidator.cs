@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.HeroBanners;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateHeroBannerValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateHeroBannerValidator : AbstractValidator<CreateHeroBannerDto>
 {
     public CreateHeroBannerValidator()

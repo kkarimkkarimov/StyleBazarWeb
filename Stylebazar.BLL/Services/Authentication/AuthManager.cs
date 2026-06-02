@@ -9,6 +9,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Authentication;
 
+// AuthManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class AuthManager : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;

@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Analytics;
 
 namespace Stylebazar.BLL.Validators;
 
+// RecordContactClickValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class RecordContactClickValidator : AbstractValidator<RecordContactClickDto>
 {
     public RecordContactClickValidator()

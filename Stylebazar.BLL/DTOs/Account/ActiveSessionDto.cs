@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Account;
 
+// ActiveSessionDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class ActiveSessionDto
 {
     public string DeviceLabel { get; set; } = "Windows PC";

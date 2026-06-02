@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Reviews;
 
+// ReviewDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class ReviewDto
 {
     public int Id { get; set; }

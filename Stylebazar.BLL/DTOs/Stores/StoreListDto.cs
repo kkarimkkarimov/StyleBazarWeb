@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Stores;
 
+// StoreListDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class StoreListDto
 {
     public int Id { get; set; }

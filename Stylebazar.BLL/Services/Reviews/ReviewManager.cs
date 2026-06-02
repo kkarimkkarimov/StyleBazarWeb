@@ -16,6 +16,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Reviews;
 
+// ReviewManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class ReviewManager : IReviewService
 {
     private readonly IReviewRepository _reviews;

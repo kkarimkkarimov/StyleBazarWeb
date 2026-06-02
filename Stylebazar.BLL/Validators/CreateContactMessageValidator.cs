@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Contact;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateContactMessageValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateContactMessageValidator : AbstractValidator<CreateContactMessageDto>
 {
     public CreateContactMessageValidator()

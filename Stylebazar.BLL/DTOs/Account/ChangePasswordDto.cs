@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Account;
 
+// ChangePasswordDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class ChangePasswordDto
 {
     public string CurrentPassword { get; set; } = string.Empty;

@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Categories;
 
+// CreateCategoryDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateCategoryDto
 {
     public string Name { get; set; } = string.Empty;

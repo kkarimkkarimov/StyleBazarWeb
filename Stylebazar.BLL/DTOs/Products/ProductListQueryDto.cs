@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Products;
 
+// ProductListQueryDto — siyahı üçün filtr / səhifələmə parametrlərini daşıyan sorğu DTO-su.
 public class ProductListQueryDto
 {
     private const int MaxPageSize = 100;

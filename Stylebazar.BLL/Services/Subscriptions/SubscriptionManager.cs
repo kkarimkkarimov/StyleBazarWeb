@@ -11,6 +11,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Subscriptions;
 
+// SubscriptionManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class SubscriptionManager : ISubscriptionService
 {
     private readonly ApplicationDbContext _db;

@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Stores;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateStoreValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateStoreValidator : AbstractValidator<CreateStoreDto>
 {
     public CreateStoreValidator()

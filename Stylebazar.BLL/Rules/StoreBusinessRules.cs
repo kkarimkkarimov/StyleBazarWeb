@@ -5,6 +5,7 @@ using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.BLL.Rules;
 
+// StoreBusinessRules — müvafiq əməliyyatlardan əvvəl yoxlanılan BİZNES QAYDALARI. Hər metod bir şərti yoxlayır; pozularsa xəta (BusinessException/NotFound) atır.
 public class StoreBusinessRules
 {
     private readonly IStoreRepository _stores;

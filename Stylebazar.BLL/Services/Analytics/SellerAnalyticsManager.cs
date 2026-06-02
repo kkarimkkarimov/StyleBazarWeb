@@ -5,6 +5,7 @@ using Stylebazar.DAL.Contexts;
 
 namespace Stylebazar.BLL.Services.Analytics;
 
+// SellerAnalyticsManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class SellerAnalyticsManager : ISellerAnalyticsService
 {
     private readonly ApplicationDbContext _db;

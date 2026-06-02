@@ -2,6 +2,7 @@ using Stylebazar.BLL.DTOs.Analytics;
 
 namespace Stylebazar.BLL.Services.Analytics;
 
+// ISellerAnalyticsService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface ISellerAnalyticsService
 {
     /// <summary>

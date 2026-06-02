@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Products;
 
+// SetFeaturedDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class SetFeaturedDto
 {
     /// <summary>

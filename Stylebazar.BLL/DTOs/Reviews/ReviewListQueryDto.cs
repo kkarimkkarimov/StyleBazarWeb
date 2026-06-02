@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Reviews;
 
+// ReviewListQueryDto — siyahı üçün filtr / səhifələmə parametrlərini daşıyan sorğu DTO-su.
 public class ReviewListQueryDto
 {
     private const int MaxPageSize = 100;

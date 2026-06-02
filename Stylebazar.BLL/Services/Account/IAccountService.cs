@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Account;
 
 namespace Stylebazar.BLL.Services.Account;
 
+// IAccountService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IAccountService
 {
     /// <summary>

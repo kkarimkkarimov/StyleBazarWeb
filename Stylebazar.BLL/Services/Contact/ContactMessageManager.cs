@@ -12,6 +12,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Contact;
 
+// ContactMessageManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class ContactMessageManager : IContactMessageService
 {
     private const int MaxPageSize = 100;

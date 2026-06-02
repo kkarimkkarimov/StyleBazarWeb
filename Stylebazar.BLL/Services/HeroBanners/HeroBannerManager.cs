@@ -11,6 +11,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.HeroBanners;
 
+// HeroBannerManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class HeroBannerManager : IHeroBannerService
 {
     private readonly IHeroBannerRepository _repo;

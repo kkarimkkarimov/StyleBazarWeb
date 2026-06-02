@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Stores;
 
 namespace Stylebazar.BLL.Validators;
 
+// UpdateStoreValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class UpdateStoreValidator : AbstractValidator<UpdateStoreDto>
 {
     public UpdateStoreValidator()

@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.HeroBanners;
 
+// CreateHeroBannerDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateHeroBannerDto
 {
     public string Title { get; set; } = string.Empty;

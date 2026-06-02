@@ -5,11 +5,15 @@ using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.BLL.Rules;
 
+// KATEQORIYA BİZNES QAYDALARI — kateqoriya əməliyyatlarından əvvəl yoxlanılan şərtlər.
+// Hər metod BİR qaydanı yoxlayır; qayda pozularsa xəta (BusinessException / NotFound) atır.
+// Manager bu qaydaları çağırır ki, biznes məntiqi bir yerdə, təmiz və təkrar istifadə oluna bilən qalsın.
 public class CategoryBusinessRules
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IProductRepository _productRepository;
 
+    // Yoxlamalar üçün bazaya baxmaq lazımdır, ona görə repository-lər DI ilə gəlir.
     public CategoryBusinessRules(
         ICategoryRepository categoryRepository,
         IProductRepository productRepository)
@@ -18,6 +22,8 @@ public class CategoryBusinessRules
         _productRepository = productRepository;
     }
 
+    // Slug (URL adı) unikal olmalıdır — eyni slug-lu başqa kateqoriya varsa xəta.
+    // excludeId: yeniləmədə kateqoriyanın özünü istisna etmək üçün (öz slug-u ilə toqquşmasın).
     public async Task SlugMustBeUniqueAsync(string slug, int? excludeId = null, CancellationToken ct = default)
     {
         bool exists = await _categoryRepository.AnyAsync(
@@ -29,6 +35,7 @@ public class CategoryBusinessRules
             throw new BusinessException(Messages.Category.SlugAlreadyExists);
     }
 
+    // Kateqoriya mövcud olmalıdır — yoxdursa NotFound. Tapılarsa obyekti qaytarır.
     public async Task<Category> CategoryMustExistAsync(int id, CancellationToken ct = default)
     {
         Category? category = await _categoryRepository.GetAsync(
@@ -42,10 +49,11 @@ public class CategoryBusinessRules
         return category;
     }
 
+    // Valideyn kateqoriya göstərilibsə, o, bazada mövcud olmalıdır.
     public async Task ParentMustExistIfSpecifiedAsync(int? parentId, CancellationToken ct = default)
     {
         if (!parentId.HasValue)
-            return;
+            return;   // valideyn göstərilməyibsə yoxlamağa ehtiyac yoxdur
 
         bool exists = await _categoryRepository.AnyAsync(
             c => c.Id == parentId.Value,
@@ -56,16 +64,16 @@ public class CategoryBusinessRules
             throw new BusinessException(Messages.Category.ParentNotFound);
     }
 
+    // Kateqoriya öz-özünün valideyni ola bilməz (A-nın valideyni yenə A olmaz).
     public void CannotBeOwnParent(int categoryId, int? parentId)
     {
         if (parentId.HasValue && parentId.Value == categoryId)
             throw new BusinessException(Messages.Category.CannotBeOwnParent);
     }
 
-    /// <summary>
-    /// Walks the parent chain upward from <paramref name="newParentId"/>.
-    /// If <paramref name="categoryId"/> is reached, the assignment would create a cycle.
-    /// </summary>
+    // DÖVRİ İSTİNADIN qarşısını alır: yeni valideyndən başlayıb zəncirlə yuxarı qalxır;
+    // əgər yolda bu kateqoriyanın özünə rast gəlsə, bu təyinat dövr (loop) yaradardı → xəta.
+    // safetyHops: sonsuz dövrəyə qarşı təhlükəsizlik limiti (maks. 100 addım).
     public async Task NoCircularReferenceAsync(int categoryId, int? newParentId, CancellationToken ct = default)
     {
         if (!newParentId.HasValue)
@@ -85,10 +93,11 @@ public class CategoryBusinessRules
                 enableTracking: false,
                 cancellationToken: ct);
 
-            current = node?.ParentCategoryId;
+            current = node?.ParentCategoryId;   // bir pillə yuxarı qalx
         }
     }
 
+    // Alt-kateqoriyası olan kateqoriya silinə bilməz (əvvəl uşaq kateqoriyaları köçür/sil).
     public async Task CannotDeleteWhenHasChildrenAsync(int categoryId, CancellationToken ct = default)
     {
         bool hasChildren = await _categoryRepository.AnyAsync(
@@ -100,6 +109,7 @@ public class CategoryBusinessRules
             throw new BusinessException(Messages.Category.HasChildren);
     }
 
+    // İçində məhsulu olan kateqoriya silinə bilməz (məhsullar sahibsiz/kateqoriyasız qalmasın).
     public async Task CannotDeleteWhenHasProductsAsync(int categoryId, CancellationToken ct = default)
     {
         bool hasProducts = await _productRepository.AnyAsync(

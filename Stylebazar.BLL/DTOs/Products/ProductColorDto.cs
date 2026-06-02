@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Products;
 
+// ProductColorDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class ProductColorDto
 {
     public int Id { get; set; }

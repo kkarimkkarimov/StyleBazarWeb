@@ -15,6 +15,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Account;
 
+// AccountManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class AccountManager : IAccountService
 {
     private const string AvatarSubfolder = "avatars";

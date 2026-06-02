@@ -8,6 +8,7 @@ using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.BLL.Services.LoginEvents;
 
+// LoginEventManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class LoginEventManager : ILoginEventService
 {
     private readonly ILoginEventRepository _events;

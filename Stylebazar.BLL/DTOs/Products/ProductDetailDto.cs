@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Products;
 
+// ProductDetailDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class ProductDetailDto
 {
     public int Id { get; set; }

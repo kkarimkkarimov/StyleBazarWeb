@@ -12,6 +12,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Addresses;
 
+// AddressManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class AddressManager : IAddressService
 {
     /// <summary>Hard cap on per-user address count. Stops bot-stuffed accounts.</summary>

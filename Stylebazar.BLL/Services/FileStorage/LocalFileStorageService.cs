@@ -5,6 +5,7 @@ using Stylebazar.BLL.Settings;
 
 namespace Stylebazar.BLL.Services.FileStorage;
 
+// LocalFileStorageService — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class LocalFileStorageService : IFileStorageService
 {
     private readonly FileStorageSettings _settings;

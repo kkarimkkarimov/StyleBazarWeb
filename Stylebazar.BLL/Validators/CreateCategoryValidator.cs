@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Categories;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateCategoryValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateCategoryValidator : AbstractValidator<CreateCategoryDto>
 {
     public CreateCategoryValidator()

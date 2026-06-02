@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Stores;
 
 namespace Stylebazar.BLL.Services.Stores;
 
+// IStoreService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IStoreService
 {
     Task<Paginate<StoreListDto>> GetListAsync(StoreListQueryDto query, CancellationToken ct = default);

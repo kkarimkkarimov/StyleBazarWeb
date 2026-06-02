@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Stories;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateStoryValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateStoryValidator : AbstractValidator<CreateStoryDto>
 {
     /// <summary>Max video length so the viewer doesn't stall on long uploads.</summary>

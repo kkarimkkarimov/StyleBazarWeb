@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Products;
 
+// CreateProductDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateProductDto
 {
     // ---- Core ----

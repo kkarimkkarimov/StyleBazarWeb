@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Authentication;
 
+// LoginResultDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class LoginResultDto
 {
     public string Token { get; set; } = string.Empty;

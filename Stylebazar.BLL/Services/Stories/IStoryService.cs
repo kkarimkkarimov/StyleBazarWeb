@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Stories;
 
 namespace Stylebazar.BLL.Services.Stories;
 
+// IStoryService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IStoryService
 {
     Task<List<StoreStoriesDto>> GetActiveFeedAsync(CancellationToken ct = default);

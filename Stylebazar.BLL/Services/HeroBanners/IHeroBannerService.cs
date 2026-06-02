@@ -2,6 +2,7 @@ using Stylebazar.BLL.DTOs.HeroBanners;
 
 namespace Stylebazar.BLL.Services.HeroBanners;
 
+// IHeroBannerService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IHeroBannerService
 {
     Task<List<HeroBannerDto>> GetActiveAsync(CancellationToken ct = default);

@@ -31,10 +31,16 @@ using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.BLL.DependencyResolver;
 
+// DI (ASILILIQ İNYEKSİYASI) QEYDİYYATI — BLL qatının bütün xidmətlərini DI konteynerinə qeyd edir.
+// İki extension metod var: AddIdentityServices (istifadəçi/rol sistemi) və AddBusinessServices
+// (mapper, validator-lar, manager-lər, qaydalar). Bunları API/MVC-nin Program.cs-i çağırır.
 public static class ServiceRegistration
 {
+    // İstifadəçi/rol sistemini (ASP.NET Core Identity) qurur.
     public static IServiceCollection AddIdentityServices(this IServiceCollection services)
     {
+        // Identity-ni qur: parol siyasəti (min 6, rəqəm + kiçik hərf), unikal email, hesab kilidi
+        // (5 uğursuz cəhd → 15 dəqiqə kilid — brute-force/parol təxmin etməyə qarşı qoruma).
         services
             .AddIdentity<AppUser, AppRole>(options =>
             {
@@ -63,10 +69,14 @@ public static class ServiceRegistration
         return services;
     }
 
+    // Bütün biznes (BLL) xidmətlərini DI-a qeyd edir.
     public static IServiceCollection AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // AutoMapper (entity↔DTO çevirmələri) + bütün FluentValidation validator-larını avtomatik tap və qeyd et.
         services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
         services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
+        // Qeyd: aşağıda hər domen üçün "AddScoped<IXService, XManager>" — DI həmin manager-i
+        // lazım olan yerə (controller-ə) avtomatik inject edir. "Scoped" = hər sorğuya bir nümunə.
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));

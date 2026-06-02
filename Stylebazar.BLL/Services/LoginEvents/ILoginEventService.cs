@@ -3,6 +3,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.Services.LoginEvents;
 
+// ILoginEventService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface ILoginEventService
 {
     /// <summary>

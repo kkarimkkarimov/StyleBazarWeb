@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Categories;
 
+// UpdateCategoryDto — mövcud qeydi YENİLƏMƏK üçün sahələri daşıyan DTO.
 public class UpdateCategoryDto
 {
     public string Name { get; set; } = string.Empty;

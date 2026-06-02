@@ -17,6 +17,7 @@ using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
 
 namespace Stylebazar.BLL.Services.Stores;
 
+// StoreManager — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class StoreManager : IStoreService
 {
     private const string ProfileSubfolder = "stores/profile";

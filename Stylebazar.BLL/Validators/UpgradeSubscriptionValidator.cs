@@ -4,6 +4,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.Validators;
 
+// UpgradeSubscriptionValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class UpgradeSubscriptionValidator : AbstractValidator<UpgradeSubscriptionDto>
 {
     public UpgradeSubscriptionValidator()

@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Authentication;
 
 namespace Stylebazar.BLL.Validators;
 
+// LoginValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class LoginValidator : AbstractValidator<LoginDto>
 {
     public LoginValidator()

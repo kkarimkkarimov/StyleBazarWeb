@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Newsletter;
 
+// NewsletterSubscriberDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class NewsletterSubscriberDto
 {
     public int Id { get; set; }

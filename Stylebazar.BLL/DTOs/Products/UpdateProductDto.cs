@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Products;
 
+// UpdateProductDto — mövcud qeydi YENİLƏMƏK üçün sahələri daşıyan DTO.
 public class UpdateProductDto
 {
     // ---- Core ----

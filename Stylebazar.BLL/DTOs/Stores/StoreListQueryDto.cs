@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Stores;
 
+// StoreListQueryDto — siyahı üçün filtr / səhifələmə parametrlərini daşıyan sorğu DTO-su.
 public class StoreListQueryDto
 {
     private const int MaxPageSize = 100;

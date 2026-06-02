@@ -8,6 +8,7 @@ using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.BLL.Services.Authentication;
 
+// TokenService — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class TokenService : ITokenService
 {
     private readonly JwtSettings _settings;

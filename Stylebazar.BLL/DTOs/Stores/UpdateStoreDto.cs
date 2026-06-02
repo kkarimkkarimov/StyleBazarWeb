@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Stores;
 
+// UpdateStoreDto — mövcud qeydi YENİLƏMƏK üçün sahələri daşıyan DTO.
 public class UpdateStoreDto
 {
     public string Name { get; set; } = string.Empty;

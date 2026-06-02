@@ -2,6 +2,7 @@ using Stylebazar.BLL.DTOs.Analytics;
 
 namespace Stylebazar.BLL.Services.Analytics;
 
+// IContactClickService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IContactClickService
 {
     /// <summary>

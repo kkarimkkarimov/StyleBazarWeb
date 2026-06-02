@@ -4,6 +4,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.Validators;
 
+// SendMessageValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class SendMessageValidator : AbstractValidator<SendMessageDto>
 {
     public SendMessageValidator()

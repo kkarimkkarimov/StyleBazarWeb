@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Newsletter;
 
 namespace Stylebazar.BLL.Services.Newsletter;
 
+// INewsletterService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface INewsletterService
 {
     Task<NewsletterSubscriberDto> SubscribeAsync(SubscribeDto dto, CancellationToken ct = default);

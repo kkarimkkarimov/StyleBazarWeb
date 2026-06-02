@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Addresses;
 
+// UpdateAddressDto — mövcud qeydi YENİLƏMƏK üçün sahələri daşıyan DTO.
 public class UpdateAddressDto
 {
     public string Title { get; set; } = string.Empty;

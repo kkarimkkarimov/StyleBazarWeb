@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Newsletter;
 
 namespace Stylebazar.BLL.Validators;
 
+// SubscribeValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class SubscribeValidator : AbstractValidator<SubscribeDto>
 {
     public SubscribeValidator()

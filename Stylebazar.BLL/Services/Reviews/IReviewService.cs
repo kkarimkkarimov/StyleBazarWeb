@@ -4,6 +4,7 @@ using Stylebazar.BLL.DTOs.Reviews;
 
 namespace Stylebazar.BLL.Services.Reviews;
 
+// IReviewService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface IReviewService
 {
     Task<Paginate<ReviewDto>> GetByProductAsync(int productId, ReviewListQueryDto query, CancellationToken ct = default);

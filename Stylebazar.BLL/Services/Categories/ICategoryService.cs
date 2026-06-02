@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Categories;
 
 namespace Stylebazar.BLL.Services.Categories;
 
+// ICategoryService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface ICategoryService
 {
     Task<Paginate<CategoryListDto>> GetListAsync(CategoryListQueryDto query, CancellationToken ct = default);

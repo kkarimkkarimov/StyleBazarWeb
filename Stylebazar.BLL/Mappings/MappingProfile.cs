@@ -14,6 +14,10 @@ using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.BLL.Mappings;
 
+// AUTOMAPPER PROFİLİ — entity ↔ DTO çevirmə qaydalarının mərkəzi yeri.
+// "CreateMap<Mənbə, Hədəf>()" iki tipi bir-birinə çevirməyi öyrədir; ForMember ilə xüsusi
+// sahələri əl ilə təyin edirik (məs. hesablanmış AverageRating, MainImageUrl). Manager-lər
+// _mapper.Map<...>() çağıranda bu qaydalar işə düşür.
 public class MappingProfile : Profile
 {
     public MappingProfile()

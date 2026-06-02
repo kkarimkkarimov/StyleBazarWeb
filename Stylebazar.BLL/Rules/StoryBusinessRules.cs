@@ -5,6 +5,7 @@ using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.BLL.Rules;
 
+// StoryBusinessRules — müvafiq əməliyyatlardan əvvəl yoxlanılan BİZNES QAYDALARI. Hər metod bir şərti yoxlayır; pozularsa xəta (BusinessException/NotFound) atır.
 public class StoryBusinessRules
 {
     private const int MaxActiveStoriesPerStore = 10;

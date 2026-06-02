@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Contact;
 
+// ContactMessageDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class ContactMessageDto
 {
     public int Id { get; set; }

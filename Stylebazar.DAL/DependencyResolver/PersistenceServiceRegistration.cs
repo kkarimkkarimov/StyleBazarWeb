@@ -7,12 +7,16 @@ using Stylebazar.DAL.Repositories.Concrete;
 
 namespace Stylebazar.DAL.DependencyResolver;
 
+// DI QEYDİYYATI (DAL qatı) — verilənlər bazası ilə bağlı xidmətləri konteynerə qeyd edir:
+// DbContext (SQL Server bağlantısı) + bütün repository-lər. API/MVC-nin Program.cs-i çağırır.
 public static class PersistenceServiceRegistration
 {
     public static IServiceCollection AddPersistenceServices(
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // DbContext-i qur: SQL Server bağlantısı + xəta zamanı 5 dəfə avtomatik təkrar cəhd
+        // (EnableRetryOnFailure) + SplitQuery (çoxlu Include-lu sorğunu kiçik sorğulara bölür).
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
@@ -28,6 +32,7 @@ public static class PersistenceServiceRegistration
                     // bytes over the wire, no warning.
                     .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
+        // Hər repository interfeysini öz gerçəkləşməsinə bağla — DI lazım olan yerə (manager-ə) inject etsin.
         services.AddScoped<IStoreRepository, StoreRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();

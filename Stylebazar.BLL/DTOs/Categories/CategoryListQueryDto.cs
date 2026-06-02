@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Categories;
 
+// CategoryListQueryDto — siyahı üçün filtr / səhifələmə parametrlərini daşıyan sorğu DTO-su.
 public class CategoryListQueryDto
 {
     private const int MaxPageSize = 100;

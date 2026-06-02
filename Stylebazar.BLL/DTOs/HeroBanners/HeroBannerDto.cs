@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.HeroBanners;
 
+// HeroBannerDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class HeroBannerDto
 {
     public int Id { get; set; }

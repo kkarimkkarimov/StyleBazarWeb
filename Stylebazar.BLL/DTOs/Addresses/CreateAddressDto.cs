@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Addresses;
 
+// CreateAddressDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateAddressDto
 {
     public string Title { get; set; } = string.Empty;

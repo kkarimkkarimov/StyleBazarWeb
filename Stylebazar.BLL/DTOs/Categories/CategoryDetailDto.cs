@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Categories;
 
+// CategoryDetailDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class CategoryDetailDto
 {
     public int Id { get; set; }

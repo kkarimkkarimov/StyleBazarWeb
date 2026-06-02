@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Addresses;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateAddressValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateAddressValidator : AbstractValidator<CreateAddressDto>
 {
     public CreateAddressValidator()

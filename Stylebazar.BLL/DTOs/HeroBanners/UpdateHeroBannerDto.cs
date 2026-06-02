@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.HeroBanners;
 
+// UpdateHeroBannerDto — mövcud qeydi YENİLƏMƏK üçün sahələri daşıyan DTO.
 public class UpdateHeroBannerDto
 {
     public string Title { get; set; } = string.Empty;

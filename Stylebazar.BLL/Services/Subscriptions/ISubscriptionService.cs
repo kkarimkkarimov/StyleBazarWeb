@@ -3,6 +3,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.Services.Subscriptions;
 
+// ISubscriptionService — bu xidmətin MÜQAVİLƏSİ (interfeys). Hansı əməliyyatların mövcud olacağını təyin edir; gerçəkləşmə ayrı sinifdədir.
 public interface ISubscriptionService
 {
     /// <summary>

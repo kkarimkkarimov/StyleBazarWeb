@@ -1,5 +1,6 @@
 namespace Stylebazar.BLL.DTOs.Stores;
 
+// CreateStoreDto — yeni qeyd YARATMAQ üçün lazım olan sahələri daşıyan DTO (məlumat ötürmə obyekti).
 public class CreateStoreDto
 {
     public string Name { get; set; } = string.Empty;

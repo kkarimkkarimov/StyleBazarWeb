@@ -2,6 +2,7 @@ using Stylebazar.DAL.Entities.Enums;
 
 namespace Stylebazar.BLL.DTOs.Authentication;
 
+// RegisterDto — məlumatı UI / API cavabına ötürən DTO (oxu modeli).
 public class RegisterDto
 {
     public string FullName { get; set; } = string.Empty;

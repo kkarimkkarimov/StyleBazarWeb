@@ -3,6 +3,7 @@ using Stylebazar.BLL.DTOs.Reviews;
 
 namespace Stylebazar.BLL.Validators;
 
+// CreateReviewValidator — FluentValidation qaydaları; müvafiq DTO-nun sahələrinin düzgünlüyünü yoxlayır.
 public class CreateReviewValidator : AbstractValidator<CreateReviewDto>
 {
     public CreateReviewValidator()

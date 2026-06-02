@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Stylebazar.BLL.Services.CurrentUser;
 
+// CurrentUserService — xidmətin GERÇƏKLƏŞMƏSİ (biznes məntiqi qatı). Yoxlama → repository/baza → nəticə axını burada idarə olunur.
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _accessor;
