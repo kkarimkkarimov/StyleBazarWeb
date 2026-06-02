@@ -4,7 +4,11 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
+using Serilog.Events;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.DAL.DependencyResolver;
 using Stylebazar.DAL.Seeders;
@@ -215,6 +219,29 @@ builder.Services.PostConfigure<Stylebazar.BLL.Settings.FileStorageSettings>(opts
     opts.BaseUrl = "/uploads";
 });
 
+// ---- OpenTelemetry (traces + metrics) ----
+// Config-gated: wired ONLY when Observability:OtlpEndpoint is set, so dev and any
+// environment without a collector pay zero cost and emit no exporter errors.
+// Point it at any OTLP backend (Grafana/Tempo, Jaeger, Azure Monitor, Honeycomb):
+//   Observability__OtlpEndpoint=http://otel-collector:4317
+var mvcOtlpEndpoint = builder.Configuration["Observability:OtlpEndpoint"];
+if (!string.IsNullOrWhiteSpace(mvcOtlpEndpoint))
+{
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(r => r.AddService(
+            serviceName: "Stylebazar.MVC",
+            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0"))
+        .WithTracing(t => t
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(o => o.Endpoint = new Uri(mvcOtlpEndpoint)))
+        .WithMetrics(m => m
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddOtlpExporter(o => o.Endpoint = new Uri(mvcOtlpEndpoint)));
+}
+
 var app = builder.Build();
 
 // Auto-apply pending migrations on startup. Idempotent — no-op when DB
@@ -245,6 +272,17 @@ await SubscriptionSeeder.SeedAsync(app.Services);
 // HTTPS redirect, auth) must see the real client IP + scheme, not the proxy's.
 // No-op in dev (no forwarded headers present).
 app.UseForwardedHeaders();
+
+// One structured log line per request (method, path, status, elapsed) into the
+// existing Serilog sinks — ready for Seq/ELK/Datadog ingestion. Health-check
+// polls drop to Verbose so they don't drown the signal; 5xx + exceptions log Error.
+app.UseSerilogRequestLogging(opts =>
+{
+    opts.GetLevel = (httpContext, elapsed, ex) =>
+        ex is not null || httpContext.Response.StatusCode >= 500 ? LogEventLevel.Error
+        : httpContext.Request.Path.StartsWithSegments("/health") ? LogEventLevel.Verbose
+        : LogEventLevel.Information;
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

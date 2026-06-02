@@ -6,8 +6,12 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using Serilog.Events;
 using Stylebazar.API.Middlewares;
 using Stylebazar.BLL.DependencyResolver;
 using Stylebazar.BLL.Settings;
@@ -158,6 +162,29 @@ builder.Services.PostConfigure<Stylebazar.BLL.Settings.FileStorageSettings>(opts
     opts.BaseUrl = "/uploads";
 });
 
+// ---- OpenTelemetry (traces + metrics) ----
+// Config-gated: wired ONLY when Observability:OtlpEndpoint is set, so dev and any
+// environment without a collector pay zero cost and emit no exporter errors.
+// Point it at any OTLP backend (Grafana/Tempo, Jaeger, Azure Monitor, Honeycomb):
+//   Observability__OtlpEndpoint=http://otel-collector:4317
+var apiOtlpEndpoint = builder.Configuration["Observability:OtlpEndpoint"];
+if (!string.IsNullOrWhiteSpace(apiOtlpEndpoint))
+{
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(r => r.AddService(
+            serviceName: "Stylebazar.API",
+            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0"))
+        .WithTracing(t => t
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(o => o.Endpoint = new Uri(apiOtlpEndpoint)))
+        .WithMetrics(m => m
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddOtlpExporter(o => o.Endpoint = new Uri(apiOtlpEndpoint)));
+}
+
 var app = builder.Build();
 
 // Auto-apply pending migrations on startup (idempotent). Without this,
@@ -185,6 +212,16 @@ await AdminSeeder.SeedAsync(app.Services);
 // Reverse-proxy headers FIRST so every downstream middleware (rate limiter,
 // HTTPS redirect, auth) sees the real client IP + scheme. No-op in dev.
 app.UseForwardedHeaders();
+
+// One structured log line per request (method, path, status, elapsed) into the
+// existing Serilog sinks. Health-check polls drop to Verbose; 5xx + exceptions Error.
+app.UseSerilogRequestLogging(opts =>
+{
+    opts.GetLevel = (httpContext, elapsed, ex) =>
+        ex is not null || httpContext.Response.StatusCode >= 500 ? LogEventLevel.Error
+        : httpContext.Request.Path.StartsWithSegments("/health") ? LogEventLevel.Verbose
+        : LogEventLevel.Information;
+});
 
 app.UseMiddleware<ExceptionMiddleware>();
 
