@@ -419,3 +419,8 @@ static void ValidateRequiredSecrets(IConfiguration cfg, IHostEnvironment env)
             "Jwt:Key must be at least 32 characters (256 bits). Generate one with: openssl rand -base64 48");
     }
 }
+
+// Top-level statements compile into an internal Program class. Exposing it as a
+// public partial lets the test project use WebApplicationFactory<Program> to
+// boot the app in-memory. No behavioural effect on the running app.
+public partial class Program { }
