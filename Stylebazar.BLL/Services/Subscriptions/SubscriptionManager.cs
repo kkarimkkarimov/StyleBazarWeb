@@ -149,6 +149,63 @@ public class SubscriptionManager : ISubscriptionService
         return await MapAsync(fresh, ct);
     }
 
+    // Stripe ödənişi təsdiqlənəndən sonra planı N ay üçün tətbiq edir (admin yox — sistem/Stripe).
+    public async Task<SubscriptionDto> ApplyPaidPlanAsync(
+        string userId, SubscriptionPlan plan, int months, string paymentReference, CancellationToken ct = default)
+    {
+        if (plan == SubscriptionPlan.Free)
+            throw new BusinessException("Pulsuz plan ödənişlə tətbiq olunmur.");
+        if (months < 1) months = 1;
+
+        AppUser? user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user is null)
+            throw new NotFoundException("İstifadəçi tapılmadı.");
+
+        // İDEMPOTENTLİK: bu ödəniş artıq tətbiq olunubsa (Notes-da ref var), heç nə etmə —
+        // mövcud aktiv abunəliyi qaytar. (Webhook + success səhifəsi eyni ödənişi göndərə bilər.)
+        if (!string.IsNullOrEmpty(paymentReference))
+        {
+            bool already = await _db.Subscriptions.AsNoTracking()
+                .AnyAsync(s => s.UserId == userId && s.Notes != null && s.Notes.Contains(paymentReference), ct);
+            if (already)
+                return await GetCurrentForUserAsync(userId, ct);
+        }
+
+        DateTime now = DateTime.UtcNow;
+        // Eyni planı uzadırsa qalan vaxtın üstünə əlavə et; fərqli plana keçirsə indidən başla.
+        DateTime baseDate = (user.CurrentPlan == plan && user.PlanExpiresAt.HasValue && user.PlanExpiresAt.Value > now)
+            ? user.PlanExpiresAt.Value
+            : now;
+        DateTime expiresAt = baseDate.AddMonths(months);
+
+        // 1. Köhnə aktiv sətirləri bağla
+        List<Subscription> activeRows = await _db.Subscriptions
+            .Where(s => s.UserId == userId && s.Status == SubscriptionStatus.Active)
+            .ToListAsync(ct);
+        foreach (Subscription prior in activeRows)
+            prior.Status = SubscriptionStatus.Cancelled;
+
+        // 2. Yeni aktiv sətir əlavə et (audit + idempotentlik üçün ödəniş ref-i Notes-da)
+        var fresh = new Subscription
+        {
+            UserId = userId,
+            Plan = plan,
+            Status = SubscriptionStatus.Active,
+            StartedAt = now,
+            ExpiresAt = expiresAt,
+            ApprovedByAdminId = null,                 // sistem/Stripe, admin yox
+            Notes = $"Stripe ödənişi · {months} ay · ref: {paymentReference}"
+        };
+        _db.Subscriptions.Add(fresh);
+
+        // 3. AppUser denormalizasiya sahələrini yenilə
+        user.CurrentPlan = plan;
+        user.PlanExpiresAt = expiresAt;
+
+        await _db.SaveChangesAsync(ct);
+        return await MapAsync(fresh, ct);
+    }
+
     // ====== Quotas ======
 
     public int GetProductLimit(SubscriptionPlan plan) => PlanCatalog.MaxProductsFor(plan);

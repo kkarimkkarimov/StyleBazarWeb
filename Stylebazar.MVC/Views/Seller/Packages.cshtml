@@ -104,8 +104,14 @@
                         }
                         else
                         {
-                            <button type="button" class="sb-btn sb-btn--primary sb-btn--block" data-pkg-upgrade data-pkg-name="@tier.Name" data-pkg-price="@tier.MonthlyPriceAzn">
-                                @tier.Name @L["plana keç"]
+                            @* Kartla anında ödəniş — Stripe Checkout-a POST edir (antiforgery avtomatik əlavə olunur) *@
+                            <form method="post" asp-controller="Payment" asp-action="Checkout" class="sb-pkg-card__pay">
+                                <input type="hidden" name="plan" value="@tier.Plan" />
+                                <button type="submit" class="sb-btn sb-btn--primary sb-btn--block">@L["Kartla al"]</button>
+                            </form>
+                            @* Manual alternativ — WhatsApp/Email modalını açır *@
+                            <button type="button" class="sb-btn sb-btn--ghost sb-btn--block" data-pkg-upgrade data-pkg-name="@tier.Name" data-pkg-price="@tier.MonthlyPriceAzn">
+                                @L["WhatsApp ilə al"]
                             </button>
                         }
                     </footer>
@@ -117,8 +123,8 @@
         <div class="sb-pkg-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             <div>
-                <strong>@L["Ödəniş hazırda manualdır."]</strong>
-                <span>@L["\"Yüksəlt\" düyməsini basdıqdan sonra biz səninlə əlaqə saxlayacayıq və ödəniş təsdiqləndikdən sonra planı aktivləşdirəcəyik. Onlayn ödəniş tezliklə."]</span>
+                <strong>@L["İki ödəniş üsulu var."]</strong>
+                <span>@L["Kartla anında saytda ödə (Stripe — təhlükəsiz) və plan dərhal aktivləşsin; ya da WhatsApp ilə əlaqə saxlayıb manual ödə. Hər iki halda plan 1 ay üçün aktivləşir."]</span>
             </div>
         </div>
     </main>

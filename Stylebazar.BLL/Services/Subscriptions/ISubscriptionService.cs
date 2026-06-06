@@ -29,6 +29,15 @@ public interface ISubscriptionService
     Task<SubscriptionDto> ChangePlanAsync(UpgradeSubscriptionDto dto, string adminId, CancellationToken ct = default);
 
     /// <summary>
+    /// Stripe ödənişi təsdiqləndikdən SONRA planı tətbiq edir (N ay üçün).
+    /// İdempotentdir: eyni paymentReference ilə təkrar çağırış yeni dəyişiklik etmir
+    /// (Stripe webhook + success səhifəsi eyni ödənişi iki dəfə tətbiq etməsin deyə).
+    /// Eyni planı uzadırsa qalan vaxtın üstünə əlavə edir; fərqli plana keçirsə indidən başlayır.
+    /// </summary>
+    Task<SubscriptionDto> ApplyPaidPlanAsync(
+        string userId, SubscriptionPlan plan, int months, string paymentReference, CancellationToken ct = default);
+
+    /// <summary>
     /// Static cap lookup — does not hit the DB. Used by ProductBusinessRules
     /// after the caller already knows the user's plan.
     /// </summary>

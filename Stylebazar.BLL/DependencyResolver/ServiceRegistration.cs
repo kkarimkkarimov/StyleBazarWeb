@@ -17,6 +17,7 @@ using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
+using Stylebazar.BLL.Services.Payments;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stores;
@@ -81,6 +82,7 @@ public static class ServiceRegistration
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.Configure<FileStorageSettings>(configuration.GetSection(FileStorageSettings.SectionName));
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+        services.Configure<StripeSettings>(configuration.GetSection(StripeSettings.SectionName));
 
         // File storage (local disk impl; swap to CloudinaryFileStorageService later)
         services.AddSingleton<IFileStorageService, LocalFileStorageService>();
@@ -140,6 +142,9 @@ public static class ServiceRegistration
 
         // Subscriptions — premium seller tier + quota enforcement
         services.AddScoped<ISubscriptionService, SubscriptionManager>();
+
+        // Ödəniş — Stripe Checkout (kartla aylıq paket alışı)
+        services.AddScoped<IPaymentService, StripePaymentService>();
 
         // Chat — real-time messaging between any two users (Phase 14.3+)
         services.AddScoped<IChatService, ChatManager>();
