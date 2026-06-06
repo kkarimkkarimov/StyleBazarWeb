@@ -43,8 +43,8 @@ public class PaymentController : Controller
         if (plan == SubscriptionPlan.Free)
             return RedirectToAction("Packages", "Seller");
 
-        string? userId = _users.GetUserId(User);
-        if (string.IsNullOrEmpty(userId))
+        AppUser? user = await _users.GetUserAsync(User);
+        if (user is null)
             return Challenge();
 
         // Stripe geri qayıtma ünvanları (mütləq/absolute olmalıdır).
@@ -54,7 +54,9 @@ public class PaymentController : Controller
 
         try
         {
-            string url = await _payments.CreateCheckoutUrlAsync(userId, plan, successUrl, cancelUrl, ct);
+            // Satıcının email + adını da ötürürük ki, Stripe dashboard-da kimin ödədiyi aydın görünsün.
+            string url = await _payments.CreateCheckoutUrlAsync(
+                user.Id, user.Email, user.FullName, plan, successUrl, cancelUrl, ct);
             return Redirect(url);   // Stripe-ın hosted ödəniş səhifəsinə yönəlt
         }
         catch (Exception ex)

@@ -24,7 +24,8 @@ public class StripePaymentService : IPaymentService
 
     // Birdəfəlik (1 aylıq) ödəniş üçün Checkout sessiyası yaradır.
     public async Task<string> CreateCheckoutUrlAsync(
-        string userId, SubscriptionPlan plan, string successUrl, string cancelUrl, CancellationToken ct = default)
+        string userId, string? userEmail, string? userName,
+        SubscriptionPlan plan, string successUrl, string cancelUrl, CancellationToken ct = default)
     {
         if (plan == SubscriptionPlan.Free)
             throw new BusinessException("Pulsuz plan üçün ödəniş tələb olunmur.");
@@ -40,11 +41,16 @@ public class StripePaymentService : IPaymentService
             SuccessUrl = successUrl,
             CancelUrl = cancelUrl,
             ClientReferenceId = userId,
-            // Webhook + success səhifəsi planı tətbiq edəndə kimi/nəyi biləcək.
+            // Stripe dashboard-da ödəyənin email-i görünsün + qəbz ora getsin.
+            CustomerEmail = string.IsNullOrWhiteSpace(userEmail) ? null : userEmail,
+            // Webhook + success səhifəsi planı tətbiq edəndə kimi/nəyi biləcək; həm də
+            // dashboard-da satıcının id/email/adı Metadata bölməsində görünəcək.
             Metadata = new Dictionary<string, string>
             {
                 ["userId"] = userId,
-                ["plan"] = plan.ToString()
+                ["plan"] = plan.ToString(),
+                ["userEmail"] = userEmail ?? string.Empty,
+                ["userName"] = userName ?? string.Empty
             },
             LineItems = new List<SessionLineItemOptions>
             {

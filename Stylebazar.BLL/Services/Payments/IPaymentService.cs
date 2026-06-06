@@ -7,8 +7,10 @@ namespace Stylebazar.BLL.Services.Payments;
 public interface IPaymentService
 {
     // Seçilmiş plan üçün Stripe Checkout sessiyası yaradır və istifadəçinin yönləndiriləcəyi URL-i qaytarır.
+    // userEmail + userName Stripe dashboard-da ödəyən satıcının kim olduğunu göstərmək üçün ötürülür.
     Task<string> CreateCheckoutUrlAsync(
-        string userId, SubscriptionPlan plan, string successUrl, string cancelUrl, CancellationToken ct = default);
+        string userId, string? userEmail, string? userName,
+        SubscriptionPlan plan, string successUrl, string cancelUrl, CancellationToken ct = default);
 
     // Checkout sessiyasını Stripe-dan oxuyur (success səhifəsi üçün): ödəniş tamamlanıbsa nəticə, yoxsa null.
     Task<PaidCheckout?> GetCompletedCheckoutAsync(string sessionId, CancellationToken ct = default);
