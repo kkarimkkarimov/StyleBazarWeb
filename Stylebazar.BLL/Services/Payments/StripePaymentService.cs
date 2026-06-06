@@ -30,6 +30,10 @@ public class StripePaymentService : IPaymentService
         if (plan == SubscriptionPlan.Free)
             throw new BusinessException("Pulsuz plan üçün ödəniş tələb olunmur.");
 
+        // Aydın xəta: açar yüklənməyibsə (user-secrets/env yoxdur, və ya app restart olunmayıb).
+        if (string.IsNullOrWhiteSpace(_settings.SecretKey))
+            throw new BusinessException("Stripe SecretKey konfiqurasiya olunmayıb — user-secrets/env yoxla və app-ı TAM yenidən başlat.");
+
         PlanInfoDto info = PlanCatalog.For(plan);
         // Stripe məbləği ən kiçik vahidlə (sent) istəyir: 15.00 → 1500.
         long amountMinor = (long)(info.MonthlyPriceAzn * 100m);
@@ -71,8 +75,9 @@ public class StripePaymentService : IPaymentService
             }
         };
 
+        // Açarı per-call ötürürük (qlobal statik state-ə güvənmirik — daha etibarlı).
         var service = new SessionService();
-        Session session = await service.CreateAsync(options, cancellationToken: ct);
+        Session session = await service.CreateAsync(options, new RequestOptions { ApiKey = _settings.SecretKey }, ct);
         return session.Url;
     }
 
@@ -82,7 +87,7 @@ public class StripePaymentService : IPaymentService
         if (string.IsNullOrWhiteSpace(sessionId)) return null;
 
         var service = new SessionService();
-        Session session = await service.GetAsync(sessionId, cancellationToken: ct);
+        Session session = await service.GetAsync(sessionId, null, new RequestOptions { ApiKey = _settings.SecretKey }, ct);
         return ToPaidCheckout(session);
     }
 
