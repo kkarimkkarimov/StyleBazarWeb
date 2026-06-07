@@ -18,6 +18,7 @@ public class PlanInfoDto
     public string Tagline { get; set; } = string.Empty;
     public decimal MonthlyPriceAzn { get; set; }
     public int MaxProducts { get; set; }
+    public int MaxActiveStories { get; set; }   // Free=məhdud, Pro/VIP=limitsiz (int.MaxValue)
     public bool HasAnalytics { get; set; }
     public bool HasVerifiedBadge { get; set; }
     public bool HasCatalogPriority { get; set; }

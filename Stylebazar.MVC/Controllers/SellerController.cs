@@ -545,6 +545,15 @@ public class SellerController : Controller
     [HttpGet]
     public async Task<IActionResult> Analytics(CancellationToken ct)
     {
+        // Plan gate: analitika yalnız Pro/VIP üçündür (PlanCatalog.HasAnalytics).
+        // Free istifadəçi Paketlər səhifəsinə yönləndirilir + yüksəltmə mesajı görür.
+        var current = await _subscriptions.GetCurrentForMeAsync(ct);
+        if (!Stylebazar.BLL.Services.Subscriptions.PlanCatalog.For(current.Plan).HasAnalytics)
+        {
+            TempData["Error"] = "Analitika yalnız Pro və VIP planlarındadır. Statistikanı açmaq üçün plana keç.";
+            return RedirectToAction(nameof(Packages));
+        }
+
         var basePanel = await BuildPanelVmAsync(ct);
         var stats = await _analytics.GetForCurrentSellerAsync(ct);
         return View(new SellerAnalyticsPageViewModel

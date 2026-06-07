@@ -19,6 +19,7 @@ public static class PlanCatalog
         Tagline = "Başlanğıc üçün ideal",
         MonthlyPriceAzn = 0m,
         MaxProducts = 5,
+        MaxActiveStories = 3,            // məhdud
         HasAnalytics = false,
         HasVerifiedBadge = false,
         HasCatalogPriority = false,
@@ -39,6 +40,7 @@ public static class PlanCatalog
         Tagline = "Aktiv satıcılar üçün",
         MonthlyPriceAzn = 15m,
         MaxProducts = 50,
+        MaxActiveStories = int.MaxValue, // limitsiz
         HasAnalytics = true,
         HasVerifiedBadge = false,
         HasCatalogPriority = false,
@@ -59,6 +61,7 @@ public static class PlanCatalog
         Tagline = "Top mağazalar üçün",
         MonthlyPriceAzn = 49m,
         MaxProducts = 500,
+        MaxActiveStories = int.MaxValue, // limitsiz
         HasAnalytics = true,
         HasVerifiedBadge = true,
         HasCatalogPriority = true,
@@ -86,4 +89,7 @@ public static class PlanCatalog
 
     /// <summary>Product quota cap (5 / 50 / 500).</summary>
     public static int MaxProductsFor(SubscriptionPlan plan) => For(plan).MaxProducts;
+
+    /// <summary>Aktiv hekayə limiti (Free=3, Pro/VIP=limitsiz).</summary>
+    public static int MaxActiveStoriesFor(SubscriptionPlan plan) => For(plan).MaxActiveStories;
 }

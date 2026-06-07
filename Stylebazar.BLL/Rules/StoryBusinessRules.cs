@@ -1,6 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.Constants;
 using Stylebazar.BLL.Exceptions;
+using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.DAL.Entities;
+using Stylebazar.DAL.Entities.Enums;
 using Stylebazar.DAL.Repositories.Abstract;
 
 namespace Stylebazar.BLL.Rules;
@@ -8,8 +11,6 @@ namespace Stylebazar.BLL.Rules;
 // StoryBusinessRules — müvafiq əməliyyatlardan əvvəl yoxlanılan BİZNES QAYDALARI. Hər metod bir şərti yoxlayır; pozularsa xəta (BusinessException/NotFound) atır.
 public class StoryBusinessRules
 {
-    private const int MaxActiveStoriesPerStore = 10;
-
     private readonly IStoryRepository _stories;
     private readonly IStoreRepository _stores;
 
@@ -68,16 +69,24 @@ public class StoryBusinessRules
             throw new BusinessException(Messages.Story.NotStoreOwner);
     }
 
+    // Aktiv hekayə limiti PLANA görədir: Free = məhdud (3), Pro/VIP = limitsiz.
+    // Mağaza sahibinin cari planını tapıb uyğun limiti tətbiq edir.
     public async Task EnsureUnderActiveLimitAsync(int storeId, CancellationToken ct = default)
     {
-        DateTime now = DateTime.UtcNow;
-        bool hasRoom = !await _stories.AnyAsync(
-            s => s.StoreId == storeId && s.IsActive && s.ExpiresAt > now,
+        // Mağazanı sahibi (Owner) ilə yüklə — limit onun planından asılıdır.
+        Store? store = await _stores.GetAsync(
+            s => s.Id == storeId,
+            include: q => q.Include(s => s.Owner),
             enableTracking: false,
             cancellationToken: ct);
-        if (hasRoom) return;
 
-        // Count properly
+        SubscriptionPlan plan = store?.Owner?.CurrentPlan ?? SubscriptionPlan.Free;
+        int limit = PlanCatalog.MaxActiveStoriesFor(plan);
+
+        // Pro/VIP — limitsiz: saymağa ehtiyac yoxdur.
+        if (limit == int.MaxValue) return;
+
+        DateTime now = DateTime.UtcNow;
         Core.Persistence.Paging.Paginate<Story> page = await _stories.GetListAsync(
             predicate: s => s.StoreId == storeId && s.IsActive && s.ExpiresAt > now,
             index: 0,
@@ -85,7 +94,7 @@ public class StoryBusinessRules
             enableTracking: false,
             cancellationToken: ct);
 
-        if (page.Count >= MaxActiveStoriesPerStore)
+        if (page.Count >= limit)
             throw new BusinessException(Messages.Story.TooManyActive);
     }
 }
