@@ -41,6 +41,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<Subscription> Subscriptions => Set<Subscription>();             // Abunəliklər
     public DbSet<Conversation> Conversations => Set<Conversation>();            // Söhbətlər
     public DbSet<Message> Messages => Set<Message>();                            // Mesajlar
+    public DbSet<CartItem> CartItems => Set<CartItem>();                          // Səbət elementləri
+    public DbSet<Order> Orders => Set<Order>();                                   // Sifarişlər
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();                       // Sifariş sətirləri
 
     // --- SaveChanges override-ları ---
     // Bazaya yazmadan ƏVVƏL audit sahələrini (CreatedDate/UpdatedDate) avtomatik doldururuq.

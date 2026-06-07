@@ -53,6 +53,9 @@ public static class PersistenceServiceRegistration
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<ICartItemRepository, CartItemRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
         return services;
     }
