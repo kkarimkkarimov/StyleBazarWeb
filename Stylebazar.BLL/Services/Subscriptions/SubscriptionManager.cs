@@ -1,4 +1,5 @@
 using AutoMapper;
+using Core.Persistence.Paging;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.DTOs.Subscriptions;
@@ -99,6 +100,50 @@ public class SubscriptionManager : ISubscriptionService
             .ToListAsync(ct);
 
         return _mapper.Map<List<SubscriptionDto>>(rows);
+    }
+
+    // Admin qlobal siyahısı — bütün abunəlik/ödəniş sətirləri (istifadəçi məlumatı ilə birgə).
+    public async Task<Paginate<AdminSubscriptionRowDto>> GetAllForAdminAsync(
+        SubscriptionPlan? plan, SubscriptionStatus? status, int page, int pageSize, CancellationToken ct = default)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 20;
+
+        IQueryable<Subscription> q = _db.Subscriptions.AsNoTracking();
+        if (plan.HasValue) q = q.Where(s => s.Plan == plan.Value);
+        if (status.HasValue) q = q.Where(s => s.Status == status.Value);
+
+        int count = await q.CountAsync(ct);
+
+        // Birbaşa DTO-ya proyeksiya — istifadəçi adı/email + təsdiqləyən admin JOIN ilə gəlir.
+        List<AdminSubscriptionRowDto> items = await q
+            .OrderByDescending(s => s.CreatedDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(s => new AdminSubscriptionRowDto
+            {
+                Id = s.Id,
+                UserId = s.UserId,
+                UserFullName = s.User.FullName,
+                UserEmail = s.User.Email ?? string.Empty,
+                Plan = s.Plan,
+                Status = s.Status,
+                StartedAt = s.StartedAt,
+                ExpiresAt = s.ExpiresAt,
+                Notes = s.Notes,
+                ApprovedByAdminFullName = s.ApprovedByAdmin != null ? s.ApprovedByAdmin.FullName : null,
+                CreatedDate = s.CreatedDate
+            })
+            .ToListAsync(ct);
+
+        return new Paginate<AdminSubscriptionRowDto>
+        {
+            Index = page - 1,
+            Size = pageSize,
+            Count = count,
+            Pages = pageSize > 0 ? (int)Math.Ceiling(count / (double)pageSize) : 0,
+            Items = items
+        };
     }
 
     // ====== Write ======

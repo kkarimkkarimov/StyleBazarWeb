@@ -39,6 +39,14 @@ public class AdminUsersPageViewModel
     public UserAdminListFilter Filter { get; set; } = new();
 }
 
+// AdminSubscriptionsPageViewModel — admin qlobal abunəlik/ödəniş səhifəsi üçün məlumat modeli.
+public class AdminSubscriptionsPageViewModel
+{
+    public Paginate<AdminSubscriptionRowDto> Items { get; set; } = new();
+    public SubscriptionPlan? PlanFilter { get; set; }
+    public SubscriptionStatus? StatusFilter { get; set; }
+}
+
 // AdminUserDetailViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminUserDetailViewModel
 {

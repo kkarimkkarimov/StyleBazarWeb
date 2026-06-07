@@ -1,3 +1,4 @@
+using Core.Persistence.Paging;
 using Stylebazar.BLL.DTOs.Subscriptions;
 using Stylebazar.DAL.Entities.Enums;
 
@@ -19,6 +20,13 @@ public interface ISubscriptionService
 
     /// <summary>Most-recent N subscription rows for the admin User Detail history table.</summary>
     Task<List<SubscriptionDto>> GetHistoryAsync(string userId, int take = 10, CancellationToken ct = default);
+
+    /// <summary>
+    /// Admin üçün BÜTÜN abunəlik/ödəniş sətirləri (səhifələnmiş, plan/status filtrli, yeni→köhnə).
+    /// Qlobal görünüş — kim, hansı plan, status, tarixlər, mənbə (Stripe ref / admin qeydi).
+    /// </summary>
+    Task<Paginate<AdminSubscriptionRowDto>> GetAllForAdminAsync(
+        SubscriptionPlan? plan, SubscriptionStatus? status, int page, int pageSize, CancellationToken ct = default);
 
     /// <summary>
     /// Admin-only: upgrade or downgrade a user to a specific plan. Atomically:

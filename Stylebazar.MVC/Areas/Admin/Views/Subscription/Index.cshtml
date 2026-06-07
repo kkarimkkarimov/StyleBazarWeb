@@ -1,0 +1,78 @@
+@model AdminSubscriptionsPageViewModel
+@using Stylebazar.DAL.Entities.Enums
+@{
+    ViewData["Title"] = L["Abunəliklər"].Value;
+    ViewData["PageTitle"] = L["Abunəliklər və ödənişlər"].Value;
+
+    string PlanChip(SubscriptionPlan p) => p switch
+    {
+        SubscriptionPlan.VIP => "sb-admin-chip--ok",
+        SubscriptionPlan.Free => "sb-admin-chip--muted",
+        _ => "sb-admin-chip"
+    };
+    string StatusChip(SubscriptionStatus s) =>
+        s == SubscriptionStatus.Active ? "sb-admin-chip--ok" : "sb-admin-chip--muted";
+}
+
+<div class="sb-admin-filter-bar">
+    <form method="get" style="display:contents">
+        <select name="plan" class="sb-admin-select" onchange="this.form.submit()">
+            <option value="" selected="@(Model.PlanFilter == null)">@L["Bütün planlar"]</option>
+            <option value="Free" selected="@(Model.PlanFilter == SubscriptionPlan.Free)">Free</option>
+            <option value="Pro" selected="@(Model.PlanFilter == SubscriptionPlan.Pro)">Pro</option>
+            <option value="VIP" selected="@(Model.PlanFilter == SubscriptionPlan.VIP)">VIP</option>
+        </select>
+        <select name="status" class="sb-admin-select" onchange="this.form.submit()">
+            <option value="" selected="@(Model.StatusFilter == null)">@L["Bütün statuslar"]</option>
+            <option value="Active" selected="@(Model.StatusFilter == SubscriptionStatus.Active)">@L["Aktiv"]</option>
+            <option value="Expired" selected="@(Model.StatusFilter == SubscriptionStatus.Expired)">@L["Bitib"]</option>
+            <option value="Cancelled" selected="@(Model.StatusFilter == SubscriptionStatus.Cancelled)">@L["Ləğv"]</option>
+        </select>
+    </form>
+    <span style="margin-left:auto; color:var(--sb-ink-soft, #6b7280); font-size:.85rem">@L["Cəmi"]: @Model.Items.Count</span>
+</div>
+
+<div class="sb-admin-card sb-admin-table-card">
+    @if (!Model.Items.Items.Any())
+    {
+        <div class="sb-admin-empty"><strong>@L["Abunəlik qeydi yoxdur"]</strong></div>
+    }
+    else
+    {
+        <table class="sb-admin-table">
+            <thead>
+                <tr>
+                    <th>@L["İstifadəçi"]</th>
+                    <th>@L["Plan"]</th>
+                    <th>Status</th>
+                    <th>@L["Başlama"]</th>
+                    <th>@L["Bitmə"]</th>
+                    <th>@L["Mənbə"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.Items.Items)
+                {
+                    <tr>
+                        <td>
+                            <strong>@s.UserFullName</strong><br />
+                            <small style="color:var(--sb-ink-soft, #6b7280)">@s.UserEmail</small>
+                        </td>
+                        <td><span class="sb-admin-chip @PlanChip(s.Plan)">@s.Plan</span></td>
+                        <td><span class="sb-admin-chip @StatusChip(s.Status)">@s.Status</span></td>
+                        <td><span class="sb-admin-date">@s.StartedAt.ToLocalTime().ToString("dd.MM.yyyy")</span></td>
+                        <td><span class="sb-admin-date">@(s.ExpiresAt.HasValue ? s.ExpiresAt.Value.ToLocalTime().ToString("dd.MM.yyyy") : "—")</span></td>
+                        <td><small style="color:var(--sb-ink-soft, #6b7280)">@(string.IsNullOrEmpty(s.Notes) ? "—" : s.Notes)</small></td>
+                        <td>
+                            <a asp-area="Admin" asp-controller="User" asp-action="Detail" asp-route-id="@s.UserId"
+                               class="sb-admin-btn sb-admin-btn--ghost">@L["İdarə et"]</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@await Html.PartialAsync("_AdminPagination", new Tuple<int,int,int>(Model.Items.Index + 1, Model.Items.Pages, Model.Items.Count))
