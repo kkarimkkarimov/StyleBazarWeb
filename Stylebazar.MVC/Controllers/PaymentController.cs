@@ -35,17 +35,20 @@ public class PaymentController : Controller
     }
 
     // Satıcı "Pro al / VIP al" düyməsinə basır → Stripe Checkout sessiyası yarat → Stripe-a yönəlt.
+    // Satıcı "Kartla al" düyməsinə basır → AJAX ilə çağırılır → Stripe Checkout sessiyası yaradılır
+    // və session URL-i JSON kimi qaytarılır. Brauzer JS həmin URL-ə window.location ilə keçir.
+    // (JSON qaytarmaq form-submit + cross-origin 302 tələlərini aradan qaldırır; xəta aydın görünür.)
     [HttpPost]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("write-default")]
     public async Task<IActionResult> Checkout(SubscriptionPlan plan, CancellationToken ct)
     {
         if (plan == SubscriptionPlan.Free)
-            return RedirectToAction("Packages", "Seller");
+            return BadRequest(new { ok = false, error = "Pulsuz plan üçün ödəniş tələb olunmur." });
 
         AppUser? user = await _users.GetUserAsync(User);
         if (user is null)
-            return Challenge();
+            return Unauthorized(new { ok = false, error = "Bu əməliyyat üçün hesabınıza daxil olun." });
 
         // Stripe geri qayıtma ünvanları (mütləq/absolute olmalıdır).
         string successUrl = Url.Action(nameof(Success), "Payment", null, Request.Scheme)!
@@ -57,13 +60,12 @@ public class PaymentController : Controller
             // Satıcının email + adını da ötürürük ki, Stripe dashboard-da kimin ödədiyi aydın görünsün.
             string url = await _payments.CreateCheckoutUrlAsync(
                 user.Id, user.Email, user.FullName, plan, successUrl, cancelUrl, ct);
-            return Redirect(url);   // Stripe-ın hosted ödəniş səhifəsinə yönəlt
+            return Json(new { ok = true, url });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Stripe checkout session yaradıla bilmədi (plan {Plan})", plan);
-            TempData["Error"] = "Ödəniş başlana bilmədi. Bir az sonra yenidən cəhd et.";
-            return RedirectToAction("Packages", "Seller");
+            return StatusCode(500, new { ok = false, error = "Ödəniş başlana bilmədi: " + ex.Message });
         }
     }
 

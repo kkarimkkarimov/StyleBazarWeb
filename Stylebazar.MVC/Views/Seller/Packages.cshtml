@@ -104,11 +104,10 @@
                         }
                         else
                         {
-                            @* Kartla anında ödəniş — Stripe Checkout-a POST edir (antiforgery avtomatik əlavə olunur) *@
-                            <form method="post" asp-controller="Payment" asp-action="Checkout" class="sb-pkg-card__pay">
-                                <input type="hidden" name="plan" value="@tier.Plan" />
-                                <button type="submit" class="sb-btn sb-btn--primary sb-btn--block">@L["Kartla al"]</button>
-                            </form>
+                            @* Kartla anında ödəniş — AJAX ilə Stripe sessiyası yaradıb yönləndirir (aşağıdakı skriptə bax) *@
+                            <button type="button" class="sb-btn sb-btn--primary sb-btn--block" data-stripe-checkout data-plan="@tier.Plan">
+                                @L["Kartla al"]
+                            </button>
                             @* Manual alternativ — WhatsApp/Email modalını açır *@
                             <button type="button" class="sb-btn sb-btn--ghost sb-btn--block" data-pkg-upgrade data-pkg-name="@tier.Name" data-pkg-price="@tier.MonthlyPriceAzn">
                                 @L["WhatsApp ilə al"]
@@ -169,3 +168,45 @@
         </div>
     </div>
 </div>
+
+@* ===== Stripe Checkout (kartla ödəniş) ===== *@
+@* AJAX: "Kartla al" düyməsi serverdən sessiya URL-i alır və Stripe-a yönləndirir. *@
+@Html.AntiForgeryToken()
+
+<script>
+    (function () {
+        var tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
+        document.querySelectorAll('[data-stripe-checkout]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var plan = btn.getAttribute('data-plan');
+                var original = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = 'Yönləndirilir…';
+                fetch('/Payment/Checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'plan=' + encodeURIComponent(plan) +
+                          '&__RequestVerificationToken=' + encodeURIComponent(tokenEl ? tokenEl.value : '')
+                })
+                .then(function (r) {
+                    return r.json().catch(function () { return { ok: false, error: 'Server xətası (' + r.status + ').' }; });
+                })
+                .then(function (data) {
+                    if (data && data.ok && data.url) {
+                        window.location.href = data.url;   // Stripe-ın ödəniş səhifəsinə keç
+                    } else {
+                        alert((data && data.error) || 'Ödəniş başlana bilmədi.');
+                        btn.disabled = false; btn.textContent = original;
+                    }
+                })
+                .catch(function () {
+                    alert('Şəbəkə xətası. Yenidən cəhd et.');
+                    btn.disabled = false; btn.textContent = original;
+                });
+            });
+        });
+    })();
+</script>
