@@ -83,6 +83,18 @@ public class SellerStoriesPageViewModel : SellerPanelViewModel
     public int Limit { get; set; } = 10;
 }
 
+// SellerOrdersPageViewModel — satıcının mağaza(ları)na aid sifarişlər siyahısı.
+public class SellerOrdersPageViewModel : SellerPanelViewModel
+{
+    public List<Stylebazar.BLL.DTOs.Orders.OrderListItemDto> Orders { get; set; } = new();
+}
+
+// SellerOrderDetailPageViewModel — bir sifarişin satıcı görünüşü (yalnız öz məhsulları + çatdırılma).
+public class SellerOrderDetailPageViewModel : SellerPanelViewModel
+{
+    public Stylebazar.BLL.DTOs.Orders.OrderDetailDto Order { get; set; } = new();
+}
+
 // SellerNotificationItem — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public record SellerNotificationItem(
     string Tone,         // ok / info / warn / danger / muted

@@ -11,6 +11,7 @@ using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.LoginEvents;
+using Stylebazar.BLL.Services.Orders;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
 using Stylebazar.BLL.Services.Stories;
@@ -40,6 +41,7 @@ public class SellerController : Controller
     private readonly ISellerAnalyticsService _analytics;
     private readonly ISubscriptionService _subscriptions;
     private readonly IStoryService _storyService;
+    private readonly IOrderService _orders;
     private readonly UserManager<AppUser> _userManager;
 
     public SellerController(
@@ -53,6 +55,7 @@ public class SellerController : Controller
         ISellerAnalyticsService analytics,
         ISubscriptionService subscriptions,
         IStoryService storyService,
+        IOrderService orders,
         UserManager<AppUser> userManager)
     {
         _account = account;
@@ -65,6 +68,7 @@ public class SellerController : Controller
         _analytics = analytics;
         _subscriptions = subscriptions;
         _storyService = storyService;
+        _orders = orders;
         _userManager = userManager;
     }
 
@@ -427,6 +431,53 @@ public class SellerController : Controller
             LowStarCount = lowStar,
             MaxRatingFilter = maxRating
         });
+    }
+
+    // ---- Sifarişlər (satıcı) ----
+
+    // Satıcının mağaza(ları)na aid ödənilmiş sifarişlər.
+    [HttpGet]
+    public async Task<IActionResult> Orders(CancellationToken ct)
+    {
+        var panel = await BuildPanelVmAsync(ct);
+        var orders = await _orders.GetStoreOrdersAsync(ct);
+        return View(new SellerOrdersPageViewModel
+        {
+            Profile = panel.Profile,
+            PrimaryStore = panel.PrimaryStore,
+            Orders = orders
+        });
+    }
+
+    // Sifariş detalı (yalnız satıcının öz məhsulları) + status idarəetmə.
+    [HttpGet]
+    public async Task<IActionResult> OrderDetail(int id, CancellationToken ct)
+    {
+        var panel = await BuildPanelVmAsync(ct);
+        var order = await _orders.GetStoreOrderDetailAsync(id, ct);
+        if (order is null) return NotFound();
+        return View(new SellerOrderDetailPageViewModel
+        {
+            Profile = panel.Profile,
+            PrimaryStore = panel.PrimaryStore,
+            Order = order
+        });
+    }
+
+    // Sifariş statusunu irəli apar (Hazırlanır→Göndərildi→Çatdırıldı, və ya Ləğv et).
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateOrderStatus(int id, OrderStatus status, CancellationToken ct)
+    {
+        try
+        {
+            await _orders.UpdateStatusAsync(id, status, ct);
+            TempData["Success"] = "Sifariş statusu yeniləndi.";
+        }
+        catch (BusinessException ex) { TempData["Error"] = ex.Message; }
+        catch (UnauthorizedException ex) { TempData["Error"] = ex.Message; }
+        catch (NotFoundException ex) { TempData["Error"] = ex.Message; }
+        return RedirectToAction(nameof(OrderDetail), new { id });
     }
 
     [HttpGet]

@@ -1,0 +1,71 @@
+@using Stylebazar.DAL.Entities.Enums
+@model SellerOrdersPageViewModel
+@{
+    ViewData["Title"] = L["Sifarişlər"].Value;
+    var p = Model.Profile;
+
+    (string Label, string Bg, string Fg) StatusChip(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => (L["Ödəniş gözlənilir"].Value, "#fff4e5", "#b26a00"),
+        OrderStatus.Processing => (L["Hazırlanır"].Value, "#e7f0ff", "#1b5fbf"),
+        OrderStatus.Shipped => (L["Göndərilib"].Value, "#efe7ff", "#6b34c4"),
+        OrderStatus.Delivered => (L["Çatdırılıb"].Value, "#e6f7ec", "#1e8449"),
+        OrderStatus.Cancelled => (L["Ləğv edilib"].Value, "#fdecea", "#a93226"),
+        _ => (s.ToString(), "#eee", "#555")
+    };
+}
+
+<section class="sb-seller-layout">
+    @await Html.PartialAsync("_SellerSidebar", p)
+
+    <main class="sb-seller-main">
+        <header class="sb-prod-page-head">
+            <div>
+                <h1>@L["Sifarişlər"]</h1>
+                <p>@L["Mağazanın məhsullarına gələn sifarişlər — hazırla, göndər, çatdır."]</p>
+            </div>
+        </header>
+
+        @if (TempData["Success"] is string okMsg)
+        {
+            <div class="sb-prod-toast sb-prod-toast--ok">@okMsg</div>
+        }
+        @if (TempData["Error"] is string errMsg)
+        {
+            <div class="sb-prod-toast sb-prod-toast--err">@errMsg</div>
+        }
+
+        @if (!Model.Orders.Any())
+        {
+            <div class="sb-seller-card sb-prod-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                <h2>@L["Hələ sifariş yoxdur"]</h2>
+                <p>@L["Məhsulların satılanda sifarişlər burada görünəcək."]</p>
+            </div>
+        }
+        else
+        {
+            <div class="sb-seller-card" style="padding:0; overflow:hidden;">
+                @foreach (var o in Model.Orders)
+                {
+                    var chip = StatusChip(o.Status);
+                    <a asp-action="OrderDetail" asp-route-id="@o.Id"
+                       style="display:flex; gap:16px; align-items:center; padding:16px 18px; border-bottom:1px solid #f0f0f0; text-decoration:none; color:inherit;">
+                        <img src="@(string.IsNullOrEmpty(o.FirstImageUrl) ? "/img/placeholder.svg" : o.FirstImageUrl)" alt=""
+                             style="width:54px; height:54px; object-fit:cover; border-radius:8px; flex:0 0 auto;" />
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:700;">@L["Sifariş"] #@o.Id</div>
+                            <div style="color:#888; font-size:.84rem; margin-top:2px;">
+                                @o.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm") · @o.ItemCount @L["məhsul"] (@o.TotalQuantity @L["ədəd"])
+                            </div>
+                        </div>
+                        <div style="text-align:right; flex:0 0 auto;">
+                            <span style="display:inline-block; font-size:.73rem; padding:3px 10px; border-radius:20px; background:@chip.Bg; color:@chip.Fg; margin-bottom:6px;">@chip.Label</span>
+                            <div style="font-weight:700;">@o.TotalAmount.ToString("0.##") ₼</div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </main>
+</section>

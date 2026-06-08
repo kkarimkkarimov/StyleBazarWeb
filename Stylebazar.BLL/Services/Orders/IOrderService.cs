@@ -30,6 +30,10 @@ public interface IOrderService
     // Cari satıcının mağaza(ları)na aid sifariş sətirlərini ehtiva edən sifarişlər.
     Task<List<OrderListItemDto>> GetStoreOrdersAsync(CancellationToken ct = default);
 
+    // Bir sifarişin satıcı görünüşü: yalnız satıcının öz məhsulları + çatdırılma (admin hamısını görür).
+    // Satıcının payı olmayan sifariş → null.
+    Task<OrderDetailDto?> GetStoreOrderDetailAsync(int orderId, CancellationToken ct = default);
+
     // Satıcı/admin sifariş statusunu irəli aparır (Processing→Shipped→Delivered, və ya Cancelled).
     Task UpdateStatusAsync(int orderId, OrderStatus status, CancellationToken ct = default);
 }

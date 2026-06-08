@@ -230,6 +230,33 @@ public class OrderManager : IOrderService
             .ToListAsync(ct);
     }
 
+    // Bir sifarişin satıcı görünüşü: yalnız öz məhsulları (admin hamısını görür).
+    public async Task<OrderDetailDto?> GetStoreOrderDetailAsync(int orderId, CancellationToken ct = default)
+    {
+        string userId = RequireUserId();
+        bool isAdmin = _currentUser.IsInRole("Admin");
+
+        List<int> storeIds = isAdmin
+            ? new List<int>()
+            : await _db.Stores.Where(s => s.OwnerId == userId).Select(s => s.Id).ToListAsync(ct);
+
+        OrderDetailDto? order = await _db.Orders.AsNoTracking()
+            .Where(o => o.Id == orderId && (isAdmin || o.Items.Any(i => storeIds.Contains(i.StoreId))))
+            .Select(DetailProjection)
+            .FirstOrDefaultAsync(ct);
+
+        if (order is null) return null;
+
+        // Satıcı yalnız öz məhsullarını və onların cəmini görür (digər satıcıların məlumatı gizli).
+        if (!isAdmin)
+        {
+            order.Items = order.Items.Where(i => storeIds.Contains(i.StoreId)).ToList();
+            order.TotalAmount = order.Items.Sum(i => i.LineTotal);
+        }
+
+        return order;
+    }
+
     // Sifariş statusunu irəli aparır (satıcı/admin). Tarixləri də yeniləyir.
     public async Task UpdateStatusAsync(int orderId, OrderStatus status, CancellationToken ct = default)
     {
@@ -287,6 +314,7 @@ public class OrderManager : IOrderService
         Items = o.Items.Select(i => new OrderItemDto
         {
             ProductId = i.ProductId,
+            StoreId = i.StoreId,
             ProductName = i.ProductName,
             ProductSlug = i.ProductSlug,
             ImageUrl = i.ImageUrl,
