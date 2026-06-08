@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Stylebazar.BLL.Services.Orders;
 using Stylebazar.BLL.Services.Payments;
 using Stylebazar.BLL.Services.Subscriptions;
 using Stylebazar.DAL.Entities;
@@ -19,17 +20,20 @@ public class PaymentController : Controller
 
     private readonly IPaymentService _payments;
     private readonly ISubscriptionService _subscriptions;
+    private readonly IOrderService _orders;
     private readonly UserManager<AppUser> _users;
     private readonly ILogger<PaymentController> _logger;
 
     public PaymentController(
         IPaymentService payments,
         ISubscriptionService subscriptions,
+        IOrderService orders,
         UserManager<AppUser> users,
         ILogger<PaymentController> logger)
     {
         _payments = payments;
         _subscriptions = subscriptions;
+        _orders = orders;
         _users = users;
         _logger = logger;
     }
@@ -117,9 +121,14 @@ public class PaymentController : Controller
 
         try
         {
-            PaidCheckout? paid = _payments.ParseCompletedCheckoutWebhook(json, signature);
-            if (paid is not null)
-                await _subscriptions.ApplyPaidPlanAsync(paid.UserId, paid.Plan, MonthsPerPurchase, paid.PaymentReference, ct);
+            // Eyni webhook həm plan, həm sifariş ödənişlərini daşıyır — metadata.type ilə ayrılır.
+            PaidCheckout? paidPlan = _payments.ParseCompletedCheckoutWebhook(json, signature);
+            if (paidPlan is not null)
+                await _subscriptions.ApplyPaidPlanAsync(paidPlan.UserId, paidPlan.Plan, MonthsPerPurchase, paidPlan.PaymentReference, ct);
+
+            PaidOrderCheckout? paidOrder = _payments.ParseCompletedOrderWebhook(json, signature);
+            if (paidOrder is not null)
+                await _orders.MarkPaidAsync(paidOrder.OrderId, paidOrder.PaymentReference, ct);
 
             return Ok();   // Stripe 2xx görməlidir, yoxsa təkrar göndərər
         }

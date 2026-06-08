@@ -18,6 +18,7 @@ using Stylebazar.BLL.Services.LoginEvents;
 using Stylebazar.BLL.Services.FileStorage;
 using Stylebazar.BLL.Services.HeroBanners;
 using Stylebazar.BLL.Services.Newsletter;
+using Stylebazar.BLL.Services.Orders;
 using Stylebazar.BLL.Services.Payments;
 using Stylebazar.BLL.Services.Products;
 using Stylebazar.BLL.Services.Reviews;
@@ -152,6 +153,9 @@ public static class ServiceRegistration
 
         // Cart — saytdaxili səbət (DB-əsaslı, istifadəçi başına)
         services.AddScoped<ICartService, CartManager>();
+
+        // Orders — səbət → sifariş → ödəniş → status izləmə (Trendyol/Amazon tipli axın)
+        services.AddScoped<IOrderService, OrderManager>();
 
         return services;
     }

@@ -51,6 +51,7 @@ public class StripePaymentService : IPaymentService
             // dashboard-da satıcının id/email/adı Metadata bölməsində görünəcək.
             Metadata = new Dictionary<string, string>
             {
+                ["type"] = "plan",
                 ["userId"] = userId,
                 ["plan"] = plan.ToString(),
                 ["userEmail"] = userEmail ?? string.Empty,
@@ -124,5 +125,89 @@ public class StripePaymentService : IPaymentService
 
         // PaymentReference = sessiya id-si → idempotentlik açarı (eyni ödəniş iki dəfə tətbiq olunmasın).
         return new PaidCheckout(userId, plan, session.Id);
+    }
+
+    // ---- Saytdaxili SİFARİŞ ödənişi ----
+
+    // Sifariş üçün Checkout sessiyası: hər məhsul ayrıca line item; metadata-da type=order, orderId.
+    public async Task<string> CreateOrderCheckoutUrlAsync(
+        OrderCheckoutRequest request, string successUrl, string cancelUrl, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.SecretKey))
+            throw new BusinessException("Stripe SecretKey konfiqurasiya olunmayıb — user-secrets/env yoxla və app-ı TAM yenidən başlat.");
+        if (request.Lines.Count == 0)
+            throw new BusinessException("Sifariş üçün məhsul yoxdur.");
+
+        var lineItems = request.Lines.Select(l => new SessionLineItemOptions
+        {
+            Quantity = l.Quantity,
+            PriceData = new SessionLineItemPriceDataOptions
+            {
+                Currency = _settings.Currency,
+                UnitAmount = (long)(l.UnitPrice * 100m),   // ən kiçik vahid (sent)
+                ProductData = new SessionLineItemPriceDataProductDataOptions { Name = l.Name }
+            }
+        }).ToList();
+
+        var options = new SessionCreateOptions
+        {
+            Mode = "payment",
+            PaymentMethodTypes = new List<string> { "card" },
+            SuccessUrl = successUrl,
+            CancelUrl = cancelUrl,
+            ClientReferenceId = request.OrderId.ToString(),
+            CustomerEmail = string.IsNullOrWhiteSpace(request.BuyerEmail) ? null : request.BuyerEmail,
+            Metadata = new Dictionary<string, string>
+            {
+                ["type"] = "order",
+                ["orderId"] = request.OrderId.ToString(),
+                ["buyerName"] = request.BuyerName ?? string.Empty
+            },
+            LineItems = lineItems
+        };
+
+        var service = new SessionService();
+        Session session = await service.CreateAsync(options, new RequestOptions { ApiKey = _settings.SecretKey }, ct);
+        return session.Url;
+    }
+
+    // Success səhifəsi üçün: sifariş sessiyasını oxu, "paid"-dirsə nəticəni qaytar.
+    public async Task<PaidOrderCheckout?> GetCompletedOrderCheckoutAsync(string sessionId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId)) return null;
+        var service = new SessionService();
+        Session session = await service.GetAsync(sessionId, null, new RequestOptions { ApiKey = _settings.SecretKey }, ct);
+        return ToPaidOrder(session);
+    }
+
+    // Webhook: imzanı yoxla, yalnız sifariş (type=order) ödənişini qaytar.
+    public PaidOrderCheckout? ParseCompletedOrderWebhook(string requestJson, string stripeSignatureHeader)
+    {
+        Event stripeEvent = EventUtility.ConstructEvent(requestJson, stripeSignatureHeader, _settings.WebhookSecret);
+        if (stripeEvent.Type != "checkout.session.completed") return null;
+        if (stripeEvent.Data.Object is not Session session) return null;
+        return ToPaidOrder(session);
+    }
+
+    // Ortaq köməkçi: Stripe sessiyasından (sifariş + ödəniş edilibsə) PaidOrderCheckout düzəldir.
+    private static PaidOrderCheckout? ToPaidOrder(Session? session)
+    {
+        if (session is null || session.PaymentStatus != "paid")
+            return null;
+
+        // Yalnız sifariş sessiyalarını emal et (plan sessiyaları ilə qarışmasın).
+        if (session.Metadata == null
+            || !session.Metadata.TryGetValue("type", out var type) || type != "order")
+            return null;
+
+        string? orderIdStr = session.Metadata.TryGetValue("orderId", out var o) && !string.IsNullOrEmpty(o)
+            ? o
+            : session.ClientReferenceId;
+
+        if (!int.TryParse(orderIdStr, out int orderId))
+            return null;
+
+        // PaymentReference = sessiya id-si → idempotentlik açarı.
+        return new PaidOrderCheckout(orderId, session.Id);
     }
 }
