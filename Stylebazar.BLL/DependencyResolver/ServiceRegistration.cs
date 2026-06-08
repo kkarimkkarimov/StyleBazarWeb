@@ -8,6 +8,7 @@ using Stylebazar.BLL.Services.Account;
 using Stylebazar.BLL.Services.Addresses;
 using Stylebazar.BLL.Services.Analytics;
 using Stylebazar.BLL.Services.Authentication;
+using Stylebazar.BLL.Services.Cart;
 using Stylebazar.BLL.Services.Categories;
 using Stylebazar.BLL.Services.Chat;
 using Stylebazar.BLL.Services.Contact;
@@ -148,6 +149,9 @@ public static class ServiceRegistration
 
         // Chat — real-time messaging between any two users (Phase 14.3+)
         services.AddScoped<IChatService, ChatManager>();
+
+        // Cart — saytdaxili səbət (DB-əsaslı, istifadəçi başına)
+        services.AddScoped<ICartService, CartManager>();
 
         return services;
     }

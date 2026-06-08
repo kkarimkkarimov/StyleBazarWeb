@@ -1,0 +1,76 @@
+@model Stylebazar.BLL.DTOs.Cart.CartSummaryDto
+@{
+    ViewData["Title"] = L["Səbət"].Value;
+}
+
+<section style="max-width:1100px; margin:0 auto; padding:24px 16px;">
+    <h1 style="font-family:'Playfair Display',serif; margin-bottom:20px;">@L["Səbətim"]</h1>
+
+    @if (TempData["Error"] is string err)
+    {
+        <div style="background:#fdecea; color:#a93226; padding:12px 16px; border-radius:10px; margin-bottom:16px;">@err</div>
+    }
+    @if (TempData["Success"] is string ok)
+    {
+        <div style="background:#eafaf1; color:#1e8449; padding:12px 16px; border-radius:10px; margin-bottom:16px;">@ok</div>
+    }
+
+    @if (Model.IsEmpty)
+    {
+        <div style="text-align:center; padding:64px 20px; border:1px dashed #ddd; border-radius:14px; background:#fafafa;">
+            <p style="font-size:1.1rem; color:#666; margin-bottom:16px;">@L["Səbətin boşdur."]</p>
+            <a asp-controller="Shop" asp-action="Index" class="sb-btn sb-btn--primary">@L["Alış-verişə başla"]</a>
+        </div>
+    }
+    else
+    {
+        <div style="display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start;" class="sb-cart-grid">
+            <div>
+                @foreach (var item in Model.Items)
+                {
+                    <div style="display:flex; gap:16px; padding:16px; border:1px solid #eee; border-radius:12px; margin-bottom:12px; background:#fff;">
+                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/img/placeholder.svg" : item.ImageUrl)" alt="@item.ProductName"
+                             style="width:90px; height:90px; object-fit:cover; border-radius:8px; flex:0 0 auto;" />
+                        <div style="flex:1; min-width:0;">
+                            <a asp-controller="Shop" asp-action="Detail" asp-route-slug="@item.ProductSlug"
+                               style="font-weight:600; text-decoration:none; color:inherit;">@item.ProductName</a>
+                            <div style="color:#888; font-size:.85rem; margin-top:4px;">
+                                @item.StoreName
+                                @if (!string.IsNullOrEmpty(item.Size)) { <text> · @L["Ölçü"]: @item.Size</text> }
+                                @if (!string.IsNullOrEmpty(item.Color)) { <text> · @L["Rəng"]: @item.Color</text> }
+                            </div>
+                            <div style="margin-top:8px; font-weight:600;">@item.UnitPrice.ToString("0.##") ₼</div>
+                            @if (item.StockQuantity <= 5)
+                            {
+                                <div style="color:#c0392b; font-size:.8rem; margin-top:4px;">@L["Stokda az qalıb"]: @item.StockQuantity</div>
+                            }
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex:0 0 auto;">
+                            <strong>@item.LineTotal.ToString("0.##") ₼</strong>
+                            <form method="post" asp-action="UpdateQuantity" style="display:flex; gap:6px; align-items:center;">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="1" max="@item.StockQuantity"
+                                       style="width:64px; padding:5px; border:1px solid #ddd; border-radius:6px;" />
+                                <button type="submit" class="sb-btn sb-btn--ghost" style="padding:5px 10px;">@L["Yenilə"]</button>
+                            </form>
+                            <form method="post" asp-action="Remove">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="sb-btn sb-btn--ghost" style="padding:5px 10px; color:#c0392b;">@L["Sil"]</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <aside style="border:1px solid #eee; border-radius:12px; padding:20px; background:#fff;">
+                <h3 style="margin-top:0;">@L["Sifariş xülasəsi"]</h3>
+                <div style="display:flex; justify-content:space-between; margin:14px 0; font-size:1.05rem;">
+                    <span>@L["Cəmi"] (@Model.TotalQuantity @L["məhsul"])</span>
+                    <strong>@Model.Subtotal.ToString("0.##") ₼</strong>
+                </div>
+                <a asp-controller="Checkout" asp-action="Index" class="sb-btn sb-btn--primary sb-btn--block">@L["Ödənişə keç"]</a>
+                <a asp-controller="Shop" asp-action="Index" class="sb-btn sb-btn--ghost sb-btn--block" style="margin-top:8px;">@L["Alış-verişə davam et"]</a>
+            </aside>
+        </div>
+    }
+</section>

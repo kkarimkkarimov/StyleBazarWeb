@@ -1,0 +1,68 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Stylebazar.BLL.DTOs.Cart;
+using Stylebazar.BLL.Exceptions;
+using Stylebazar.BLL.Services.Cart;
+
+namespace Stylebazar.MVC.Controllers;
+
+// CartController — saytdaxili səbət. [Authorize] — səbət giriş tələb edir.
+[Authorize]
+public class CartController : Controller
+{
+    private readonly ICartService _cart;
+    private readonly ILogger<CartController> _logger;
+
+    public CartController(ICartService cart, ILogger<CartController> logger)
+    {
+        _cart = cart;
+        _logger = logger;
+    }
+
+    // Səbət səhifəsi.
+    [HttpGet]
+    public async Task<IActionResult> Index(CancellationToken ct)
+        => View(await _cart.GetMyCartAsync(ct));
+
+    // "Səbətə at" — AJAX (məhsul detalı/kartından). JSON {ok, count} qaytarır ki, rozetka yenilənsin.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("write-default")]
+    public async Task<IActionResult> Add(AddToCartDto dto, CancellationToken ct)
+    {
+        try
+        {
+            await _cart.AddAsync(dto, ct);
+            int count = await _cart.GetMyCountAsync(ct);
+            return Json(new { ok = true, count, message = "Səbətə əlavə olundu" });
+        }
+        catch (BusinessException ex) { return Json(new { ok = false, error = ex.Message }); }
+        catch (NotFoundException ex) { return Json(new { ok = false, error = ex.Message }); }
+        catch (UnauthorizedException ex) { return Json(new { ok = false, error = ex.Message }); }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Səbətə əlavə alınmadı (product {ProductId})", dto.ProductId);
+            return Json(new { ok = false, error = "Səbətə əlavə olunmadı. Yenidən cəhd et." });
+        }
+    }
+
+    // Səbət səhifəsində sayı dəyiş (form post → Index-ə qayıt).
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateQuantity(int id, int quantity, CancellationToken ct)
+    {
+        try { await _cart.UpdateQuantityAsync(id, quantity, ct); }
+        catch (NotFoundException) { /* artıq yoxdursa səssizcə keç */ }
+        return RedirectToAction(nameof(Index));
+    }
+
+    // Səbətdən sil (form post → Index-ə qayıt).
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Remove(int id, CancellationToken ct)
+    {
+        await _cart.RemoveAsync(id, ct);
+        return RedirectToAction(nameof(Index));
+    }
+}
