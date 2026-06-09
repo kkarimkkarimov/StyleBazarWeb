@@ -1,28 +1,31 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Stylebazar.DAL.Entities;
+using Microsoft.EntityFrameworkCore;                    // Fluent API genişləndirmələri.
+using Microsoft.EntityFrameworkCore.Metadata.Builders;  // EntityTypeBuilder<T> tipi.
+using Stylebazar.DAL.Entities;                          // ProductSize entity-si.
 
+// EF konfiqurasiyalarının ad fəzası.
 namespace Stylebazar.DAL.Configurations;
 
-// ProductSize entity-sinin VERİLƏNLƏR BAZASINDA necə qurulacağını təyin edir (Fluent API).
-// IEntityTypeConfiguration → EF bu sinifləri OnModelCreating-də avtomatik tapıb tətbiq edir.
+// ProductSize entity-sinin bazaya map qaydaları (Fluent API).
 public class ProductSizeConfiguration : IEntityTypeConfiguration<ProductSize>
 {
     public void Configure(EntityTypeBuilder<ProductSize> builder)
     {
-        builder.HasKey(ps => ps.Id);   // Primary key = Id
+        // İlkin açar = Id.
+        builder.HasKey(ps => ps.Id);
 
+        // Size: məcburi (NOT NULL), maksimum 20 simvol (nvarchar(20)).
         builder.Property(ps => ps.Size)
-            .IsRequired()               // boş ola bilməz (NOT NULL)
-            .HasMaxLength(20);          // maksimum 20 simvol (məs. nvarchar(20))
+            .IsRequired()
+            .HasMaxLength(20);
 
+        // StockQuantity: default dəyər = 0.
         builder.Property(ps => ps.StockQuantity)
-            .HasDefaultValue(0);        // default dəyər = 0
+            .HasDefaultValue(0);
 
-        // Əlaqə: bir Məhsulun ÇOX ölçüsü olur (1 Product → N ProductSize).
-        builder.HasOne(ps => ps.Product)          // hər ölçünün 1 məhsulu var
-            .WithMany(p => p.Sizes)               // məhsulun çox ölçüsü var
-            .HasForeignKey(ps => ps.ProductId)    // əlaqə açarı (foreign key)
-            .OnDelete(DeleteBehavior.Cascade);    // məhsul silinsə, ölçüləri də silinir
+        // Ölçü → Məhsul əlaqəsi: bir məhsulun çox ölçüsü (1 Product → N ProductSize).
+        builder.HasOne(ps => ps.Product)
+            .WithMany(p => p.Sizes)
+            .HasForeignKey(ps => ps.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);   // məhsul silinsə, ölçüləri də silinir
     }
 }

@@ -1,21 +1,24 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Stylebazar.DAL.Entities;
+using Microsoft.EntityFrameworkCore;                    // Fluent API genişləndirmələri.
+using Microsoft.EntityFrameworkCore.Metadata.Builders;  // EntityTypeBuilder<T> tipi.
+using Stylebazar.DAL.Entities;                          // ReviewImage entity-si.
 
+// EF konfiqurasiyalarının ad fəzası.
 namespace Stylebazar.DAL.Configurations;
 
-// ReviewImage entity-sinin baza qaydaları (Fluent API).
+// ReviewImage (rəy şəkli) entity-sinin bazaya map qaydaları (Fluent API).
 public class ReviewImageConfiguration : IEntityTypeConfiguration<ReviewImage>
 {
     public void Configure(EntityTypeBuilder<ReviewImage> builder)
     {
-        builder.HasKey(ri => ri.Id);   // primary key
+        // İlkin açar = Id.
+        builder.HasKey(ri => ri.Id);
 
+        // ImageUrl: məcburi, maks. 500 simvol.
         builder.Property(ri => ri.ImageUrl)
-            .IsRequired()              // şəkil URL-i məcburidir
+            .IsRequired()
             .HasMaxLength(500);
 
-        // Bir rəyin ÇOX şəkli olur (1 Review → N ReviewImage).
+        // Şəkil → Rəy əlaqəsi: bir rəyin çox şəkli (1 Review → N ReviewImage).
         builder.HasOne(ri => ri.Review)
             .WithMany(r => r.Images)
             .HasForeignKey(ri => ri.ReviewId)

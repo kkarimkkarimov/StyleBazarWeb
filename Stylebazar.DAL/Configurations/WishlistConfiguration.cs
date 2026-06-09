@@ -1,33 +1,36 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Stylebazar.DAL.Entities;
+using Microsoft.EntityFrameworkCore;                    // Fluent API genişləndirmələri.
+using Microsoft.EntityFrameworkCore.Metadata.Builders;  // EntityTypeBuilder<T> tipi.
+using Stylebazar.DAL.Entities;                          // Wishlist entity-si.
 
+// EF konfiqurasiyalarının ad fəzası.
 namespace Stylebazar.DAL.Configurations;
 
-// Wishlist (seçilmişlər) entity-sinin baza qaydaları. Bir istifadəçi eyni məhsulu
-// iki dəfə seçilmişə əlavə edə bilməsin deyə (UserId, ProductId) üzərində unikal indeks var.
+// Wishlist (seçilmişlər) entity-sinin bazaya map qaydaları. Bir istifadəçi eyni məhsulu iki dəfə
+// seçilmişə əlavə edə bilməsin deyə (UserId, ProductId) üzərində unikal indeks var.
 public class WishlistConfiguration : IEntityTypeConfiguration<Wishlist>
 {
     public void Configure(EntityTypeBuilder<Wishlist> builder)
     {
-        builder.HasKey(w => w.Id);   // primary key
+        // İlkin açar = Id.
+        builder.HasKey(w => w.Id);
 
+        // İstifadəçi id-si məcburidir.
         builder.Property(w => w.UserId)
             .IsRequired();
 
-        // Seçimi edən istifadəçi.
+        // Seçim → İstifadəçi əlaqəsi. Restrict → seçimi olan istifadəçini birbaşa silmə.
         builder.HasOne(w => w.User)
             .WithMany(u => u.Wishlists)
             .HasForeignKey(w => w.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Seçilən məhsul.
+        // Seçim → Məhsul əlaqəsi. Cascade → məhsul silinsə, seçilmiş qeydləri də silinir.
         builder.HasOne(w => w.Product)
             .WithMany(p => p.Wishlists)
             .HasForeignKey(w => w.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);   // məhsul silinsə, seçilmiş qeydləri də silinir
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // Eyni istifadəçi + eyni məhsul cütü yalnız bir dəfə ola bilər.
+        // (UserId, ProductId) UNİKAL → eyni istifadəçi + eyni məhsul cütü yalnız bir dəfə.
         builder.HasIndex(w => new { w.UserId, w.ProductId })
             .IsUnique();
     }

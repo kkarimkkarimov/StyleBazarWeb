@@ -1,27 +1,28 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Stylebazar.DAL.Entities;
+using Microsoft.EntityFrameworkCore;                    // Fluent API genişləndirmələri.
+using Microsoft.EntityFrameworkCore.Metadata.Builders;  // EntityTypeBuilder<T> tipi.
+using Stylebazar.DAL.Entities;                          // Conversation entity-si.
 
+// EF konfiqurasiyalarının ad fəzası.
 namespace Stylebazar.DAL.Configurations;
 
+// Conversation (söhbət) entity-sinin bazaya map qaydaları (Fluent API).
 public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
 {
     public void Configure(EntityTypeBuilder<Conversation> builder)
     {
+        // İki iştirakçı id-si məcburi (Identity id-ləri 450 simvola qədər); önizləmə qısa.
         builder.Property(c => c.User1Id).IsRequired().HasMaxLength(450);
         builder.Property(c => c.User2Id).IsRequired().HasMaxLength(450);
         builder.Property(c => c.LastMessagePreview).HasMaxLength(120);
 
-        // Unique on (User1Id, User2Id) — combined with the alphabetical-sort
-        // invariant in ChatManager.GetOrCreate, this guarantees ONE row per pair.
+        // (User1Id, User2Id) UNİKAL — ChatManager-dəki əlifba sırası ilə birlikdə hər cüt üçün BİR sətir.
         builder.HasIndex(c => new { c.User1Id, c.User2Id }).IsUnique();
-        // Inbox-list query orders by LastMessageAt desc per participant.
+        // Gələnlər qutusu hər iştirakçı üçün LastMessageAt-a görə (azalan) sıralanır.
         builder.HasIndex(c => new { c.User1Id, c.LastMessageAt });
         builder.HasIndex(c => new { c.User2Id, c.LastMessageAt });
 
-        // FKs to AspNetUsers are Restrict — deleting a user goes through
-        // AccountManager.DeleteUserAsync which cleans up conversations
-        // explicitly (Phase 14.2+).
+        // AspNetUsers-ə FK-lar Restrict-dir — istifadəçinin silinməsi AccountManager.DeleteUserAsync
+        // vasitəsilə gedir, o, söhbətləri ayrıca təmizləyir.
         builder.HasOne(c => c.User1)
             .WithMany()
             .HasForeignKey(c => c.User1Id)
