@@ -1,0 +1,89 @@
+@model AdminOrdersPageViewModel
+@{
+    ViewData["Title"] = L["Sifarişlər"].Value;
+    ViewData["PageTitle"] = L["Sifarişlər"].Value;
+
+    string StatusChip(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "sb-admin-chip--warn",
+        OrderStatus.Processing => "sb-admin-chip--inprogress",
+        OrderStatus.Shipped => "sb-admin-chip--accent",
+        OrderStatus.Delivered => "sb-admin-chip--ok",
+        OrderStatus.Cancelled => "sb-admin-chip--danger",
+        _ => "sb-admin-chip--muted"
+    };
+    string StatusLabel(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => L["Ödəniş gözlənilir"].Value,
+        OrderStatus.Processing => L["Hazırlanır"].Value,
+        OrderStatus.Shipped => L["Göndərilib"].Value,
+        OrderStatus.Delivered => L["Çatdırılıb"].Value,
+        OrderStatus.Cancelled => L["Ləğv edilib"].Value,
+        _ => s.ToString()
+    };
+}
+
+<div class="sb-admin-filter-bar">
+    <form method="get" style="display:contents">
+        <select name="status" class="sb-admin-select" onchange="this.form.submit()">
+            <option value="" selected="@(Model.StatusFilter == null)">@L["Bütün statuslar"]</option>
+            <option value="Pending" selected="@(Model.StatusFilter == OrderStatus.Pending)">@L["Ödəniş gözlənilir"]</option>
+            <option value="Processing" selected="@(Model.StatusFilter == OrderStatus.Processing)">@L["Hazırlanır"]</option>
+            <option value="Shipped" selected="@(Model.StatusFilter == OrderStatus.Shipped)">@L["Göndərilib"]</option>
+            <option value="Delivered" selected="@(Model.StatusFilter == OrderStatus.Delivered)">@L["Çatdırılıb"]</option>
+            <option value="Cancelled" selected="@(Model.StatusFilter == OrderStatus.Cancelled)">@L["Ləğv edilib"]</option>
+        </select>
+    </form>
+    <span style="margin-left:auto; color:var(--sb-ink-soft, #6b7280); font-size:.85rem">@L["Cəmi"]: @Model.Orders.Count</span>
+</div>
+
+<div class="sb-admin-card sb-admin-table-card">
+    @if (!Model.Orders.Any())
+    {
+        <div class="sb-admin-empty"><strong>@L["Sifariş qeydi yoxdur"]</strong></div>
+    }
+    else
+    {
+        <table class="sb-admin-table">
+            <thead>
+                <tr>
+                    <th>@L["Sifariş"]</th>
+                    <th>@L["Alıcı"]</th>
+                    <th>Status</th>
+                    <th>@L["Ödəniş"]</th>
+                    <th>@L["Məhsul"]</th>
+                    <th>@L["Cəmi"]</th>
+                    <th>@L["Tarix"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Orders)
+                {
+                    <tr>
+                        <td><strong>#@o.Id</strong></td>
+                        <td>@(string.IsNullOrEmpty(o.BuyerName) ? "—" : o.BuyerName)</td>
+                        <td><span class="sb-admin-chip @StatusChip(o.Status)">@StatusLabel(o.Status)</span></td>
+                        <td>
+                            @if (o.IsPaid)
+                            {
+                                <span class="sb-admin-chip sb-admin-chip--ok">@L["Ödənilib"]</span>
+                            }
+                            else
+                            {
+                                <span class="sb-admin-chip sb-admin-chip--muted">@L["Gözlənilir"]</span>
+                            }
+                        </td>
+                        <td>@o.ItemCount (@o.TotalQuantity @L["ədəd"])</td>
+                        <td><strong>@o.TotalAmount.ToString("0.##") ₼</strong></td>
+                        <td><span class="sb-admin-date">@o.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span></td>
+                        <td>
+                            <a asp-area="Admin" asp-controller="Order" asp-action="Detail" asp-route-id="@o.Id"
+                               class="sb-admin-btn sb-admin-btn--ghost">@L["Bax"]</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

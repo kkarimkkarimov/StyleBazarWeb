@@ -86,6 +86,9 @@
         safe('setupProductGallery',      setupProductGallery);
         safe('setupSizePicker',          setupSizePicker);
         safe('setupQuantityStepper',     setupQuantityStepper);
+        safe('setupAddToCart',           setupAddToCart);
+        safe('setupCart',                setupCart);
+        safe('setupCheckout',            setupCheckout);
         safe('setupLightbox',            setupLightbox);
         safe('setupReviewForm',          setupReviewForm);
         safe('setupMyReviewActions',     setupMyReviewActions);
@@ -472,6 +475,224 @@
         toastTimer = setTimeout(function () {
             toastEl.classList.remove('is-visible');
         }, 2400);
+    }
+
+    // Header səbət rozetkasını yenilə + "pop" animasiyası.
+    function bumpCartBadge(total) {
+        var badge = document.querySelector('[data-cart-badge]');
+        if (!badge) return;
+        badge.textContent = String(total);
+        badge.classList.toggle('is-visible', total > 0);
+        badge.classList.remove('is-bumping');
+        void badge.offsetWidth;
+        badge.classList.add('is-bumping');
+    }
+
+    /* ----------- "Səbətə at" — istənilən səhifədən (PDP/kart) ----------- */
+    function setupAddToCart() {
+        var buttons = document.querySelectorAll('[data-add-to-cart]');
+        if (!buttons.length) return;
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (btn.classList.contains('is-loading')) return;
+                var pid = btn.getAttribute('data-product-id');
+                if (!pid) return;
+
+                // PDP konteksti (opsional): say + seçilmiş ölçü/rəng.
+                var qtyEl = document.getElementById('sbCartQty');
+                var qty = qtyEl ? (parseInt(qtyEl.value, 10) || 1) : 1;
+                function pickText(sel) {
+                    var el = document.querySelector(sel);
+                    if (!el) return '';
+                    var v = (el.textContent || '').trim();
+                    return (v && v !== '—') ? v : '';
+                }
+                var size = pickText('[data-size-label]');
+                var color = pickText('[data-color-label]');
+                var token = getAntiForgeryToken() || '';
+                var label = btn.querySelector('[data-add-to-cart-label]');
+                var orig = label ? label.textContent : '';
+
+                btn.classList.add('is-loading');
+                btn.disabled = true;
+
+                var body = new URLSearchParams();
+                body.append('ProductId', pid);
+                body.append('Quantity', String(qty));
+                if (size) body.append('Size', size);
+                if (color) body.append('Color', color);
+                if (token) body.append('__RequestVerificationToken', token);
+
+                fetch('/Cart/Add', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: body })
+                    .then(function (r) { if (r.redirected) { window.location.href = r.url; return null; } return r.json(); })
+                    .then(function (data) {
+                        btn.classList.remove('is-loading');
+                        if (!data) return;
+                        if (data.ok) {
+                            bumpCartBadge(data.count);
+                            showToast('Səbətə əlavə olundu', 'success');
+                            btn.classList.add('is-success');
+                            if (label) label.textContent = '✓ ' + t('Səbətə əlavə olundu');
+                            setTimeout(function () {
+                                btn.classList.remove('is-success');
+                                if (label) label.textContent = orig;
+                                btn.disabled = false;
+                            }, 1600);
+                        } else {
+                            showToast(data.error || 'Səbətə əlavə olunmadı.', 'error');
+                            btn.disabled = false;
+                        }
+                    })
+                    .catch(function () {
+                        btn.classList.remove('is-loading');
+                        btn.disabled = false;
+                        showToast('Şəbəkə xətası. Yenidən cəhd et.', 'error');
+                    });
+            });
+        });
+    }
+
+    /* ----------- Səbət səhifəsi — canlı say/silmə (səhifə yenilənmədən) ----------- */
+    function setupCart() {
+        var page = document.querySelector('[data-cart-page]');
+        if (!page) return;
+        var token = getAntiForgeryToken() || '';
+
+        function money(text) { return text + ' ₼'; }
+
+        function updateSummary(data) {
+            var sub = page.querySelector('[data-subtotal]');
+            if (sub && data.subtotalText != null) sub.textContent = money(data.subtotalText);
+            page.querySelectorAll('[data-cart-count]').forEach(function (c) {
+                c.textContent = String(data.totalQuantity);
+            });
+            bumpCartBadge(data.totalQuantity);
+        }
+
+        function swapEmpty(isEmpty) {
+            if (!isEmpty) return;
+            var grid = page.querySelector('[data-cart-grid]');
+            var empty = page.querySelector('[data-cart-empty]');
+            if (grid) grid.remove();
+            if (empty) empty.hidden = false;
+        }
+
+        function post(url, id, extra) {
+            var body = new URLSearchParams();
+            body.append('id', id);
+            if (extra) Object.keys(extra).forEach(function (k) { body.append(k, extra[k]); });
+            if (token) body.append('__RequestVerificationToken', token);
+            return fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: body })
+                .then(function (r) { if (r.redirected) { window.location.href = r.url; return null; } return r.json(); });
+        }
+
+        function removeRow(item, data) {
+            item.classList.add('is-removing');
+            setTimeout(function () {
+                item.remove();
+                updateSummary(data);
+                swapEmpty(data.isEmpty);
+            }, 280);
+        }
+
+        page.querySelectorAll('[data-cart-item]').forEach(function (item) {
+            var id = item.getAttribute('data-id');
+            var input = item.querySelector('[data-qty-input]');
+            var stepper = item.querySelector('[data-qty]');
+            var lineTotal = item.querySelector('[data-line-total]');
+            var timer = null;
+
+            if (input) {
+                input.addEventListener('change', function () {
+                    clearTimeout(timer);
+                    timer = setTimeout(function () {
+                        var qty = parseInt(input.value, 10) || 1;
+                        if (stepper) stepper.classList.add('is-busy');
+                        post('/Cart/UpdateQuantity', id, { quantity: qty }).then(function (data) {
+                            if (stepper) stepper.classList.remove('is-busy');
+                            if (!data) return;
+                            if (data.removed) { removeRow(item, data); return; }
+                            if (lineTotal && data.lineTotalText != null) lineTotal.textContent = money(data.lineTotalText);
+                            if (input.value !== String(data.quantity)) input.value = String(data.quantity); // stokla məhdudlaşıbsa
+                            updateSummary(data);
+                        }).catch(function () { if (stepper) stepper.classList.remove('is-busy'); });
+                    }, 250);
+                });
+            }
+
+            var removeBtn = item.querySelector('[data-remove]');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    post('/Cart/Remove', id, null).then(function (data) {
+                        if (data) removeRow(item, data);
+                    });
+                });
+            }
+        });
+    }
+
+    /* ----------- Checkout — ünvan seçimi + Stripe ödənişi ----------- */
+    function setupCheckout() {
+        var root = document.querySelector('[data-checkout]');
+        if (!root) return;
+        var payBtn = root.querySelector('[data-pay]');
+        var errBox = root.querySelector('[data-checkout-error]');
+        var newAddr = root.querySelector('[data-new-addr]');
+        var radios = root.querySelectorAll('input[name="sbAddr"]');
+
+        function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+        function err(msg) { if (errBox) { errBox.textContent = t(msg); errBox.hidden = false; } }
+        function syncNew() {
+            var sel = root.querySelector('input[name="sbAddr"]:checked');
+            var showNew = !sel || sel.value === 'new';
+            if (newAddr) newAddr.hidden = !showNew;
+        }
+        radios.forEach(function (r) { r.addEventListener('change', syncNew); });
+        syncNew();
+
+        if (!payBtn) return;
+        payBtn.addEventListener('click', function () {
+            if (payBtn.classList.contains('is-loading')) return;
+            if (errBox) errBox.hidden = true;
+
+            var sel = root.querySelector('input[name="sbAddr"]:checked');
+            var usingSaved = sel && sel.value !== 'new';
+            var token = getAntiForgeryToken() || '';
+            var body = new URLSearchParams();
+            if (token) body.append('__RequestVerificationToken', token);
+
+            if (usingSaved) {
+                body.append('AddressId', sel.value);
+            } else {
+                if (!val('f_FullName') || !val('f_Phone') || !val('f_City') || !val('f_AddressLine')) {
+                    err('Zəhmət olmasa ad, telefon, şəhər və ünvanı doldurun.');
+                    return;
+                }
+                body.append('ShipFullName', val('f_FullName'));
+                body.append('ShipPhone', val('f_Phone'));
+                body.append('ShipCity', val('f_City'));
+                body.append('ShipDistrict', val('f_District'));
+                body.append('ShipAddressLine', val('f_AddressLine'));
+                body.append('ShipPostalCode', val('f_PostalCode'));
+                body.append('ShipNotes', val('f_Notes'));
+                var save = document.getElementById('f_Save');
+                body.append('SaveAddress', (save && save.checked) ? 'true' : 'false');
+            }
+
+            payBtn.classList.add('is-loading');
+            fetch(root.getAttribute('data-place-url') || '/Checkout/Place', {
+                method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: body
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data && data.ok && data.url) { window.location = data.url; return; }
+                    payBtn.classList.remove('is-loading');
+                    err((data && data.error) || 'Ödəniş başlana bilmədi.');
+                })
+                .catch(function () { payBtn.classList.remove('is-loading'); err('Şəbəkə xətası. Yenidən cəhd et.'); });
+        });
     }
 
     /* ----------- Hero carousel ----------- */
@@ -1788,13 +2009,18 @@
                 inc.disabled = v >= getMax() || getMax() <= 0;
             }
 
+            // +/- dəyişikliyini xarici dinləyicilərə (məs. səbət AJAX) bildirmək üçün
+            // 'change' hadisəsi göndərilir; .value-nu proqramla təyin etmək onu öz-özünə yaratmır.
+            function fireChange() { input.dispatchEvent(new Event('change', { bubbles: true })); }
             dec.addEventListener('click', function () {
                 input.value = String(clamp(parseInt(input.value, 10) - 1));
                 paint();
+                fireChange();
             });
             inc.addEventListener('click', function () {
                 input.value = String(clamp(parseInt(input.value, 10) + 1));
                 paint();
+                fireChange();
             });
             input.addEventListener('input', paint);
             input.addEventListener('blur', paint);

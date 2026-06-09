@@ -225,7 +225,31 @@ public class OrderManager : IOrderService
                 TotalAmount = o.Items.Where(i => storeIds.Contains(i.StoreId)).Sum(i => i.UnitPrice * i.Quantity),
                 TotalQuantity = o.Items.Where(i => storeIds.Contains(i.StoreId)).Sum(i => i.Quantity),
                 ItemCount = o.Items.Count(i => storeIds.Contains(i.StoreId)),
-                FirstImageUrl = o.Items.Where(i => storeIds.Contains(i.StoreId)).Select(i => i.ImageUrl).FirstOrDefault()
+                FirstImageUrl = o.Items.Where(i => storeIds.Contains(i.StoreId)).Select(i => i.ImageUrl).FirstOrDefault(),
+                BuyerName = o.Buyer.FullName
+            })
+            .ToListAsync(ct);
+    }
+
+    // Bütün sifarişlər (admin icmalı) — opsional status filtri ilə.
+    public async Task<List<OrderListItemDto>> GetAllForAdminAsync(OrderStatus? status, CancellationToken ct = default)
+    {
+        IQueryable<Order> q = _db.Orders.AsNoTracking();
+        if (status.HasValue) q = q.Where(o => o.Status == status.Value);
+
+        return await q
+            .OrderByDescending(o => o.CreatedDate)
+            .Select(o => new OrderListItemDto
+            {
+                Id = o.Id,
+                CreatedDate = o.CreatedDate,
+                Status = o.Status,
+                IsPaid = o.IsPaid,
+                TotalAmount = o.TotalAmount,
+                TotalQuantity = o.Items.Sum(i => i.Quantity),
+                ItemCount = o.Items.Count,
+                FirstImageUrl = o.Items.Select(i => i.ImageUrl).FirstOrDefault(),
+                BuyerName = o.Buyer.FullName
             })
             .ToListAsync(ct);
     }

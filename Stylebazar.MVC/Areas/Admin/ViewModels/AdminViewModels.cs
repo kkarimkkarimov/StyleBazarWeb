@@ -47,6 +47,19 @@ public class AdminSubscriptionsPageViewModel
     public SubscriptionStatus? StatusFilter { get; set; }
 }
 
+// AdminOrdersPageViewModel — admin qlobal sifariş icmalı üçün məlumat modeli.
+public class AdminOrdersPageViewModel
+{
+    public List<Stylebazar.BLL.DTOs.Orders.OrderListItemDto> Orders { get; set; } = new();
+    public OrderStatus? StatusFilter { get; set; }
+}
+
+// AdminOrderDetailViewModel — admin sifariş detalı (status idarəetmə) üçün məlumat modeli.
+public class AdminOrderDetailViewModel
+{
+    public Stylebazar.BLL.DTOs.Orders.OrderDetailDto Order { get; set; } = new();
+}
+
 // AdminUserDetailViewModel — view (səhifə) üçün məlumat modeli; controller doldurur, Razor göstərir.
 public class AdminUserDetailViewModel
 {

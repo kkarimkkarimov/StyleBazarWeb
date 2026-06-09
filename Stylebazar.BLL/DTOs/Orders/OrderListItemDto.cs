@@ -13,4 +13,5 @@ public class OrderListItemDto
     public int TotalQuantity { get; set; }     // ümumi məhsul sayı (cəm)
     public int ItemCount { get; set; }         // fərqli sətir sayı
     public string? FirstImageUrl { get; set; } // siyahıda göstərmək üçün ilk məhsul şəkli
+    public string? BuyerName { get; set; }     // satıcı/admin siyahısında alıcının adı (alıcının öz siyahısında null)
 }

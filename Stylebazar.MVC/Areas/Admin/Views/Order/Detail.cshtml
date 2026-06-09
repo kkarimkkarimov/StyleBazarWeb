@@ -1,0 +1,92 @@
+@model AdminOrderDetailViewModel
+@{
+    var o = Model.Order;
+    ViewData["Title"] = L["Sifariş"].Value + " #" + o.Id;
+    ViewData["PageTitle"] = L["Sifariş"].Value + " #" + o.Id;
+
+    string StatusChip(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "sb-admin-chip--warn",
+        OrderStatus.Processing => "sb-admin-chip--inprogress",
+        OrderStatus.Shipped => "sb-admin-chip--accent",
+        OrderStatus.Delivered => "sb-admin-chip--ok",
+        OrderStatus.Cancelled => "sb-admin-chip--danger",
+        _ => "sb-admin-chip--muted"
+    };
+}
+
+<div style="margin-bottom:16px;">
+    <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="sb-admin-btn sb-admin-btn--ghost">← @L["Sifarişlərə qayıt"]</a>
+</div>
+
+<div class="sb-admin-grid-2">
+    <div class="sb-admin-card">
+        <div class="sb-admin-card__head">
+            <h2 class="sb-admin-card__title">@L["Məhsullar"]</h2>
+            <span class="sb-admin-chip @StatusChip(o.Status)">@o.Status</span>
+        </div>
+        <table class="sb-admin-table">
+            <tbody>
+                @foreach (var item in o.Items)
+                {
+                    <tr>
+                        <td style="width:54px;">
+                            <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/img/placeholder.svg" : item.ImageUrl)" alt=""
+                                 style="width:46px; height:46px; object-fit:cover; border-radius:8px;" />
+                        </td>
+                        <td>
+                            <strong>@item.ProductName</strong><br />
+                            <small style="color:var(--sb-ink-soft,#6b7280)">
+                                @item.StoreName · @item.Quantity × @item.UnitPrice.ToString("0.##") ₼
+                                @if (!string.IsNullOrEmpty(item.Size)) { <text> · @item.Size</text> }
+                                @if (!string.IsNullOrEmpty(item.Color)) { <text> · @item.Color</text> }
+                            </small>
+                        </td>
+                        <td style="text-align:right;"><strong>@item.LineTotal.ToString("0.##") ₼</strong></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div style="display:flex; justify-content:space-between; padding:14px 4px 4px; font-size:1.05rem; font-weight:700; border-top:1px solid var(--sb-admin-line,#e5e7eb);">
+            <span>@L["Cəmi"]</span>
+            <span>@o.TotalAmount.ToString("0.##") ₼</span>
+        </div>
+    </div>
+
+    <div>
+        <div class="sb-admin-card" style="margin-bottom:16px;">
+            <div class="sb-admin-card__head"><h2 class="sb-admin-card__title">@L["Çatdırılma"]</h2></div>
+            <p style="line-height:1.7; margin:0;">
+                <strong>@o.ShipFullName</strong><br />
+                @o.ShipPhone<br />
+                @o.ShipCity@(string.IsNullOrEmpty(o.ShipDistrict) ? "" : ", " + o.ShipDistrict)<br />
+                @o.ShipAddressLine
+                @if (!string.IsNullOrEmpty(o.ShipPostalCode)) { <br /><text>@o.ShipPostalCode</text> }
+            </p>
+            @if (!string.IsNullOrEmpty(o.ShipNotes))
+            {
+                <p style="color:var(--sb-ink-soft,#6b7280); font-size:.85rem; margin-top:8px;">@L["Qeyd"]: @o.ShipNotes</p>
+            }
+            <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; font-size:.85rem; color:var(--sb-ink-soft,#6b7280);">
+                <span>@L["Tarix"]: @o.CreatedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                @if (o.PaidAt != null) { <span>· @L["Ödənilib"]: @o.PaidAt.Value.ToLocalTime().ToString("dd.MM.yyyy")</span> }
+            </div>
+        </div>
+
+        <div class="sb-admin-card">
+            <div class="sb-admin-card__head"><h2 class="sb-admin-card__title">@L["Statusu dəyiş"]</h2></div>
+            <form asp-area="Admin" asp-controller="Order" asp-action="UpdateStatus" method="post" style="display:flex; gap:8px; align-items:center;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@o.Id" />
+                <select name="status" class="sb-admin-select" style="flex:1;">
+                    @foreach (OrderStatus s in Enum.GetValues(typeof(OrderStatus)))
+                    {
+                        <option value="@s" selected="@(o.Status == s)">@s</option>
+                    }
+                </select>
+                <button type="submit" class="sb-admin-btn sb-admin-btn--primary">@L["Tətbiq et"]</button>
+            </form>
+            <p style="color:var(--sb-ink-soft,#6b7280); font-size:.78rem; margin:10px 0 0;">@L["Admin istənilən statusa keçid edə bilər."]</p>
+        </div>
+    </div>
+</div>

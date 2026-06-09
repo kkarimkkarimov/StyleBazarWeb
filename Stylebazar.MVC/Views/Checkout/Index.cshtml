@@ -3,180 +3,98 @@
     ViewData["Title"] = L["Ödəniş"].Value;
 }
 
-<style>
-    .sb-input { padding:10px 12px; border:1px solid #ddd; border-radius:8px; font:inherit; width:100%; }
-    .sb-addr-option:has(input:checked) { border-color:var(--sb-primary,#d6336c); box-shadow:0 0 0 1px var(--sb-primary,#d6336c) inset; }
-    @@media (max-width:860px){ .sb-checkout-grid{ grid-template-columns:1fr !important; } #sbNewAddr{ grid-template-columns:1fr !important; } }
-</style>
+<section class="sb-commerce" data-checkout data-place-url="@Url.Action("Place", "Checkout")">
+    <div class="sb-commerce__head">
+        <h1 class="sb-commerce__title">@L["Sifarişi tamamla"]</h1>
+    </div>
 
-<section style="max-width:1100px; margin:0 auto; padding:24px 16px;">
-    <h1 style="font-family:'Playfair Display',serif; margin-bottom:20px;">@L["Sifarişi tamamla"]</h1>
+    <div class="sb-alert sb-alert--err" data-checkout-error hidden></div>
+    @Html.AntiForgeryToken()
 
-    <div id="sbCheckoutError" style="display:none; background:#fdecea; color:#a93226; padding:12px 16px; border-radius:10px; margin-bottom:16px;"></div>
-
-    <div style="display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start;" class="sb-checkout-grid">
+    <div class="sb-buy-grid">
         <div>
             <!-- ÇATDIRILMA ÜNVANI -->
-            <div style="border:1px solid #eee; border-radius:12px; padding:20px; background:#fff; margin-bottom:16px;">
-                <h3 style="margin-top:0;">@L["Çatdırılma ünvanı"]</h3>
+            <div class="sb-panel">
+                <h2 class="sb-panel__title">@L["Çatdırılma ünvanı"]</h2>
 
                 @if (Model.Addresses.Any())
                 {
-                    <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="sb-addr-list">
                         @foreach (var a in Model.Addresses)
                         {
-                            <label class="sb-addr-option" style="display:flex; gap:12px; align-items:flex-start; padding:12px; border:1px solid #e6e6e6; border-radius:10px; cursor:pointer;">
-                                <input type="radio" name="sbAddr" value="@a.Id" @(a.Id == Model.DefaultAddressId ? "checked" : "") style="margin-top:4px;" />
+                            <label class="sb-addr">
+                                <input type="radio" name="sbAddr" value="@a.Id" class="sb-addr__radio" @(a.Id == Model.DefaultAddressId ? "checked" : "") />
                                 <span>
-                                    <strong>@a.FullName</strong>
-                                    @if (a.IsDefault) { <span style="font-size:.72rem; background:#eef; color:#3949ab; padding:2px 8px; border-radius:20px; margin-left:6px;">@L["Əsas"]</span> }
-                                    <br />
-                                    <span style="color:#555;">@a.Phone</span><br />
-                                    <span style="color:#555;">@a.City@(string.IsNullOrEmpty(a.District) ? "" : ", " + a.District), @a.AddressLine</span>
+                                    <span class="sb-addr__name">@a.FullName</span>
+                                    @if (a.IsDefault) { <span class="sb-addr__badge">@L["Əsas"]</span> }
+                                    <span class="sb-addr__lines">
+                                        @a.Phone<br />
+                                        @a.City@(string.IsNullOrEmpty(a.District) ? "" : ", " + a.District), @a.AddressLine
+                                    </span>
                                 </span>
                             </label>
                         }
-                        <label class="sb-addr-option" style="display:flex; gap:12px; align-items:center; padding:12px; border:1px dashed #ccc; border-radius:10px; cursor:pointer;">
-                            <input type="radio" name="sbAddr" value="new" />
-                            <span>@L["Yeni ünvan əlavə et"]</span>
+                        <label class="sb-addr sb-addr--new">
+                            <input type="radio" name="sbAddr" value="new" class="sb-addr__radio" />
+                            <span>＋ @L["Yeni ünvan əlavə et"]</span>
                         </label>
                     </div>
                 }
 
-                <!-- Yeni ünvan formu (saxlanmış ünvan yoxdursa açıq, varsa "Yeni ünvan" seçiləndə açılır) -->
-                <div id="sbNewAddr" style="@(Model.Addresses.Any() ? "display:none;" : "") margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <input id="f_FullName" placeholder="@L["Ad Soyad"]" class="sb-input" />
-                    <input id="f_Phone" placeholder="@L["Telefon"]" class="sb-input" />
-                    <input id="f_City" placeholder="@L["Şəhər"]" class="sb-input" />
-                    <input id="f_District" placeholder="@L["Rayon"]" class="sb-input" />
-                    <input id="f_AddressLine" placeholder="@L["Ünvan (küçə, ev, mənzil)"]" class="sb-input" style="grid-column:1 / -1;" />
-                    <input id="f_PostalCode" placeholder="@L["Poçt indeksi"]" class="sb-input" />
-                    <input id="f_Notes" placeholder="@L["Qeyd (orientir)"]" class="sb-input" />
-                    <label style="grid-column:1 / -1; display:flex; gap:8px; align-items:center; color:#555; font-size:.9rem;">
+                <div class="sb-field-grid" data-new-addr hidden="@(Model.Addresses.Any() ? "hidden" : null)">
+                    <input id="f_FullName" class="sb-input" placeholder="@L["Ad Soyad"]" autocomplete="name" />
+                    <input id="f_Phone" class="sb-input" placeholder="@L["Telefon"]" autocomplete="tel" inputmode="tel" />
+                    <input id="f_City" class="sb-input" placeholder="@L["Şəhər"]" autocomplete="address-level2" />
+                    <input id="f_District" class="sb-input" placeholder="@L["Rayon"]" autocomplete="address-level3" />
+                    <input id="f_AddressLine" class="sb-input sb-input--full" placeholder="@L["Ünvan (küçə, ev, mənzil)"]" autocomplete="street-address" />
+                    <input id="f_PostalCode" class="sb-input" placeholder="@L["Poçt indeksi"]" autocomplete="postal-code" />
+                    <input id="f_Notes" class="sb-input" placeholder="@L["Qeyd (orientir)"]" />
+                    <label class="sb-checkrow">
                         <input type="checkbox" id="f_Save" checked /> @L["Bu ünvanı yadda saxla"]
                     </label>
                 </div>
             </div>
 
-            <!-- SİFARİŞ MƏHSULLARI -->
-            <div style="border:1px solid #eee; border-radius:12px; padding:20px; background:#fff;">
-                <h3 style="margin-top:0;">@L["Məhsullar"] (@Model.Cart.TotalQuantity)</h3>
+            <!-- MƏHSULLAR -->
+            <div class="sb-panel">
+                <h2 class="sb-panel__title">@L["Məhsullar"] (@Model.Cart.TotalQuantity)</h2>
                 @foreach (var item in Model.Cart.Items)
                 {
-                    <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #f2f2f2;">
-                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/img/placeholder.svg" : item.ImageUrl)" alt="@item.ProductName"
-                             style="width:56px; height:56px; object-fit:cover; border-radius:8px;" />
-                        <div style="flex:1;">
-                            <div style="font-weight:600;">@item.ProductName</div>
-                            <div style="color:#888; font-size:.82rem;">
+                    <div class="sb-miniline">
+                        <img class="sb-miniline__img" src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/img/placeholder.svg" : item.ImageUrl)" alt="@item.ProductName" loading="lazy" />
+                        <div class="sb-miniline__body">
+                            <div class="sb-miniline__name">@item.ProductName</div>
+                            <div class="sb-miniline__meta">
                                 @item.Quantity × @item.UnitPrice.ToString("0.##") ₼
                                 @if (!string.IsNullOrEmpty(item.Size)) { <text> · @item.Size</text> }
                                 @if (!string.IsNullOrEmpty(item.Color)) { <text> · @item.Color</text> }
                             </div>
                         </div>
-                        <strong>@item.LineTotal.ToString("0.##") ₼</strong>
+                        <span class="sb-miniline__price">@item.LineTotal.ToString("0.##") ₼</span>
                     </div>
                 }
             </div>
         </div>
 
         <!-- XÜLASƏ + ÖDƏ -->
-        <aside style="border:1px solid #eee; border-radius:12px; padding:20px; background:#fff; position:sticky; top:90px;">
-            <h3 style="margin-top:0;">@L["Sifariş xülasəsi"]</h3>
-            <div style="display:flex; justify-content:space-between; margin:10px 0; color:#555;">
+        <aside class="sb-summary">
+            <h2 class="sb-summary__title">@L["Sifariş xülasəsi"]</h2>
+            <div class="sb-summary__row sb-summary__row--muted">
                 <span>@L["Ara cəm"]</span>
                 <span>@Model.Cart.Subtotal.ToString("0.##") ₼</span>
             </div>
-            <div style="display:flex; justify-content:space-between; margin:10px 0; color:#555;">
+            <div class="sb-summary__row sb-summary__row--muted">
                 <span>@L["Çatdırılma"]</span>
-                <span style="color:#1e8449;">@L["Pulsuz"]</span>
+                <span class="sb-summary__free">@L["Pulsuz"]</span>
             </div>
-            <hr style="border:none; border-top:1px solid #eee; margin:14px 0;" />
-            <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:700; margin-bottom:16px;">
+            <hr class="sb-summary__hr" />
+            <div class="sb-summary__total">
                 <span>@L["Cəmi"]</span>
-                <span>@Model.Cart.Subtotal.ToString("0.##") ₼</span>
+                <b>@Model.Cart.Subtotal.ToString("0.##") ₼</b>
             </div>
-            <button id="sbPayBtn" type="button" class="sb-btn sb-btn--primary sb-btn--block">@L["Kartla ödə"]</button>
-            <a asp-controller="Cart" asp-action="Index" class="sb-btn sb-btn--ghost sb-btn--block" style="margin-top:8px;">@L["Səbətə qayıt"]</a>
-            <p style="color:#999; font-size:.78rem; margin-top:12px; text-align:center;">🔒 @L["Ödəniş Stripe ilə təhlükəsiz aparılır"]</p>
+            <button type="button" class="sb-btn sb-btn--primary sb-btn--block" data-pay>@L["Kartla ödə"]</button>
+            <a asp-controller="Cart" asp-action="Index" class="sb-btn sb-btn--ghost sb-btn--block">@L["Səbətə qayıt"]</a>
+            <p class="sb-summary__note">🔒 @L["Ödəniş Stripe ilə təhlükəsiz aparılır"]</p>
         </aside>
     </div>
 </section>
-
-@Html.AntiForgeryToken()
-
-@section Scripts {
-    <script>
-        (function () {
-            var newAddr = document.getElementById('sbNewAddr');
-            var radios = document.querySelectorAll('input[name="sbAddr"]');
-            var errBox = document.getElementById('sbCheckoutError');
-            var payBtn = document.getElementById('sbPayBtn');
-
-            function syncNewAddr() {
-                var sel = document.querySelector('input[name="sbAddr"]:checked');
-                var showNew = !sel || sel.value === 'new';
-                if (newAddr) newAddr.style.display = showNew ? 'grid' : 'none';
-            }
-            radios.forEach(function (r) { r.addEventListener('change', syncNewAddr); });
-            syncNewAddr();
-
-            function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
-
-            payBtn.addEventListener('click', function () {
-                errBox.style.display = 'none';
-                var sel = document.querySelector('input[name="sbAddr"]:checked');
-                var usingSaved = sel && sel.value !== 'new';
-
-                var body = new URLSearchParams();
-                var token = document.querySelector('input[name="__RequestVerificationToken"]');
-                if (token) body.append('__RequestVerificationToken', token.value);
-
-                if (usingSaved) {
-                    body.append('AddressId', sel.value);
-                } else {
-                    // Minimal client-side yoxlama (server də yoxlayır).
-                    if (!val('f_FullName') || !val('f_Phone') || !val('f_City') || !val('f_AddressLine')) {
-                        errBox.textContent = '@L["Zəhmət olmasa ad, telefon, şəhər və ünvanı doldurun."]';
-                        errBox.style.display = 'block';
-                        return;
-                    }
-                    body.append('ShipFullName', val('f_FullName'));
-                    body.append('ShipPhone', val('f_Phone'));
-                    body.append('ShipCity', val('f_City'));
-                    body.append('ShipDistrict', val('f_District'));
-                    body.append('ShipAddressLine', val('f_AddressLine'));
-                    body.append('ShipPostalCode', val('f_PostalCode'));
-                    body.append('ShipNotes', val('f_Notes'));
-                    body.append('SaveAddress', document.getElementById('f_Save').checked ? 'true' : 'false');
-                }
-
-                payBtn.disabled = true;
-                payBtn.textContent = '@L["Gözləyin..."]';
-
-                fetch('@Url.Action("Place", "Checkout")', {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    body: body
-                })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (data && data.ok && data.url) {
-                        window.location = data.url;
-                    } else {
-                        errBox.textContent = (data && data.error) || '@L["Ödəniş başlana bilmədi."]';
-                        errBox.style.display = 'block';
-                        payBtn.disabled = false;
-                        payBtn.textContent = '@L["Kartla ödə"]';
-                    }
-                })
-                .catch(function () {
-                    errBox.textContent = '@L["Şəbəkə xətası. Yenidən cəhd et."]';
-                    errBox.style.display = 'block';
-                    payBtn.disabled = false;
-                    payBtn.textContent = '@L["Kartla ödə"]';
-                });
-            });
-        })();
-    </script>
-}

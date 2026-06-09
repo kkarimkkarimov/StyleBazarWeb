@@ -4,30 +4,39 @@
     ViewData["Title"] = L["Sifariş"].Value + " #" + Model.Order.Id;
     var p = Model.Profile;
     var o = Model.Order;
+    bool cancelled = o.Status == OrderStatus.Cancelled;
 
-    (string Label, string Bg, string Fg) StatusChip(OrderStatus s) => s switch
+    (string Cls, string Label) Status(OrderStatus s) => s switch
     {
-        OrderStatus.Pending => (L["Ödəniş gözlənilir"].Value, "#fff4e5", "#b26a00"),
-        OrderStatus.Processing => (L["Hazırlanır"].Value, "#e7f0ff", "#1b5fbf"),
-        OrderStatus.Shipped => (L["Göndərilib"].Value, "#efe7ff", "#6b34c4"),
-        OrderStatus.Delivered => (L["Çatdırılıb"].Value, "#e6f7ec", "#1e8449"),
-        OrderStatus.Cancelled => (L["Ləğv edilib"].Value, "#fdecea", "#a93226"),
-        _ => (s.ToString(), "#eee", "#555")
+        OrderStatus.Pending => ("sb-status--pending", L["Ödəniş gözlənilir"].Value),
+        OrderStatus.Processing => ("sb-status--processing", L["Hazırlanır"].Value),
+        OrderStatus.Shipped => ("sb-status--shipped", L["Göndərilib"].Value),
+        OrderStatus.Delivered => ("sb-status--delivered", L["Çatdırılıb"].Value),
+        OrderStatus.Cancelled => ("sb-status--cancelled", L["Ləğv edilib"].Value),
+        _ => ("sb-status--pending", s.ToString())
     };
-    var chip = StatusChip(o.Status);
+    var chip = Status(o.Status);
+
+    var steps = new[]
+    {
+        (Title: L["Sifariş verildi"].Value, Done: true, When: (DateTime?)o.CreatedDate),
+        (Title: L["Ödəniş alındı"].Value, Done: o.IsPaid, When: o.PaidAt),
+        (Title: L["Göndərildi"].Value, Done: o.ShippedAt != null, When: o.ShippedAt),
+        (Title: L["Çatdırıldı"].Value, Done: o.DeliveredAt != null, When: o.DeliveredAt)
+    };
 }
 
 <section class="sb-seller-layout">
     @await Html.PartialAsync("_SellerSidebar", p)
 
     <main class="sb-seller-main">
-        <a asp-action="Orders" style="color:#888; text-decoration:none; font-size:.9rem;">← @L["Sifarişlərə qayıt"]</a>
-        <header class="sb-prod-page-head" style="margin-top:8px;">
+        <a class="sb-order-back" asp-action="Orders">← @L["Sifarişlərə qayıt"]</a>
+        <header class="sb-prod-page-head" style="margin-top:6px;">
             <div>
                 <h1>@L["Sifariş"] #@o.Id</h1>
                 <p>@o.CreatedDate.ToLocalTime().ToString("dd MMMM yyyy, HH:mm")</p>
             </div>
-            <span style="font-size:.8rem; padding:6px 14px; border-radius:20px; background:@chip.Bg; color:@chip.Fg; font-weight:600; align-self:center;">@chip.Label</span>
+            <span class="sb-status @chip.Cls" style="align-self:center;">@chip.Label</span>
         </header>
 
         @if (TempData["Success"] is string okMsg)
@@ -39,37 +48,56 @@
             <div class="sb-prod-toast sb-prod-toast--err">@errMsg</div>
         }
 
-        <div style="display:grid; grid-template-columns:1fr 300px; gap:18px; align-items:start;" class="sb-order-grid">
-            <!-- MƏHSULLAR (yalnız bu satıcının) -->
-            <div class="sb-seller-card">
-                <h3 style="margin-top:0;">@L["Məhsullar"]</h3>
+        @if (!cancelled)
+        {
+            <div class="sb-timeline">
+                @foreach (var st in steps)
+                {
+                    <div class="sb-timeline__step @(st.Done ? "is-done" : "")">
+                        <div class="sb-timeline__dot">
+                            @if (st.Done)
+                            {
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            }
+                        </div>
+                        <div class="sb-timeline__label">@st.Title</div>
+                        @if (st.When != null)
+                        {
+                            <div class="sb-timeline__time">@st.When.Value.ToLocalTime().ToString("dd.MM HH:mm")</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="sb-order-detail-grid">
+            <div class="sb-panel" style="margin-bottom:0;">
+                <h2 class="sb-panel__title">@L["Məhsullar"]</h2>
                 @foreach (var item in o.Items)
                 {
-                    <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #f2f2f2;">
-                        <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/img/placeholder.svg" : item.ImageUrl)" alt="@item.ProductName"
-                             style="width:58px; height:58px; object-fit:cover; border-radius:8px;" />
-                        <div style="flex:1;">
-                            <div style="font-weight:600;">@item.ProductName</div>
-                            <div style="color:#888; font-size:.82rem; margin-top:2px;">
+                    <div class="sb-miniline">
+                        <img class="sb-miniline__img" src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/img/placeholder.svg" : item.ImageUrl)" alt="@item.ProductName" loading="lazy" />
+                        <div class="sb-miniline__body">
+                            <div class="sb-miniline__name">@item.ProductName</div>
+                            <div class="sb-miniline__meta">
                                 @item.Quantity × @item.UnitPrice.ToString("0.##") ₼
                                 @if (!string.IsNullOrEmpty(item.Size)) { <text> · @L["Ölçü"]: @item.Size</text> }
                                 @if (!string.IsNullOrEmpty(item.Color)) { <text> · @L["Rəng"]: @item.Color</text> }
                             </div>
                         </div>
-                        <strong>@item.LineTotal.ToString("0.##") ₼</strong>
+                        <span class="sb-miniline__price">@item.LineTotal.ToString("0.##") ₼</span>
                     </div>
                 }
-                <div style="display:flex; justify-content:space-between; padding-top:14px; font-size:1.1rem; font-weight:700;">
+                <div class="sb-summary__total" style="margin-top:14px;">
                     <span>@L["Cəmi"]</span>
-                    <span>@o.TotalAmount.ToString("0.##") ₼</span>
+                    <b>@o.TotalAmount.ToString("0.##") ₼</b>
                 </div>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:18px;">
-                <!-- ÇATDIRILMA ÜNVANI -->
-                <aside class="sb-seller-card">
-                    <h3 style="margin-top:0;">@L["Çatdırılma ünvanı"]</h3>
-                    <p style="margin:6px 0; line-height:1.6;">
+            <div>
+                <aside class="sb-order-side-card">
+                    <h2 class="sb-panel__title">@L["Çatdırılma ünvanı"]</h2>
+                    <p class="sb-order-ship">
                         <strong>@o.ShipFullName</strong><br />
                         @o.ShipPhone<br />
                         @o.ShipCity@(string.IsNullOrEmpty(o.ShipDistrict) ? "" : ", " + o.ShipDistrict)<br />
@@ -78,49 +106,50 @@
                     </p>
                     @if (!string.IsNullOrEmpty(o.ShipNotes))
                     {
-                        <p style="color:#888; font-size:.85rem; margin-top:8px;">@L["Qeyd"]: @o.ShipNotes</p>
+                        <p class="sb-commerce__sub" style="margin-top:8px; font-size:.85rem;">@L["Qeyd"]: @o.ShipNotes</p>
                     }
                 </aside>
 
-                <!-- STATUS İDARƏETMƏ -->
-                <aside class="sb-seller-card">
-                    <h3 style="margin-top:0;">@L["Statusu yenilə"]</h3>
-                    @if (!o.IsPaid)
-                    {
-                        <p style="color:#b26a00;">@L["Sifariş hələ ödənilməyib."]</p>
-                    }
-                    else if (o.Status == OrderStatus.Processing)
-                    {
-                        <form asp-action="UpdateOrderStatus" method="post" style="margin-bottom:8px;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@o.Id" />
-                            <input type="hidden" name="status" value="@((int)OrderStatus.Shipped)" />
-                            <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" style="width:100%;">@L["Göndərildi olaraq işarələ"]</button>
-                        </form>
-                        <form asp-action="UpdateOrderStatus" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@o.Id" />
-                            <input type="hidden" name="status" value="@((int)OrderStatus.Cancelled)" />
-                            <button type="submit" class="sb-btn sb-btn--ghost" style="width:100%; color:#c0392b;">@L["Sifarişi ləğv et"]</button>
-                        </form>
-                    }
-                    else if (o.Status == OrderStatus.Shipped)
-                    {
-                        <form asp-action="UpdateOrderStatus" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@o.Id" />
-                            <input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" />
-                            <button type="submit" class="sb-btn-primary sb-btn-primary--cyan" style="width:100%;">@L["Çatdırıldı olaraq işarələ"]</button>
-                        </form>
-                    }
-                    else if (o.Status == OrderStatus.Delivered)
-                    {
-                        <p style="color:#1e8449; font-weight:600;">@L["Sifariş çatdırıldı. ✓"]</p>
-                    }
-                    else if (o.Status == OrderStatus.Cancelled)
-                    {
-                        <p style="color:#a93226; font-weight:600;">@L["Sifariş ləğv edildi."]</p>
-                    }
+                <aside class="sb-order-side-card">
+                    <h2 class="sb-panel__title">@L["Statusu yenilə"]</h2>
+                    <div class="sb-order-actions">
+                        @if (!o.IsPaid)
+                        {
+                            <p style="color:var(--sb-warning); margin:0;">@L["Sifariş hələ ödənilməyib."]</p>
+                        }
+                        else if (o.Status == OrderStatus.Processing)
+                        {
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="@((int)OrderStatus.Shipped)" />
+                                <button type="submit" class="sb-btn sb-btn--primary sb-btn--block">@L["Göndərildi olaraq işarələ"]</button>
+                            </form>
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="@((int)OrderStatus.Cancelled)" />
+                                <button type="submit" class="sb-btn sb-btn--ghost sb-btn--block" style="color:var(--sb-danger);">@L["Sifarişi ləğv et"]</button>
+                            </form>
+                        }
+                        else if (o.Status == OrderStatus.Shipped)
+                        {
+                            <form asp-action="UpdateOrderStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@o.Id" />
+                                <input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" />
+                                <button type="submit" class="sb-btn sb-btn--primary sb-btn--block">@L["Çatdırıldı olaraq işarələ"]</button>
+                            </form>
+                        }
+                        else if (o.Status == OrderStatus.Delivered)
+                        {
+                            <p style="color:var(--sb-success); font-weight:600; margin:0;">@L["Sifariş çatdırıldı. ✓"]</p>
+                        }
+                        else if (o.Status == OrderStatus.Cancelled)
+                        {
+                            <p style="color:var(--sb-danger); font-weight:600; margin:0;">@L["Sifariş ləğv edildi."]</p>
+                        }
+                    </div>
                 </aside>
             </div>
         </div>

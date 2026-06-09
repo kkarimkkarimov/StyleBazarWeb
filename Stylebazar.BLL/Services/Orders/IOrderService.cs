@@ -36,4 +36,9 @@ public interface IOrderService
 
     // Satıcı/admin sifariş statusunu irəli aparır (Processing→Shipped→Delivered, və ya Cancelled).
     Task UpdateStatusAsync(int orderId, OrderStatus status, CancellationToken ct = default);
+
+    // ---- Admin ----
+
+    // Bütün sifarişlər (admin icmalı) — opsional status filtri ilə, ən yenisi öndə.
+    Task<List<OrderListItemDto>> GetAllForAdminAsync(OrderStatus? status, CancellationToken ct = default);
 }
