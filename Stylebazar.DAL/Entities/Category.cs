@@ -1,22 +1,31 @@
+// Core.Persistence.Repositories — Entity<TId> baza sinfini gətirir (Id + audit tarixləri).
 using Core.Persistence.Repositories;
+// Aşağıdakı System ad fəzaları (DateTime, List<>, StringBuilder) şablonla gəlib — saxlanılır.
 using System;
 using System.Collections.Generic;
 using System.Text;
 
+// DAL entity-lərinin ad fəzası.
 namespace Stylebazar.DAL.Entities
 {
     // KATEQORIYA entity-si — "Categories" cədvəli. Məhsullar kateqoriyalara bölünür.
-    // Kateqoriya İYERARXİKDİR: bir kateqoriyanın valideyni (ParentCategory) və
-    // alt-kateqoriyaları (ChildCategories) ola bilər — yəni ağac (tree) quruluşu.
+    // İYERARXİKDİR: bir kateqoriyanın valideyni (ParentCategory) və alt-kateqoriyaları
+    // (ChildCategories) ola bilər — yəni ağac (tree) quruluşu yaranır.
     public class Category : Entity<int>
     {
-        public required string Name { get; set; }      // Kateqoriya adı (məs. "Qadın geyimi")
-        public required string Slug { get; set; }      // URL üçün təmiz ad
-        public int? ParentCategoryId { get; set; }     // Valideyn kateqoriyanın id-si; null = ən üst (kök) kateqoriya
+        // Kateqoriya adı (məs. "Qadın geyimi"). Məcburidir.
+        public required string Name { get; set; }
+        // URL üçün təmiz ad (slug).
+        public required string Slug { get; set; }
+        // Valideyn kateqoriyanın id-si. null → bu, ən üst (kök) kateqoriyadır.
+        public int? ParentCategoryId { get; set; }
 
         // --- Naviqasiya sahələri (özünə-istinad edən əlaqə) ---
-        public virtual Category? ParentCategory { get; set; }                                       // Valideyn kateqoriya
-        public virtual ICollection<Category> ChildCategories { get; set; } = new List<Category>();   // Alt-kateqoriyalar
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();            // Bu kateqoriyadakı məhsullar
+        // Valideyn kateqoriya (kök kateqoriyada bu null olur).
+        public virtual Category? ParentCategory { get; set; }
+        // Bu kateqoriyanın alt-kateqoriyaları (bir valideyn → çox uşaq).
+        public virtual ICollection<Category> ChildCategories { get; set; } = new List<Category>();
+        // Bu kateqoriyaya aid məhsullar.
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

@@ -1,50 +1,81 @@
+// Core.Persistence.Repositories ad fəzası — Entity<TId> baza sinfini gətirir (Id + audit tarixləri).
 using Core.Persistence.Repositories;
+// Stylebazar.DAL.Entities.Enums — bu faylda işlənən ProductCondition enum-unu gətirir.
 using Stylebazar.DAL.Entities.Enums;
 
+// Bu sinfin yerləşdiyi ad fəzası — bütün verilənlər bazası entity-ləri burada toplanır.
 namespace Stylebazar.DAL.Entities;
 
-// MƏHSUL entity-si — "Products" cədvəlinə uyğundur. Satıcının satışa qoyduğu hər
-// məhsul burada bir sətirdir. Entity<int>-dən miras alır → Id + audit tarixləri hazır gəlir.
+// MƏHSUL entity-si — bazadakı "Products" cədvəlinin BİR sətrini təmsil edir.
+// Entity<int>-dən miras alır → Id (int), CreatedDate, UpdatedDate, DeletedDate (soft-delete) hazır gəlir.
 public class Product : Entity<int>
 {
-    public required string Name { get; set; }          // Məhsulun adı (məcburi)
-    public required string Slug { get; set; }          // URL-də işlənən təmiz ad (məs. "qirmizi-koynek")
-    public required string Description { get; set; }    // Təsvir/izah (məcburi)
-    public decimal Price { get; set; }                  // Qiymət
-    public decimal? DiscountPrice { get; set; }         // Endirimli qiymət (varsa); null = endirim yoxdur
-    public int StockQuantity { get; set; }              // Anbarda say
-    public string? Brand { get; set; }                  // Brend (varsa)
-    public ProductCondition Condition { get; set; } = ProductCondition.New; // Yeni / işlənmiş (default: Yeni)
-    public int StoreId { get; set; }                    // Hansı mağazaya aiddir (FK → Store)
-    public int CategoryId { get; set; }                 // Hansı kateqoriyaya aiddir (FK → Category)
-    public bool IsFeatured { get; set; }                // "Seçilmiş/öne çıxan" məhsuldur?
-    public DateTime? FeaturedUntil { get; set; }        // Öne çıxma nə vaxta qədər davam edir
-    public bool IsActive { get; set; }                  // Aktivdir? (false = saytda görünmür)
+    // Məhsulun adı. "required" → obyekt yaradılanda mütləq doldurulmalıdır (boş qala bilməz).
+    public required string Name { get; set; }
+    // URL üçün "təmiz" ad (slug). Məs: "Qırmızı köynək" → "qirmizi-koynek".
+    public required string Slug { get; set; }
+    // Məhsulun ətraflı təsviri. Məcburidir.
+    public required string Description { get; set; }
+    // Əsas qiymət. "decimal" tipi pul üçündür — yuvarlaqlaşma xətası vermir.
+    public decimal Price { get; set; }
+    // Endirimli qiymət. "?" → null ola bilər; null = endirim yoxdur.
+    public decimal? DiscountPrice { get; set; }
+    // Anbardakı say (stok). 0 → "Stokda yoxdur".
+    public int StockQuantity { get; set; }
+    // Brend adı. Opsionaldır (null ola bilər).
+    public string? Brand { get; set; }
+    // Məhsulun vəziyyəti (Yeni / İşlənmiş). Default = New.
+    public ProductCondition Condition { get; set; } = ProductCondition.New;
+    // Aid olduğu mağazanın id-si — xarici açar (FK), Store cədvəlinə bağlanır.
+    public int StoreId { get; set; }
+    // Aid olduğu kateqoriyanın id-si — xarici açar (FK), Category cədvəlinə bağlanır.
+    public int CategoryId { get; set; }
+    // Məhsul "öne çıxan / seçilmiş"dirmi? true → ana səhifədə xüsusi yerləşdirilir.
+    public bool IsFeatured { get; set; }
+    // Öne çıxma müddətinin bitmə tarixi. null = müddət təyin edilməyib.
+    public DateTime? FeaturedUntil { get; set; }
+    // Məhsul aktivdirmi? false → saytda görünmür (gizlədilir).
+    public bool IsActive { get; set; }
 
-    // --- Məhsulun zəngin xüsusiyyətləri (detal səhifəsində sağ paneldə göstərilir) ---
-    // Hamısı opsionaldır (null ola bilər). Sərbəst mətndir ki, satıcı dropdown-la
-    // məhdudlaşmasın. UI-da null olanda "—" göstərilir.
+    // --- Məhsulun zəngin xüsusiyyətləri (detal səhifəsindəki "Məlumatlar" panelində göstərilir) ---
+    // Hamısı opsionaldır (null ola bilər) və sərbəst mətndir ki, satıcı dropdown-la məhdudlaşmasın.
+    // UI-da dəyər null olanda "—" göstərilir.
 
-    public string? Material { get; set; }           // Material: "Pambıq", "Polyester", "Yun"
-    public string? Pattern { get; set; }            // Naxış: "Düz", "Minimalist logo print"
-    public string? Neckline { get; set; }           // Yaxa forması: "V-neck", "Round Neck"
-    public string? SleeveLength { get; set; }       // Qol uzunluğu: "Qısa qol", "Uzun qol"
-    public string? Fit { get; set; }                // Oturum: "Slim", "Regular", "Loose"
-    public string? Season { get; set; }             // Mövsüm: "Yaz, Yay" (vergüllə)
-    public string? Style { get; set; }              // Stil: "Casual", "Formal", "Vintage"
-    public string? CountryOfOrigin { get; set; }    // İstehsal ölkəsi: "Türkiyə", "Çin"
+    // Material: "Pambıq", "Polyester", "Yun".
+    public string? Material { get; set; }
+    // Naxış: "Düz", "Minimalist logo print".
+    public string? Pattern { get; set; }
+    // Yaxa forması: "V-neck", "Round Neck".
+    public string? Neckline { get; set; }
+    // Qol uzunluğu: "Qısa qol", "Uzun qol".
+    public string? SleeveLength { get; set; }
+    // Oturum/forma: "Slim", "Regular", "Loose".
+    public string? Fit { get; set; }
+    // Mövsüm: "Yaz, Yay" (vergüllə ayrılır).
+    public string? Season { get; set; }
+    // Stil: "Casual", "Formal", "Vintage".
+    public string? Style { get; set; }
+    // İstehsal ölkəsi: "Türkiyə", "Çin".
+    public string? CountryOfOrigin { get; set; }
 
-    // Satıcı bu məhsul üçün çatdırılma təklif edir? true → alıcı yaşıl "Çatdırılma var"
-    // nişanı görür, false → "Çatdırılma yoxdur".
+    // Satıcı bu məhsula çatdırılma təklif edirmi? true → alıcı "Çatdırılma var" nişanı görür.
     public bool HasDelivery { get; set; }
 
     // --- Naviqasiya sahələri (əlaqəli cədvəllər) ---
-    // "virtual" → EF Core lazım olanda bunları avtomatik yükləyə bilsin (lazy/eager loading).
-    public virtual Store Store { get; set; } = null!;                                   // Aid olduğu mağaza (1 məhsul → 1 mağaza)
-    public virtual Category Category { get; set; } = null!;                              // Aid olduğu kateqoriya
-    public virtual ICollection<ProductImage> Images { get; set; } = new List<ProductImage>(); // Məhsulun şəkilləri (1 → çox)
-    public virtual ICollection<ProductSize> Sizes { get; set; } = new List<ProductSize>();     // Mövcud ölçülər
-    public virtual ICollection<ProductColor> Colors { get; set; } = new List<ProductColor>();  // Mövcud rənglər
-    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();        // Bu məhsulu seçilmişə əlavə edənlər
-    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();              // Məhsula yazılan rəylər
+    // "virtual" → EF Core bu əlaqələri lazım olanda avtomatik yükləyə bilsin (lazy/eager loading).
+
+    // Aid olduğu mağaza (çox məhsul → bir mağaza). "= null!" → EF dolduracaq, kompilyatoru susdurur.
+    public virtual Store Store { get; set; } = null!;
+    // Aid olduğu kateqoriya (çox məhsul → bir kateqoriya).
+    public virtual Category Category { get; set; } = null!;
+    // Məhsulun şəkilləri (bir məhsul → çox şəkil).
+    public virtual ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+    // Məhsulun mövcud ölçüləri (S, M, L ...).
+    public virtual ICollection<ProductSize> Sizes { get; set; } = new List<ProductSize>();
+    // Məhsulun mövcud rəngləri.
+    public virtual ICollection<ProductColor> Colors { get; set; } = new List<ProductColor>();
+    // Bu məhsulu seçilmişlərə (wishlist) əlavə edən istifadəçilərin qeydləri.
+    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+    // Bu məhsula yazılmış rəylər.
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

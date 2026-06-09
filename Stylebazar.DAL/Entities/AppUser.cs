@@ -1,37 +1,49 @@
+// Microsoft.AspNetCore.Identity — IdentityUser<string> baza sinfini gətirir (hazır istifadəçi sistemi).
 using Microsoft.AspNetCore.Identity;
+// Stylebazar.DAL.Entities.Enums — SubscriptionPlan enum-unu gətirir.
 using Stylebazar.DAL.Entities.Enums;
 
+// DAL entity-lərinin ad fəzası.
 namespace Stylebazar.DAL.Entities
 {
     // İSTİFADƏÇİ entity-si — "AspNetUsers" cədvəli.
-    // IdentityUser<string>-dən miras alır → ASP.NET Core Identity-nin hazır
-    // sahələrini (Email, PasswordHash, UserName və s.) avtomatik gətirir.
-    // Biz ona yalnız öz əlavə sahələrimizi əlavə edirik.
+    // IdentityUser<string>-dən miras alır → Email, PasswordHash, UserName, PhoneNumber və s.
+    // sahələri AVTOMATİK gəlir. Biz yalnız öz əlavə sahələrimizi qoşuruq.
     public class AppUser : IdentityUser<string>
     {
-        public required string FullName { get; set; }   // Ad-soyad (məcburi)
-        public string? ProfileImageUrl { get; set; }    // Profil şəkli (varsa)
-        public string? Bio { get; set; }                // Qısa haqqında məlumat
-        public DateTime CreatedDate { get; set; }       // Qeydiyyat tarixi
+        // Ad-soyad. "required" → mütləq doldurulmalıdır.
+        public required string FullName { get; set; }
+        // Profil şəkli URL-i. Opsionaldır (null ola bilər).
+        public string? ProfileImageUrl { get; set; }
+        // Qısa "haqqında" mətni. Opsionaldır.
+        public string? Bio { get; set; }
+        // Qeydiyyat tarixi.
+        public DateTime CreatedDate { get; set; }
 
         // ------ Denormalizasiya olunmuş abunəlik vəziyyəti (hibrid model) ------
-        // Subscription cədvəli bütün dəyişiklik tarixçəsini saxlayır; bu iki sahə
-        // isə *cari* planı burada da saxlayır ki, tez-tez oxunan yerlərdə (hər
-        // /Seller/* sorğusu, kataloq sıralaması) əlavə JOIN olmadan sürətli oxunsun.
+        // Subscription cədvəli bütün dəyişiklik TARİXÇƏSİNİ saxlayır; bu iki sahə isə
+        // CARİ planı burada da saxlayır ki, tez-tez oxunan yerlər (hər /Seller/* sorğusu,
+        // kataloq sıralaması) əlavə JOIN olmadan sürətli işləsin.
 
-        // Aktiv plan səviyyəsi. Hər yeni istifadəçi üçün default = Free (pulsuz).
+        // Aktiv plan səviyyəsi. Hər yeni istifadəçidə default = Free (pulsuz).
         public SubscriptionPlan CurrentPlan { get; set; } = SubscriptionPlan.Free;
 
-        // Planın bitmə tarixi (UTC). null = bitmə yoxdur (ömürlük / Free).
-        // UtcNow-dan kiçik olanda → avtomatik Free-yə endirmə işə düşür.
+        // Planın bitmə tarixi (UTC). null = bitmə yoxdur (Free / ömürlük).
+        // UtcNow-dan kiçik olanda oxu zamanı avtomatik Free-yə endirmə işə düşür.
         public DateTime? PlanExpiresAt { get; set; }
 
         // --- Naviqasiya sahələri (istifadəçinin sahib olduğu məlumatlar) ---
-        public virtual ICollection<Store> Stores { get; set; } = new List<Store>();                 // İstifadəçinin mağazaları
-        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();        // Seçilmişləri
-        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();              // Yazdığı rəylər
-        public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();          // Ünvanları
-        public virtual ICollection<StoreFollower> StoreFollows { get; set; } = new List<StoreFollower>(); // İzlədiyi mağazalar
-        public virtual ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();  // Abunəlik tarixçəsi
+        // İstifadəçinin mağazaları (bir istifadəçi → çox mağaza).
+        public virtual ICollection<Store> Stores { get; set; } = new List<Store>();
+        // Seçilmişlər (wishlist) qeydləri.
+        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+        // İstifadəçinin yazdığı rəylər.
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        // İstifadəçinin çatdırılma ünvanları.
+        public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+        // İzlədiyi mağazalar.
+        public virtual ICollection<StoreFollower> StoreFollows { get; set; } = new List<StoreFollower>();
+        // Abunəlik dəyişiklik tarixçəsi.
+        public virtual ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     }
 }

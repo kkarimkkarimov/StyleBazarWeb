@@ -1,5 +1,7 @@
+// Core.Persistence.Repositories — Entity<TId> baza sinfini gətirir (Id + audit tarixləri).
 using Core.Persistence.Repositories;
 
+// DAL entity-lərinin ad fəzası.
 namespace Stylebazar.DAL.Entities;
 
 // MAĞAZA İZLƏYİCİSİ entity-si — "StoreFollowers" cədvəli (junction/əlaqə cədvəli).
@@ -7,9 +9,13 @@ namespace Stylebazar.DAL.Entities;
 // ki, eyni cüt üçün yalnız bir sətir olsun (təkrar izləmənin qarşısını alır).
 public class StoreFollower : Entity<int>
 {
-    public required string UserId { get; set; }   // İzləyən istifadəçi (FK → AppUser)
-    public int StoreId { get; set; }              // İzlənən mağaza (FK → Store)
+    // İzləyən istifadəçi — xarici açar (FK → AppUser). Məcburidir.
+    public required string UserId { get; set; }
+    // İzlənən mağaza — xarici açar (FK → Store).
+    public int StoreId { get; set; }
 
-    public virtual AppUser User { get; set; } = null!;     // İzləyən
-    public virtual Store Store { get; set; } = null!;      // İzlənən mağaza
+    // İzləyən istifadəçi.
+    public virtual AppUser User { get; set; } = null!;
+    // İzlənən mağaza.
+    public virtual Store Store { get; set; } = null!;
 }
