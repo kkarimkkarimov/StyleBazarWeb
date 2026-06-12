@@ -476,7 +476,18 @@
         }
 
         if (out) { if (more) row.appendChild(more); row.appendChild(bubble); }
-        else { row.appendChild(bubble); if (more) row.appendChild(more); }
+        else {
+            // Gələn mesajda göndərənin mini avatarı (qrup davamında CSS ilə gizlədilir,
+            // amma yer tutub bubble-ları eyni xəttə düzür).
+            var ava = document.createElement('span');
+            ava.className = 'sb-msgr-row__ava sb-msgr-ava';
+            ava.innerHTML = m.senderAvatarUrl
+                ? '<img src="' + esc(m.senderAvatarUrl) + '" alt="" loading="lazy" />'
+                : esc(initials(m.senderFullName));
+            row.appendChild(ava);
+            row.appendChild(bubble);
+            if (more) row.appendChild(more);
+        }
 
         // Reaksiyalar bubble-ın altına.
         if (m.reactions && m.reactions.length) paintReactions(row, m.reactions);
