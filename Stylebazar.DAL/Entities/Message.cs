@@ -36,6 +36,20 @@ public class Message : Entity<int>
     // Admin tərəfindən silinib? (sətir audit üçün qalır, sadəcə gizlədilir).
     public bool IsDeletedForAll { get; set; }
 
+    // --- Messaging V2 sahələri ---
+    // Bu mesaj başqa mesaja cavabdırsa — istinad olunan mesajın id-si (reply-to).
+    public int? ReplyToMessageId { get; set; }
+    // Mesaj göndərildikdən sonra redaktə olunubsa — son redaktə vaxtı (UTC). null = redaktə olunmayıb.
+    public DateTime? EditedAt { get; set; }
+    // Göndərən özü silib? (hər iki tərəfdə "Bu mesaj silindi" görünür, sətir audit üçün qalır).
+    public bool IsDeletedBySender { get; set; }
+    // Fayl mesajı üçün orijinal fayl adı (məs. "qaime.pdf").
+    public string? AttachmentName { get; set; }
+    // Fayl/şəkil/səs faylının ölçüsü (bayt) — UI-da "2.4 MB" göstərmək üçün.
+    public long? AttachmentSize { get; set; }
+    // Səsli mesajın uzunluğu (saniyə).
+    public int? DurationSeconds { get; set; }
+
     // Aid olduğu söhbət.
     public virtual Conversation Conversation { get; set; } = null!;
     // Göndərən istifadəçi.
@@ -44,4 +58,8 @@ public class Message : Entity<int>
     public virtual Story? Story { get; set; }
     // Əlaqəli məhsul (ProductShare olduqda).
     public virtual Product? Product { get; set; }
+    // Cavab verilən mesaj (reply-to; varsa).
+    public virtual Message? ReplyToMessage { get; set; }
+    // Bu mesaja qoyulmuş reaksiyalar (hər istifadəçidən ən çoxu bir).
+    public virtual ICollection<MessageReaction> Reactions { get; set; } = new List<MessageReaction>();
 }

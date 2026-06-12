@@ -32,6 +32,10 @@ namespace Stylebazar.DAL.Entities
         // UtcNow-dan kiçik olanda oxu zamanı avtomatik Free-yə endirmə işə düşür.
         public DateTime? PlanExpiresAt { get; set; }
 
+        // Mesajlaşmada "son görülmə" (UTC) — istifadəçi oflayn olanda chat hub yazır.
+        // null = heç vaxt qoşulmayıb (və ya hələ yazılmayıb).
+        public DateTime? LastSeenAt { get; set; }
+
         // --- Naviqasiya sahələri (istifadəçinin sahib olduğu məlumatlar) ---
         // İstifadəçinin mağazaları (bir istifadəçi → çox mağaza).
         public virtual ICollection<Store> Stores { get; set; } = new List<Store>();

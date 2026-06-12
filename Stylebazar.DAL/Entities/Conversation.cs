@@ -24,6 +24,23 @@ public class Conversation : Entity<int>
     // User2 üçün oxunmamış mesaj sayı (User2 söhbəti açanda sıfırlanır).
     public int Unread2 { get; set; }
 
+    // --- Messaging V2: hər iştirakçının ÖZ tərəfinə aid parametrlər (1 = User1, 2 = User2) ---
+    // Söhbət sancılıb? (pinned — siyahının yuxarısında durur).
+    public bool Pinned1 { get; set; }
+    public bool Pinned2 { get; set; }
+    // Söhbət səssizə alınıb? (muted — bildiriş səsi/brauzer bildirişi gəlmir).
+    public bool Muted1 { get; set; }
+    public bool Muted2 { get; set; }
+    // Sevimli kimi işarələnib? (satıcının "sevimli müştərilər" filtri üçün).
+    public bool Fav1 { get; set; }
+    public bool Fav2 { get; set; }
+    // İştirakçının qarşı tərəf haqqında ŞƏXSİ qeydi (yalnız özü görür; satıcı aləti).
+    public string? Note1 { get; set; }
+    public string? Note2 { get; set; }
+    // İştirakçının bu söhbətə verdiyi etiket (məs. "VIP", "Yeni", "Sifariş").
+    public string? Tag1 { get; set; }
+    public string? Tag2 { get; set; }
+
     // Birinci iştirakçı.
     public virtual AppUser User1 { get; set; } = null!;
     // İkinci iştirakçı.

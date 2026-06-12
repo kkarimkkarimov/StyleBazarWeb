@@ -15,6 +15,16 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(m => m.Body).HasMaxLength(2000);
         builder.Property(m => m.AttachmentUrl).HasMaxLength(500);
         builder.Property(m => m.MessageType).HasConversion<int>();
+        // V2: faylın orijinal adı (UI-da göstərmək üçün).
+        builder.Property(m => m.AttachmentName).HasMaxLength(255);
+
+        // V2: cavab (reply-to) — özünə-istinad edən opsional FK. ClientSetNull → bazada
+        // NO ACTION (SQL Server özünə-istinadda kaskada icazə vermir); mesajlar onsuz da
+        // hard-delete olunmur (bayraqla gizlədilir).
+        builder.HasOne(m => m.ReplyToMessage)
+            .WithMany()
+            .HasForeignKey(m => m.ReplyToMessageId)
+            .OnDelete(DeleteBehavior.ClientSetNull);
 
         // Ən çox işlənən sorğu: "X söhbətinin son N mesajını tarixə görə azalan gətir" → buna görə indeks.
         builder.HasIndex(m => new { m.ConversationId, m.CreatedDate });

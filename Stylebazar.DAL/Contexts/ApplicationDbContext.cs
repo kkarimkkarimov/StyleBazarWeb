@@ -44,6 +44,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<CartItem> CartItems => Set<CartItem>();                          // Səbət elementləri
     public DbSet<Order> Orders => Set<Order>();                                   // Sifarişlər
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();                       // Sifariş sətirləri
+    public DbSet<MessageReaction> MessageReactions => Set<MessageReaction>();     // Mesaj reaksiyaları
+    public DbSet<UserBlock> UserBlocks => Set<UserBlock>();                       // İstifadəçi blokları
+    public DbSet<UserReport> UserReports => Set<UserReport>();                    // İstifadəçi şikayətləri
+    public DbSet<QuickReply> QuickReplies => Set<QuickReply>();                   // Sürətli cavab şablonları
 
     // --- SaveChanges override-ları ---
     // Bazaya yazmadan ƏVVƏL audit sahələrini (CreatedDate/UpdatedDate) avtomatik doldururuq.

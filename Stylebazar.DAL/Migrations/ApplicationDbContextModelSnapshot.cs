@@ -259,6 +259,9 @@ namespace Stylebazar.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime?>("LastSeenAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -522,12 +525,46 @@ namespace Stylebazar.DAL.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("Fav1")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Fav2")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("LastMessageAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LastMessagePreview")
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("Muted1")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Muted2")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Note1")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Note2")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("Pinned1")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Pinned2")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Tag1")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Tag2")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<int>("Unread1")
                         .HasColumnType("int");
@@ -668,6 +705,13 @@ namespace Stylebazar.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AttachmentName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<long?>("AttachmentSize")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("AttachmentUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -685,6 +729,15 @@ namespace Stylebazar.DAL.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EditedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeletedBySender")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeletedForAll")
                         .HasColumnType("bit");
 
@@ -695,6 +748,9 @@ namespace Stylebazar.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReplyToMessageId")
                         .HasColumnType("int");
 
                     b.Property<string>("SenderId")
@@ -712,6 +768,8 @@ namespace Stylebazar.DAL.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("ReplyToMessageId");
+
                     b.HasIndex("SenderId");
 
                     b.HasIndex("StoryId");
@@ -719,6 +777,45 @@ namespace Stylebazar.DAL.Migrations
                     b.HasIndex("ConversationId", "CreatedDate");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.MessageReaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Emoji")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("MessageId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("MessageReactions");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.NewsletterSubscriber", b =>
@@ -1148,6 +1245,45 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("ProductSizes");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.QuickReply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("QuickReplies");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -1459,6 +1595,94 @@ namespace Stylebazar.DAL.Migrations
                     b.ToTable("Subscriptions");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.UserBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BlockedId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("BlockerId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedId");
+
+                    b.HasIndex("BlockerId", "BlockedId")
+                        .IsUnique();
+
+                    b.ToTable("UserBlocks");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.UserReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ReportedUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ReporterId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("ReportedUserId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("IsResolved", "CreatedDate");
+
+                    b.ToTable("UserReports");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Wishlist", b =>
                 {
                     b.Property<int>("Id")
@@ -1652,6 +1876,10 @@ namespace Stylebazar.DAL.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Stylebazar.DAL.Entities.Message", "ReplyToMessage")
+                        .WithMany()
+                        .HasForeignKey("ReplyToMessageId");
+
                     b.HasOne("Stylebazar.DAL.Entities.AppUser", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
@@ -1667,9 +1895,30 @@ namespace Stylebazar.DAL.Migrations
 
                     b.Navigation("Product");
 
+                    b.Navigation("ReplyToMessage");
+
                     b.Navigation("Sender");
 
                     b.Navigation("Story");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.MessageReaction", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.Message", "Message")
+                        .WithMany("Reactions")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Order", b =>
@@ -1762,6 +2011,17 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.QuickReply", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Review", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
@@ -1851,6 +2111,51 @@ namespace Stylebazar.DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Stylebazar.DAL.Entities.UserBlock", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "Blocked")
+                        .WithMany()
+                        .HasForeignKey("BlockedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "Blocker")
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Blocked");
+
+                    b.Navigation("Blocker");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.UserReport", b =>
+                {
+                    b.HasOne("Stylebazar.DAL.Entities.Conversation", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "ReportedUser")
+                        .WithMany()
+                        .HasForeignKey("ReportedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Stylebazar.DAL.Entities.AppUser", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("ReportedUser");
+
+                    b.Navigation("Reporter");
+                });
+
             modelBuilder.Entity("Stylebazar.DAL.Entities.Wishlist", b =>
                 {
                     b.HasOne("Stylebazar.DAL.Entities.Product", "Product")
@@ -1895,6 +2200,11 @@ namespace Stylebazar.DAL.Migrations
             modelBuilder.Entity("Stylebazar.DAL.Entities.Conversation", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Stylebazar.DAL.Entities.Message", b =>
+                {
+                    b.Navigation("Reactions");
                 });
 
             modelBuilder.Entity("Stylebazar.DAL.Entities.Order", b =>

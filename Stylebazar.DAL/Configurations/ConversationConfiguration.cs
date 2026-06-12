@@ -14,6 +14,11 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
         builder.Property(c => c.User1Id).IsRequired().HasMaxLength(450);
         builder.Property(c => c.User2Id).IsRequired().HasMaxLength(450);
         builder.Property(c => c.LastMessagePreview).HasMaxLength(120);
+        // V2: hər tərəfin şəxsi qeydi (maks. 500) və etiketi (maks. 40).
+        builder.Property(c => c.Note1).HasMaxLength(500);
+        builder.Property(c => c.Note2).HasMaxLength(500);
+        builder.Property(c => c.Tag1).HasMaxLength(40);
+        builder.Property(c => c.Tag2).HasMaxLength(40);
 
         // (User1Id, User2Id) UNİKAL — ChatManager-dəki əlifba sırası ilə birlikdə hər cüt üçün BİR sətir.
         builder.HasIndex(c => new { c.User1Id, c.User2Id }).IsUnique();
