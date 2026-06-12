@@ -2,8 +2,10 @@ using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Stylebazar.BLL.DTOs.Chat;
 using Stylebazar.BLL.Services.Chat;
+using Stylebazar.DAL.Contexts;
 using Stylebazar.DAL.Entities;
 
 namespace Stylebazar.MVC.Hubs;
@@ -23,11 +25,13 @@ public class ChatHub : Hub
 
     private readonly IChatService _chat;              // mesajları yadda saxlayan biznes xidməti
     private readonly UserManager<AppUser> _users;     // cari istifadəçini tapmaq üçün
+    private readonly ApplicationDbContext _db;        // "son görülmə" yazısı üçün
 
-    public ChatHub(IChatService chat, UserManager<AppUser> users)
+    public ChatHub(IChatService chat, UserManager<AppUser> users, ApplicationDbContext db)
     {
         _chat = chat;
         _users = users;
+        _db = db;
     }
 
     // İstifadəçi qoşulanda işə düşür: onu öz qrupuna əlavə et və "onlayn oldu" siqnalı göndər.
@@ -57,7 +61,11 @@ public class ChatHub : Hub
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(userId));
             if (nowOffline)
             {
-                await Clients.Others.SendAsync("UserPresence", new { userId, online = false });
+                // "Son görülmə"ni yaz (tək set-based UPDATE — tracking yükü yoxdur).
+                DateTime now = DateTime.UtcNow;
+                await _db.Users.Where(u => u.Id == userId)
+                    .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastSeenAt, now));
+                await Clients.Others.SendAsync("UserPresence", new { userId, online = false, lastSeenAt = now });
             }
         }
         await base.OnDisconnectedAsync(exception);

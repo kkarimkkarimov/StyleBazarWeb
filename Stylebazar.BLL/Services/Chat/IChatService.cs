@@ -3,64 +3,81 @@ using Stylebazar.BLL.DTOs.Chat;
 
 namespace Stylebazar.BLL.Services.Chat;
 
-/// <summary>
-/// All chat operations. Every method operates on behalf of the CURRENT user
-/// (read from ICurrentUserService) — there is no admin-impersonation surface
-/// here. Admin moderation lives behind separate methods (suffix *ForAdmin).
-/// </summary>
+// IChatService — mesajlaşma xidmətinin MÜQAVİLƏSİ (V2). Bütün metodlar CARİ istifadəçi
+// adından işləyir (ICurrentUserService); admin moderasiyası *ForAdmin şəkilçili ayrı metodlardadır.
 public interface IChatService
 {
-    /// <summary>
-    /// Returns the current user's inbox — every conversation they participate in,
-    /// ordered by most-recently-updated.
-    /// </summary>
-    Task<Paginate<ConversationDto>> GetMyConversationsAsync(int page = 1, int pageSize = 25, CancellationToken ct = default);
+    // ---- Gələnlər qutusu ----
 
-    /// <summary>
-    /// Returns the message history for a conversation, newest-first. Caller must
-    /// be one of the two participants — throws BusinessException otherwise.
-    /// </summary>
+    // Cari istifadəçinin söhbətləri: sancılanlar öndə, sonra ən son mesaja görə.
+    // filter: null/"all" | "unread" | "pinned" | "fav"; search: qarşı tərəfin adına görə axtarış.
+    Task<Paginate<ConversationDto>> GetMyConversationsAsync(
+        string? filter = null, string? search = null, int page = 1, int pageSize = 25, CancellationToken ct = default);
+
+    // Söhbətin mesaj tarixçəsi (ən yenisi öndə). Çağıran iştirakçı olmalıdır.
     Task<Paginate<MessageDto>> GetMessagesAsync(int conversationId, int page = 1, int pageSize = 30, CancellationToken ct = default);
 
-    /// <summary>
-    /// Idempotent: returns the existing conversation between current user and peer,
-    /// or creates one if none exists.
-    /// </summary>
+    // İdempotent: qarşı tərəflə mövcud söhbəti qaytarır, yoxdursa yaradır.
     Task<ConversationDto> GetOrCreateConversationAsync(string peerUserId, CancellationToken ct = default);
 
-    /// <summary>
-    /// Sends a message. Resolves the conversation via dto.RecipientUserId (creating
-    /// it if needed). Updates Conversation.LastMessage* + the recipient's Unread*
-    /// counter atomically.
-    /// </summary>
+    // Sağ panel məlumatı: qarşı tərəfin profili + mağazası + paylaşılmış media + şəxsi parametrlər.
+    Task<ConversationDetailDto> GetConversationDetailAsync(int conversationId, CancellationToken ct = default);
+
+    // Söhbət daxilində mətn axtarışı (ən yeni uyğunluqlar).
+    Task<List<MessageDto>> SearchMessagesAsync(int conversationId, string query, int take = 20, CancellationToken ct = default);
+
+    // ---- Göndərmə / redaktə / silmə ----
+
+    // Mesaj göndərir (blok yoxlaması ilə). Söhbəti tapır/yaradır, Unread + LastMessage* yenilənir.
     Task<MessageDto> SendMessageAsync(SendMessageDto dto, CancellationToken ct = default);
 
-    /// <summary>
-    /// Marks all messages in the conversation as read by the current viewer.
-    /// Clears their Unread counter. No-op if they aren't a participant.
-    /// Returns the peer's userId (whose messages were just seen) so callers can
-    /// push a targeted "MessagesRead" notification, or null when nothing changed.
-    /// </summary>
+    // Öz mətn mesajını redaktə edir (EditedAt qoyulur). Yenilənmiş DTO qaytarır.
+    Task<MessageDto> EditMessageAsync(int messageId, string newBody, CancellationToken ct = default);
+
+    // Öz mesajını hamı üçün silir (IsDeletedBySender). Yayım üçün (conversationId, peerId) qaytarır.
+    Task<(int ConversationId, string PeerId)> DeleteMessageAsync(int messageId, CancellationToken ct = default);
+
+    // Reaksiya qoy/dəyiş/sil (eyni emoji ikinci dəfə → silinir). Yenilənmiş qrupları qaytarır.
+    Task<(List<MessageReactionDto> Reactions, int ConversationId, string PeerId)> ReactAsync(
+        int messageId, string emoji, CancellationToken ct = default);
+
+    // ---- Oxundu / sayğac ----
+
+    // Söhbəti cari istifadəçi üçün oxundu işarələyir; qarşı tərəfin id-sini qaytarır (yoxsa null).
     Task<string?> MarkConversationReadAsync(int conversationId, CancellationToken ct = default);
 
-    /// <summary>
-    /// Total unread count across all conversations — drives the header badge.
-    /// </summary>
+    // Bütün söhbətlər üzrə oxunmamış cəm — header rozetkası.
     Task<int> GetMyUnreadTotalAsync(CancellationToken ct = default);
 
-    // ----- ADMIN MODERATION (Phase 14.8) -----
+    // ---- Söhbət parametrləri (pin / mute / sevimli / qeyd / etiket) ----
 
-    /// <summary>Every conversation in the system, paginated, for the admin overview.</summary>
+    Task<bool> TogglePinAsync(int conversationId, CancellationToken ct = default);       // yeni vəziyyəti qaytarır
+    Task<bool> ToggleMuteAsync(int conversationId, CancellationToken ct = default);
+    Task<bool> ToggleFavoriteAsync(int conversationId, CancellationToken ct = default);
+    Task SetNoteAsync(int conversationId, string? note, CancellationToken ct = default);
+    Task SetTagAsync(int conversationId, string? tag, CancellationToken ct = default);
+
+    // ---- Təhlükəsizlik: blok / şikayət ----
+
+    // Qarşı tərəfi blokla/blokdan çıxar. Yeni vəziyyəti qaytarır (true = indi bloklanıb).
+    Task<bool> ToggleBlockAsync(string peerUserId, CancellationToken ct = default);
+    // Qarşı tərəfdən şikayət et (admin moderasiyası üçün saxlanır).
+    Task ReportUserAsync(string peerUserId, int? conversationId, string reason, CancellationToken ct = default);
+
+    // ---- Sürətli cavablar (satıcı şablonları) ----
+
+    Task<List<QuickReplyDto>> GetMyQuickRepliesAsync(CancellationToken ct = default);
+    Task<QuickReplyDto> AddQuickReplyAsync(string title, string body, CancellationToken ct = default);
+    Task DeleteQuickReplyAsync(int id, CancellationToken ct = default);
+
+    // ---- ADMIN MODERASİYASI ----
+
     Task<Paginate<AdminConversationRowDto>> GetAllConversationsForAdminAsync(int page = 1, int pageSize = 25, CancellationToken ct = default);
-
-    /// <summary>Read-only message history for admin moderation.</summary>
     Task<Paginate<MessageDto>> GetMessagesForAdminAsync(int conversationId, int page = 1, int pageSize = 50, CancellationToken ct = default);
-
-    /// <summary>Soft-deletes a single message for both peers (admin moderation).</summary>
     Task DeleteMessageForAdminAsync(int messageId, CancellationToken ct = default);
 }
 
-/// <summary>Admin inbox row — shows BOTH participants since admin isn't one of them.</summary>
+// Admin icmal sətri — admin iştirakçı olmadığı üçün HƏR İKİ tərəfi göstərir.
 public class AdminConversationRowDto
 {
     public int Id { get; set; }
