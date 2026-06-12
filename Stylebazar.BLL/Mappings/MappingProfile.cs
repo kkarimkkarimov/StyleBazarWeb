@@ -90,6 +90,7 @@ public class MappingProfile : Profile
         CreateMap<Product, ProductDetailDto>()
             .ForMember(d => d.StoreName, opt => opt.MapFrom(s => s.Store != null ? s.Store.Name : string.Empty))
             .ForMember(d => d.StoreSlug, opt => opt.MapFrom(s => s.Store != null ? s.Store.Slug : string.Empty))
+            .ForMember(d => d.StoreOwnerId, opt => opt.MapFrom(s => s.Store != null ? s.Store.OwnerId : string.Empty))
             .ForMember(d => d.StorePhone, opt => opt.MapFrom(s => s.Store != null ? s.Store.ContactPhone : null))
             .ForMember(d => d.StoreWhatsApp, opt => opt.MapFrom(s => s.Store != null ? s.Store.WhatsAppNumber : null))
             .ForMember(d => d.StoreInstagram, opt => opt.MapFrom(s => s.Store != null ? s.Store.InstagramHandle : null))

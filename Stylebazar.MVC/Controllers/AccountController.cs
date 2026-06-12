@@ -439,9 +439,13 @@ public class AccountController : Controller
         });
     }
 
+    // Messenger mərkəzi. "with" = bu istifadəçi ilə söhbəti dərhal aç;
+    // "product" = composer-ə məhsul kartı bərkidilsin (məhsul səhifəsindən gəlir).
     [HttpGet] [Authorize]
-    public async Task<IActionResult> Messages(CancellationToken ct)
+    public async Task<IActionResult> Messages(string? with, int? product, CancellationToken ct)
     {
+        ViewData["MsgrPeer"] = with;
+        ViewData["MsgrProduct"] = product;
         return View(new AccountPanelViewModel { Profile = await _account.GetMineAsync(ct) });
     }
 

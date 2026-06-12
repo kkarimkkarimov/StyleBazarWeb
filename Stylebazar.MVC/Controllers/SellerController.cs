@@ -567,8 +567,10 @@ public class SellerController : Controller
         });
     }
 
-    [HttpGet] public async Task<IActionResult> Messages(CancellationToken ct)
-        => View(await BuildPanelVmAsync(ct));
+    // Satıcı inbox-u messenger mərkəzinə yönləndirilir — satıcı alətləri (şablonlar,
+    // qeydlər, etiketlər, filtrlər) artıq orada birləşib.
+    [HttpGet] public IActionResult Messages()
+        => RedirectToAction("Messages", "Account");
 
     [HttpGet]
     public async Task<IActionResult> Packages(CancellationToken ct)

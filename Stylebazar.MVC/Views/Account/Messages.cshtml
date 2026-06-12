@@ -1,69 +1,200 @@
+@using System.Security.Claims
 @model AccountPanelViewModel
 @{
     ViewData["Title"] = L["Mesajlar"].Value;
+    string meId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+    bool isSeller = User.IsInRole("Seller") || User.IsInRole("Admin");
 }
 
-@* Full-page chat inbox. Same JS handler as the floating widget — it picks the
-   right elements via the data-chat-fullpage anchor. Left pane = inbox, right
-   pane = active thread. *@
-<section class="sb-acc-layout">
-    @await Html.PartialAsync("_AccountSidebar", Model.Profile)
+@* Messenger V2 — tam hündürlüklü 3 panelli premium mesajlaşma mərkəzi.
+   Bütün dinamik məzmunu messenger.js çəkir; burada yalnız karkas + boş hallar var. *@
+<link rel="stylesheet" href="~/css/messenger.css" asp-append-version="true" />
 
-    <main class="sb-acc-main">
-        <header class="sb-acc-pagehead">
-            <h1>@L["Mesajlar"]</h1>
-            <p>@L["Real-vaxt yazışma — alıcılar, satıcılar və admin ilə."]</p>
+<div class="sb-msgr" id="sbMsgr"
+     data-me="@meId"
+     data-peer="@(ViewData["MsgrPeer"] as string)"
+     data-product="@(ViewData["MsgrProduct"]?.ToString())"
+     data-seller="@(isSeller ? "1" : "0")">
+
+    @* ============ SOL PANEL: söhbət siyahısı ============ *@
+    <aside class="sb-msgr__list" data-m-pane="list">
+        <header class="sb-msgr-listhead">
+            <h1 class="sb-msgr-listhead__title">@L["Mesajlar"]</h1>
+            <span class="sb-msgr-listhead__count" data-m-total-unread hidden>0</span>
         </header>
 
-        <div class="sb-chat-fullpage" data-chat-fullpage>
-            @* Left: inbox list *@
-            <aside class="sb-chat-fullpage__list">
-                <header class="sb-chat-fullpage__list-head">
-                    <h2>@L["Söhbətlər"]</h2>
-                </header>
-                <div class="sb-chat-list" data-chat-conversations></div>
-                <div class="sb-chat-empty" data-chat-empty hidden>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                    <strong>@L["Hələ söhbət yoxdur"]</strong>
-                    <span>@L["Mağaza səhifəsindən satıcı ilə əlaqə qur."]</span>
-                </div>
-            </aside>
-
-            @* Right: active thread *@
-            <section class="sb-chat-fullpage__thread" data-chat-thread>
-                <header class="sb-chat-fullpage__thread-head" data-chat-thread-head hidden>
-                    <button type="button" class="sb-chat-fullpage__back" data-chat-back aria-label="@L["Geri"]">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-                    </button>
-                    <span class="sb-chat-fullpage__peer-avatar" data-chat-peer-avatar></span>
-                    <div class="sb-chat-fullpage__peer-meta">
-                        <strong data-chat-peer-name></strong>
-                        <span data-chat-peer-status>—</span>
-                    </div>
-                </header>
-
-                <div class="sb-chat-fullpage__placeholder" data-chat-placeholder>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                    <strong>@L["Bir söhbət seç"]</strong>
-                    <span>@L["Sol tərəfdən bir söhbətə klikləyərək başla."]</span>
-                </div>
-
-                <div class="sb-chat-thread__messages" data-chat-messages hidden></div>
-                <div class="sb-chat-thread__typing" data-chat-typing hidden>
-                    <span></span><span></span><span></span> @L["yazır..."]
-                </div>
-
-                <form class="sb-chat-composer sb-chat-composer--fullpage" data-chat-composer hidden>
-                    <label class="sb-chat-composer__attach" title="@L["Şəkil əlavə et"]">
-                        <input type="file" accept="image/*" hidden data-chat-attach />
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
-                    </label>
-                    <input type="text" placeholder="@L["Mesaj yaz..."]" maxlength="2000" data-chat-input autocomplete="off" />
-                    <button type="submit" aria-label="@L["Göndər"]">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
-                </form>
-            </section>
+        <div class="sb-msgr-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" placeholder="@L["Söhbətlərdə axtar..."]" data-m-search autocomplete="off" />
         </div>
-    </main>
-</section>
+
+        <div class="sb-msgr-filters" role="tablist">
+            <button type="button" class="sb-msgr-filters__chip is-active" data-m-filter="all">@L["Hamısı"]</button>
+            <button type="button" class="sb-msgr-filters__chip" data-m-filter="unread">@L["Oxunmamış"]</button>
+            <button type="button" class="sb-msgr-filters__chip" data-m-filter="pinned">@L["Sancılmış"]</button>
+            <button type="button" class="sb-msgr-filters__chip" data-m-filter="fav">@L["Sevimli"]</button>
+        </div>
+
+        <div class="sb-msgr-convs" data-m-convs></div>
+
+        <div class="sb-msgr-skeleton" data-m-list-skeleton>
+            <div class="sb-msgr-skeleton__row"></div>
+            <div class="sb-msgr-skeleton__row"></div>
+            <div class="sb-msgr-skeleton__row"></div>
+            <div class="sb-msgr-skeleton__row"></div>
+        </div>
+
+        <div class="sb-msgr-empty" data-m-list-empty hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+            <strong>@L["Hələ söhbət yoxdur"]</strong>
+            <span>@L["Mağaza və ya məhsul səhifəsindən satıcıya yaz."]</span>
+        </div>
+    </aside>
+
+    @* ============ ORTA PANEL: aktiv söhbət ============ *@
+    <section class="sb-msgr__thread" data-m-pane="thread">
+        <div class="sb-msgr-welcome" data-m-welcome>
+            <div class="sb-msgr-welcome__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+            </div>
+            <h2>@L["Mesajlaşma mərkəzi"]</h2>
+            <p>@L["Söhbət seç və ya mağaza səhifəsindən satıcıya yaz — hər şey burada, real vaxtda."]</p>
+        </div>
+
+        <header class="sb-msgr-head" data-m-head hidden>
+            <button type="button" class="sb-msgr-head__back" data-m-back aria-label="@L["Geri"]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="sb-msgr-ava sb-msgr-head__ava" data-m-peer-ava></span>
+            <div class="sb-msgr-head__meta">
+                <strong data-m-peer-name></strong>
+                <span class="sb-msgr-head__status" data-m-peer-status></span>
+            </div>
+            <div class="sb-msgr-head__actions">
+                <button type="button" class="sb-msgr-iconbtn" data-m-act="searchmsg" title="@L["Mesajlarda axtar"]" aria-label="@L["Mesajlarda axtar"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button type="button" class="sb-msgr-iconbtn" data-m-act="pin" title="@L["Sanc"]" aria-label="@L["Sanc"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76V7a1 1 0 011-1h4a1 1 0 011 1v3.76l1.71 1.71A1 1 0 0116 14H8a1 1 0 01-.71-1.53L9 10.76z"/></svg>
+                </button>
+                <button type="button" class="sb-msgr-iconbtn" data-m-act="mute" title="@L["Səssiz"]" aria-label="@L["Səssiz"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                </button>
+                <button type="button" class="sb-msgr-iconbtn" data-m-act="info" title="@L["Məlumat"]" aria-label="@L["Məlumat"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="sb-msgr-msgsearch" data-m-msgsearch hidden>
+            <input type="search" placeholder="@L["Bu söhbətdə axtar..."]" data-m-msgsearch-input autocomplete="off" />
+            <button type="button" class="sb-msgr-iconbtn" data-m-msgsearch-close aria-label="@L["Bağla"]">✕</button>
+            <div class="sb-msgr-msgsearch__results" data-m-msgsearch-results hidden></div>
+        </div>
+
+        <div class="sb-msgr-body" data-m-body hidden>
+            <div class="sb-msgr-msgs" data-m-msgs></div>
+            <button type="button" class="sb-msgr-jump" data-m-jump hidden aria-label="@L["Aşağı keç"]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                <span data-m-jump-count hidden></span>
+            </button>
+            <div class="sb-msgr-typing" data-m-typing hidden>
+                <span class="sb-msgr-typing__dots"><i></i><i></i><i></i></span>
+                <span data-m-typing-name></span> @L["yazır..."]
+            </div>
+            <div class="sb-msgr-drag" data-m-drag hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <strong>@L["Faylı bura burax"]</strong>
+            </div>
+        </div>
+
+        <div class="sb-msgr-composer" data-m-composer hidden>
+            <div class="sb-msgr-replybar" data-m-replybar hidden>
+                <div class="sb-msgr-replybar__body">
+                    <strong data-m-replybar-name></strong>
+                    <span data-m-replybar-text></span>
+                </div>
+                <button type="button" class="sb-msgr-iconbtn" data-m-replybar-close aria-label="@L["Ləğv et"]">✕</button>
+            </div>
+            <div class="sb-msgr-productchip" data-m-productchip hidden>
+                <img data-m-productchip-img alt="" />
+                <div class="sb-msgr-productchip__meta">
+                    <strong data-m-productchip-name></strong>
+                    <span data-m-productchip-price></span>
+                </div>
+                <button type="button" class="sb-msgr-iconbtn" data-m-productchip-close aria-label="@L["Ləğv et"]">✕</button>
+            </div>
+            <div class="sb-msgr-recbar" data-m-recbar hidden>
+                <span class="sb-msgr-recbar__dot"></span>
+                <span data-m-rec-time>0:00</span>
+                <button type="button" class="sb-msgr-recbar__cancel" data-m-rec-cancel>@L["Ləğv et"]</button>
+                <button type="button" class="sb-msgr-recbar__send" data-m-rec-send>@L["Göndər"]</button>
+            </div>
+
+            <div class="sb-msgr-composer__row">
+                <button type="button" class="sb-msgr-iconbtn" data-m-attach-btn title="@L["Əlavə et"]" aria-label="@L["Əlavə et"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <button type="button" class="sb-msgr-iconbtn" data-m-emoji-btn title="Emoji" aria-label="Emoji">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </button>
+                <textarea class="sb-msgr-input" rows="1" maxlength="2000" placeholder="@L["Mesaj yaz..."]" data-m-input></textarea>
+                <button type="button" class="sb-msgr-iconbtn" data-m-voice-btn title="@L["Səsli mesaj"]" aria-label="@L["Səsli mesaj"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+                </button>
+                <button type="button" class="sb-msgr-send" data-m-send aria-label="@L["Göndər"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+
+            <div class="sb-msgr-attachmenu" data-m-attachmenu hidden>
+                <label class="sb-msgr-attachmenu__item">
+                    <input type="file" accept="image/jpeg,image/png,image/webp" hidden data-m-file-image />
+                    <span class="sb-msgr-attachmenu__icon sb-msgr-attachmenu__icon--img">🖼️</span> @L["Şəkil"]
+                </label>
+                <label class="sb-msgr-attachmenu__item">
+                    <input type="file" accept="application/pdf" hidden data-m-file-doc />
+                    <span class="sb-msgr-attachmenu__icon sb-msgr-attachmenu__icon--doc">📄</span> @L["Sənəd (PDF)"]
+                </label>
+                <button type="button" class="sb-msgr-attachmenu__item" data-m-quickreplies-btn>
+                    <span class="sb-msgr-attachmenu__icon sb-msgr-attachmenu__icon--qr">⚡</span> @L["Sürətli cavablar"]
+                </button>
+            </div>
+            <div class="sb-msgr-emoji" data-m-emoji hidden></div>
+            <div class="sb-msgr-qr" data-m-qr hidden>
+                <header><strong>@L["Sürətli cavablar"]</strong>
+                    <button type="button" class="sb-msgr-iconbtn" data-m-qr-close aria-label="@L["Bağla"]">✕</button>
+                </header>
+                <div data-m-qr-list></div>
+                <form class="sb-msgr-qr__form" data-m-qr-form>
+                    <input type="text" maxlength="60" placeholder="@L["Başlıq"]" data-m-qr-title required />
+                    <textarea maxlength="1000" rows="2" placeholder="@L["Mətn"]" data-m-qr-body required></textarea>
+                    <button type="submit" class="sb-msgr-btn sb-msgr-btn--primary">@L["Əlavə et"]</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    @* ============ SAĞ PANEL: məlumat ============ *@
+    <aside class="sb-msgr__info" data-m-pane="info" hidden>
+        <header class="sb-msgr-infohead">
+            <strong>@L["Söhbət məlumatı"]</strong>
+            <button type="button" class="sb-msgr-iconbtn" data-m-info-close aria-label="@L["Bağla"]">✕</button>
+        </header>
+        <div class="sb-msgr-infobody" data-m-info-body></div>
+    </aside>
+
+    @* ============ Üst qat elementləri ============ *@
+    <div class="sb-msgr-ctx" data-m-ctx hidden></div>
+    <div class="sb-msgr-modal" data-m-modal hidden>
+        <div class="sb-msgr-modal__card" data-m-modal-card></div>
+    </div>
+    <div class="sb-msgr-lightbox" data-m-lightbox hidden>
+        <button type="button" class="sb-msgr-lightbox__close" data-m-lightbox-close aria-label="@L["Bağla"]">✕</button>
+        <img data-m-lightbox-img alt="" />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/messenger.js" asp-append-version="true"></script>
+}

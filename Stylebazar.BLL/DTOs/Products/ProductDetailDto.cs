@@ -21,6 +21,8 @@ public class ProductDetailDto
     public int StoreId { get; set; }
     public string StoreName { get; set; } = string.Empty;
     public string StoreSlug { get; set; } = string.Empty;
+    // Mağaza sahibinin istifadəçi id-si — "Bu məhsul haqqında yaz" düyməsi messenger-i bununla açır.
+    public string StoreOwnerId { get; set; } = string.Empty;
 
     /// <summary>Seller contact channels — drives the "Satıcıya mesaj yaz" CTA.</summary>
     public string? StorePhone { get; set; }

@@ -26,6 +26,9 @@ public interface IChatService
     // Söhbət daxilində mətn axtarışı (ən yeni uyğunluqlar).
     Task<List<MessageDto>> SearchMessagesAsync(int conversationId, string query, int take = 20, CancellationToken ct = default);
 
+    // Composer-ə bərkidilən məhsul kartı üçün minimal məhsul snapshot-u (yoxdursa null).
+    Task<ProductPreviewDto?> GetProductPreviewAsync(int productId, CancellationToken ct = default);
+
     // ---- Göndərmə / redaktə / silmə ----
 
     // Mesaj göndərir (blok yoxlaması ilə). Söhbəti tapır/yaradır, Unread + LastMessage* yenilənir.

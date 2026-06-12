@@ -295,6 +295,15 @@ public class ChatManager : IChatService
         return items.Select(m => ToDto(m, me)).ToList();
     }
 
+    public async Task<ProductPreviewDto?> GetProductPreviewAsync(int productId, CancellationToken ct = default)
+    {
+        RequireUserId();
+        Product? p = await _db.Products.AsNoTracking()
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == productId && x.IsActive, ct);
+        return p is null ? null : ToProductPreview(p);
+    }
+
     // ============== GÖNDƏRMƏ / REDAKTƏ / SİLMƏ ==============
 
     public async Task<MessageDto> SendMessageAsync(SendMessageDto dto, CancellationToken ct = default)

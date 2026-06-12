@@ -222,6 +222,17 @@
                 </button>
             </div>
         }
+
+        @* ===== Bu məhsul haqqında satıcıya yaz (messenger, məhsul kartı bərkidilmiş) ===== *@
+        @if (!string.IsNullOrEmpty(p.StoreOwnerId))
+        {
+            <a class="sb-btn sb-btn--ghost sb-btn--block" style="margin:0 0 12px;"
+               asp-controller="Account" asp-action="Messages"
+               asp-route-with="@p.StoreOwnerId" asp-route-product="@p.Id">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px;"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                @L["Bu məhsul haqqında yaz"]
+            </a>
+        }
         else
         {
             <div style="padding:8px 0 12px; color:#c0392b; font-weight:600;">@L["Stokda yoxdur"]</div>

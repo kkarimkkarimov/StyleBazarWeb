@@ -410,6 +410,14 @@ public class ChatController : ControllerBase
         return NoContent();
     }
 
+    // Composer məhsul kartı üçün minimal məhsul məlumatı.
+    [HttpGet("product-preview/{productId:int}")]
+    public async Task<IActionResult> ProductPreview(int productId, CancellationToken ct)
+    {
+        var p = await _chat.GetProductPreviewAsync(productId, ct);
+        return p is null ? NotFound(new { error = "Məhsul tapılmadı." }) : Ok(p);
+    }
+
     // ============== KÖMƏKÇİ ==============
 
     // Redaktə yayımı üçün qarşı tərəfin id-sini detail sorğusu ilə tapır.
