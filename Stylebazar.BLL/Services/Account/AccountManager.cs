@@ -9,6 +9,7 @@ using Stylebazar.BLL.DTOs.Account;
 using Stylebazar.BLL.Exceptions;
 using Stylebazar.BLL.Services.CurrentUser;
 using Stylebazar.BLL.Services.FileStorage;
+using Stylebazar.DAL.Contexts;
 using Stylebazar.DAL.Entities;
 using Stylebazar.DAL.Repositories.Abstract;
 using ValidationException = Stylebazar.BLL.Exceptions.ValidationException;
@@ -32,6 +33,9 @@ public class AccountManager : IAccountService
     private readonly IFileStorageService _files;
     private readonly IValidator<UpdateProfileDto> _profileValidator;
     private readonly IValidator<ChangePasswordDto> _passwordValidator;
+    // Messaging V2 + sifariş entity-lərinin Restrict FK-lərini set-based təmizləmək üçün
+    // birbaşa DbContext (bu entity-lərin ayrıca repository-si yoxdur).
+    private readonly ApplicationDbContext _db;
 
     public AccountManager(
         UserManager<AppUser> users,
@@ -45,7 +49,8 @@ public class AccountManager : IAccountService
         ICurrentUserService currentUser,
         IFileStorageService files,
         IValidator<UpdateProfileDto> profileValidator,
-        IValidator<ChangePasswordDto> passwordValidator)
+        IValidator<ChangePasswordDto> passwordValidator,
+        ApplicationDbContext db)
     {
         _users = users;
         _stores = stores;
@@ -59,6 +64,7 @@ public class AccountManager : IAccountService
         _files = files;
         _profileValidator = profileValidator;
         _passwordValidator = passwordValidator;
+        _db = db;
     }
 
     public async Task<AccountProfileDto> GetMineAsync(CancellationToken ct = default)
@@ -365,6 +371,60 @@ public class AccountManager : IAccountService
         foreach (var r in userReviews.Items)
             await _reviews.DeleteAsync(r, permanent: true, cancellationToken: ct);
 
+        // ---------- CLEANUP: messaging (V2) ----------
+        // Conversation.User1/User2, Message.Sender, MessageReaction.User, UserBlock.*,
+        // UserReport.* — hamısı Restrict FK-dir. İstifadəçi silinməzdən əvvəl bunları
+        // çoxluq-əsaslı (set-based) silirik. ExecuteDelete dərhal SQL-ə yazır (SaveChanges
+        // gözləmir), ona görə son addımda Identity DELETE-i artıq sərbəstdir.
+        List<int> convIds = await _db.Conversations.IgnoreQueryFilters()
+            .Where(c => c.User1Id == userId || c.User2Id == userId)
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+
+        if (convIds.Count > 0)
+        {
+            // Reply-to özünə-istinad NO ACTION-dur — kaskad silmədə "same table reference"
+            // konfliktini önləmək üçün əvvəlcə bu istinadları null edirik.
+            await _db.Messages.IgnoreQueryFilters()
+                .Where(m => convIds.Contains(m.ConversationId))
+                .ExecuteUpdateAsync(s => s.SetProperty(m => m.ReplyToMessageId, (int?)null), ct);
+        }
+
+        // İstifadəçinin qoyduğu reaksiyalar (Restrict) — söhbətlər silinəndə mesaj reaksiyaları
+        // onsuz da kaskadla gedir, amma istifadəçiyə bağlı olanları açıq silirik.
+        await _db.MessageReactions.IgnoreQueryFilters()
+            .Where(r => r.UserId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        // Söhbətləri sil → DB mesajları və onların reaksiyalarını kaskadla təmizləyir.
+        await _db.Conversations.IgnoreQueryFilters()
+            .Where(c => c.User1Id == userId || c.User2Id == userId)
+            .ExecuteDeleteAsync(ct);
+
+        // Təhlükəsizlik üçün: qalan istənilən mesaj (göndərən bu istifadəçidir) silinsin.
+        await _db.Messages.IgnoreQueryFilters()
+            .Where(m => m.SenderId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        // Bloklar + şikayətlər (hər iki istiqamətdə Restrict).
+        await _db.UserBlocks.IgnoreQueryFilters()
+            .Where(b => b.BlockerId == userId || b.BlockedId == userId)
+            .ExecuteDeleteAsync(ct);
+        await _db.UserReports.IgnoreQueryFilters()
+            .Where(r => r.ReporterId == userId || r.ReportedUserId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        // Sürətli cavab şablonları (User FK Cascade-dir, amma açıq silmək də zərərsizdir).
+        await _db.QuickReplies.IgnoreQueryFilters()
+            .Where(q => q.UserId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        // ---------- CLEANUP: orders (alıcı) ----------
+        // Order.Buyer FK Restrict; OrderItems Order-dən DB kaskadı ilə silinir.
+        await _db.Orders.IgnoreQueryFilters()
+            .Where(o => o.BuyerId == userId)
+            .ExecuteDeleteAsync(ct);
+
         // ---------- FINAL: delete the user ----------
         // Identity will cascade Addresses, LoginEvents, StoreFollowers, AspNetUserRoles,
         // AspNetUserClaims, AspNetUserLogins, AspNetUserTokens. ContactClick.UserId
@@ -419,6 +479,15 @@ public class AccountManager : IAccountService
             cancellationToken: ct);
         foreach (var c in clicks.Items)
             await _contactClicks.DeleteAsync(c, permanent: true, cancellationToken: ct);
+
+        // ---- OrderItems ----
+        // OrderItem.StoreId VƏ OrderItem.ProductId hər ikisi Restrict FK-dir. Bu mağazanın
+        // məhsulları hansısa sifarişdə varsa, məhsulu silmək olmaz. Ona görə əvvəlcə bu
+        // mağazaya aid sifariş sətirlərini set-based silirik (alıcının sifariş başlığı qalır;
+        // çox-satıcılı sifarişdə yalnız bu satıcının sətri çıxır).
+        await _db.OrderItems.IgnoreQueryFilters()
+            .Where(oi => oi.StoreId == store.Id)
+            .ExecuteDeleteAsync(ct);
 
         // ---- Products ----
         foreach (Product p in products.Items)
