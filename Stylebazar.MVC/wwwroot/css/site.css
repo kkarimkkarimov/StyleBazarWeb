@@ -953,7 +953,7 @@ body.sb-locked { overflow: hidden; }
     white-space: nowrap;
     box-shadow: 0 2px 6px rgba(0,0,0,.12);
 }
-.sb-product-pill--info    { background: #2563EB; }       /* "Stokda" / "Vintage" — info blue */
+.sb-product-pill--info    { background: var(--sb-ink); }  /* "Stokda" / "Second-hand" — brend mürəkkəbi */
 .sb-product-pill--muted   { background: rgba(15,15,18,.65); backdrop-filter: blur(6px); }
 .sb-product-pill--accent  { background: var(--sb-accent); }
 .sb-product-pill--dark    { background: var(--sb-ink); }
@@ -1087,15 +1087,13 @@ body.sb-locked { overflow: hidden; }
     font-family: var(--sb-font-display);
     font-weight: 600;
     font-size: 1.05rem;
-    color: #10B981;
+    color: var(--sb-ink);
     line-height: 1;
 }
 .sb-product__leaf {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
+    display: none; /* köhnə "yaşıl yarpaq" qiymət ikonu — brend palitrasına uyğun deyil */
 }
-.sb-product__price-now--accent { color: #10B981; }
+.sb-product__price-now--accent { color: var(--sb-accent); } /* endirimli qiymət koralda */
 .sb-product__price-old {
     font-size: .8rem;
     color: var(--sb-muted);
@@ -2386,6 +2384,7 @@ body.sb-locked { overflow: hidden; }
     top: calc(var(--sb-header-h) + 16px);
     max-height: calc(100vh - var(--sb-header-h) - 32px);
     overflow-y: auto;
+    overflow-x: hidden; /* alt hissədəki üfüqi scrollbar artefaktının qarşısını alır */
 }
 @media (max-width: 1023.98px) {
     .sb-filter {
@@ -4229,10 +4228,10 @@ body.sb-locked { overflow: hidden; }
     .sb-tile { padding: 18px 14px 20px; border-radius: 14px; margin: 14px 0; }
 }
 /* Geyin-style tile background tones — subtle pastel washes */
-.sb-tile--mint   { background: #ECF7EE; }   /* Products */
+.sb-tile--mint   { background: #F4F3ED; }   /* Products — isti kağız tonu */
 .sb-tile--blush  { background: #FBEEF0; }   /* Stories */
 .sb-tile--cream  { background: #FAF6EE; }
-.sb-tile--lilac  { background: #ECEEFB; }   /* Featured */
+.sb-tile--lilac  { background: #FBF0EA; }   /* Featured — yumşaq şaftalı (brend koralının tonu) */
 
 .sb-tile__head {
     display: flex;
@@ -4705,11 +4704,15 @@ body.sb-locked { overflow: hidden; }
     z-index: 2;
 }
 .sb-shop-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+/* Profil şəkli olmayanda avatar brend qradiyentinə bürünür (boş ağ dairə qalmasın). */
+.sb-shop-card__avatar:has(.sb-shop-card__avatar-initial) {
+    background: linear-gradient(140deg, #FFB9A8, #FF5A3C 90%);
+}
 .sb-shop-card__avatar-initial {
     font-family: var(--sb-font-display);
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--sb-ink);
+    color: #fff;
 }
 .sb-shop-card__count {
     position: absolute;
@@ -4947,7 +4950,7 @@ body.sb-locked { overflow: hidden; }
 }
 .sb-pdp__manat {
     font-family: var(--sb-font-display);
-    color: #10B981;
+    color: var(--sb-ink);
     font-size: 1.6rem;
     font-weight: 600;
     line-height: 1;
@@ -4956,7 +4959,7 @@ body.sb-locked { overflow: hidden; }
     font-family: var(--sb-font-display);
     font-size: 2.1rem;
     font-weight: 700;
-    color: #10B981;
+    color: var(--sb-ink);
     line-height: 1;
 }
 .sb-pdp__price-old {
@@ -5081,6 +5084,16 @@ body.sb-locked { overflow: hidden; }
     color: #fff;
 }
 .sb-btn-contact svg { width: 20px; height: 20px; }
+
+/* "Səbətə at" varyantı — kommersiya CTA-sı brend mürəkkəbində (WhatsApp yaşılından ayrılır). */
+.sb-btn-contact--cart {
+    background: var(--sb-ink);
+    box-shadow: 0 6px 18px rgba(10, 10, 10, .22);
+}
+.sb-btn-contact--cart:hover {
+    background: var(--sb-accent);
+    box-shadow: 0 10px 28px rgba(255, 90, 60, .35);
+}
 .sb-btn-contact[data-channel="instagram"] {
     background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF);
     box-shadow: 0 6px 18px rgba(221, 42, 123, .28);
@@ -5281,7 +5294,7 @@ body.sb-locked { overflow: hidden; }
     font-size: .65rem;
     font-weight: 700;
     letter-spacing: .08em;
-    color: #10B981;
+    color: var(--sb-accent);
     margin-bottom: 3px;
 }
 .sb-feature__value {
@@ -5394,8 +5407,9 @@ body.sb-locked { overflow: hidden; }
    17z. Account dashboard (image 1) — /Account/* pages
    ----------------------------------------------------------- */
 :root {
-    --sb-acc-cyan: #0EA5B7;
-    --sb-acc-cyan-soft: #E6F4F6;
+    /* Köhnə "cyan" panel vurğusu brendin koral rənginə yönləndirildi — sayt boyu vahid palitra. */
+    --sb-acc-cyan: var(--sb-accent);
+    --sb-acc-cyan-soft: #FFEFE9; /* koralın yumşaq tonu — panel vurğuları brendlə vahid */
     --sb-acc-page-bg: #F5F7FB;
 }
 
@@ -5604,7 +5618,7 @@ body.sb-locked { overflow: hidden; }
 .sb-acc-field textarea:focus {
     outline: none;
     border-color: var(--sb-acc-cyan);
-    box-shadow: 0 0 0 4px rgba(14,165,183,.1);
+    box-shadow: 0 0 0 4px rgba(255,90,60,.12);
 }
 .sb-acc-field input[readonly] {
     background: var(--sb-acc-cyan-soft);
@@ -5631,11 +5645,11 @@ body.sb-locked { overflow: hidden; }
 
 /* Cyan-flavoured button variants used in dashboards */
 .sb-btn-primary--cyan {
-    background: var(--sb-acc-cyan);
+    background: var(--sb-ink);
     color: #fff;
 }
 .sb-btn-primary--cyan:hover:not(:disabled) {
-    background: #0894A4;
+    background: var(--sb-accent);
     color: #fff;
 }
 .sb-btn-primary--lg { height: 46px; padding: 0 24px; font-size: .95rem; }
@@ -5699,7 +5713,7 @@ body.sb-locked { overflow: hidden; }
 .sb-acc-session {
     padding: 14px 16px;
     background: var(--sb-acc-cyan-soft);
-    border: 1px solid rgba(14,165,183,.18);
+    border: 1px solid rgba(255,90,60,.2);
     border-radius: 10px;
 }
 .sb-acc-session__head {
@@ -5938,7 +5952,7 @@ body.sb-locked { overflow: hidden; }
 .sb-seller-social-row input:focus {
     outline: none;
     border-color: var(--sb-acc-cyan);
-    box-shadow: 0 0 0 4px rgba(14,165,183,.1);
+    box-shadow: 0 0 0 4px rgba(255,90,60,.12);
 }
 
 .sb-seller-toggle {
@@ -6147,7 +6161,7 @@ body:has(.sb-seller-layout) {
 }
 .sb-addr-card:hover {
     border-color: var(--sb-acc-cyan);
-    box-shadow: 0 8px 22px rgba(14, 165, 183, .08);
+    box-shadow: 0 8px 22px rgba(255, 90, 60, .08);
 }
 
 @@keyframes sbAddrIn {
@@ -6483,7 +6497,7 @@ body:has(.sb-seller-layout) {
 }
 .sb-prod-card:hover {
     border-color: var(--sb-acc-cyan);
-    box-shadow: 0 12px 28px rgba(14,165,183,.08);
+    box-shadow: 0 12px 28px rgba(255,90,60,.08);
     transform: translateY(-2px);
 }
 .sb-prod-card.is-inactive { opacity: .58; }
@@ -6757,7 +6771,7 @@ body:has(.sb-seller-layout) {
 .sb-tag__stock {
     width: 56px;
     padding: 2px 8px;
-    border: 1px solid rgba(14,165,183,.3);
+    border: 1px solid rgba(255,90,60,.3);
     border-radius: 6px;
     font-size: .8rem;
     color: var(--sb-ink);
@@ -6776,7 +6790,7 @@ body:has(.sb-seller-layout) {
 .sb-tag__remove {
     width: 22px; height: 22px;
     border: 0;
-    background: rgba(14,165,183,.15);
+    background: rgba(255,90,60,.15);
     color: var(--sb-acc-cyan);
     border-radius: 50%;
     cursor: pointer;
@@ -6925,7 +6939,7 @@ body:has(.sb-seller-layout) {
     border-radius: inherit;
     background: rgba(255,255,255,.6);
     background-image:
-        linear-gradient(90deg, transparent 0%, rgba(14, 165, 183, .25) 50%, transparent 100%);
+        linear-gradient(90deg, transparent 0%, rgba(255, 90, 60, .25) 50%, transparent 100%);
     background-size: 200% 100%;
     animation: sb-img-upload-shimmer 1.2s linear infinite;
 }
@@ -6959,7 +6973,7 @@ body:has(.sb-seller-layout) {
     position: relative;
     width: 100%;
     aspect-ratio: 16/5;
-    background: linear-gradient(135deg, #E6F4F6 0%, #c8e6e9 100%);
+    background: linear-gradient(135deg, #FFEFE9 0%, #FFDFD4 100%);
     overflow: hidden;
 }
 .sb-store-cover img {
@@ -7326,7 +7340,7 @@ body:has(.sb-seller-layout) {
     padding: 9px 18px;
     border: 0;
     border-radius: 999px;
-    background: #2563EB;
+    background: var(--sb-ink);
     color: #fff;
     font-weight: 600;
     font-size: .92rem;
@@ -7335,14 +7349,14 @@ body:has(.sb-seller-layout) {
     transition: background .15s ease, transform .15s ease;
 }
 .sb-storepage__follow:hover {
-    background: #1D4ED8;
+    background: var(--sb-ink-2);
     transform: translateY(-1px);
     color: #fff;
 }
 .sb-storepage__follow.is-following {
     background: #fff;
-    color: var(--sb-acc-cyan);
-    border: 1.5px solid var(--sb-acc-cyan);
+    color: var(--sb-ink);
+    border: 1.5px solid var(--sb-ink);
     padding: 7.5px 16.5px;  /* compensate border to keep alignment */
 }
 .sb-storepage__follow.is-following:hover {
@@ -7469,7 +7483,7 @@ body:has(.sb-seller-layout) {
 
 /* ----- Products header / filter row ----- */
 .sb-storepage__products-head {
-    background: linear-gradient(180deg, #E6F4F6 0%, #DCEEF0 100%);
+    background: linear-gradient(180deg, #FFEFE9 0%, #FBE4DA 100%);
     border-radius: 18px;
     padding: 16px 22px;
     display: flex;
@@ -8260,7 +8274,12 @@ body:has(.sb-seller-layout) {
     inset: 0;
     background-size: cover;
     background-position: center;
-    background-color: #1f2937;
+    /* Şəkilsiz slayd üçün brend qradiyenti (şəkil inline style ilə bunu örtür). */
+    background-color: #18181C;
+    background-image:
+        radial-gradient(circle at 80% 16%, rgba(255, 90, 60, .55), transparent 52%),
+        radial-gradient(circle at 8% 88%, rgba(255, 160, 120, .28), transparent 46%),
+        linear-gradient(135deg, #1B1B1F 0%, #2B2218 100%);
     opacity: 0;
     transition: opacity .55s ease;
     pointer-events: none;
@@ -9271,7 +9290,7 @@ body:has(.sb-seller-layout) {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--sb-acc-cyan-soft), #ECFEFF);
+    background: linear-gradient(135deg, var(--sb-acc-cyan-soft), #FFF6F2);
     color: var(--sb-acc-cyan);
     display: grid;
     place-items: center;
@@ -9658,7 +9677,7 @@ body:has(.sb-seller-layout) {
     transition: background .15s ease;
 }
 .sb-chat-conv:hover { background: #F9FAFB; }
-.sb-chat-conv.is-active { background: #EFF6FF; }
+.sb-chat-conv.is-active { background: var(--sb-accent-100); }
 .sb-chat-conv__avatar {
     position: relative;
     width: 42px; height: 42px;
@@ -9769,7 +9788,7 @@ body:has(.sb-seller-layout) {
     gap: 4px;
 }
 .sb-chat-msg.is-mine {
-    background: #4F46E5;
+    background: var(--sb-ink);
     color: #fff;
     align-self: flex-end;
     border-bottom-right-radius: 4px;
@@ -9875,11 +9894,11 @@ body:has(.sb-seller-layout) {
     outline: none;
     background: #F9FAFB;
 }
-.sb-chat-composer input[type="text"]:focus { border-color: #4F46E5; background: #fff; }
+.sb-chat-composer input[type="text"]:focus { border-color: var(--sb-ink); background: #fff; }
 .sb-chat-composer button[type="submit"] {
     width: 36px; height: 36px;
     border-radius: 999px;
-    background: #4F46E5;
+    background: var(--sb-ink);
     color: #fff;
     border: 0;
     cursor: pointer;
@@ -10067,7 +10086,7 @@ body:has(.sb-seller-layout) {
     gap: 8px;
     padding: 10px 18px;
     border-radius: 999px;
-    background: #4F46E5;
+    background: var(--sb-accent);
     color: #fff;
     border: 0;
     font-weight: 600;
@@ -10075,7 +10094,7 @@ body:has(.sb-seller-layout) {
     cursor: pointer;
     transition: background .15s ease, transform .1s ease;
 }
-.sb-storepage__msg:hover { background: #4338CA; }
+.sb-storepage__msg:hover { background: var(--sb-accent-700); color: #fff; }
 .sb-storepage__msg:active { transform: translateY(1px); }
 .sb-storepage__msg svg { width: 16px; height: 16px; }
 

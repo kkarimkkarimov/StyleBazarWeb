@@ -67,7 +67,12 @@ else
                         }
                         else
                         {
-                            <div class="sb-shop-card__cover-fallback" style="background: linear-gradient(135deg, var(--sb-soft), #fff)"></div>
+                            @* Kover yoxdursa — brend tonlu zərif qradiyent (boş ağ sahə qalmasın). *@
+                            <div class="sb-shop-card__cover-fallback"
+                                 style="background:
+                                     radial-gradient(circle at 78% 18%, rgba(255,90,60,.16), transparent 55%),
+                                     radial-gradient(circle at 12% 85%, rgba(10,10,10,.05), transparent 50%),
+                                     linear-gradient(135deg, #F7F5F0, #EDEAE2);"></div>
                         }
                         <span class="sb-shop-card__count">@s.ProductCount @L["məhsul"]</span>
                     </div>
