@@ -443,8 +443,8 @@
 .sb-msgr-send:disabled { opacity: .45; cursor: default; transform: none; }
 .sb-msgr-send svg { width: 18px; height: 18px; margin-left: -2px; }
 
-/* Reply / məhsul çipi / səs yazma zolağı */
-.sb-msgr-replybar, .sb-msgr-productchip {
+/* Reply zolağı / səs yazma zolağı */
+.sb-msgr-replybar {
     display: flex; align-items: center; gap: 11px; margin-bottom: 10px;
     background: var(--m-panel-2); border: 1px solid var(--m-line);
     border-left: 3px solid var(--m-accent); border-radius: 12px; padding: 8px 12px;
@@ -453,10 +453,32 @@
 .sb-msgr-replybar__body { min-width: 0; flex: 1; font-size: .8rem; }
 .sb-msgr-replybar__body strong { color: var(--m-accent); display: block; font-size: .72rem; font-weight: 700; }
 .sb-msgr-replybar__body span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--m-muted); }
-.sb-msgr-productchip img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
-.sb-msgr-productchip__meta { flex: 1; min-width: 0; font-size: .82rem; }
-.sb-msgr-productchip__meta strong { display: block; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sb-msgr-productchip__meta span { color: var(--m-ink); font-weight: 800; font-size: .8rem; }
+
+/* Composer-ə bərkidilmiş MƏHSUL kartı — görkəmli, kart formatlı önizləmə.
+   Alıcı məhsul səhifəsindən gələndə hansı məhsuldan danışdığı aydın görünür. */
+.sb-msgr-productchip {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--m-accent-soft), var(--m-panel) 70%);
+    border: 1px solid color-mix(in srgb, var(--m-accent) 32%, var(--m-line));
+    border-radius: 14px; padding: 9px 11px;
+    box-shadow: var(--m-shadow-sm);
+    animation: mFadeUp .2s var(--m-ease);
+}
+.sb-msgr-productchip img {
+    width: 54px; height: 54px; border-radius: 11px; object-fit: cover; flex: 0 0 auto;
+    box-shadow: var(--m-shadow-sm);
+}
+.sb-msgr-productchip__meta { flex: 1; min-width: 0; }
+.sb-msgr-productchip__eyebrow {
+    display: flex; align-items: center; gap: 4px;
+    font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--m-accent); margin-bottom: 2px;
+}
+.sb-msgr-productchip__meta strong {
+    display: block; font-size: .87rem; font-weight: 650;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sb-msgr-productchip__price { color: var(--m-ink); font-weight: 800; font-size: .82rem; }
 
 .sb-msgr-recbar {
     display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
