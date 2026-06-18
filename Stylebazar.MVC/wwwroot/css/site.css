@@ -10509,3 +10509,58 @@ input[type="password"]:focus, input[type="search"]:focus, textarea:focus {
     .sb-product__media img,
     .sb-shop-card__cover-media img { transition: none !important; }
 }
+
+/* ==========================================================================
+   LUXE LAYER 4 — premium interactions (site-wide)
+   ========================================================================== */
+
+/* Reading-progress bar — a clay hairline across the very top that fills as the
+   page scrolls. scaleX is updated by setupScrollProgress (compositor-cheap). */
+.sb-scroll-progress {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 1200;                 /* above the frosted header */
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--sb-accent), var(--sb-accent-700));
+    pointer-events: none;
+    box-shadow: 0 1px 6px -1px rgba(189, 106, 76, .5);
+}
+
+/* Back-to-top — warm-charcoal disc bottom-right; lifts in past one screen of
+   scroll, warms to clay on hover. */
+.sb-to-top {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--sb-ink);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: var(--sb-shadow);
+    opacity: 0;
+    transform: translateY(14px) scale(.92);
+    pointer-events: none;
+    transition: opacity var(--sb-base) var(--sb-ease),
+                transform var(--sb-base) var(--sb-ease-out),
+                background var(--sb-fast);
+    z-index: 60;
+}
+.sb-to-top.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.sb-to-top:hover { background: var(--sb-accent); transform: translateY(-3px); }
+.sb-to-top:active { transform: translateY(0) scale(.96); }
+.sb-to-top svg { width: 20px; height: 20px; }
+/* Clear the mobile bottom tab-bar on small screens. */
+@media (max-width: 768px) {
+    .sb-to-top { bottom: 80px; right: 16px; width: 44px; height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sb-to-top { transition: opacity var(--sb-base) linear; }
+    .sb-to-top.is-visible { transform: none; }
+    .sb-to-top:hover { transform: none; }
+}

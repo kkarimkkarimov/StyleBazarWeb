@@ -43,6 +43,10 @@
     @* Global anti-forgery token — used by every AJAX endpoint (wishlist toggle,
        review form, etc.) so we don't have to render it per-page. *@
     @Html.AntiForgeryToken()
+
+    @* Reading-progress bar — fills as the page scrolls (setupScrollProgress). *@
+    <div class="sb-scroll-progress" id="sbScrollProgress" aria-hidden="true"></div>
+
     @* ============== TOP UTILITY BAR (desktop only) ============== *@
     <div class="sb-utility">
         <div class="sb-container sb-utility__bar">
@@ -500,6 +504,11 @@
             </div>
         </div>
     </footer>
+
+    @* ============== BACK TO TOP ============== *@
+    <button type="button" class="sb-to-top" id="sbBackToTop" aria-label="@L["Yuxarı qayıt"]">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
 
     @* ============== MOBILE BOTTOM TAB BAR ============== *@
     <nav class="sb-bottombar" aria-label="@L["Nav.Home"]">

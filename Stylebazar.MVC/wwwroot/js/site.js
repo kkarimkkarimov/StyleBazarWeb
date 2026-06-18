@@ -80,6 +80,10 @@
         safe('setupStoryCreate',         setupStoryCreate);
         safe('setupChatWidget',          setupChatWidget);
         safe('setupNewsletterForm',      setupNewsletterForm);
+        safe('setupScrollProgress',      setupScrollProgress);
+        safe('setupBackToTop',           setupBackToTop);
+        safe('setupCountUp',             setupCountUp);
+        safe('setupSearchHotkey',        setupSearchHotkey);
         safe('setupRevealOnScroll',      setupRevealOnScroll);
         safe('setupShopFilter',          setupShopFilter);
         safe('setupShopSort',            setupShopSort);
@@ -150,6 +154,95 @@
         };
         apply();
         window.addEventListener('scroll', apply, { passive: true });
+    }
+
+    /* ----------- Scroll progress bar -----------
+       A hair-thin clay bar across the very top that fills as the page is read.
+       Uses a scaleX transform (compositor-cheap) updated inside rAF. */
+    function setupScrollProgress() {
+        var bar = document.getElementById('sbScrollProgress');
+        if (!bar) return;
+        var ticking = false;
+        function update() {
+            var doc = document.documentElement;
+            var max = doc.scrollHeight - doc.clientHeight;
+            var pct = max > 0 ? window.scrollY / max : 0;
+            bar.style.transform = 'scaleX(' + Math.min(Math.max(pct, 0), 1) + ')';
+            ticking = false;
+        }
+        function onScroll() {
+            if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        }
+        update();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+    }
+
+    /* ----------- Back-to-top button -----------
+       Fades in past one viewport of scroll; glides back up (respecting
+       reduced-motion). */
+    function setupBackToTop() {
+        var btn = document.getElementById('sbBackToTop');
+        if (!btn) return;
+        var apply = function () {
+            if (window.scrollY > 600) btn.classList.add('is-visible');
+            else btn.classList.remove('is-visible');
+        };
+        apply();
+        window.addEventListener('scroll', apply, { passive: true });
+        btn.addEventListener('click', function () {
+            var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        });
+    }
+
+    /* ----------- Count-up numbers -----------
+       Any [data-countup="N"] animates 0→N once it scrolls into view, with an
+       optional data-countup-prefix / data-countup-suffix kept around it. */
+    function setupCountUp() {
+        var els = document.querySelectorAll('[data-countup]');
+        if (!els.length) return;
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function run(el) {
+            var target = parseFloat(el.getAttribute('data-countup'));
+            if (isNaN(target)) return;
+            var prefix = el.getAttribute('data-countup-prefix') || '';
+            var suffix = el.getAttribute('data-countup-suffix') || '';
+            if (reduce) { el.textContent = prefix + target + suffix; return; }
+            var dur = 1400, start = performance.now();
+            function tick(now) {
+                var p = Math.min((now - start) / dur, 1);
+                var eased = 1 - Math.pow(1 - p, 3);            // easeOutCubic
+                el.textContent = prefix + Math.round(target * eased) + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+                else el.textContent = prefix + target + suffix;
+            }
+            requestAnimationFrame(tick);
+        }
+
+        if (typeof IntersectionObserver === 'undefined') { els.forEach(run); return; }
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) { run(e.target); obs.unobserve(e.target); }
+            });
+        }, { threshold: 0.4 });
+        els.forEach(function (el) { obs.observe(el); });
+    }
+
+    /* ----------- "/" focuses search -----------
+       A power-user nicety: pressing "/" (when not already typing) opens the
+       search overlay, like a docs/commerce command bar. */
+    function setupSearchHotkey() {
+        var openBtn = document.getElementById('sbSearchOpen');
+        if (!openBtn) return;
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key !== '/' || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+            var a = document.activeElement;
+            if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable)) return;
+            ev.preventDefault();
+            openBtn.click();
+        });
     }
 
     /* ----------- Mega-menus (hover + click) ----------- */
