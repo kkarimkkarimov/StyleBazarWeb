@@ -121,7 +121,7 @@
 @* ============== STORIES — pastel blush rail ============== *@
 @if (Model.Stories.Any())
 {
-    <section class="sb-tile sb-tile--blush">
+    <section class="sb-tile sb-tile--blush sb-reveal">
         <header class="sb-tile__head">
             <h2>@L["Hekayələr"]</h2>
         </header>
@@ -151,7 +151,7 @@
 }
 
 @* ============== PRODUCTS — pastel mint grid (rich cards) ============== *@
-<section class="sb-tile sb-tile--mint">
+<section class="sb-tile sb-tile--mint sb-reveal">
     <header class="sb-tile__head">
         <h2>@L["Məhsullar"]</h2>
         <a asp-controller="Shop" asp-action="Index" class="sb-tile__view-all">
@@ -176,7 +176,7 @@
 </section>
 
 @* ============== NEWSLETTER — ink-dark CTA with AJAX form ============== *@
-<section class="sb-section">
+<section class="sb-section sb-reveal">
     <div class="sb-newsletter">
         <span class="sb-eyebrow" style="color: rgba(255,255,255,.6);">@L["Yeniliklərə abunə"]</span>
         <h2>@L["İlk biz xəbər verək"]</h2>

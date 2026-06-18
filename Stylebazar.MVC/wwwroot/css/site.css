@@ -4243,7 +4243,7 @@ body.sb-locked { overflow: hidden; }
 }
 /* Geyin-style tile background tones — subtle pastel washes */
 .sb-tile--mint   { background: #F4F3ED; }   /* Products — isti kağız tonu */
-.sb-tile--blush  { background: #FBEEF0; }   /* Stories */
+.sb-tile--blush  { background: #F9EFEA; }   /* Stories — isti krem (çəhrayı çalar təmizləndi) */
 .sb-tile--cream  { background: #FAF6EE; }
 .sb-tile--lilac  { background: #FBF0EA; }   /* Featured — yumşaq şaftalı (brend koralının tonu) */
 
@@ -10424,3 +10424,62 @@ input[type="password"]:focus, input[type="search"]:focus, textarea:focus {
 
 /* ---- Footer: airy, warm ---- */
 .sb-footer { background: var(--sb-surface); border-top: 1px solid var(--sb-line); }
+
+/* ==========================================================================
+   LUXE LAYER 2 — public surfaces (PDP, shop, stores, auth, inputs)
+   ========================================================================== */
+
+/* ---- Inputs: warm clay focus ring, gentle motion ---- */
+.sb-field__input, .sb-input, .sb-filter-search, .sb-shops-search input {
+    transition: border-color var(--sb-base), box-shadow var(--sb-base), background var(--sb-base);
+}
+.sb-field__input:focus {
+    border-color: var(--sb-ink);
+    box-shadow: 0 0 0 4px rgba(189, 106, 76, .14);
+}
+
+/* ---- PDP contact CTA: refined clay (replaces bright WhatsApp green) so the
+   buy box reads calm & unified. Channel is still cued by the button's icon;
+   small share/channel chips keep their brand colours below. ---- */
+.sb-btn-contact {
+    background: var(--sb-accent);
+    box-shadow: 0 6px 18px -8px rgba(189, 106, 76, .5);
+    border-radius: 14px;
+}
+.sb-btn-contact:hover { background: var(--sb-accent-700); box-shadow: 0 12px 28px -10px rgba(189, 106, 76, .55); filter: none; }
+.sb-btn-contact[data-channel] { background: var(--sb-accent); }
+.sb-btn-contact[data-channel]:hover { background: var(--sb-accent-700); }
+.sb-btn-contact--cart { background: var(--sb-ink); box-shadow: 0 6px 18px -8px rgba(35, 32, 25, .45); }
+.sb-btn-contact--cart:hover { background: var(--sb-accent); box-shadow: 0 12px 28px -10px rgba(189, 106, 76, .5); }
+
+/* ---- Shop store card: airy hover lift ---- */
+.sb-shop-card {
+    border-radius: var(--sb-radius-lg);
+    transition: transform var(--sb-base), box-shadow var(--sb-base), border-color var(--sb-base);
+}
+.sb-shop-card:hover { transform: translateY(-5px); box-shadow: var(--sb-shadow); }
+.sb-shop-card__cover-media img { transition: transform 1.1s var(--sb-ease-out); }
+
+/* ---- PDP: refined price + breathing room ---- */
+.sb-pdp__price, .sb-pdp__manat { letter-spacing: -.01em; }
+.sb-pdp-info { gap: 14px; }
+
+/* ---- Auth: editorial headline ---- */
+.sb-auth__form h1 { letter-spacing: -.02em; font-weight: 500; }
+.sb-auth__form-wrap { background: var(--sb-surface-2); }
+
+/* ---- Filter panel: airy ---- */
+.sb-filter { box-shadow: var(--sb-shadow-sm); }
+
+/* ---- Commerce surfaces inherit luxe radii/shadow via tokens; nudge cards ---- */
+.sb-cart-item, .sb-summary, .sb-panel, .sb-order-row, .sb-order-side-card {
+    box-shadow: var(--sb-shadow-sm);
+}
+.sb-order-row:hover { box-shadow: var(--sb-shadow); }
+
+/* ---- Account/Seller panel cards: soft luxe ---- */
+.sb-acc-card, .sb-seller-card { box-shadow: var(--sb-shadow-sm); border-radius: var(--sb-radius-lg); }
+
+/* ---- Floating chat bubble: warm charcoal, soft ---- */
+.sb-chat-fab { background: var(--sb-ink); box-shadow: var(--sb-shadow); }
+.sb-chat-fab:hover { background: var(--sb-accent); }

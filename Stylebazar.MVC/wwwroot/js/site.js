@@ -119,6 +119,25 @@
                 el.classList.add('is-visible');
             });
         }, 1500);
+
+        // Hard fallback: a few renderers (older engines, some headless/embedded
+        // webviews) never advance opacity/transform transitions, which would
+        // leave a revealed section stuck at its hidden "from" state. By 3 s any
+        // real fade (started ≤1.5 s, 0.8 s long) has finished, so we force the
+        // final state inline only on elements a renderer left invisible —
+        // guaranteeing content can never stay permanently hidden.
+        setTimeout(function () {
+            document.querySelectorAll('.sb-reveal').forEach(function (el) {
+                if (parseFloat(getComputedStyle(el).opacity) < 0.99) {
+                    // Disable the transition too: on a stuck renderer the very act
+                    // of setting opacity would re-trigger the frozen transition, so
+                    // we snap straight to the final state.
+                    el.style.transition = 'none';
+                    el.style.opacity = '1';
+                    el.style.transform = 'none';
+                }
+            });
+        }, 3000);
     });
 
     /* ----------- Header scroll-shrink ----------- */
