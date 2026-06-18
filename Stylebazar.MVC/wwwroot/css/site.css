@@ -10455,9 +10455,10 @@ input[type="password"]:focus, input[type="search"]:focus, textarea:focus {
 /* ---- Shop store card: airy hover lift ---- */
 .sb-shop-card {
     border-radius: var(--sb-radius-lg);
+    box-shadow: var(--sb-shadow-sm);
     transition: transform var(--sb-base), box-shadow var(--sb-base), border-color var(--sb-base);
 }
-.sb-shop-card:hover { transform: translateY(-5px); box-shadow: var(--sb-shadow); }
+.sb-shop-card:hover { transform: translateY(-5px); box-shadow: var(--sb-shadow); border-color: var(--sb-line-2); }
 .sb-shop-card__cover-media img { transition: transform 1.1s var(--sb-ease-out); }
 
 /* ---- PDP: refined price + breathing room ---- */
@@ -10483,3 +10484,28 @@ input[type="password"]:focus, input[type="search"]:focus, textarea:focus {
 /* ---- Floating chat bubble: warm charcoal, soft ---- */
 .sb-chat-fab { background: var(--sb-ink); box-shadow: var(--sb-shadow); }
 .sb-chat-fab:hover { background: var(--sb-accent); }
+
+/* ==========================================================================
+   LUXE LAYER 3 — accessibility & native-control polish (site-wide)
+   ========================================================================== */
+
+/* Every interactive element gets a clear keyboard focus ring. :where() keeps
+   specificity at 0 so any element with its own focus style still wins — this is
+   purely a safety net so nothing is ever invisible to keyboard / screen-reader
+   navigation. Only shows for keyboard focus (:focus-visible), never on click. */
+:where(a, button, [role="button"], [tabindex], summary,
+       input, select, textarea, .sb-story-item, .sb-product):focus-visible {
+    outline: 2px solid var(--sb-accent);
+    outline-offset: 3px;
+    border-radius: var(--sb-radius-sm);
+}
+
+/* Native checkboxes, radios and range sliders adopt the brand clay. */
+:root { accent-color: var(--sb-accent); }
+
+/* Honour reduced-motion globally for the page-load fade + product zooms that
+   sit outside the reveal system, so motion-sensitive users get a calm page. */
+@media (prefers-reduced-motion: reduce) {
+    .sb-product__media img,
+    .sb-shop-card__cover-media img { transition: none !important; }
+}
