@@ -1,0 +1,85 @@
+# StyleBazar — PRODUCTION stack with automatic HTTPS.
+#
+#   One time:   cp .env.example .env   then edit .env (5 values)
+#   Launch:     docker compose -f docker-compose.prod.yml up -d --build
+#   Update:     git pull && docker compose -f docker-compose.prod.yml up -d --build
+#   Logs:       docker compose -f docker-compose.prod.yml logs -f mvc
+#
+# Caddy automatically fetches & renews a real Let's Encrypt TLS certificate for
+# ${DOMAIN}. The only ports open to the internet are 80/443 (Caddy). SQL Server
+# and the app live on a private network and are never publicly reachable.
+name: stylebazar
+
+services:
+  # ---- Database (private — no published port) ----
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD:?set SA_PASSWORD in .env}"
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks: [sbnet]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # ---- The website (private — Caddy proxies to it) ----
+  mvc:
+    build:
+      context: .
+      dockerfile: Stylebazar.MVC/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=StyleBazar;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;Encrypt=False"
+      Jwt__Key: "${JWT_KEY:?set JWT_KEY in .env}"
+      Admin__Password: "${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}"
+      # Optional — leave blank until you connect an SMTP/SendGrid key. The app
+      # still boots; only password-reset emails are paused until it's set.
+      Email__Password: "${EMAIL_PASSWORD:-}"
+      # Trust the compose bridge subnet so X-Forwarded-* from Caddy is honoured
+      # (real client IP for rate-limiting + correct HTTPS scheme). Matches the
+      # sbnet subnet defined below.
+      ForwardedHeaders__KnownNetworks__0: "172.28.0.0/16"
+    volumes:
+      - mvc_uploads:/app/wwwroot/uploads   # user-uploaded images survive restarts
+      - mvc_keys:/app/keys                 # Data Protection key-ring (cookies/antiforgery)
+    networks: [sbnet]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  # ---- Reverse proxy + automatic HTTPS (the only public service) ----
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: "${DOMAIN:?set DOMAIN in .env}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data       # stores the issued TLS certificates (persist!)
+      - caddy_config:/config
+    networks: [sbnet]
+    depends_on:
+      - mvc
+
+networks:
+  sbnet:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  sqldata:
+  mvc_uploads:
+  mvc_keys:
+  caddy_data:
+  caddy_config:

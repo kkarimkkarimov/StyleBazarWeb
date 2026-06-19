@@ -1,0 +1,11 @@
+# StyleBazar reverse proxy — automatic HTTPS via Let's Encrypt.
+# {$DOMAIN} is read from the .env DOMAIN value. Caddy obtains and renews the
+# certificate on its own; nothing else to configure.
+#
+# To also serve www.yourdomain, change the first line to:
+#   {$DOMAIN}, www.{$DOMAIN} {
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy mvc:8080
+}

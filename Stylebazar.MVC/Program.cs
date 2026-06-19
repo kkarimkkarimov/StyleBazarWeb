@@ -65,6 +65,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(o =>
     o.KnownProxies.Add(IPAddress.IPv6Loopback);
     foreach (var ip in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>())
         if (IPAddress.TryParse(ip, out var addr)) o.KnownProxies.Add(addr);
+    // When the proxy runs in a sibling container (Caddy/nginx in docker-compose),
+    // its IP is on the compose bridge subnet and isn't loopback. Trust that whole
+    // CIDR via config: ForwardedHeaders:KnownNetworks = [ "172.18.0.0/16", ... ].
+    foreach (var cidr in builder.Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>())
+        if (System.Net.IPNetwork.TryParse(cidr, out var net)) o.KnownIPNetworks.Add(net);
 });
 
 // ---- Data Protection (key-ring persistence) ----
