@@ -4,6 +4,17 @@
 * text=auto
 
 ###############################################################################
+# Linux-targeted deploy files MUST stay LF — CRLF breaks bash / sh / Caddy on
+# the server even when the repo is cloned from a Windows machine.
+###############################################################################
+*.sh         text eol=lf
+Caddyfile    text eol=lf
+Dockerfile   text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+.env.example text eol=lf
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by
